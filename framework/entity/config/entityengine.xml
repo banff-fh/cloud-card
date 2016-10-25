@@ -342,7 +342,7 @@ access. For a detailed description see the core/docs/entityconfig.html file.
         <read-data reader-name="ext"/>
         <inline-jdbc
                 jdbc-driver="com.mysql.jdbc.Driver"
-                jdbc-uri="jdbc:mysql://127.0.0.1/ofbiz?autoReconnect=true"
+                jdbc-uri="jdbc:mysql://127.0.0.1/ofbiz_12.04?autoReconnect=true"
                 jdbc-username="root"
                 jdbc-password="123456"
                 isolation-level="ReadCommitted"
@@ -373,7 +373,7 @@ access. For a detailed description see the core/docs/entityconfig.html file.
         <read-data reader-name="ext"/>
         <inline-jdbc
                 jdbc-driver="com.mysql.jdbc.Driver"
-                jdbc-uri="jdbc:mysql://127.0.0.1/ofbizolap?autoReconnect=true"
+                jdbc-uri="jdbc:mysql://127.0.0.1/ofbizolap_12.04?autoReconnect=true"
                 jdbc-username="root"
                 jdbc-password="123456"
                 isolation-level="ReadCommitted"
@@ -404,7 +404,7 @@ access. For a detailed description see the core/docs/entityconfig.html file.
         <read-data reader-name="ext"/>
         <inline-jdbc
                 jdbc-driver="com.mysql.jdbc.Driver"
-                jdbc-uri="jdbc:mysql://127.0.0.1/ofbiztenant?autoReconnect=true"
+                jdbc-uri="jdbc:mysql://127.0.0.1/ofbiztenant_12.04?autoReconnect=true"
                 jdbc-username="root"
                 jdbc-password="123456"
                 isolation-level="ReadCommitted"
@@ -432,7 +432,7 @@ access. For a detailed description see the core/docs/entityconfig.html file.
         <read-data reader-name="seed"/>
         <inline-jdbc
                 jdbc-driver="com.mysql.jdbc.Driver"
-                jdbc-uri="jdbc:mysql://127.0.0.1/ofbiz_odbc?autoReconnect=true"
+                jdbc-uri="jdbc:mysql://127.0.0.1/ofbiz_odbc_12.04?autoReconnect=true"
                 jdbc-username="root"
                 jdbc-password="123456"
                 isolation-level="ReadCommitted"
