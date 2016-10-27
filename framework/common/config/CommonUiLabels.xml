@@ -12419,4 +12419,10 @@
         <value xml:lang="zh_CN">中文</value>
         <value xml:lang="zh_TW">中文</value>
     </property>
+    <property key="cloudcard">
+        <value xml:lang="en">cloudcard</value>
+        <value xml:lang="zh">云卡</value>
+        <value xml:lang="zh_CN">云卡</value>
+        <value xml:lang="zh_TW">云卡</value>
+    </property>
 </resource>

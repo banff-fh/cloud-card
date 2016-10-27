@@ -9,8 +9,8 @@
             location="com.banfftech.finaccount.FinAccountServices" invoke="findFinAccountByOwnerPartyId" auth="true">
         <description>查询卡信息</description>
         <attribute name="ownerPartyId" type="String" mode="IN" optional="false"/>
-        <attribute name="viewIndex" type="String" mode="IN" optional="true"/>
-        <attribute name="viewSize" type="String" mode="IN" optional="true"/>
+        <attribute name="viewIndex" type="Integer" mode="IN" optional="true"/>
+        <attribute name="viewSize" type="Integer" mode="IN" optional="true"/>
         <attribute name="finAccountList" type="List" mode="OUT" optional="false"/>
     </service>
     
@@ -18,6 +18,8 @@
             location="com.banfftech.finaccount.FinAccountServices" invoke="findFinAccountTransByPartyId" auth="true">
         <description>查询交易流水</description>
         <attribute name="partyId" type="String" mode="IN" optional="false"/>
+        <attribute name="viewIndex" type="Integer" mode="IN" optional="true"/>
+        <attribute name="viewSize" type="Integer" mode="IN" optional="true"/>
         <attribute name="finAccountTransList" type="List" mode="OUT" optional="false"/>
     </service>
     

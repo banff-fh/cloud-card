@@ -24,8 +24,8 @@ public class FinAccountServices {
 	public static Map<String, Object> findFinAccountByOwnerPartyId(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		String ownerPartyId = (String) context.get("ownerPartyId");
-		String viewIndex = (String) context.get("viewIndex");
-		String viewSize = (String) context.get("viewSize");
+		Integer viewIndex = (Integer) context.get("viewIndex");
+		Integer viewSize = (Integer) context.get("viewSize");
 
 		Map<String, Object> inputFieldMap = FastMap.newInstance();
 		inputFieldMap.put("ownerPartyId", ownerPartyId);
@@ -59,8 +59,8 @@ public class FinAccountServices {
 	public static Map<String, Object> findFinAccountTransByPartyId(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		String partyId = (String) context.get("partyId");
-		String viewIndex = (String) context.get("viewIndex");
-		String viewSize = (String) context.get("viewSize");
+		Integer viewIndex = (Integer) context.get("viewIndex");
+		Integer viewSize = (Integer) context.get("viewSize");
 
 		Map<String, Object> inputFieldMap = FastMap.newInstance();
 		inputFieldMap.put("partyId", partyId);
