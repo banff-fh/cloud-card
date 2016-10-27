@@ -23,6 +23,11 @@
 		<security https="true" auth="true" />
 		<response name="success" type="view" value="findLiquidation" />
 	</request-map>
+	<request-map uri="test">
+    	<event type="service" invoke="findPartiesById"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
 
 	<!-- View Mappings -->
 	<view-map name="main" type="screen"
