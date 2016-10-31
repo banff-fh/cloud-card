@@ -14,8 +14,8 @@
         <attribute name="finAccountList" type="List" mode="OUT" optional="false"/>
     </service>
     
-    <service name="findPaymentByPartyIdTo" engine="java"
-            location="com.banfftech.cloudcard.CloudCardServices" invoke="findPaymentByPartyIdTo" auth="true">
+    <service name="findPaymentByPartyId" engine="java"
+            location="com.banfftech.cloudcard.CloudCardServices" invoke="findPaymentByPartyId" auth="true">
         <description>查询交易流水</description>
         <attribute name="partyIdFrom" type="String" mode="IN" optional="true"/>
         <attribute name="partyIdTo" type="String" mode="IN" optional="true"/>
@@ -23,6 +23,18 @@
         <attribute name="viewIndex" type="Integer" mode="IN" optional="true"/>
         <attribute name="viewSize" type="Integer" mode="IN" optional="true"/>
         <attribute name="paymentList" type="List" mode="OUT" optional="false"/>
+    </service>
+    
+    <service name="createCardAuth" engine="java"
+    	location="com.banfftech.cloudcard.CloudCardServices" invoke="createCardAuth" auth="true">
+    	<description>卡授权</description>
+    	<attribute name="telNumber" type="String" mode="IN" optional="false"/>
+        <attribute name="finAccountId" type="String" mode="IN" optional="false"/>
+        <attribute name="amount" type="String" mode="IN" optional="false"/>
+        <attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="thruDate" type="Timestamp" mode="IN" optional="false"/>      
+		<attribute name="currentPassword" type="String" mode="IN" optional="false" />
+		<attribute name="currentPasswordVerify" type="String" mode="IN" optional="false" />
     </service>
     
 </services>
