@@ -1,10 +1,9 @@
-package com.banfftech.finaccount;
+package com.banfftech.cloudcard;
 
 import java.util.List;
 import java.util.Map;
 
 import org.ofbiz.base.util.UtilGenerics;
-import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
@@ -17,7 +16,7 @@ import javolution.util.FastMap;
  * @author subenkun
  *
  */
-public class FinAccountServices {
+public class CloudCardServices {
 	/**
 	 * 查询卡信息
 	 */
@@ -56,32 +55,36 @@ public class FinAccountServices {
 	 * 查询交易流水
 	 */
 
-	public static Map<String, Object> findFinAccountTransByPartyId(DispatchContext dctx, Map<String, Object> context) {
+	public static Map<String, Object> findPaymentByPartyIdTo(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
-		String partyId = (String) context.get("partyId");
+		String partyIdFrom = (String) context.get("partyIdFrom");
+		String partyIdTo = (String) context.get("partyIdTo");
+		String paymentTypeId = (String) context.get("paymentTypeId");
 		Integer viewIndex = (Integer) context.get("viewIndex");
 		Integer viewSize = (Integer) context.get("viewSize");
 
 		Map<String, Object> inputFieldMap = FastMap.newInstance();
-		inputFieldMap.put("partyId", partyId);
+		inputFieldMap.put("partyIdFrom", partyIdFrom);
+		inputFieldMap.put("partyIdTo", partyIdTo);
+		inputFieldMap.put("paymentTypeId", paymentTypeId);
 
 		Map<String, Object> ctxMap = FastMap.newInstance();
 		ctxMap.put("inputFields", inputFieldMap);
-		ctxMap.put("entityName", "FinAccountTrans");
-		ctxMap.put("orderBy", "transactionDate");
+		ctxMap.put("entityName", "PaymentAndTypePartyNameView");
+		ctxMap.put("orderBy", "effectiveDate");
 		ctxMap.put("viewIndex", viewIndex);
 		ctxMap.put("viewSize", viewSize);
 
-		Map<String, Object> finAccountTransResult = null;
+		Map<String, Object> paymentResult = null;
 		try {
-			finAccountTransResult = dispatcher.runSync("performFindList", ctxMap);
+			paymentResult = dispatcher.runSync("performFindList", ctxMap);
 		} catch (GenericServiceException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 		Map<String, Object> result = ServiceUtil.returnSuccess();
-		result.put("finAccountTransList", finAccountTransResult.get("list"));
+		result.put("paymentList", paymentResult.get("list"));
 		return result;
 	}
 

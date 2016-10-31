@@ -6,7 +6,7 @@
     <version>1.0</version>
     
     <service name="findFinAccountByOwnerPartyId" engine="java"
-            location="com.banfftech.finaccount.FinAccountServices" invoke="findFinAccountByOwnerPartyId" auth="true">
+            location="com.banfftech.cloudcard.CloudCardServices" invoke="findFinAccountByOwnerPartyId" auth="true">
         <description>查询卡信息</description>
         <attribute name="ownerPartyId" type="String" mode="IN" optional="false"/>
         <attribute name="viewIndex" type="Integer" mode="IN" optional="true"/>
@@ -14,13 +14,15 @@
         <attribute name="finAccountList" type="List" mode="OUT" optional="false"/>
     </service>
     
-    <service name="findFinAccountTransByPartyId" engine="java"
-            location="com.banfftech.finaccount.FinAccountServices" invoke="findFinAccountTransByPartyId" auth="true">
+    <service name="findPaymentByPartyIdTo" engine="java"
+            location="com.banfftech.cloudcard.CloudCardServices" invoke="findPaymentByPartyIdTo" auth="true">
         <description>查询交易流水</description>
-        <attribute name="partyId" type="String" mode="IN" optional="false"/>
+        <attribute name="partyIdFrom" type="String" mode="IN" optional="true"/>
+        <attribute name="partyIdTo" type="String" mode="IN" optional="true"/>
+        <attribute name="paymentTypeId" type="String" mode="IN" optional="false"/>
         <attribute name="viewIndex" type="Integer" mode="IN" optional="true"/>
         <attribute name="viewSize" type="Integer" mode="IN" optional="true"/>
-        <attribute name="finAccountTransList" type="List" mode="OUT" optional="false"/>
+        <attribute name="paymentList" type="List" mode="OUT" optional="false"/>
     </service>
     
 </services>
