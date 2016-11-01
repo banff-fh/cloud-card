@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <entity-engine-xml>
 
+	<StatusItem description="已授权给其他用户" sequenceId="11" statusCode="AUTH" statusId="FNACT_AUTH" statusTypeId="FINACCT_STATUS"/>
+	<StatusValidChange condition="" statusId="FNACT_ACTIVE" statusIdTo="FNACT_AUTH" transitionName="auth"/>
+	<StatusValidChange condition="" statusId="FNACT_AUTH" statusIdTo="FNACT_ACTIVE" transitionName="revoke auth"/>
+	<StatusValidChange condition="" statusId="FNACT_AUTH" statusIdTo="FNACT_MANFROZEN" transitionName="Set Manually Frozen"/>
+	<StatusValidChange condition="" statusId="FNACT_AUTH" statusIdTo="FNACT_CANCELLED" transitionName="Cancel"/>
+
 </entity-engine-xml>
