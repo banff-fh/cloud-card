@@ -35,22 +35,23 @@ public class CloudCardServices {
 	/**
 	 * 查询卡信息
 	 */
-	public static Map<String, Object> findFinAccountByOwnerPartyId(DispatchContext dctx, Map<String, Object> context) {
+	public static Map<String, Object> findFinAccountByPartyId(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
-		String ownerPartyId = (String) context.get("ownerPartyId");
+		String partyId = (String) context.get("partyId");
 		Integer viewIndex = (Integer) context.get("viewIndex");
 		Integer viewSize = (Integer) context.get("viewSize");
 
 		Map<String, Object> inputFieldMap = FastMap.newInstance();
-		inputFieldMap.put("ownerPartyId", ownerPartyId);
+		inputFieldMap.put("partyId", partyId);
 		inputFieldMap.put("statusId", "FNACT_ACTIVE");
 
 		Map<String, Object> ctxMap = FastMap.newInstance();
 		ctxMap.put("inputFields", inputFieldMap);
-		ctxMap.put("entityName", "FinAccount");
-		ctxMap.put("orderBy", "finAccountId");
+		ctxMap.put("entityName", "FinAccountAndPaymentMethodAndGiftCard");
+		ctxMap.put("orderBy", "expireDate");
 		ctxMap.put("viewIndex", viewIndex);
 		ctxMap.put("viewSize", viewSize);
+		ctxMap.put("filterByDate", "Y");
 
 		Map<String, Object> faResult = null;
 		try {
@@ -109,26 +110,53 @@ public class CloudCardServices {
 	public static Map<String, Object> createCardAuth(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
+		String customerPartyId = null;
 		Map<String, Object> result = null;
+		GenericValue userLogin = (GenericValue) context.get("userLogin");
 		String telNumber = (String) context.get("telNumber");
 		String finAccountId = (String) context.get("finAccountId");
 		String amount = (String) context.get("amount");
+		String currentPassword = (String) context.get("currentPassword");
+		String currentPasswordVerify = (String) context.get("currentPasswordVerify");
 		Timestamp fromDate = (Timestamp) context.get("fromDate");
 		Timestamp thruDate = (Timestamp) context.get("thruDate");
-
+		String cardCode = (String) context.get("cardCode");
+		String organizationPartyId = (String) context.get("organizationPartyId");
 		try {
+			GenericValue partyGroup;
+			try {
+				partyGroup = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", organizationPartyId));
+			} catch (GenericEntityException e) {
+				Debug.logError(e, module);
+				return ServiceUtil.returnError(e.getMessage());
+			}
 			// 授权时判断用户是否存在
 			GenericValue person = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", telNumber));
 			// 如果用户不存在，该用户设置为新用户
+			Map<String, Object> createPersonAndUserLoginOutMap = null;
 			if (person == null) {
 				Map<String, Object> personAndUserLoginMap = FastMap.newInstance();
-				personAndUserLoginMap.put("userLoginId", (String) context.get("telNumber"));
-				personAndUserLoginMap.put("currentPassword", context.get("currentPassword"));
-				personAndUserLoginMap.put("currentPasswordVerify", context.get("currentPasswordVerify"));
+				personAndUserLoginMap.put("firstName", telNumber);
+				personAndUserLoginMap.put("userLoginId", telNumber);
 				personAndUserLoginMap.put("enabled", "Y");
-				dispatcher.runSync("createPersonAndUserLogin", personAndUserLoginMap);
+				personAndUserLoginMap.put("currentPassword", currentPassword);
+				personAndUserLoginMap.put("currentPasswordVerify", currentPasswordVerify );
+				personAndUserLoginMap.put("requirePasswordChange", "Y");
+				personAndUserLoginMap.put("preferredCurrencyUomId", DEFAULT_CURRENCY_UOM_ID);
+				createPersonAndUserLoginOutMap = dispatcher.runSync("createPersonAndUserLogin", personAndUserLoginMap);
 			}
-						
+			
+			if(ServiceUtil.isError(createPersonAndUserLoginOutMap)){
+				return createPersonAndUserLoginOutMap;
+			}
+			
+			if(person != null){
+				customerPartyId = person.getString("partyId");
+			}else{
+				customerPartyId = (String) createPersonAndUserLoginOutMap.get("partyId");
+			}
+			//创建paymentMethod和giftCard
+			createPaymentMethodAndGiftCard(dispatcher, delegator, userLogin, cardCode, customerPartyId, finAccountId, partyGroup, fromDate, thruDate);
 			
 		} catch (GenericServiceException | GenericEntityException e) {
 			// TODO Auto-generated catch block
@@ -234,19 +262,34 @@ public class CloudCardServices {
 		}
 		finAccountId = (String) finAccountOutMap.get("finAccountId");
 		
-		// 给卡主 OWNER 角色
-		Map<String, Object> finAccountRoleOutMap;
-		try {
-			finAccountRoleOutMap = dispatcher.runSync("createFinAccountRole", UtilMisc.toMap("finAccountId", finAccountId, "partyId", "customerPartyId", "roleTypeId","OWNER"));
-		} catch (GenericServiceException e1) {
-			Debug.logError(e1, module);
-			return ServiceUtil.returnError(e1.getMessage());
-		}
-		if (ServiceUtil.isError(finAccountRoleOutMap)) {
-			return finAccountRoleOutMap;
-		}
-		
 		// 创建PaymentMethod  GiftCard
+		createPaymentMethodAndGiftCard(dispatcher, delegator, userLogin, cardCode, customerPartyId, finAccountId, partyGroup);
+
+		// 3、充值
+		
+		
+		result.put("customerPartyId", customerPartyId);
+		result.put("customerUserLoginId", customerUserLoginId);
+		result.put("amount", amount);
+		result.put("actualBalance", amount);
+		result.put("finAccountId", finAccountId);
+		
+		return result;
+	}
+	
+	private static Map<String,Object> createPaymentMethodAndGiftCard(LocalDispatcher dispatcher, Delegator delegator,
+			GenericValue userLogin, String cardCode, String customerPartyId, String finAccountId,
+			GenericValue partyGroup) {
+		
+		return createPaymentMethodAndGiftCard(dispatcher,delegator,userLogin,cardCode,customerPartyId,finAccountId,partyGroup,null,null);
+	
+	}
+	
+	private static Map<String, Object> createPaymentMethodAndGiftCard(LocalDispatcher dispatcher, Delegator delegator,
+			GenericValue userLogin, String cardCode, String customerPartyId, String finAccountId,
+			GenericValue partyGroup, Timestamp fromDate, Timestamp thruDate) {
+
+		String paymentMethodId;
 		Map<String, Object> giftCardMap = FastMap.newInstance();
 		giftCardMap.put("userLogin", userLogin);
 		giftCardMap.put("partyId", customerPartyId); 
@@ -272,24 +315,18 @@ public class CloudCardServices {
 		}
 		// 关联 paymentMethod 与 finAccount
 		paymentMethod.set("finAccountId", finAccountId);
+		paymentMethod.set("fromDate", fromDate);
+		paymentMethod.set("thruDate", thruDate);
 		try {
 			paymentMethod.store();
 		} catch (GenericEntityException e) {
 			Debug.logError(e, module);
 			return ServiceUtil.returnError(e.getMessage());
 		}
-
-		// 3、充值
 		
-		
-		result.put("customerPartyId", customerPartyId);
-		result.put("customerUserLoginId", customerUserLoginId);
-		result.put("amount", amount);
-		result.put("actualBalance", amount);
-		result.put("finAccountId", finAccountId);
-		
-		return result;
+		return giftCardOutMap;
 	}
+	
 	
 	
 	/**

@@ -5,10 +5,10 @@
     <vendor></vendor>
     <version>1.0</version>
     
-    <service name="findFinAccountByOwnerPartyId" engine="java"
-            location="com.banfftech.cloudcard.CloudCardServices" invoke="findFinAccountByOwnerPartyId" auth="true">
+    <service name="findFinAccountByPartyId" engine="java"
+            location="com.banfftech.cloudcard.CloudCardServices" invoke="findFinAccountByPartyId" auth="true">
         <description>查询卡信息</description>
-        <attribute name="ownerPartyId" type="String" mode="IN" optional="false"/>
+        <attribute name="partyId" type="String" mode="IN" optional="false"/>
         <attribute name="viewIndex" type="Integer" mode="IN" optional="true"/>
         <attribute name="viewSize" type="Integer" mode="IN" optional="true"/>
         <attribute name="finAccountList" type="List" mode="OUT" optional="false"/>
@@ -28,9 +28,11 @@
     <service name="createCardAuth" engine="java"
     	location="com.banfftech.cloudcard.CloudCardServices" invoke="createCardAuth" auth="true">
     	<description>卡授权</description>
+    	<attribute name="organizationPartyId" type="String" mode="IN" optional="false"/>
     	<attribute name="telNumber" type="String" mode="IN" optional="false"/>
         <attribute name="finAccountId" type="String" mode="IN" optional="false"/>
         <attribute name="amount" type="String" mode="IN" optional="false"/>
+        <attribute name="cardCode" type="String" mode="IN" optional="false"/>
         <attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
         <attribute name="thruDate" type="Timestamp" mode="IN" optional="false"/>      
 		<attribute name="currentPassword" type="String" mode="IN" optional="false" />
