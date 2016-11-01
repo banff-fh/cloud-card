@@ -8,5 +8,39 @@
     <description>None</description>
     <copyright></copyright>
     <version></version>
-
+	<view-entity entity-name="FinAccountAndPaymentMethodAndGiftCard" package-name="org.ofbiz.accounting.finaccount" title="Financial Account Authorization Sum">
+        <description>金融账户关联支付以及卡</description>
+        <member-entity entity-alias="FA" entity-name="FinAccount"/>
+        <member-entity entity-alias="PM" entity-name="PaymentMethod"/>
+      	<member-entity entity-alias="GC" entity-name="GiftCard"/>
+      	<alias entity-alias="FA" name="finAccountId" />
+      	<alias entity-alias="FA" name="ownerPartyId" />
+      	<alias entity-alias="FA" name="finAccountTypeId" />
+      	<alias entity-alias="FA" name="statusId" />
+      	<alias entity-alias="FA" name="finAccountName" />
+		<alias entity-alias="PM" name="paymentMethodId" />
+		<alias entity-alias="PM" name="paymentMethodTypeId" />
+		<alias entity-alias="PM" name="partyId" />
+		<alias entity-alias="PM" name="fromDate" />
+		<alias entity-alias="PM" name="thruDate" />
+		<alias entity-alias="GC" name="cardNumber" />
+		<alias entity-alias="GC" name="pinNumber" />
+		<alias entity-alias="GC" name="expireDate" />
+		<view-link entity-alias="FA" rel-entity-alias="PM">
+			<key-map field-name="finAccountId" rel-field-name="finAccountId" />
+		</view-link>
+		<view-link entity-alias="PM" rel-entity-alias="GC">
+			<key-map field-name="paymentMethodId" />
+		</view-link>
+		<relation type="one-nofk" rel-entity-name="PaymentMethod">
+			<key-map field-name="paymentMethodId" />
+		</relation>
+		<relation type="one-nofk" rel-entity-name="PaymentMethodType">
+			<key-map field-name="paymentMethodTypeId" />
+		</relation>
+		<relation type="one-nofk" rel-entity-name="GiftCard">
+			<key-map field-name="paymentMethodId" />
+		</relation>
+    </view-entity>
+	
 </entitymodel>
