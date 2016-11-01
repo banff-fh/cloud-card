@@ -1,10 +1,19 @@
 package com.banfftech.cloudcard;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
+import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilGenerics;
+import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.condition.EntityCondition;
+import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
@@ -17,6 +26,11 @@ import javolution.util.FastMap;
  *
  */
 public class CloudCardServices {
+	
+	public static final String module = CloudCardServices.class.getName();
+	
+	public static final String DEFAULT_CURRENCY_UOM_ID = "CNY";
+	
 	/**
 	 * 查询卡信息
 	 */
@@ -54,7 +68,6 @@ public class CloudCardServices {
 	/**
 	 * 查询交易流水
 	 */
-
 	public static Map<String, Object> findPaymentByPartyIdTo(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		String partyIdFrom = (String) context.get("partyIdFrom");
@@ -87,5 +100,225 @@ public class CloudCardServices {
 		result.put("paymentList", paymentResult.get("list"));
 		return result;
 	}
+	
+	
+	/**
+	 * 给用户开卡
+	 * 	1、根据telNumber查找用户，不存在则创建
+	 *	2、创建FinAccount，关联卡上二维码等信息。
+	 *	3、充值
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> createCloudCard(DispatchContext dctx, Map<String, Object> context) {
+        LocalDispatcher dispatcher = dctx.getDispatcher();
+        Delegator delegator = dctx.getDelegator();
+        GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
 
+		String organizationPartyId = (String) context.get("organizationPartyId");
+		String telNumber = (String) context.get("telNumber");
+		String cardCode = (String) context.get("cardCode");
+		BigDecimal amount = (BigDecimal) context.get("amount");
+		
+		
+		String customerPartyId = "";
+		String customerUserLoginId = "";
+		String finAccountId = "";
+		String paymentMethodId = "";
+		
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		GenericValue partyGroup;
+		try {
+			partyGroup = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", organizationPartyId));
+		} catch (GenericEntityException e) {
+			Debug.logError(e, module);
+			return ServiceUtil.returnError(e.getMessage());
+		}
+		if(partyGroup == null){
+			Debug.logError("商户："+organizationPartyId + "不存在", module);
+			return ServiceUtil.returnError("商户不存在");
+		}
+			
+		// 1、根据telNumber查找用户，不存在则创建
+		GenericValue customer;
+		try {
+			customer = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", telNumber));
+		} catch (GenericEntityException e) {
+			Debug.logError(e, module);
+			return ServiceUtil.returnError(e.getMessage());
+		}
+		if(customer != null){
+			customerPartyId = (String) customer.get("partyId");
+			customerUserLoginId = (String) customer.get("userLoginId");
+		}else{
+			Map<String, Object> createCustomerMap = UtilMisc.toMap("userLogin", userLogin, "userLoginId", telNumber, "firstName", telNumber, "lastName", "86");
+			createCustomerMap.put("currentPassword", "123456"); //TODO 密码随机生成？
+			createCustomerMap.put("currentPasswordVerify", "123456"); //TODO
+			createCustomerMap.put("requirePasswordChange", "Y");
+			createCustomerMap.put("preferredCurrencyUomId", DEFAULT_CURRENCY_UOM_ID);
+			Map<String, Object> customerOutMap;
+			try {
+				customerOutMap = dispatcher.runSync("createPersonAndUserLogin", createCustomerMap);
+			} catch (GenericServiceException e) {
+				Debug.logError(e, module);
+				return ServiceUtil.returnError(e.getMessage());
+			}
+			if (ServiceUtil.isError(customerOutMap)) {
+				return customerOutMap;
+			}
+			GenericValue newUserLogin = (GenericValue) customerOutMap.get("newUserLogin");
+			customerPartyId = (String) customerOutMap.get("partyId");
+			customerUserLoginId = (String) newUserLogin.get("userLoginId");
+		}
+				
+			
+			// 2、创建finAccount 和 paymentMethod
+			Map<String, Object> finAccountMap = FastMap.newInstance();
+			finAccountMap.put("userLogin", userLogin);
+			finAccountMap.put("finAccountTypeId", "GIFTCERT_ACCOUNT"); //TODO 类型待定
+			finAccountMap.put("finAccountName", partyGroup.get("groupName")+" 的卡");  //TODO
+			finAccountMap.put("finAccountCode", cardCode);
+			finAccountMap.put("currencyUomId", DEFAULT_CURRENCY_UOM_ID);
+			finAccountMap.put("organizationPartyId", organizationPartyId);
+			finAccountMap.put("ownerPartyId", customerPartyId);
+			
+			Map<String, Object> finAccountOutMap;
+			try {
+				finAccountOutMap = dispatcher.runSync("createFinAccount", finAccountMap);
+			} catch (GenericServiceException e) {
+				Debug.logError(e, module);
+				return ServiceUtil.returnError(e.getMessage());
+			}
+			if (ServiceUtil.isError(finAccountOutMap)) {
+				return finAccountOutMap;
+			}
+			finAccountId = (String) finAccountOutMap.get("finAccountId");
+			
+			// 给卡主 OWNER 角色
+			Map<String, Object> finAccountRoleOutMap;
+			try {
+				finAccountRoleOutMap = dispatcher.runSync("createFinAccountRole", UtilMisc.toMap("finAccountId", finAccountId, "partyId", "customerPartyId", "roleTypeId","OWNER"));
+			} catch (GenericServiceException e1) {
+				Debug.logError(e1, module);
+				return ServiceUtil.returnError(e1.getMessage());
+			}
+			if (ServiceUtil.isError(finAccountRoleOutMap)) {
+				return finAccountRoleOutMap;
+			}
+			
+			// 创建PaymentMethod  GiftCard
+			Map<String, Object> giftCardMap = FastMap.newInstance();
+			giftCardMap.put("userLogin", userLogin);
+			giftCardMap.put("partyId", customerPartyId); 
+			giftCardMap.put("description", partyGroup.get("groupName")+" 的卡");  //TODO
+			giftCardMap.put("cardNumber", cardCode);
+			Map<String, Object> giftCardOutMap;
+			try {
+				giftCardOutMap = dispatcher.runSync("createGiftCard", giftCardMap);
+			} catch (GenericServiceException e) {
+				Debug.logError(e, module);
+				return ServiceUtil.returnError(e.getMessage());
+			}
+			if (ServiceUtil.isError(giftCardOutMap)) {
+				return giftCardOutMap;
+			}
+			paymentMethodId = (String) giftCardOutMap.get("paymentMethodId");
+			GenericValue paymentMethod;
+			try {
+				paymentMethod = delegator.findByPrimaryKey("PaymentMethod", UtilMisc.toMap("paymentMethodId", paymentMethodId));
+			} catch (GenericEntityException e) {
+				Debug.logError(e, module);
+				return ServiceUtil.returnError(e.getMessage());
+			}
+			// 关联 paymentMethod 与 finAccount
+			paymentMethod.set("finAccountId", finAccountId);
+			try {
+				paymentMethod.store();
+			} catch (GenericEntityException e) {
+				Debug.logError(e, module);
+				return ServiceUtil.returnError(e.getMessage());
+			}
+
+			// 3、充值
+			
+			
+			result.put("customerPartyId", customerPartyId);
+			result.put("customerUserLoginId", customerUserLoginId);
+			result.put("amount", amount);
+			result.put("actualBalance", amount);
+			result.put("finAccountId", finAccountId);
+			
+
+		
+		return result;
+	}
+	
+	
+	/**
+	 *	充值
+	 *   1、扣商户开卡余额
+	 *   2、存入用户账户
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> rechargeCloudCard(DispatchContext dctx, Map<String, Object> context) {
+        LocalDispatcher dispatcher = dctx.getDispatcher();
+        Delegator delegator = dctx.getDelegator();
+        GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
+
+		String organizationPartyId = (String) context.get("organizationPartyId");
+		String finAccountId = (String) context.get("finAccountId");
+		BigDecimal amount = (BigDecimal) context.get("amount");
+		
+		String partyGroupFinAccountId = "";
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		try {
+			GenericValue partyGroup = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", organizationPartyId));
+			if(UtilValidate.isEmpty(partyGroup)){
+				return ServiceUtil.returnError("商户不存在");
+			}
+			
+			GenericValue finAccount = delegator.findByPrimaryKey("FinAccount", UtilMisc.toMap("finAccountId", finAccountId));
+			if(UtilValidate.isEmpty(finAccount)){
+				return ServiceUtil.returnError("用户账户不存在");
+			}
+			
+			//  1、扣商户开卡余额
+			// 获取商户金融账户
+			EntityCondition dateCond = EntityUtil.getFilterByDateExpr();
+			EntityCondition cond = EntityCondition.makeCondition(
+					UtilMisc.toMap("organizationPartyId", organizationPartyId, "ownerPartyId", organizationPartyId,
+							"finAccountTypeId", "BANK_ACCOUNT", "statusId", "FNACT_ACTIVE")
+					);
+			GenericValue partyGroupFinAccount = EntityUtil.getFirst(delegator.findList("FinAccount", EntityCondition.makeCondition(cond, dateCond), null, 
+					UtilMisc.toList("createdStamp DESC"), null, true));
+			if(UtilValidate.isEmpty(partyGroupFinAccount)){
+				return ServiceUtil.returnError("商户没有金融账户");
+			}
+			partyGroupFinAccountId = (String) partyGroupFinAccount.get("finAccountId");
+			
+			// 检查开卡余额是否够用
+			BigDecimal actualBalance = partyGroupFinAccount.getBigDecimal("actualBalance");
+			if(actualBalance.compareTo(amount)<0){
+				return ServiceUtil.returnError("商户卖卡额度不足, 余额：" + actualBalance.toPlainString());
+			}
+			
+			EntityCondition pgPmCond = EntityCondition.makeCondition(
+					UtilMisc.toMap("partyId", organizationPartyId, "paymentMethodTypeId", "FIN_ACCOUNT", "finAccountId", partyGroupFinAccountId));
+			GenericValue partyGroupPaymentMethod = EntityUtil.getFirst(delegator.findList("PaymentMethod", EntityCondition.makeCondition(pgPmCond, dateCond), null,
+					UtilMisc.toList("createdStamp DESC"), null, true));
+			
+			// 商户账户扣款（扣减开卡余额）
+			
+
+		} catch (GenericEntityException e) {
+			// TODO
+		}
+		
+		return result;
+	}
 }
