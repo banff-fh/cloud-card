@@ -179,7 +179,7 @@ public class CloudCardServices {
 			return ServiceUtil.returnError("商户不存在");
 		}
 			
-		// 1、根据telNumber查找用户，不存在则创建
+		// 1、根据telNumber查找用户，不存在则创建    createPartyTelecomNumber
 		GenericValue customer;
 		try {
 			customer = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", telNumber));
@@ -237,7 +237,7 @@ public class CloudCardServices {
 		// 给卡主 OWNER 角色
 		Map<String, Object> finAccountRoleOutMap;
 		try {
-			finAccountRoleOutMap = dispatcher.runSync("createFinAccountRole", UtilMisc.toMap("finAccountId", finAccountId, "partyId", "customerPartyId", "roleTypeId","OWNER"));
+			finAccountRoleOutMap = dispatcher.runSync("createFinAccountRole", UtilMisc.toMap("userLogin", userLogin, "finAccountId", finAccountId, "partyId", "customerPartyId", "roleTypeId","OWNER"));
 		} catch (GenericServiceException e1) {
 			Debug.logError(e1, module);
 			return ServiceUtil.returnError(e1.getMessage());
@@ -343,14 +343,45 @@ public class CloudCardServices {
 				return ServiceUtil.returnError("商户卖卡额度不足, 余额：" + actualBalance.toPlainString());
 			}
 			
+			//TODO 可能会调整
+			// 找到一个可用的 paymentMethod，
+			// createPaymentAndFinAccountTrans服务需要传入一个关联了finAccountId的paymentMethodId才能创建finAccountTrans，才能对Finaccount进行扣款
+			// 如果用 finAccountDeposit / finAccountWithdraw 这两个服务，则需要 productStoreId，需要给店家创建productStore
 			EntityCondition pgPmCond = EntityCondition.makeCondition(
 					UtilMisc.toMap("partyId", organizationPartyId, "paymentMethodTypeId", "FIN_ACCOUNT", "finAccountId", partyGroupFinAccountId));
 			GenericValue partyGroupPaymentMethod = EntityUtil.getFirst(delegator.findList("PaymentMethod", EntityCondition.makeCondition(pgPmCond, dateCond), null,
 					UtilMisc.toList("createdStamp DESC"), null, true));
+			if(UtilValidate.isEmpty(partyGroupPaymentMethod)){
+				return ServiceUtil.returnError("商户没有可供扣减额度的账户");
+			}
 			
 			// 商户账户扣款（扣减开卡余额）
+			Map<String, Object> finAccountWithdrawalOutMap;
+			try {
+				finAccountWithdrawalOutMap = dispatcher.runSync("createPaymentAndFinAccountTrans", 
+						UtilMisc.toMap("userLogin", userLogin, 
+								"statusId", "PMNT_SENT", 
+								"currencyUomId", DEFAULT_CURRENCY_UOM_ID, 
+								"finAccountTransTypeId", "WITHDRAWAL",
+								"paymentTypeId", "DISBURSEMENT", 
+								"paymentMethodId", partyGroupPaymentMethod.get("paymentMethodId"),
+								"paymentMethodTypeId", "FIN_ACCOUNT", 
+								"partyIdFrom", organizationPartyId,
+								"partyIdTo", finAccount.get("ownerPartyId"),
+								"amount", amount,
+								"comments", "充值扣减卖卡额度",
+								"isDepositWithDrawPayment", "Y"
+								));
+			} catch (GenericServiceException e1) {
+				Debug.logError(e1, module);
+				return ServiceUtil.returnError(e1.getMessage());
+			}
+			if (ServiceUtil.isError(finAccountWithdrawalOutMap)) {
+				return finAccountWithdrawalOutMap;
+			}
 			
-
+			
+			
 		} catch (GenericEntityException e) {
 			// TODO
 		}
