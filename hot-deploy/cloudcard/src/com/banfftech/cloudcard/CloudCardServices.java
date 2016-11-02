@@ -290,6 +290,16 @@ public class CloudCardServices {
 		return result;
 	}
 	
+	/**
+	 * @param dispatcher
+	 * @param delegator
+	 * @param userLogin
+	 * @param cardCode
+	 * @param customerPartyId
+	 * @param finAccountId
+	 * @param partyGroup
+	 * @return
+	 */
 	private static Map<String,Object> createPaymentMethodAndGiftCard(LocalDispatcher dispatcher, Delegator delegator,
 			GenericValue userLogin, String cardCode, String customerPartyId, String finAccountId,
 			GenericValue partyGroup) {
