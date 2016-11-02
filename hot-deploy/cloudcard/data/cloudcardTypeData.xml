@@ -6,5 +6,10 @@
 	<StatusValidChange condition="" statusId="FNACT_AUTH" statusIdTo="FNACT_ACTIVE" transitionName="revoke auth"/>
 	<StatusValidChange condition="" statusId="FNACT_AUTH" statusIdTo="FNACT_MANFROZEN" transitionName="Set Manually Frozen"/>
 	<StatusValidChange condition="" statusId="FNACT_AUTH" statusIdTo="FNACT_CANCELLED" transitionName="Cancel"/>
+	
+	
+	<ContactMechPurposeType contactMechPurposeTypeId="AS_USER_LOGIN_ID" description="可用作登录标识"/>
+	<ContactMechTypePurpose contactMechPurposeTypeId="AS_USER_LOGIN_ID" contactMechTypeId="TELECOM_NUMBER"/>
+	
 
 </entity-engine-xml>
