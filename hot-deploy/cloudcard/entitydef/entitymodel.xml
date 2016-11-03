@@ -43,4 +43,37 @@
 		</relation>
     </view-entity>
 	
+	
+	<view-entity entity-name="TelecomNumberAndUserLogin"
+        package-name="org.ofbiz.party.contact"
+        title="根据会员电话号码查询userlogin">
+        <member-entity entity-alias="PCMP" entity-name="PartyContactMechPurpose"/>
+        <member-entity entity-alias="TN" entity-name="TelecomNumber"/>
+        <member-entity entity-alias="PTY" entity-name="Party"/>
+        <member-entity entity-alias="ULN" entity-name="UserLogin"/>
+        <alias-all entity-alias="PCMP"/>
+        <alias-all entity-alias="TN"/>
+        <alias entity-alias="PTY" name="partyId"/>
+        <alias entity-alias="PTY" name="partyTypeId"/>
+        <alias entity-alias="ULN" name="userLoginId"/>
+        <alias entity-alias="ULN" name="enabled"/>
+        <view-link entity-alias="PCMP" rel-entity-alias="TN">
+            <key-map field-name="contactMechId"/>
+            <entity-condition>
+                <condition-expr field-name="contactMechPurposeTypeId" operator="equals" value="AS_USER_LOGIN_ID"/>
+            </entity-condition>
+        </view-link>
+        <view-link entity-alias="PCMP" rel-entity-alias="PTY">
+            <key-map field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PTY" rel-entity-alias="ULN">
+            <key-map field-name="partyId"/>
+        </view-link>
+        <relation type="one-nofk" rel-entity-name="Party">
+            <key-map field-name="partyId"/>
+        </relation>
+        <relation type="one-nofk" rel-entity-name="UserLogin">
+            <key-map field-name="userLoginId"/>
+        </relation>
+    </view-entity>
 </entitymodel>
