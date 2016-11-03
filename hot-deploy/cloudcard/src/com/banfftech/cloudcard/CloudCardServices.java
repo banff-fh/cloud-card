@@ -15,6 +15,7 @@ import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.util.EntityUtil;
+import org.ofbiz.party.party.PartyRelationshipHelper;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
@@ -180,6 +181,32 @@ public class CloudCardServices {
 		}		
 		String customerPartyId = (String) checkCustomerOut.get("customerPartyId");
 		String customerUserLoginId = (String) checkCustomerOut.get("customerUserLoginId");
+		
+		
+		// 若客户与本商家没有客户关系,则建立关系
+		Map<String,Object> partyRelationshipValues = UtilMisc.toMap(
+				"userLogin", userLogin,
+				"partyIdFrom", customerPartyId,
+				"partyIdTo", organizationPartyId,
+				"roleTypeIdFrom", "CUSTOMER",
+				"roleTypeIdTo", "INTERNAL_ORGANIZATIO",
+				"partyRelationshipTypeId", "CUSTOMER_REL"
+				);
+		List<GenericValue> relations = PartyRelationshipHelper.getActivePartyRelationships(delegator, partyRelationshipValues);
+		if (UtilValidate.isEmpty(relations)) {
+			Map<String, Object> relationOutMap;
+			try {
+				dispatcher.runSync("ensurePartyRole", UtilMisc.toMap("partyId", customerPartyId, "roleTypeId", "CUSTOMER"));
+				relationOutMap = dispatcher.runSync("createPartyRelationship", partyRelationshipValues);
+			} catch (GenericServiceException e) {
+				Debug.logError(e, module);
+				return ServiceUtil.returnError(e.getMessage());
+			}
+			if (ServiceUtil.isError(relationOutMap)) {
+				return relationOutMap;
+			}
+		}
+		
 		
 		// 2、创建finAccount 和 paymentMethod
 		Map<String, Object> finAccountMap = FastMap.newInstance();
@@ -370,10 +397,8 @@ public class CloudCardServices {
 	/**
 	 * 根据电话号码检查是否有关联的注册用户，有则返回customerPartyId 和 customerUserLoginId
 	 * 没有则 创建一个用户与电话号码关联，并返回新创建的 customerPartyId 和 customerUserLoginId
-	 * @param dispatcher
-	 * @param delegator
-	 * @param userLogin
-	 * @param telNumber
+	 * @param dctx
+	 * @param context
 	 * @return
 	 */
 	private static Map<String, Object> getOrCreateCustomer(DispatchContext dctx, Map<String, Object> context) {
