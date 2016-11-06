@@ -24,4 +24,12 @@
         <value xml:lang="en">Deduct the amount failure</value>
         <value xml:lang="zh">扣减开卡余额失败</value>
     </property>
+    <property key="CloudCardBalanceIsNotEnough">
+        <value xml:lang="en">balance is not enough, finAccount:${finAccountId}, available balance: ${balance}</value>
+        <value xml:lang="zh">用户账户[${finAccountId}]余额不足，可用余额：${balance}</value>
+    </property>
+     <property key="CloudCardPaymentFailure">
+        <value xml:lang="en">payment failure</value>
+        <value xml:lang="zh">云卡支付失败</value>
+    </property>
 </resource>
