@@ -28,15 +28,12 @@
     <service name="createCardAuth" engine="java"
     	location="com.banfftech.cloudcard.CloudCardServices" invoke="createCardAuth" auth="true">
     	<description>卡授权</description>
-    	<attribute name="organizationPartyId" type="String" mode="IN" optional="false"/>
     	<attribute name="telNumber" type="String" mode="IN" optional="false"/>
         <attribute name="finAccountId" type="String" mode="IN" optional="false"/>
         <attribute name="amount" type="String" mode="IN" optional="false"/>
-        <attribute name="cardCode" type="String" mode="IN" optional="false"/>
         <attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
-        <attribute name="thruDate" type="Timestamp" mode="IN" optional="false"/>      
-		<attribute name="currentPassword" type="String" mode="IN" optional="false" />
-		<attribute name="currentPasswordVerify" type="String" mode="IN" optional="false" />
+        <attribute name="thruDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="customerPartyId" type="String" mode="OUT" optional="false"/> 
     </service>
     
     <service name="createCloudCard" engine="java"
