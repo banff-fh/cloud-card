@@ -6,7 +6,7 @@
     <version>1.0</version>
     
     <service name="findFinAccountByPartyId" engine="java"
-            location="com.banfftech.cloudcard.CloudCardServices" invoke="findFinAccountByPartyId" auth="true">
+            location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="findFinAccountByPartyId" auth="true">
         <description>查询卡信息</description>
         <attribute name="partyId" type="String" mode="IN" optional="false"/>
         <attribute name="viewIndex" type="Integer" mode="IN" optional="true"/>
@@ -15,7 +15,7 @@
     </service>
     
     <service name="findPaymentByPartyId" engine="java"
-            location="com.banfftech.cloudcard.CloudCardServices" invoke="findPaymentByPartyId" auth="true">
+            location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="findPaymentByPartyId" auth="true">
         <description>查询交易流水</description>
         <attribute name="partyIdFrom" type="String" mode="IN" optional="true"/>
         <attribute name="partyIdTo" type="String" mode="IN" optional="true"/>
@@ -65,6 +65,15 @@
         <attribute name="finAccountId" type="String" mode="INOUT" optional="false"/>
         <attribute name="amount" type="BigDecimal" mode="IN" optional="false"/>
         <attribute name="customerPartyId" type="String" mode="OUT" optional="false"/>
+        <attribute name="actualBalance" type="BigDecimal" mode="OUT" optional="false"/>
+	</service>
+	
+	<service name="findLimitAndPresellInfo" engine="java"
+		location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="findLimitAndPresellInfo" auth="true">
+		<description>查询开卡额度和已卖卡金额信息</description>
+        <attribute name="organizationPartyId" type="String" mode="IN" optional="false"/>
+        <attribute name="presellAmount" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="totalAmount" type="BigDecimal" mode="OUT" optional="false"/>
         <attribute name="actualBalance" type="BigDecimal" mode="OUT" optional="false"/>
 	</service>
 </services>
