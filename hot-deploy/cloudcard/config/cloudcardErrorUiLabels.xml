@@ -5,8 +5,8 @@
         <value xml:lang="zh">内部服务错误，请联系平台管理员</value>
     </property>
     <property key="CloudCardConfigError">
-        <value xml:lang="en">Configuration error, please contact the platform administrator</value>
-        <value xml:lang="zh">商家配置错误，请联系平台管理员</value>
+        <value xml:lang="en">Organization Party[${organizationPartyId}] Configuration error, please contact the platform administrator</value>
+        <value xml:lang="zh">商家[${organizationPartyId}]配置错误，请联系平台管理员</value>
     </property>
     <property key="CloudCardUserLoginIsNotManager">
         <value xml:lang="en">Not the store manager can not operate</value>
@@ -14,7 +14,7 @@
     </property>
     <property key="CloudCardOrganizationPartyNotFound">
         <value xml:lang="en">No organizationPartyId found: ${organizationPartyId}</value>
-        <value xml:lang="zh">找不到商户标识（organizationPartyId） ${organizationPartyId}</value>
+        <value xml:lang="zh">找不到商家[${organizationPartyId}]</value>
     </property>
     <property key="CloudCardCreditIsNotEnough">
         <value xml:lang="en">Credit is not enough, available balance: ${balance}</value>
