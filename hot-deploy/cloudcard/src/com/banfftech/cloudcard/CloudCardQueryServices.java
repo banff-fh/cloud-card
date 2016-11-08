@@ -135,35 +135,28 @@ public class CloudCardQueryServices {
 				EntityCondition.makeCondition("finAccountId", EntityOperator.EQUALS,
 						partyGroupFinAccount.get("finAccountId")),
 				EntityCondition.makeCondition(
-						EntityCondition.makeCondition("finAccountTransTypeId", EntityOperator.EQUALS, "WITHDRAWAL"))),
+						EntityCondition.makeCondition("amount", EntityOperator.GREATER_THAN, ZERO))),
 				EntityOperator.AND);
 		
-        List<GenericValue> transSums;
+        List<GenericValue> finAccountAuthList = null;
 		try {
-			transSums = delegator.findList("FinAccountTransSum", incrementConditions, UtilMisc.toSet("amount"), null, null, false);
-	        incrementTotal = addFirstEntryAmount(incrementTotal, transSums, "amount", (decimals+1), rounding);
+			finAccountAuthList = delegator.findList("FinAccountAuth", incrementConditions, UtilMisc.toSet("amount"), null, null, false);
 		} catch (GenericEntityException e) {
 			e.printStackTrace();
+		}
+		
+		//计算卖卡金额
+		if (finAccountAuthList != null) {
+			for (GenericValue finAccountAuth : finAccountAuthList) {
+				incrementTotal = incrementTotal.add(BigDecimal.valueOf(UtilMisc.toDouble(finAccountAuth.get("amount"))));
+			}
 		}
         
 		Map<String, Object> results = ServiceUtil.returnSuccess();
 		results.put("presellAmount", incrementTotal);
-		results.put("totalAmount", partyGroupFinAccount.get("replenishLevel"));
-		results.put("actualBalance", partyGroupFinAccount.get("actualBalance"));
+		results.put("totalAmount", partyGroupFinAccount.get("actualBalance"));
+		results.put("actualBalance", partyGroupFinAccount.get("availableBalance"));
 		return results;
 	}
 	
-	public static BigDecimal addFirstEntryAmount(BigDecimal initialValue, List<GenericValue> transactions, String fieldName, int decimals, int rounding) throws GenericEntityException {
-        if ((transactions != null) && (transactions.size() == 1)) {
-            GenericValue firstEntry = transactions.get(0);
-            if (firstEntry.get(fieldName) != null) {
-                BigDecimal valueToAdd = firstEntry.getBigDecimal(fieldName);
-                return initialValue.add(valueToAdd).setScale(decimals, rounding);
-            } else {
-                return initialValue;
-            }
-        } else {
-            return initialValue;
-        }
-   }
 }
