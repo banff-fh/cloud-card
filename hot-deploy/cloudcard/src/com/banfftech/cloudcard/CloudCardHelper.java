@@ -63,8 +63,9 @@ public class CloudCardHelper {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dctx.getDelegator();
 		GenericValue userLogin = (GenericValue) context.get("userLogin");
-		String telNumber = (String) context.get("telNumber");
 		Locale locale = (Locale) context.get("locale");
+
+		String telNumber = (String) context.get("telNumber");
 		String organizationPartyId = (String) context.get("organizationPartyId");
 		Boolean ensureCustomerRelationship = (Boolean)context.get("ensureCustomerRelationship");
 		if(ensureCustomerRelationship==null){
@@ -264,4 +265,47 @@ public class CloudCardHelper {
 		
 		return partyGroupFinAccount;
 	}
+	
+	
+    /**
+     * 根据二维码查询卡信息
+     * @param cardCode 二维码信息
+     * @param delegator
+     * @return FinAccountAndPaymentMethodAndGiftCard
+     * @throws GenericEntityException
+     */
+    public static GenericValue getCloudCardAccountFromCode(String cardCode, Delegator delegator) throws GenericEntityException {
+        if (UtilValidate.isEmpty(cardCode)) {
+            return null;
+        }
+        // 因为FinAccount.finAccountCode 与 GiftCard.cardNumber都是加密存储的，需要先对输入后的code加密后才能作为条件进行查询
+        // 先查 GiftCard.cardNumber，再查FinAccount,因为别人可能直接拿物理的卡来扫描
+        // 考虑到 finAccount可以授权给别人，关联多个giftCard，二维码就应该是有多个，否则可能会出现授权被回收后，有人用截屏的二维码图片进行支付
+        // FIXME 二维码支付的安全性应当进一步设计,比如用户需要进行支付的时候，请求后台生成个码，拼接到二维码里面去？
+       
+        GenericValue encryptedGiftCard = delegator.makeValue("GiftCard", UtilMisc.toMap("cardNumber",cardCode));
+        delegator.encryptFields(encryptedGiftCard);
+        String encryptedCardNumber = encryptedGiftCard.getString("cardNumber");
+        List<GenericValue> giftCards = delegator.findByAnd("FinAccountAndPaymentMethodAndGiftCard", UtilMisc.toMap("cardNumber", encryptedCardNumber));
+        giftCards =  EntityUtil.filterByDate(giftCards);
+        
+        if (UtilValidate.isEmpty(giftCards)) {
+        	//扫描的物理卡 去FinAccount里面找
+        	GenericValue encryptedFinAccount = delegator.makeValue("FinAccount", UtilMisc.toMap("finAccountCode",cardCode));
+            delegator.encryptFields(encryptedFinAccount);
+            String encryptedFinAccountCode = encryptedFinAccount.getString("finAccountCode");
+            EntityCondition dateCond = EntityUtil.getFilterByDateExpr();
+            EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toMap("finAccountCode", encryptedFinAccountCode));
+            
+            // 既然是物理卡，createdStamp应该是最小的吧
+            List<GenericValue> accounts = delegator.findList("FinAccountAndPaymentMethodAndGiftCard", EntityCondition.makeCondition(cond, dateCond), null, UtilMisc.toList(ModelEntity.CREATE_STAMP_FIELD), null, false);
+            accounts = EntityUtil.filterByDate(accounts);
+            return EntityUtil.getFirst(accounts);
+        } else if (giftCards.size() > 1) {
+            Debug.logError("一个二维码找到多张卡？", module);
+            return null;
+        } else {
+            return giftCards.get(0);
+        }
+    }
 }

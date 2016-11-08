@@ -8,6 +8,10 @@
         <value xml:lang="en">Organization Party[${organizationPartyId}] Configuration error, please contact the platform administrator</value>
         <value xml:lang="zh">商家[${organizationPartyId}]配置错误，请联系平台管理员</value>
     </property>
+    <property key="CloudCardAlreadyExist">
+        <value xml:lang="en">This card already exist</value>
+        <value xml:lang="zh">此卡已经激活，不能再次激活</value>
+    </property>
     <property key="CloudCardUserLoginIsNotManager">
         <value xml:lang="en">Not the store manager can not operate</value>
         <value xml:lang="zh">不是本店管理员无法操作</value>

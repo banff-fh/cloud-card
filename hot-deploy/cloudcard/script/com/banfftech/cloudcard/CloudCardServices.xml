@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+
+
+	<simple-method method-name="createPaymentAndFinAccountTransForCloudCard" short-description="Only CloudCard use, copy from : component://accounting/script/org/ofbiz/accounting/finaccount/FinAccountServices.xml#createPaymentAndFinAccountTrans, create new payment and associate with respective financial account in FinAccountTrans Entity.">
+        <set-service-fields service-name="createPayment" map="parameters" to-map="createPaymentMap"/>
+        <if-not-empty field="parameters.paymentMethodId">
+            <entity-one entity-name="PaymentMethod" value-field="paymentMethod" auto-field-map="true"/>
+            <set field="createPaymentMap.paymentMethodTypeId" from-field="paymentMethod.paymentMethodTypeId"/>
+        </if-not-empty>
+        <call-service service-name="createPayment" in-map-name="createPaymentMap">
+            <result-to-field result-name="paymentId"/>
+        </call-service>
+        <if-not-empty field="parameters.finAccountId">
+            <entity-one entity-name="FinAccount" value-field="finAccount">
+                <field-map field-name="finAccountId" from-field="parameters.finAccountId"/>
+            </entity-one>
+            <if-compare field="finAccount.statusId" operator="equals" value="FNACT_MANFROZEN">
+                <add-error>
+                    <fail-property resource="AccountingErrorUiLabels" property="AccountingFinAccountInactiveStatusError"/>
+                </add-error>
+            </if-compare>
+            <if-compare field="finAccount.statusId" operator="equals" value="FNACT_CANCELLED">
+                <add-error>
+                    <fail-property resource="AccountingErrorUiLabels" property="AccountingFinAccountStatusNotValidError"/>
+                </add-error>
+            </if-compare>
+            <check-errors/>
+
+            <set-service-fields service-name="createFinAccountTrans" map="parameters" to-map="createFinAccountTransMap"/>
+            <set field="createFinAccountTransMap.paymentId" from-field="paymentId"/>
+            <set field="createFinAccountTransMap.partyId" from-field="parameters.partyIdFrom"/><!-- 这里可能要调整 -->
+            <set field="createFinAccountTransMap.statusId" from-field="FINACT_TRNS_APPROVED"/>
+            <call-service service-name="createFinAccountTrans" in-map-name="createFinAccountTransMap">
+                <result-to-field result-name="finAccountTransId"/>
+            </call-service>
+            <set field="updatePaymentCtx.paymentId" from-field="paymentId"/>
+            <set field="updatePaymentCtx.finAccountTransId" from-field="finAccountTransId"/>
+            <call-service service-name="updatePayment" in-map-name="updatePaymentCtx"/>
+        </if-not-empty>
+        <field-to-result field="paymentId"/>
+    </simple-method>
+
+</simple-methods>

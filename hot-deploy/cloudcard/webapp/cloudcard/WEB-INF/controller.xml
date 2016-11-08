@@ -28,18 +28,13 @@
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
-	<request-map uri="createCloudCard">
-    	<event type="service" invoke="createCloudCard"/>
+	<request-map uri="createCloudCardAndRecharge">
+    	<event type="service" invoke="createCloudCardAndRecharge"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
 	<request-map uri="createCardAuth">
     	<event type="service" invoke="createCardAuth"/>
-        <response name="success" type="request" value="json"/>
-        <response name="error" type="request" value="json"/>
-    </request-map>
-	<request-map uri="rechargeCloudCard">
-    	<event type="service" invoke="rechargeCloudCard"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
