@@ -42,6 +42,7 @@ public class SmsServices {
 		Locale locale = (Locale) context.get("locale");
 		String phone = (String) context.get("phone");
 		String code = (String) context.get("code");
+		String product = (String) context.get("product");
 		//初始化短信发送配置文件
 		getSmsProperty(delegator);
 		//发送短信
@@ -50,7 +51,7 @@ public class SmsServices {
 		req.setExtend("");
 		req.setSmsType("normal");
 		req.setSmsFreeSignName(smsFreeSignName);
-		req.setSmsParamString("{code:'"+code+"',product:'123'}");
+		req.setSmsParamString("{code:'"+code+"',product:'"+product+"'}");
 		req.setRecNum(phone);
 		req.setSmsTemplateCode(smsTemplateCode);
 		AlibabaAliqinFcSmsNumSendResponse rsp = null;
