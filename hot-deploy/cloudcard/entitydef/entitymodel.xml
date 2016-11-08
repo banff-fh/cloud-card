@@ -18,6 +18,8 @@
       	<alias entity-alias="FA" name="finAccountTypeId" />
       	<alias entity-alias="FA" name="statusId" />
       	<alias entity-alias="FA" name="finAccountName" />
+      	<alias entity-alias="FA" name="organizationPartyId" />
+      	<alias entity-alias="FA" name="finAccountCode" />
 		<alias entity-alias="PM" name="paymentMethodId" />
 		<alias entity-alias="PM" name="paymentMethodTypeId" />
 		<alias entity-alias="PM" name="partyId" />

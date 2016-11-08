@@ -17,11 +17,13 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityConditionList;
 import org.ofbiz.entity.condition.EntityOperator;
+import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
+import javolution.util.FastList;
 import javolution.util.FastMap;
 
 public class CloudCardQueryServices {
@@ -39,6 +41,7 @@ public class CloudCardQueryServices {
 	 */
 	public static Map<String, Object> findFinAccountByPartyId(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
 		String partyId = (String) context.get("partyId");
 		Integer viewIndex = (Integer) context.get("viewIndex");
@@ -65,9 +68,21 @@ public class CloudCardQueryServices {
 		}
 
 		List<GenericValue> retList = UtilGenerics.checkList(faResult.get("list"));
+		List<Object> finaccountList = FastList.newInstance();
 
+		//图片地址
+		for(GenericValue finaccount:retList){
+			Map<String, Object> finaccountMap = FastMap.newInstance();
+			finaccountMap.putAll(finaccount);
+			String organizationPartyId = finaccount.get("organizationPartyId").toString();
+			if(organizationPartyId != null){
+				finaccountMap.put("cardImg", EntityUtilProperties.getPropertyValue("cloudcard","cardImg."+organizationPartyId,delegator));
+			}
+			finaccountList.add(finaccountMap);
+		}
+		
 		Map<String, Object> result = ServiceUtil.returnSuccess();
-		result.put("finAccountList", retList);
+		result.put("finAccountList", finaccountList);
 		return result;
 	}
 
@@ -135,35 +150,28 @@ public class CloudCardQueryServices {
 				EntityCondition.makeCondition("finAccountId", EntityOperator.EQUALS,
 						partyGroupFinAccount.get("finAccountId")),
 				EntityCondition.makeCondition(
-						EntityCondition.makeCondition("finAccountTransTypeId", EntityOperator.EQUALS, "WITHDRAWAL"))),
+						EntityCondition.makeCondition("amount", EntityOperator.GREATER_THAN, ZERO))),
 				EntityOperator.AND);
 		
-        List<GenericValue> transSums;
+        List<GenericValue> finAccountAuthList = null;
 		try {
-			transSums = delegator.findList("FinAccountTransSum", incrementConditions, UtilMisc.toSet("amount"), null, null, false);
-	        incrementTotal = addFirstEntryAmount(incrementTotal, transSums, "amount", (decimals+1), rounding);
+			finAccountAuthList = delegator.findList("FinAccountAuth", incrementConditions, UtilMisc.toSet("amount"), null, null, false);
 		} catch (GenericEntityException e) {
 			e.printStackTrace();
+		}
+		
+		//计算卖卡金额
+		if (finAccountAuthList != null) {
+			for (GenericValue finAccountAuth : finAccountAuthList) {
+				incrementTotal = incrementTotal.add(BigDecimal.valueOf(UtilMisc.toDouble(finAccountAuth.get("amount"))));
+			}
 		}
         
 		Map<String, Object> results = ServiceUtil.returnSuccess();
 		results.put("presellAmount", incrementTotal);
-		results.put("totalAmount", partyGroupFinAccount.get("replenishLevel"));
-		results.put("actualBalance", partyGroupFinAccount.get("actualBalance"));
+		results.put("totalAmount", partyGroupFinAccount.get("actualBalance"));
+		results.put("actualBalance", partyGroupFinAccount.get("availableBalance"));
 		return results;
 	}
 	
-	public static BigDecimal addFirstEntryAmount(BigDecimal initialValue, List<GenericValue> transactions, String fieldName, int decimals, int rounding) throws GenericEntityException {
-        if ((transactions != null) && (transactions.size() == 1)) {
-            GenericValue firstEntry = transactions.get(0);
-            if (firstEntry.get(fieldName) != null) {
-                BigDecimal valueToAdd = firstEntry.getBigDecimal(fieldName);
-                return initialValue.add(valueToAdd).setScale(decimals, rounding);
-            } else {
-                return initialValue;
-            }
-        } else {
-            return initialValue;
-        }
-   }
 }

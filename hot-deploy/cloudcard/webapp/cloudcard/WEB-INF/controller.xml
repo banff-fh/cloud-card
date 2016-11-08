@@ -43,6 +43,22 @@
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
+    <request-map uri="findFinAccountByPartyId">
+    	<event type="service" invoke="findFinAccountByPartyId"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    <request-map uri="findPaymentByPartyId">
+    	<event type="service" invoke="findPaymentByPartyId"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    <request-map uri="findLimitAndPresellInfo">
+    	<event type="service" invoke="findLimitAndPresellInfo"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    
 
 	<!-- View Mappings -->
 	<view-map name="main" type="screen"
