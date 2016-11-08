@@ -17,11 +17,13 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityConditionList;
 import org.ofbiz.entity.condition.EntityOperator;
+import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
+import javolution.util.FastList;
 import javolution.util.FastMap;
 
 public class CloudCardQueryServices {
@@ -39,6 +41,7 @@ public class CloudCardQueryServices {
 	 */
 	public static Map<String, Object> findFinAccountByPartyId(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
 		String partyId = (String) context.get("partyId");
 		Integer viewIndex = (Integer) context.get("viewIndex");
@@ -65,9 +68,21 @@ public class CloudCardQueryServices {
 		}
 
 		List<GenericValue> retList = UtilGenerics.checkList(faResult.get("list"));
+		List<Object> finaccountList = FastList.newInstance();
 
+		//图片地址
+		for(GenericValue finaccount:retList){
+			Map<String, Object> finaccountMap = FastMap.newInstance();
+			finaccountMap.putAll(finaccount);
+			String organizationPartyId = finaccount.get("organizationPartyId").toString();
+			if(organizationPartyId != null){
+				finaccountMap.put("cardImg", EntityUtilProperties.getPropertyValue("cloudcard","cardImg."+organizationPartyId,delegator));
+			}
+			finaccountList.add(finaccountMap);
+		}
+		
 		Map<String, Object> result = ServiceUtil.returnSuccess();
-		result.put("finAccountList", retList);
+		result.put("finAccountList", finaccountList);
 		return result;
 	}
 
