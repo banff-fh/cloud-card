@@ -12,6 +12,9 @@
         <value xml:lang="en">This card already exist</value>
         <value xml:lang="zh">此卡已经激活，不能再次激活</value>
     </property>
+    <property key="CloudCardNeedTelenumber">
+        <value xml:lang="zh">请输入手机号码</value>
+    </property>
     <property key="CloudCardUserLoginIsNotManager">
         <value xml:lang="en">Not the store manager can not operate</value>
         <value xml:lang="zh">不是本店管理员无法操作</value>

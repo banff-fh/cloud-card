@@ -5,6 +5,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
@@ -91,7 +92,7 @@ public class CloudCardServices {
 		
 		String organizationPartyId = (String) context.get("organizationPartyId");
 		String cardCode = (String) context.get("cardCode");
-		String telNumber = (String) context.get("telNumber");
+		String teleNumber = (String) context.get("teleNumber");
 		BigDecimal amount = (BigDecimal) context.get("amount");
 		
 		Map<String, Object> checkParamOut = checkInputParam(dctx, context);
@@ -112,16 +113,16 @@ public class CloudCardServices {
 		}
 		if(null == cloudCard ){
 			// 没有激活的卡，调用开卡服务
-			if(UtilValidate.isEmpty(telNumber)){
+			if(UtilValidate.isEmpty(teleNumber)){
 				Debug.logInfo("激活新卡需要输入客户手机号码", module);
-				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCard", locale)); 
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardNeedTelenumber", locale)); 
 			}else{
 				Map<String, Object> createCloudCardOutMap;
 				try {
 					createCloudCardOutMap = dispatcher.runSync("createCloudCard",
 							UtilMisc.toMap("userLogin", userLogin, "locale",locale,
 									"organizationPartyId", organizationPartyId, 
-									"telNumber", telNumber,
+									"teleNumber", teleNumber,
 									"cardCode", cardCode));
 				} catch (GenericServiceException e1) {
 					Debug.logError(e1, module);
@@ -159,6 +160,7 @@ public class CloudCardServices {
 		
 		//3、返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("amount", amount);
 		result.put("actualBalance", rechargeCloudCardOutMap.get("actualBalance"));
 		result.put("customerPartyId", customerPartyId);
 		result.put("finAccountId", finAccountId);
@@ -168,7 +170,7 @@ public class CloudCardServices {
 	
 	/**
 	 * 给用户开卡服务
-	 * 	1、根据telNumber查找用户，不存在则创建
+	 * 	1、根据teleNumber查找用户，不存在则创建
 	 *	2、创建FinAccount，关联卡上二维码等信息，并创建PaymentMethod
 	 * @param dctx
 	 * @param context
@@ -205,14 +207,13 @@ public class CloudCardServices {
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardAlreadyExist", locale)); 
 		}
 
-		// 1、根据telNumber查找用户，不存在则创建 
+		// 1、根据teleNumber查找用户，不存在则创建 
 		context.put("ensureCustomerRelationship", true);
 		Map<String, Object>	 getOrCreateCustomerOut  = CloudCardHelper.getOrCreateCustomer(dctx, context);
 		if (ServiceUtil.isError(getOrCreateCustomerOut)) {
 			return getOrCreateCustomerOut;
 		}		
 		String customerPartyId = (String) getOrCreateCustomerOut.get("customerPartyId");
-		String customerUserLoginId = (String) getOrCreateCustomerOut.get("customerUserLoginId");
 		
 		
 		// 2、创建finAccount 和 paymentMethod
@@ -227,6 +228,7 @@ public class CloudCardServices {
 		finAccountMap.put("organizationPartyId", organizationPartyId);
 		finAccountMap.put("postToGlAccountId", "213200");// TODO 213500?
 		finAccountMap.put("ownerPartyId", customerPartyId);
+		finAccountMap.put("fromDate", UtilDateTime.nowTimestamp());
 		
 		Map<String, Object> finAccountOutMap;
 		try {
@@ -271,9 +273,8 @@ public class CloudCardServices {
 		// 3、返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("customerPartyId", customerPartyId);
-		result.put("customerUserLoginId", customerUserLoginId);
 		result.put("finAccountId", finAccountId);
-		result.put("paymentMethodId",  giftCardOutMap.get("paymentMethodId"));
+		result.put("paymentMethodId", giftCardOutMap.get("paymentMethodId"));
 		return result;
 	}
 
@@ -320,13 +321,13 @@ public class CloudCardServices {
 		String partyGroupFinAccountId = (String) partyGroupFinAccount.get("finAccountId");
 
 		// 检查开卡余额是否够用
-		BigDecimal actualBalance = partyGroupFinAccount.getBigDecimal("actualBalance");
-		if(null==actualBalance){
-			actualBalance = BigDecimal.ZERO;
+		BigDecimal partyGroupActualBalance = partyGroupFinAccount.getBigDecimal("actualBalance");
+		if(null==partyGroupActualBalance){
+			partyGroupActualBalance = BigDecimal.ZERO;
 		}
-		if (actualBalance.compareTo(amount) < 0) {
-			Debug.logInfo("商户卖卡额度不足, 余额：" + actualBalance.toPlainString(), module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardCreditIsNotEnough", UtilMisc.toMap("balance", actualBalance.toPlainString()), locale));
+		if (partyGroupActualBalance.compareTo(amount) < 0) {
+			Debug.logInfo("商户卖卡额度不足, 余额：" + partyGroupActualBalance.toPlainString(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardCreditIsNotEnough", UtilMisc.toMap("balance", partyGroupActualBalance.toPlainString()), locale));
 		}
 		
 
@@ -381,10 +382,15 @@ public class CloudCardServices {
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
 		
+		BigDecimal actualBalance = (BigDecimal) finAccount.get("actualBalance");
+		if(null == actualBalance){
+			actualBalance = BigDecimal.ZERO;
+		}
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
-		result.put("actualBalance", finAccount.get("actualBalance"));
+		result.put("actualBalance", actualBalance);
 		result.put("customerPartyId", finAccount.get("ownerPartyId"));
+		result.put("amount", amount);
 		result.put("finAccountId", finAccountId);
 		return result;
 	}

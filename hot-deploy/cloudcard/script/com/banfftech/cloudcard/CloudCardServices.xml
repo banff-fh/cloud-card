@@ -50,7 +50,7 @@ under the License.
             <set-service-fields service-name="createFinAccountTrans" map="parameters" to-map="createFinAccountTransMap"/>
             <set field="createFinAccountTransMap.paymentId" from-field="paymentId"/>
             <set field="createFinAccountTransMap.partyId" from-field="parameters.partyIdFrom"/><!-- 这里可能要调整 -->
-            <set field="createFinAccountTransMap.statusId" from-field="FINACT_TRNS_APPROVED"/>
+            <set field="createFinAccountTransMap.statusId" value="FINACT_TRNS_APPROVED"/>
             <call-service service-name="createFinAccountTrans" in-map-name="createFinAccountTransMap">
                 <result-to-field result-name="finAccountTransId"/>
             </call-service>

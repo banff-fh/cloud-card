@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
@@ -65,7 +66,7 @@ public class CloudCardHelper {
 		GenericValue userLogin = (GenericValue) context.get("userLogin");
 		Locale locale = (Locale) context.get("locale");
 
-		String telNumber = (String) context.get("telNumber");
+		String teleNumber = (String) context.get("teleNumber");
 		String organizationPartyId = (String) context.get("organizationPartyId");
 		Boolean ensureCustomerRelationship = (Boolean)context.get("ensureCustomerRelationship");
 		if(ensureCustomerRelationship==null){
@@ -88,7 +89,7 @@ public class CloudCardHelper {
 		try {
 			customer = EntityUtil.getFirst(delegator.findList("TelecomNumberAndUserLogin", 
 					EntityCondition.makeCondition(
-							EntityCondition.makeCondition(UtilMisc.toMap("contactNumber", telNumber)), 
+							EntityCondition.makeCondition(UtilMisc.toMap("contactNumber", teleNumber)), 
 							EntityUtil.getFilterByDateExpr()), null, UtilMisc.toList("partyId DESC"), null, false));
 		} catch (GenericEntityException e) {
 			Debug.logError(e, module);
@@ -100,7 +101,7 @@ public class CloudCardHelper {
 		}else{
 			// 由于createPersonAndUserLogin 会自动新启一个事务，后面若失败，不能回滚，
 			// 所以分步调用 createPerson 和 createUserLogin
-			Map<String, Object> createPersonMap = UtilMisc.toMap("userLogin", userLogin, "firstName", telNumber, "lastName", "86");
+			Map<String, Object> createPersonMap = UtilMisc.toMap("userLogin", userLogin, "firstName", teleNumber, "lastName", "86");
 			createPersonMap.put("preferredCurrencyUomId", DEFAULT_CURRENCY_UOM_ID);
 			Map<String, Object> personOutMap;
 			try {
@@ -145,7 +146,7 @@ public class CloudCardHelper {
 			try {
 				partyTelecomOutMap = dispatcher.runSync("createPartyTelecomNumber", 
 						UtilMisc.toMap("userLogin", userLogin, "contactMechPurposeTypeId", "AS_USER_LOGIN_ID", "partyId", customerPartyId,
-								"contactNumber", telNumber));
+								"contactNumber", teleNumber));
 			} catch (GenericServiceException e) {
 				Debug.logError(e, module);
 				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
@@ -204,6 +205,10 @@ public class CloudCardHelper {
 		String finAccountId = (String) context.get("finAccountId");
 		String description = (String) context.get("description");
 		Timestamp fromDate =(Timestamp)context.get("fromDate");
+		if(UtilValidate.isEmpty(fromDate)){
+			fromDate = UtilDateTime.nowTimestamp();
+		}
+		
 		Timestamp thruDate =(Timestamp)context.get("thruDate");
 
 		String paymentMethodId;
@@ -297,8 +302,8 @@ public class CloudCardHelper {
             EntityCondition dateCond = EntityUtil.getFilterByDateExpr();
             EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toMap("finAccountCode", encryptedFinAccountCode));
             
-            // 既然是物理卡，createdStamp应该是最小的吧
-            List<GenericValue> accounts = delegator.findList("FinAccountAndPaymentMethodAndGiftCard", EntityCondition.makeCondition(cond, dateCond), null, UtilMisc.toList(ModelEntity.CREATE_STAMP_FIELD), null, false);
+            // 既然是物理卡，fromDate应该是最小的吧
+            List<GenericValue> accounts = delegator.findList("FinAccountAndPaymentMethodAndGiftCard", EntityCondition.makeCondition(cond, dateCond), null, UtilMisc.toList("fromDate"), null, false);
             accounts = EntityUtil.filterByDate(accounts);
             return EntityUtil.getFirst(accounts);
         } else if (giftCards.size() > 1) {
