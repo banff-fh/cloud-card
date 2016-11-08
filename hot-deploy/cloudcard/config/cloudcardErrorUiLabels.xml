@@ -32,8 +32,13 @@
         <value xml:lang="en">Account[${finAccountId}] Not Found</value>
         <value xml:lang="zh">找不到账户[${finAccountId}]</value>
     </property>
-     <property key="CloudCardPaymentFailure">
+    <property key="CloudCardPaymentFailure">
         <value xml:lang="en">payment failure</value>
         <value xml:lang="zh">云卡支付失败</value>
     </property>
+    <property key="CloudCardSendMessageServiceError">
+        <value xml:lang="en">sendMessage[${phone}] failure</value>
+        <value xml:lang="zh">用户手机号[${phone}]发送短息失败</value>
+    </property>
+    
 </resource>
