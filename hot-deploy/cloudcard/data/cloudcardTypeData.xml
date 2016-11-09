@@ -11,5 +11,14 @@
 	<ContactMechPurposeType contactMechPurposeTypeId="AS_USER_LOGIN_ID" description="可用作登录标识"/>
 	<ContactMechTypePurpose contactMechPurposeTypeId="AS_USER_LOGIN_ID" contactMechTypeId="TELECOM_NUMBER"/>
 	
+	
+	<SystemProperty systemResourceId="cloudcard" systemPropertyId="cardImg.10011" systemPropertyValue="123" description="卡图片地址"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.appkey" systemPropertyValue="23525875" description="短信平台appkey"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.intervalTime" systemPropertyValue="60" description="第二次与第一次短信发送间隔时间"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.secret" systemPropertyValue="4b7a953e901247d908209208f5f84203" description="短信平台secret"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsFreeSignName" systemPropertyValue="登录验证" description="短信平台配置签名"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsTemplateCode" systemPropertyValue="SMS_25720222" description="短信平台模版号"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.url" systemPropertyValue="http://gw.api.taobao.com/router/rest" description="短信平台请求地址"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.validTime" systemPropertyValue="900" description="短信使用有效时间"/>
 
 </entity-engine-xml>

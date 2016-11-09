@@ -17,6 +17,7 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityConditionList;
 import org.ofbiz.entity.condition.EntityOperator;
+import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.LocalDispatcher;
@@ -79,25 +80,24 @@ public class SmsServices {
 		return result;
 	}
 	
+	/**
+	 * 获取登录验证码
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
 	public static Map<String, Object> getLoginCaptcha(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
 		String telNum = (String) context.get("telNum");
 		java.sql.Timestamp nowTimestamp  = UtilDateTime.nowTimestamp();
 
-		EntityConditionList<EntityCondition> incrementConditions = EntityCondition
-				.makeCondition(
-						UtilMisc.toList(EntityCondition.makeCondition("telNum", EntityOperator.EQUALS, telNum),
-								EntityCondition.makeCondition(
-										EntityCondition.makeCondition("fromDate", EntityOperator.LESS_THAN,
-												UtilDateTime.nowTimestamp()),
-										EntityCondition.makeCondition("thruDate", EntityOperator.GREATER_THAN,
-												UtilDateTime.nowTimestamp()))),
-						EntityOperator.AND);
+		EntityConditionList<EntityCondition> captchaConditions = EntityCondition
+				.makeCondition(EntityCondition.makeCondition("telNum", EntityOperator.EQUALS, telNum),EntityUtil.getFilterByDateExpr());
 		
 		List<GenericValue> smsList = FastList.newInstance();
 		try {
-			smsList = delegator.findList("SmsValidateCode", incrementConditions, null,
+			smsList = delegator.findList("SmsValidateCode", captchaConditions, null,
 					null, null, false);
 		} catch (GenericEntityException e) {
 			// TODO Auto-generated catch block
@@ -123,17 +123,19 @@ public class SmsServices {
 			}
 			
 			//发送短信
-			/*context.put("phone", telNum);
+			context.put("phone", telNum);
 			context.put("code", captcha);
 			context.put("product", "卡云卡");
-			SmsServices.sendMessage(dctx, context);*/
+			SmsServices.sendMessage(dctx, context);
 
 		}else{
 			GenericValue sms = smsList.get(0);
 			//获取短信发送间隔时间
-			int time = Integer.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","sms.time",delegator));
+			int validTime = Integer.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","sms.validTime","900",delegator));
+			int intervalTime = Integer.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","sms.intervalTime","30",delegator));
+
 			//如果这次请求不在上一次请求一分钟内，修改短信开始时间并重新发送短信。
-			if(UtilDateTime.adjustTimestamp((java.sql.Timestamp)sms.get("thruDate"), Calendar.MINUTE,(1-time)).before(UtilDateTime.nowTimestamp())){
+			if(UtilDateTime.adjustTimestamp((java.sql.Timestamp)sms.get("thruDate"), Calendar.SECOND,(intervalTime-validTime)).before(UtilDateTime.nowTimestamp())){
 				sms.set("thruDate",UtilDateTime.adjustTimestamp(nowTimestamp, Calendar.MINUTE,15));
 				try {
 					sms.store();
@@ -142,10 +144,10 @@ public class SmsServices {
 					e.printStackTrace();
 				}
 				//发送短信
-				/*context.put("phone", telNum);
+				context.put("phone", telNum);
 				context.put("code", sms.get("captcha"));
 				context.put("product", "卡云卡");
-				SmsServices.sendMessage(dctx, context);*/
+				SmsServices.sendMessage(dctx, context);
 			}
 			
 		}
@@ -154,33 +156,37 @@ public class SmsServices {
 		return result;
 	}
 	
+	/**
+	 * 手机app登录
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
 	public static Map<String, Object> appLogin(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
 		String telNum = (String) context.get("telNum");
 		String captcha = (String) context.get("captcha");
-		EntityConditionList<EntityCondition> incrementConditions = EntityCondition
-				.makeCondition(
-						UtilMisc.toList(EntityCondition.makeCondition("telNum", EntityOperator.EQUALS, telNum),
-								EntityCondition.makeCondition(
-										EntityCondition.makeCondition("fromDate", EntityOperator.LESS_THAN,
-												UtilDateTime.nowTimestamp()),
-										EntityCondition.makeCondition("thruDate", EntityOperator.GREATER_THAN,
-												UtilDateTime.nowTimestamp()))),
-						EntityOperator.AND);
+		EntityConditionList<EntityCondition> captchaConditions = EntityCondition
+				.makeCondition(EntityCondition.makeCondition("telNum", EntityOperator.EQUALS, telNum),EntityUtil.getFilterByDateExpr());
 		List<GenericValue> smsList = FastList.newInstance();
 		try {
-			smsList = delegator.findList("SmsValidateCode", incrementConditions, null,
+			smsList = delegator.findList("SmsValidateCode", captchaConditions, null,
 					null, null, false);
 		} catch (GenericEntityException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		if(!UtilValidate.isEmpty(smsList)){
-			System.out.println("验证码不存在");
+		if(UtilValidate.isEmpty(smsList)){
+			System.out.println("验证码已过期");
 		}else{
-			System.out.println("22");
+			GenericValue sms = smsList.get(0);
+			if(sms.get("captcha").equals(captcha)){
+				
+			}else{
+				System.out.println("验证码错误");
+			}
 		}
 		
 		Map<String, Object> result = ServiceUtil.returnSuccess();
