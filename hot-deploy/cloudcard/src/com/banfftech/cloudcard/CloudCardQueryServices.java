@@ -174,4 +174,51 @@ public class CloudCardQueryServices {
 		return results;
 	}
 	
+	
+	/**
+	 * 查询卖卡余额和开卡额度
+	 * @param dctx
+	 * @param context
+	 * @return Map
+	 */
+	
+	public static Map<String, Object> getCardInfoByCode(DispatchContext dctx, Map<String, Object> context) {
+		Delegator delegator = dctx.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+		
+//		String organizationPartyId = (String) context.get("organizationPartyId");
+		String cardCode = (String) context.get("cardCode");
+		
+		GenericValue cloudCardAccount;
+		try {
+			cloudCardAccount = CloudCardHelper.getCloudCardAccountFromCode(cardCode, delegator);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale)); 
+		}
+		
+		Map<String, Object> results = ServiceUtil.returnSuccess();
+
+		if(null != cloudCardAccount){
+			results.put("isExist", "Y");
+			BigDecimal actualBalance = cloudCardAccount.getBigDecimal("actualBalance");
+			if(null==actualBalance){
+				results.put("actualBalance", ZERO);
+			}else{
+				results.put("actualBalance", actualBalance);
+			}
+			String cardOrganizationPartyId = cloudCardAccount.get("organizationPartyId").toString();
+			if(cardOrganizationPartyId != null){
+				results.put("cardImg", EntityUtilProperties.getPropertyValue("cloudcard","cardImg." + cardOrganizationPartyId,delegator));
+			}
+			results.put("finAccountId", cloudCardAccount.getString("finAccountId"));
+			results.put("finAccountName", cloudCardAccount.getString("finAccountName"));
+			results.put("customerPartyId", cloudCardAccount.getString("customerPartyId"));
+		}else{
+			results.put("isExist", "N");
+		}
+		
+		return results;
+	}
+	
 }

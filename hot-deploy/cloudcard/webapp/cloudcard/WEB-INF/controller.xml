@@ -25,38 +25,49 @@
 		<security https="true" auth="true" />
 		<response name="success" type="view" value="findLiquidation" />
 	</request-map>
-	<request-map uri="test">
-    	<event type="service" invoke="findPartiesById"/>
-        <response name="success" type="request" value="json"/>
-        <response name="error" type="request" value="json"/>
-    </request-map>
+
+	<!-- 开卡充值统一接口 -->
 	<request-map uri="createCloudCardAndRecharge">
     	<event type="service" invoke="createCloudCardAndRecharge"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
+    
+    <!-- 卡授权接口 -->
 	<request-map uri="createCardAuth">
     	<event type="service" invoke="createCardAuth"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
+    
+     <!-- 扫码支付接口 -->
 	<request-map uri="cloudCardWithdraw">
     	<event type="service" invoke="cloudCardWithdraw"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
+    
     <request-map uri="findFinAccountByPartyId">
     	<event type="service" invoke="findFinAccountByPartyId"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
+    
     <request-map uri="findPaymentByPartyId">
     	<event type="service" invoke="findPaymentByPartyId"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
+    
     <request-map uri="findLimitAndPresellInfo">
     	<event type="service" invoke="findLimitAndPresellInfo"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+
+	<!-- 扫二维码获取卡信息 -->
+    <request-map uri="getCardInfoByCode">
+    	<event type="service" invoke="getCardInfoByCode"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
