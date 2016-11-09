@@ -9,7 +9,9 @@
 	<description>cloudcard Component Site Configuration File</description>
 
 	<!-- Events to run on every request before security (chains exempt) -->
-	<!-- <preprocessor> </preprocessor> -->
+	<preprocessor>
+		<event name="checkTokenLogin" type="java" path="com.banfftech.cloudcard.common.CloudCardLoginWorker" invoke="checkTokenLogin"/>
+	</preprocessor>
 	<!-- Events to run on every request after all other processing (chains exempt) -->
 	<!-- <postprocessor> <event name="test" type="java" path="org.ofbiz.webapp.event.TestEvent" 
 		invoke="test"/> </postprocessor> -->
