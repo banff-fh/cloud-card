@@ -75,12 +75,13 @@ public class CloudCardHelper {
 		
 		//TODO 密码随机生成？
 		String currentPassword = (String) context.get("currentPassword");
+		String defaultPwd = "123456";
 		if(UtilValidate.isEmpty(currentPassword)){
-			currentPassword =  "123456";
+			currentPassword =  defaultPwd;
 		}
 		String currentPasswordVerify = (String) context.get("currentPasswordVerify");
 		if(UtilValidate.isEmpty(currentPasswordVerify)){
-			currentPasswordVerify =  "123456";
+			currentPasswordVerify =  defaultPwd;
 		}
 		String customerPartyId;
 		String customerUserLoginId;
@@ -114,7 +115,7 @@ public class CloudCardHelper {
 				return personOutMap;
 			}
 			customerPartyId = (String) personOutMap.get("partyId");
-			//TODO,UserLoginId通常是可以直接由用户输入的用户名，这里由系统生成，自定义个前缀CC  代表 Cloud Card，减少冲突
+			// UserLoginId通常是可以直接由用户输入的用户名，这里由系统生成，自定义个前缀CC  代表 Cloud Card，减少冲突
 			customerUserLoginId ="CC"+delegator.getNextSeqId("UserLogin");
 			GenericValue systemUser;
 			try {
@@ -128,7 +129,7 @@ public class CloudCardHelper {
 			createUserLoginMap.put("userLoginId", customerUserLoginId);
 			createUserLoginMap.put("partyId", customerPartyId); 
 			createUserLoginMap.put("currentPassword", currentPassword); 
-			createUserLoginMap.put("currentPasswordVerify", currentPasswordVerify); //TODO
+			createUserLoginMap.put("currentPasswordVerify", currentPasswordVerify); 
 			createUserLoginMap.put("requirePasswordChange", "Y");
 			
 			Map<String, Object> userLoginOutMap;
@@ -255,7 +256,19 @@ public class CloudCardHelper {
 	 * @param organizationPartyId
 	 * @return
 	 */
-	public static GenericValue getCreditLimitAccount(Delegator delegator,  String organizationPartyId) {
+	public static GenericValue getCreditLimitAccount(Delegator delegator,  String organizationPartyId){
+		return getCreditLimitAccount(delegator, organizationPartyId, true);
+	}
+	
+	
+	/**
+	 * 获取商家用于扣减开卡限额的金融账户
+	 * @param delegator
+	 * @param organizationPartyId
+	 * @param useCache
+	 * @return
+	 */
+	public static GenericValue getCreditLimitAccount(Delegator delegator,  String organizationPartyId, boolean useCache) {
 		EntityCondition dateCond = EntityUtil.getFilterByDateExpr();
 		EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toMap("organizationPartyId", organizationPartyId,
 				"ownerPartyId", organizationPartyId, "finAccountTypeId", "BANK_ACCOUNT", "statusId", "FNACT_ACTIVE"));
@@ -263,7 +276,40 @@ public class CloudCardHelper {
 		try {
 			partyGroupFinAccount = EntityUtil
 					.getFirst(delegator.findList("FinAccount", EntityCondition.makeCondition(cond, dateCond), null,
-							UtilMisc.toList("-" + ModelEntity.STAMP_FIELD), null, false));
+							UtilMisc.toList("-" + ModelEntity.STAMP_FIELD), null, useCache));
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+		}
+		
+		return partyGroupFinAccount;
+	}
+	
+	/**
+	 * 获取商家用于收款的金融账户
+	 * @param delegator
+	 * @param organizationPartyId
+	 * @return
+	 */
+	public static GenericValue getReceiptAccount(Delegator delegator,  String organizationPartyId) {
+		return getReceiptAccount(delegator, organizationPartyId, true);
+	}
+	
+	/**
+	 * 获取商家用于收款的金融账户
+	 * @param delegator
+	 * @param organizationPartyId
+	 * @param useCache
+	 * @return
+	 */
+	public static GenericValue getReceiptAccount(Delegator delegator,  String organizationPartyId, boolean useCache) {
+		EntityCondition dateCond = EntityUtil.getFilterByDateExpr();
+		EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toMap("organizationPartyId", organizationPartyId,
+				"ownerPartyId", organizationPartyId, "finAccountTypeId", "DEPOSIT_ACCOUNT", "statusId", "FNACT_ACTIVE"));
+		GenericValue partyGroupFinAccount = null;
+		try {
+			partyGroupFinAccount = EntityUtil
+					.getFirst(delegator.findList("FinAccount", EntityCondition.makeCondition(cond, dateCond), null,
+							UtilMisc.toList("-" + ModelEntity.STAMP_FIELD), null, useCache));
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 		}
