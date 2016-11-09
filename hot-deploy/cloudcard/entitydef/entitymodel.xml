@@ -78,4 +78,16 @@
             <key-map field-name="userLoginId"/>
         </relation>
     </view-entity>
+    
+    <entity entity-name="SmsValidateCode" package-name="org.ofbiz.cloudcard.sms">
+		<field name="telNum" type="id"></field>
+		<field name="smsType" type="id"></field>
+		<field name="captcha" type="id"></field>
+		<field name="isValidate" type="id"></field>
+		<field name="fromDate" type="date-time"></field>
+      	<field name="thruDate" type="date-time"></field>
+      	<prim-key field="telNum"/>
+      	<prim-key field="captcha"/>
+	    <prim-key field="fromDate"/>
+	</entity>
 </entitymodel>

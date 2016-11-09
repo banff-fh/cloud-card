@@ -106,4 +106,17 @@
         <attribute name="paymentMethodId" type="String" mode="IN" optional="true"/>
         <attribute name="paymentId" type="String" mode="OUT" optional="true"/>
     </service>
+    
+    <service name="getLoginCaptcha" engine="java"
+		location="com.banfftech.cloudcard.sms.SmsServices" invoke="getLoginCaptcha" auth="true">
+		<description>获取登录验证码</description>
+        <attribute name="telNum" type="String" mode="IN" optional="false"/>
+	</service>
+    
+    <service name="appLogin" engine="java"
+		location="com.banfftech.cloudcard.sms.SmsServices" invoke="appLogin" auth="true">
+		<description>手机登录</description>
+        <attribute name="telNum" type="String" mode="IN" optional="false"/>
+        <attribute name="captcha" type="String" mode="IN" optional="false"/>
+	</service>
 </services>
