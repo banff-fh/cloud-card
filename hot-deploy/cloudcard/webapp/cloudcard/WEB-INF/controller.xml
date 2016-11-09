@@ -72,14 +72,16 @@
         <response name="error" type="request" value="json"/>
     </request-map>
     
+    <!-- 验证码发送申请 -->
     <request-map uri="getLoginCaptcha">
     	<event type="service" invoke="getLoginCaptcha"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
     
+    <!-- app登录接口 -->
     <request-map uri="appLogin">
-    	<event type="service" invoke="getLoginCaptcha"/>
+    	<event type="service" invoke="appLogin"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
