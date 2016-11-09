@@ -430,6 +430,16 @@ public class CloudCardServices {
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardUserLoginIsNotManager", locale));
 		}
 		
+		// 检查商家收款帐号
+		GenericValue receiptAccount = CloudCardHelper.getReceiptAccount(delegator, organizationPartyId);
+		if(null==receiptAccount){
+			Debug.logError("商家["+organizationPartyId+"]用于收款的账户没有正确配置", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+					"CloudCardConfigError", UtilMisc.toMap("organizationPartyId", organizationPartyId), locale));
+		}
+		String receiptAccountId = receiptAccount.getString("finAccountId");
+		
+		// 根据二维码获取用户用于支付的帐号
 		GenericValue FinAccountAndPaymentMethodAndGiftCard;
 		try {
 			FinAccountAndPaymentMethodAndGiftCard = CloudCardHelper.getCloudCardAccountFromCode(cardCode, delegator);
@@ -445,6 +455,11 @@ public class CloudCardServices {
 		String finAccountId = FinAccountAndPaymentMethodAndGiftCard.getString("finAccountId");
 		String customerPartyId = FinAccountAndPaymentMethodAndGiftCard.getString("ownerPartyId");
 		String paymentMethodId = FinAccountAndPaymentMethodAndGiftCard.getString("paymentMethodId");
+		String finAccountOrganizationPartyId = FinAccountAndPaymentMethodAndGiftCard.getString("organizationPartyId");
+		boolean isSameStore = false; //是否 店内消费（本店卖出去的卡在本店消费）
+		if(finAccountOrganizationPartyId.equals(organizationPartyId)){
+			 isSameStore = true;
+		}
 
 		
 		// 1、扣除用户余额
@@ -479,7 +494,7 @@ public class CloudCardServices {
 			return finAccountWithdrawalOutMap;
 		}
 		
-//		String withdrawalPaymentId = (String) finAccountWithdrawalOutMap.get("paymentId");
+		String withdrawalPaymentId = (String) finAccountWithdrawalOutMap.get("paymentId");
 		
 		// 2、创建发票及发票明细
 		Map<String, Object> invoiceOutMap;
@@ -535,11 +550,60 @@ public class CloudCardServices {
 		}
 		
 		// 4、商家收款账户入账
-		// TODO
+		Map<String, Object> finAccountDepositOutMap;
+		try {
+			finAccountDepositOutMap = dispatcher.runSync("createFinAccountTrans",
+					UtilMisc.toMap("userLogin", userLogin, "locale",locale,
+							"finAccountId",receiptAccountId,
+							"partyId", customerPartyId,
+							"amount",amount,
+							"finAccountTransTypeId","DEPOSIT",
+							"paymentId", withdrawalPaymentId,
+							"reasonEnumId", "FATR_PURCHASE",
+							"glAccountId", "111000",//TODO 待定
+							"comments", "顾客消费-商家收款",
+							"statusId", "FINACT_TRNS_APPROVED"));
+		} catch (GenericServiceException e1) {
+			Debug.logError(e1, module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
+		if (ServiceUtil.isError(finAccountDepositOutMap)) {
+			return finAccountDepositOutMap;
+		}
 		
 		
 		// 5、如果同店消费，直接回冲卖卡限额
-		// TODO
+		if(isSameStore){
+			GenericValue creditLimitAccount = CloudCardHelper.getCreditLimitAccount(delegator, organizationPartyId);
+	        if (UtilValidate.isEmpty(creditLimitAccount)) {
+	        	Debug.logError("商家[" + organizationPartyId + "]未配置卖卡额度账户", module);
+	        	return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardConfigError", UtilMisc.toMap("organizationPartyId", organizationPartyId), locale));
+	        }
+
+			String creditLimitAccountId = (String) creditLimitAccount.get("finAccountId");
+			
+			// 卖卡限额回冲
+			Map<String, Object> createFinAccountAuthOutMap;
+			try {
+				createFinAccountAuthOutMap = dispatcher.runSync("createFinAccountAuth",
+						UtilMisc.toMap("userLogin", userLogin, "locale",locale, 
+								"currencyUomId", DEFAULT_CURRENCY_UOM_ID,  
+								"finAccountId", creditLimitAccountId,
+								"amount", amount.negate(),
+								//TODO 奇怪的BUG，如果fromDate直接用当前时间戳，
+								// 会导致FinAccountAuth相关的ECA（updateFinAccountBalancesFromAuth）
+								// 服务中，用当前时间进行 起止 时间筛选FinAccountAuth时漏掉了本次刚创建的这条记录，导致金额计算不正确
+								// 所以，这里人为地把fromDate时间提前100毫秒，让后面的ECA服务能找到本次创建的记录，以正确计算金额。
+								"fromDate", UtilDateTime.adjustTimestamp(UtilDateTime.nowTimestamp(), Calendar.MILLISECOND, -100)));
+			} catch (GenericServiceException e1) {
+				Debug.logError(e1, module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+			}
+			if (ServiceUtil.isError(createFinAccountAuthOutMap)) {
+				return createFinAccountAuthOutMap;
+			}
+			delegator.clearCacheLine(creditLimitAccount);
+		}
 		
 		try {
 			FinAccountAndPaymentMethodAndGiftCard.refresh();
