@@ -18,6 +18,12 @@
     <!-- <entity-resource type="eca" reader-name="main" loader="main" location="entitydef/eecas.xml"/> -->
     <entity-resource type="data" reader-name="seed" loader="main" location="data/cloudcardTypeData.xml"/>
     <entity-resource type="data" reader-name="seed" loader="main" location="data/cloudcardSecurityData.xml"/>
+    
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/cloudcardSeedsData.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/platformGeneralChartOfAccounts.xml"/>
+    <entity-resource type="data" reader-name="seed" loader="main" location="data/platformGlSetupData.xml"/>
+    
+    
     <entity-resource type="data" reader-name="demo" loader="main" location="data/cloudcardDemoData.xml"/>
 
     <!-- service resources: model(s), eca(s) and group definitions -->
