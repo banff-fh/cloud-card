@@ -1,6 +1,7 @@
 package com.banfftech.cloudcard.sms;
 
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -23,6 +24,8 @@ import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
+import com.auth0.jwt.JWTSigner;
+import com.banfftech.cloudcard.CloudCardHelper;
 import com.banfftech.cloudcard.CloudCardQueryServices;
 import com.taobao.api.ApiException;
 import com.taobao.api.DefaultTaobaoClient;
@@ -93,7 +96,7 @@ public class SmsServices {
 		java.sql.Timestamp nowTimestamp  = UtilDateTime.nowTimestamp();
 
 		EntityConditionList<EntityCondition> captchaConditions = EntityCondition
-				.makeCondition(EntityCondition.makeCondition("telNum", EntityOperator.EQUALS, telNum),EntityUtil.getFilterByDateExpr());
+				.makeCondition(EntityCondition.makeCondition("telNum", EntityOperator.EQUALS, telNum),EntityUtil.getFilterByDateExpr(),EntityCondition.makeCondition("isValid", EntityOperator.EQUALS,"N"));
 		
 		List<GenericValue> smsList = FastList.newInstance();
 		try {
@@ -103,6 +106,8 @@ public class SmsServices {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		Map<String, Object> result = ServiceUtil.returnSuccess();
 		//判断短信是否存在，不存在创建验证码，否则判断短信是否需要重新发送。
 		if(UtilValidate.isEmpty(smsList)){
 			//生成验证码
@@ -111,14 +116,14 @@ public class SmsServices {
 			smsValidateCodeMap.put("telNum", telNum);
 			smsValidateCodeMap.put("captcha", captcha);
 			smsValidateCodeMap.put("smsType", "LOGIN");
-			smsValidateCodeMap.put("isValidate", "N");
+			smsValidateCodeMap.put("isValid", "N");
 			smsValidateCodeMap.put("fromDate", nowTimestamp);
 			smsValidateCodeMap.put("thruDate",UtilDateTime.adjustTimestamp(nowTimestamp, Calendar.MINUTE,15));
 			try {
 				GenericValue smstGV = delegator.makeValue("SmsValidateCode", smsValidateCodeMap);
 				smstGV.create();
 			} catch (GenericEntityException e) {
-				// TODO Auto-generated catch block
+				result.put("status", "发送失败");
 				e.printStackTrace();
 			}
 			
@@ -127,7 +132,7 @@ public class SmsServices {
 			context.put("code", captcha);
 			context.put("product", "卡云卡");
 			SmsServices.sendMessage(dctx, context);
-
+			result.put("status", "发送成功");
 		}else{
 			GenericValue sms = smsList.get(0);
 			//获取短信发送间隔时间
@@ -148,11 +153,11 @@ public class SmsServices {
 				context.put("code", sms.get("captcha"));
 				context.put("product", "卡云卡");
 				SmsServices.sendMessage(dctx, context);
+				result.put("status", "发送成功");
 			}
 			
 		}
 		
-		Map<String, Object> result = ServiceUtil.returnSuccess();
 		return result;
 	}
 	
@@ -165,31 +170,79 @@ public class SmsServices {
 	public static Map<String, Object> appLogin(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
-		String telNum = (String) context.get("telNum");
+		Locale locale = (Locale) context.get("locale");
+		String teleNumber = (String) context.get("teleNumber");
 		String captcha = (String) context.get("captcha");
-		EntityConditionList<EntityCondition> captchaConditions = EntityCondition
-				.makeCondition(EntityCondition.makeCondition("telNum", EntityOperator.EQUALS, telNum),EntityUtil.getFilterByDateExpr());
-		List<GenericValue> smsList = FastList.newInstance();
+		String token = null;
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+
+		GenericValue customer;
 		try {
-			smsList = delegator.findList("SmsValidateCode", captchaConditions, null,
-					null, null, false);
+			customer = EntityUtil.getFirst(delegator.findList("TelecomNumberAndUserLogin", 
+					EntityCondition.makeCondition(
+							EntityCondition.makeCondition(UtilMisc.toMap("contactNumber", teleNumber)), 
+							EntityUtil.getFilterByDateExpr()), null, UtilMisc.toList("partyId DESC"), null, false));
 		} catch (GenericEntityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Debug.logError(e, module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
 		
-		if(UtilValidate.isEmpty(smsList)){
-			System.out.println("验证码已过期");
+		if(UtilValidate.isEmpty(customer)){
+			result.put("status", "用户不存在");
 		}else{
-			GenericValue sms = smsList.get(0);
-			if(sms.get("captcha").equals(captcha)){
-				
+			//返回机构Id
+			Map<String, Object> organizationPartyMap = CloudCardHelper.getOrganizationPartyId(delegator, customer.get("partyId").toString());
+			result.put("organizationPartyId", organizationPartyMap.get("organizationPartyId"));
+			
+			//查找用户验证码是否存在
+			EntityConditionList<EntityCondition> captchaConditions = EntityCondition
+					.makeCondition(EntityCondition.makeCondition("telNum", EntityOperator.EQUALS, teleNumber),EntityUtil.getFilterByDateExpr());
+			List<GenericValue> smsList = FastList.newInstance();
+			try {
+				smsList = delegator.findList("SmsValidateCode", captchaConditions, null,
+						null, null, false);
+			} catch (GenericEntityException e) {
+				e.printStackTrace();
+			}
+			
+			if(UtilValidate.isEmpty(smsList)){
+				result.put("token", "验证码已过期");
 			}else{
-				System.out.println("验证码错误");
+				GenericValue sms = smsList.get(0);
+				
+				if(sms.get("captcha").equals(captcha)){
+					//有效时间
+					long expirationTime = Long.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","token.expirationTime","60",delegator));
+					String iss = EntityUtilProperties.getPropertyValue("cloudcard","token.issuer","60L",delegator);
+					String tokenSecret = EntityUtilProperties.getPropertyValue("cloudcard","token.secret","60L",delegator);
+					//开始时间
+					final long iat = System.currentTimeMillis() / 1000L; // issued at claim 
+					//Token到期时间
+					final long exp = iat + expirationTime; // expires claim. In this case the token expires in 60 seconds
+					//生成Token
+					final JWTSigner signer = new JWTSigner(tokenSecret);
+					final HashMap<String, Object> claims = new HashMap<String, Object>();
+					claims.put("iss", iss);
+					claims.put("user", customer.get("userLoginId"));
+					claims.put("exp", exp);
+					claims.put("iat", iat);
+					token = signer.sign(claims);
+					//修改验证码状态
+					sms.set("isValid", "Y");
+					try {
+						sms.store();
+					} catch (GenericEntityException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					result.put("status", "登录成功");
+					result.put("token", token);
+				}else{
+					result.put("status", "验证码错误");
+				}
 			}
 		}
 		
-		Map<String, Object> result = ServiceUtil.returnSuccess();
 		return result;
 	}
 	

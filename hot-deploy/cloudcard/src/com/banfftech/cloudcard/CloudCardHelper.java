@@ -14,6 +14,7 @@ import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
+import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.party.party.PartyRelationshipHelper;
@@ -22,6 +23,7 @@ import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
+import javolution.util.FastList;
 import javolution.util.FastMap;
 
 /**
@@ -50,6 +52,36 @@ public class CloudCardHelper {
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * 获取partyId是否为organizationPartyId的管理人员的organizationPartyId
+	 * @param delegator
+	 * @param userLogin
+	 * @param organizationPartyId
+	 */
+	public static Map<String, Object> getOrganizationPartyId(Delegator delegator, String partyId) {
+		Map<String, Object> organizationPartyMap = FastMap.newInstance();
+        List<EntityCondition> condList = FastList.newInstance();
+        condList.add(EntityCondition.makeCondition("partyIdFrom", partyId));
+        condList.add(EntityCondition.makeCondition("roleTypeIdFrom", "MANAGER"));
+        condList.add(EntityCondition.makeCondition("roleTypeIdTo", "INTERNAL_ORGANIZATIO"));
+        condList.add(EntityCondition.makeCondition("partyRelationshipTypeId", "EMPLOYMENT"));
+        condList.add(EntityUtil.getFilterByDateExpr());
+        EntityCondition condition = EntityCondition.makeCondition(condList);
+
+        List<GenericValue> partyRelationships = null;
+        try {
+            partyRelationships = delegator.findList("PartyRelationship", condition, null, null, null, false);
+        } catch (GenericEntityException e) {
+            Debug.logError(e, "Problem finding PartyRelationships. ", module);
+            return null;
+        }
+        if (UtilValidate.isNotEmpty(partyRelationships)) {
+			organizationPartyMap.put("organizationPartyId", partyRelationships.get(0).get("partyIdTo"));
+        }
+		
+		return organizationPartyMap;
 	}
 	
 

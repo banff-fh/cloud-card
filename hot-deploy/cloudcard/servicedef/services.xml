@@ -112,12 +112,16 @@
 		location="com.banfftech.cloudcard.sms.SmsServices" invoke="getLoginCaptcha" auth="true">
 		<description>获取登录验证码</description>
         <attribute name="telNum" type="String" mode="IN" optional="false"/>
+        <attribute name="status" type="String" mode="OUT" optional="true"/>
 	</service>
     
     <service name="appLogin" engine="java"
 		location="com.banfftech.cloudcard.sms.SmsServices" invoke="appLogin" auth="true">
 		<description>手机登录</description>
-        <attribute name="telNum" type="String" mode="IN" optional="false"/>
+        <attribute name="teleNumber" type="String" mode="IN" optional="false"/>
         <attribute name="captcha" type="String" mode="IN" optional="false"/>
+        <attribute name="status" type="String" mode="OUT" optional="false"/>
+        <attribute name="token" type="String" mode="OUT" optional="true"/>
+        <attribute name="organizationPartyId" type="String" mode="OUT" optional="true"/>
 	</service>
 </services>
