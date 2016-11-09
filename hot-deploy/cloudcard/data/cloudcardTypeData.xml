@@ -20,5 +20,8 @@
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsTemplateCode" systemPropertyValue="SMS_25720222" description="短信平台模版号"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.url" systemPropertyValue="http://gw.api.taobao.com/router/rest" description="短信平台请求地址"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.validTime" systemPropertyValue="900" description="短信使用有效时间"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="token.expirationTime" systemPropertyValue="1296000" description="token的有效时间"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="token.issuer" systemPropertyValue="cloudcard" description="token的issuer"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="token.secret" systemPropertyValue="{{secret used for signing}}" description="token的secret"/>
 
 </entity-engine-xml>
