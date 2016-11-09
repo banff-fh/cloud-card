@@ -78,7 +78,7 @@
             location="com.banfftech.cloudcard.CloudCardServices" invoke="cloudCardWithdraw" auth="true">
         <description>云卡扫码支付</description>
         <attribute name="organizationPartyId" type="String" mode="IN" optional="false"/>
-        <attribute name="cardCode" type="String" mode="IN" optional="true"/>
+        <attribute name="cardCode" type="String" mode="IN" optional="false"/>
         <attribute name="amount" type="BigDecimal" mode="INOUT" optional="false"/>
         <attribute name="customerPartyId" type="String" mode="OUT" optional="false"/>
         <attribute name="actualBalance" type="BigDecimal" mode="OUT" optional="false"/>
