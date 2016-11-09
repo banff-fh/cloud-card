@@ -196,7 +196,7 @@ public class SmsServices {
 			
 			//查找用户验证码是否存在
 			EntityConditionList<EntityCondition> captchaConditions = EntityCondition
-					.makeCondition(EntityCondition.makeCondition("telNum", EntityOperator.EQUALS, teleNumber),EntityUtil.getFilterByDateExpr());
+					.makeCondition(EntityCondition.makeCondition("telNum", EntityOperator.EQUALS, teleNumber),EntityUtil.getFilterByDateExpr(),EntityCondition.makeCondition("isValid", EntityOperator.EQUALS, "N"));
 			List<GenericValue> smsList = FastList.newInstance();
 			try {
 				smsList = delegator.findList("SmsValidateCode", captchaConditions, null,
@@ -206,7 +206,7 @@ public class SmsServices {
 			}
 			
 			if(UtilValidate.isEmpty(smsList)){
-				result.put("token", "验证码已过期");
+				result.put("status", "验证码不存在");
 			}else{
 				GenericValue sms = smsList.get(0);
 				
