@@ -84,7 +84,7 @@
 		<field name="telNum" type="id"></field>
 		<field name="smsType" type="id"></field>
 		<field name="captcha" type="id"></field>
-		<field name="isValidate" type="id"></field>
+		<field name="isValid" type="id"></field>
 		<field name="fromDate" type="date-time"></field>
       	<field name="thruDate" type="date-time"></field>
       	<prim-key field="telNum"/>
