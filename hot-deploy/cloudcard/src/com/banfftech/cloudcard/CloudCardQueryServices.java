@@ -209,7 +209,7 @@ public class CloudCardQueryServices {
 			}
 			String cardOrganizationPartyId = cloudCardAccount.get("organizationPartyId").toString();
 			if(cardOrganizationPartyId != null){
-				results.put("cardImg", EntityUtilProperties.getPropertyValue("cloudcard","cardImg." + cardOrganizationPartyId,delegator));
+				results.put("cardImg", EntityUtilProperties.getPropertyValue("cloudcard","cardImg." + cardOrganizationPartyId, delegator));
 			}
 			results.put("finAccountId", cloudCardAccount.getString("finAccountId"));
 			results.put("finAccountName", cloudCardAccount.getString("finAccountName"));

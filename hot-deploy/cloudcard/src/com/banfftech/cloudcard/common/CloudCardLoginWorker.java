@@ -18,12 +18,38 @@
  *******************************************************************************/
 package com.banfftech.cloudcard.common;
 
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import java.util.Map;
+
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.DelegatorFactory;
+import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.util.EntityUtilProperties;
+import org.ofbiz.security.Security;
+import org.ofbiz.security.SecurityConfigurationException;
+import org.ofbiz.security.SecurityFactory;
+import org.ofbiz.security.authz.Authorization;
+import org.ofbiz.security.authz.AuthorizationFactory;
+import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.webapp.control.ContextFilter;
+import org.ofbiz.webapp.control.LoginWorker;
+import org.ofbiz.webapp.stats.VisitHandler;
+
+import com.auth0.jwt.JWTExpiredException;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.JWTVerifyException;
 
 /**
  * Common Workers
@@ -33,50 +59,121 @@ public class CloudCardLoginWorker {
     public final static String module = CloudCardLoginWorker.class.getName();
     public static final String resourceWebapp = "SecurityextUiLabels";
 
-    public static final String EXTERNAL_LOGIN_KEY_ATTR = "token";
+    public static final String TOKEN_KEY_ATTR = "token";
+    
 
     public static String checkTokenLogin(HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = request.getSession();
+        Delegator delegator = (Delegator) request.getAttribute("delegator");
 
-        Debug.logInfo("ahhaahahahhah:=====",module);
-        String externalKey = request.getParameter(EXTERNAL_LOGIN_KEY_ATTR);
-        if (externalKey == null) return "success";
-
-        GenericValue userLogin = null;
-//        = CloudCardLoginWorker.externalLoginKeys.get(externalKey);
+        Debug.logInfo("token verify...",module);
+        String token = request.getParameter(TOKEN_KEY_ATTR);
+        // 这种事件里面只能返回success, 后面的其它预处理事件会继续采用其它方式验证登录情况
+        if (token == null) return "success"; 
+        
+        // 验证token
+        Delegator defaultDelegator = DelegatorFactory.getDelegator("default");//万一出现多租户情况，应在主库中查配置
+        String tokenSecret = EntityUtilProperties.getPropertyValue("cloudcard","token.secret","60L", defaultDelegator);
+        
+        Map<String, Object> claims;
+        try {
+             JWTVerifier verifier = new JWTVerifier(tokenSecret);
+             claims= verifier.verify(token);
+        }catch(JWTExpiredException e1){
+            Debug.logInfo("token过期：" + e1.getMessage(),module);
+            return "success";
+        }catch (JWTVerifyException | InvalidKeyException | NoSuchAlgorithmException | IllegalStateException | SignatureException | IOException e) {
+            Debug.logInfo("token没通过验证：" + e.getMessage(),module);
+            return "success";
+        }
+        
+        if(UtilValidate.isEmpty(claims)||UtilValidate.isEmpty(claims.get("user"))||UtilValidate.isEmpty(claims.get("delegatorName"))){
+        	 Debug.logInfo("token invalid",module);
+             return "success";
+        }
+        
+        String userLoginId = (String) claims.get("user");
+        String tokenDelegatorName = (String) claims.get("delegatorName");
+        Delegator tokenDelegator = DelegatorFactory.getDelegator(tokenDelegatorName);
+        GenericValue userLogin;
+		try {
+			userLogin = tokenDelegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", userLoginId));
+		} catch (GenericEntityException e) {
+			Debug.logError("some thing wrong when verify the token:" + e.getMessage(), module);
+			return "success";
+		}
+        
         if (userLogin != null) {
-           /* //to check it's the right tenant
-            //in case username and password are the same in different tenants
-            LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
-            Delegator delegator = (Delegator) request.getAttribute("delegator");
-            String oldDelegatorName = delegator.getDelegatorName();
+            //in case  in different tenants
+            String currentDelegatorName = delegator.getDelegatorName();
             ServletContext servletContext = session.getServletContext();
-            if (!oldDelegatorName.equals(userLogin.getDelegator().getDelegatorName())) {
-                delegator = DelegatorFactory.getDelegator(userLogin.getDelegator().getDelegatorName());
-                dispatcher = ContextFilter.makeWebappDispatcher(servletContext, delegator);
-                setWebContextObjects(request, response, delegator, dispatcher);
+            if (!currentDelegatorName.equals(tokenDelegatorName)) {
+            	LocalDispatcher tokenDispatcher = ContextFilter.makeWebappDispatcher(servletContext, tokenDelegator);
+                setWebContextObjects(request, response, tokenDelegator, tokenDispatcher);
             }
             // found userLogin, do the external login...
 
             // if the user is already logged in and the login is different, logout the other user
-            GenericValue currentUserLogin = (GenericValue) session.getAttribute("userLogin");
-            if (currentUserLogin != null) {
-                if (currentUserLogin.getString("userLoginId").equals(userLogin.getString("userLoginId"))) {
+            GenericValue sessionUserLogin = (GenericValue) session.getAttribute("userLogin");
+            if (sessionUserLogin != null) {
+                if (sessionUserLogin.getString("userLoginId").equals(userLoginId)) {
                     // is the same user, just carry on...
                     return "success";
                 }
 
                 // logout the current user and login the new user...
-                logout(request, response);
+                LoginWorker.logout(request, response);
                 // ignore the return value; even if the operation failed we want to set the new UserLogin
             }
 
-            doBasicLogin(userLogin, request);*/
+            LoginWorker.doBasicLogin(userLogin, request);
         } else {
-            Debug.logWarning("Could not find userLogin for external login key: " + externalKey, module);
+            Debug.logWarning("Could not find userLogin for token: " + token, module);
         }
-        request.setAttribute(EXTERNAL_LOGIN_KEY_ATTR, "new token");
+        //request.setAttribute(TOKEN_KEY_ATTR, "new token");
         return "success";
     }
 
+    
+    /**
+     * Copy from org.ofbiz.webapp.control.LoginWorker
+     * @param request
+     * @param response
+     * @param delegator
+     * @param dispatcher
+     */
+    private static void setWebContextObjects(HttpServletRequest request, HttpServletResponse response, Delegator delegator, LocalDispatcher dispatcher) {
+        HttpSession session = request.getSession();
+        // NOTE: we do NOT want to set this in the servletContext, only in the request and session
+        // We also need to setup the security and authz objects since they are dependent on the delegator
+        Security security = null;
+        try {
+            security = SecurityFactory.getInstance(delegator);
+        } catch (SecurityConfigurationException e) {
+            Debug.logError(e, module);
+        }
+        Authorization authz = null;
+        try {
+            authz = AuthorizationFactory.getInstance(delegator);
+        } catch (SecurityConfigurationException e) {
+            Debug.logError(e, module);
+        }
+
+        request.setAttribute("delegator", delegator);
+        request.setAttribute("dispatcher", dispatcher);
+        request.setAttribute("security", security);
+        request.setAttribute("authz", authz);
+
+        session.setAttribute("delegatorName", delegator.getDelegatorName());
+        session.setAttribute("delegator", delegator);
+        session.setAttribute("dispatcher", dispatcher);
+        session.setAttribute("security", security);
+        session.setAttribute("authz", authz);
+
+        // get rid of the visit info since it was pointing to the previous database, and get a new one
+        session.removeAttribute("visitor");
+        session.removeAttribute("visit");
+        VisitHandler.getVisitor(request, response);
+        VisitHandler.getVisit(session);
+    }
 }
