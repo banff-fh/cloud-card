@@ -51,5 +51,21 @@
         <value xml:lang="en">sendMessage[${phone}] failure</value>
         <value xml:lang="zh">用户手机号[${phone}]发送短息失败</value>
     </property>
+    <property key="CloudCardUserNotExistError">
+        <value xml:lang="en">user not exist</value>
+        <value xml:lang="zh">用户不存在</value>
+    </property>
+    <property key="CloudCardCaptchaNotExistError">
+        <value xml:lang="en">captcha not exist</value>
+        <value xml:lang="zh">验证码不存在</value>
+    </property>
+    <property key="CloudCardCaptchaCheckFailedError">
+        <value xml:lang="en">captcha check failed</value>
+        <value xml:lang="zh">验证码不正确</value>
+    </property>
+    <property key="CloudCardCaptchaCheckFailedError">
+        <value xml:lang="en">send failed</value>
+        <value xml:lang="zh">发送失败</value>
+    </property>
     
 </resource>

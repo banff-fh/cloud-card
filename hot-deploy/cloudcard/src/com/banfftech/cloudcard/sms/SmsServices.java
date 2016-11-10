@@ -113,6 +113,7 @@ public class SmsServices {
 			//生成验证码
 			String captcha = UtilFormatOut.padString(String.valueOf(Math.floor((Math.random()*10e6))), 6, false, '0');
 			Map<String,Object> smsValidateCodeMap = FastMap.newInstance();
+			Locale locale = (Locale) context.get("locale");
 			smsValidateCodeMap.put("telNum", telNum);
 			smsValidateCodeMap.put("captcha", captcha);
 			smsValidateCodeMap.put("smsType", "LOGIN");
@@ -123,8 +124,7 @@ public class SmsServices {
 				GenericValue smstGV = delegator.makeValue("SmsValidateCode", smsValidateCodeMap);
 				smstGV.create();
 			} catch (GenericEntityException e) {
-				result.put("status", "发送失败");
-				e.printStackTrace();
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardSendFailedError", locale));
 			}
 			
 			//发送短信
@@ -132,7 +132,6 @@ public class SmsServices {
 			context.put("code", captcha);
 			context.put("product", "卡云卡");
 			SmsServices.sendMessage(dctx, context);
-			result.put("status", "发送成功");
 		}else{
 			GenericValue sms = smsList.get(0);
 			//获取短信发送间隔时间
@@ -153,7 +152,6 @@ public class SmsServices {
 				context.put("code", sms.get("captcha"));
 				context.put("product", "卡云卡");
 				SmsServices.sendMessage(dctx, context);
-				result.put("status", "发送成功");
 			}
 			
 		}
@@ -208,7 +206,7 @@ public class SmsServices {
 		}
 		
 		if(UtilValidate.isEmpty(customer)){
-			result.put("status", "用户不存在");
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardUserNotExistError", locale));
 		}else{
 			//返回机构Id
 			Map<String, Object> organizationPartyMap = CloudCardHelper.getOrganizationPartyId(delegator, customer.get("partyId").toString());
@@ -222,11 +220,11 @@ public class SmsServices {
 				smsList = delegator.findList("SmsValidateCode", captchaConditions, null,
 						null, null, false);
 			} catch (GenericEntityException e) {
-				e.printStackTrace();
+				Debug.logError(e, module);
 			}
 			
 			if(UtilValidate.isEmpty(smsList)){
-				result.put("status", "验证码不存在");
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardCaptchaNotExistError", locale));
 			}else{
 				GenericValue sms = smsList.get(0);
 				
@@ -255,10 +253,9 @@ public class SmsServices {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					result.put("status", "登录成功");
 					result.put("token", token);
 				}else{
-					result.put("status", "验证码错误");
+					return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardCaptchaCheckFailedError", locale));
 				}
 			}
 		}
