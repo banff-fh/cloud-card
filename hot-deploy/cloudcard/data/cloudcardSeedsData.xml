@@ -23,7 +23,7 @@
 
 	<!-- 云卡平台超级管理员作为seed数据 -->
     <Party partyId="ccadmin" partyTypeId="PERSON"/>
-    <Person firstName="云卡超级管理员"  partyId="ccadmin" personalTitle="Mr."/>
+    <Person firstName="卡云卡超级管理员"  partyId="ccadmin" personalTitle="Mr."/>
     <PartyRole partyId="ccadmin" roleTypeId="BUYER"/>
     <PartyRole partyId="ccadmin" roleTypeId="MANAGER"/>
     <PartyRole partyId="ccadmin" roleTypeId="ORDER_CLERK"/>
@@ -36,18 +36,18 @@
     <!-- 目前暂时给全部权限 -->
     <UserLoginSecurityGroup groupId="FULLADMIN" userLoginId="ccadmin" fromDate="2001-01-01 12:00:00.0"/>
 
-	<Party partyId="Platform" partyTypeId="PARTY_GROUP"/>
-    <PartyGroup partyId="Platform" groupName="云卡支付平台"/>
-    <PartyRole partyId="Platform" roleTypeId="BILL_FROM_VENDOR"/>
-    <PartyRole partyId="Platform" roleTypeId="BILL_TO_CUSTOMER"/>
-    <PartyRole partyId="Platform" roleTypeId="INTERNAL_ORGANIZATIO"/>
-    <PartyRole partyId="Platform" roleTypeId="_NA_"/>
+	<Party partyId="Company" partyTypeId="PARTY_GROUP"/>
+    <PartyGroup partyId="Company" groupName="卡云卡支付平台"/>
+    <PartyRole partyId="Company" roleTypeId="BILL_FROM_VENDOR"/>
+    <PartyRole partyId="Company" roleTypeId="BILL_TO_CUSTOMER"/>
+    <PartyRole partyId="Company" roleTypeId="INTERNAL_ORGANIZATIO"/>
+    <PartyRole partyId="Company" roleTypeId="_NA_"/>
 	
 
 
     <!-- make ccadmin an employee of Platform -->
     <PartyRole partyId="ccadmin" roleTypeId="CONTACT"/>
-    <PartyRole partyId="Platform" roleTypeId="ACCOUNT"/>
-    <PartyRelationship partyIdFrom="Platform" roleTypeIdFrom="ACCOUNT" partyIdTo="ccadmin" roleTypeIdTo="CONTACT" fromDate="2000-01-01 00:00:00.000" partyRelationshipTypeId="EMPLOYMENT"/>
+    <PartyRole partyId="Company" roleTypeId="ACCOUNT"/>
+    <PartyRelationship partyIdFrom="Company" roleTypeIdFrom="ACCOUNT" partyIdTo="ccadmin" roleTypeIdTo="CONTACT" fromDate="2000-01-01 00:00:00.000" partyRelationshipTypeId="EMPLOYMENT"/>
 
 </entity-engine-xml>
