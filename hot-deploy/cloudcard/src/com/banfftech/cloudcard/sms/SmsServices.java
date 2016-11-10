@@ -92,19 +92,20 @@ public class SmsServices {
 	public static Map<String, Object> getLoginCaptcha(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
-		String telNum = (String) context.get("telNum");
+		Locale locale = (Locale) context.get("locale");
+		String telNumber = (String) context.get("telNumber");
 		java.sql.Timestamp nowTimestamp  = UtilDateTime.nowTimestamp();
 
 		EntityConditionList<EntityCondition> captchaConditions = EntityCondition
-				.makeCondition(EntityCondition.makeCondition("telNum", EntityOperator.EQUALS, telNum),EntityUtil.getFilterByDateExpr(),EntityCondition.makeCondition("isValid", EntityOperator.EQUALS,"N"));
+				.makeCondition(EntityCondition.makeCondition("telNumber", EntityOperator.EQUALS, telNumber),EntityUtil.getFilterByDateExpr(),EntityCondition.makeCondition("isValid", EntityOperator.EQUALS,"N"));
 		
 		List<GenericValue> smsList = FastList.newInstance();
 		try {
 			smsList = delegator.findList("SmsValidateCode", captchaConditions, null,
 					null, null, false);
 		} catch (GenericEntityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Debug.logError(e, module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardGetCAPTCHAFailedError", locale));
 		}
 		
 		Map<String, Object> result = ServiceUtil.returnSuccess();
@@ -113,8 +114,7 @@ public class SmsServices {
 			//生成验证码
 			String captcha = UtilFormatOut.padString(String.valueOf(Math.floor((Math.random()*10e6))), 6, false, '0');
 			Map<String,Object> smsValidateCodeMap = FastMap.newInstance();
-			Locale locale = (Locale) context.get("locale");
-			smsValidateCodeMap.put("telNum", telNum);
+			smsValidateCodeMap.put("telNumber", telNumber);
 			smsValidateCodeMap.put("captcha", captcha);
 			smsValidateCodeMap.put("smsType", "LOGIN");
 			smsValidateCodeMap.put("isValid", "N");
@@ -124,11 +124,12 @@ public class SmsServices {
 				GenericValue smstGV = delegator.makeValue("SmsValidateCode", smsValidateCodeMap);
 				smstGV.create();
 			} catch (GenericEntityException e) {
+				Debug.logError(e, module);
 				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardSendFailedError", locale));
 			}
 			
 			//发送短信
-			context.put("phone", telNum);
+			context.put("phone", telNumber);
 			context.put("code", captcha);
 			context.put("product", "卡云卡");
 			SmsServices.sendMessage(dctx, context);
@@ -144,11 +145,11 @@ public class SmsServices {
 				try {
 					sms.store();
 				} catch (GenericEntityException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Debug.logError(e, module);
+					return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardUserNotExistError", locale));
 				}
 				//发送短信
-				context.put("phone", telNum);
+				context.put("phone", telNumber);
 				context.put("code", sms.get("captcha"));
 				context.put("product", "卡云卡");
 				SmsServices.sendMessage(dctx, context);
@@ -214,7 +215,7 @@ public class SmsServices {
 			
 			//查找用户验证码是否存在
 			EntityConditionList<EntityCondition> captchaConditions = EntityCondition
-					.makeCondition(EntityCondition.makeCondition("telNum", EntityOperator.EQUALS, teleNumber),EntityUtil.getFilterByDateExpr(),EntityCondition.makeCondition("isValid", EntityOperator.EQUALS, "N"));
+					.makeCondition(EntityCondition.makeCondition("telNumber", EntityOperator.EQUALS, teleNumber),EntityUtil.getFilterByDateExpr(),EntityCondition.makeCondition("isValid", EntityOperator.EQUALS, "N"));
 			List<GenericValue> smsList = FastList.newInstance();
 			try {
 				smsList = delegator.findList("SmsValidateCode", captchaConditions, null,

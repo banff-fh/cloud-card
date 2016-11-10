@@ -126,7 +126,7 @@
     <service name="getLoginCaptcha" engine="java"
 		location="com.banfftech.cloudcard.sms.SmsServices" invoke="getLoginCaptcha" auth="false">
 		<description>获取登录验证码</description>
-        <attribute name="telNum" type="String" mode="IN" optional="false"/>
+        <attribute name="telNumber" type="String" mode="IN" optional="false"/>
         <attribute name="status" type="String" mode="OUT" optional="true"/>
 	</service>
     
