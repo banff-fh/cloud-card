@@ -74,6 +74,7 @@
     
     <!-- 验证码发送申请 -->
     <request-map uri="getLoginCaptcha">
+    	<security https="true" auth="false" />
     	<event type="service" invoke="getLoginCaptcha"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
@@ -81,6 +82,7 @@
 
 	<!-- 商户app登录接口 -->
 	<request-map uri="bizAppLogin">
+		<security https="true" auth="false" />
 		<event type="service" invoke="bizAppLogin" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
@@ -88,6 +90,7 @@
 
 	<!-- 用户app登录接口 -->
 	<request-map uri="userAppLogin">
+		<security https="true" auth="false" />
 		<event type="service" invoke="userAppLogin" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />

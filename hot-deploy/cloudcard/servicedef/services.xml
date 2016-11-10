@@ -124,14 +124,14 @@
     </service>
     
     <service name="getLoginCaptcha" engine="java"
-		location="com.banfftech.cloudcard.sms.SmsServices" invoke="getLoginCaptcha" auth="true">
+		location="com.banfftech.cloudcard.sms.SmsServices" invoke="getLoginCaptcha" auth="false">
 		<description>获取登录验证码</description>
         <attribute name="telNum" type="String" mode="IN" optional="false"/>
         <attribute name="status" type="String" mode="OUT" optional="true"/>
 	</service>
     
     <service name="bizAppLogin" engine="java"
-		location="com.banfftech.cloudcard.sms.SmsServices" invoke="bizAppLogin" auth="true">
+		location="com.banfftech.cloudcard.sms.SmsServices" invoke="bizAppLogin" auth="false">
 		<description>商家手机登录</description>
         <attribute name="teleNumber" type="String" mode="IN" optional="false"/>
         <attribute name="captcha" type="String" mode="IN" optional="false"/>
@@ -141,7 +141,7 @@
 	</service>
     
     <service name="userAppLogin" engine="java"
-		location="com.banfftech.cloudcard.sms.SmsServices" invoke="userAppLogin" auth="true">
+		location="com.banfftech.cloudcard.sms.SmsServices" invoke="userAppLogin" auth="false">
 		<description>用户手机登录</description>
         <attribute name="teleNumber" type="String" mode="IN" optional="false"/>
         <attribute name="captcha" type="String" mode="IN" optional="false"/>

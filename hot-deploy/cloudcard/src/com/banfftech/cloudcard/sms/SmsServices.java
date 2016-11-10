@@ -244,6 +244,7 @@ public class SmsServices {
 					final HashMap<String, Object> claims = new HashMap<String, Object>();
 					claims.put("iss", iss);
 					claims.put("user", customer.get("userLoginId"));
+					claims.put("delegatorName", delegator.getDelegatorName());
 					claims.put("exp", exp);
 					claims.put("iat", iat);
 					token = signer.sign(claims);
