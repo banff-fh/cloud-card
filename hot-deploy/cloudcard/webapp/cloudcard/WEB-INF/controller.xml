@@ -78,13 +78,20 @@
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
-    
-    <!-- app登录接口 -->
-    <request-map uri="appLogin">
-    	<event type="service" invoke="appLogin"/>
-        <response name="success" type="request" value="json"/>
-        <response name="error" type="request" value="json"/>
-    </request-map>
+
+	<!-- 商户app登录接口 -->
+	<request-map uri="bizAppLogin">
+		<event type="service" invoke="bizAppLogin" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+
+	<!-- 用户app登录接口 -->
+	<request-map uri="userAppLogin">
+		<event type="service" invoke="userAppLogin" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
     
     
 

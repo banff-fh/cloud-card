@@ -162,6 +162,26 @@ public class SmsServices {
 	}
 	
 	/**
+	 * 用户app登录接口
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> userAppLogin(DispatchContext dctx, Map<String, Object> context) {
+		return appLogin(dctx,context);
+	}
+	
+	/**
+	 * 商户app登录接口
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> bizAppLogin(DispatchContext dctx, Map<String, Object> context) {
+		return appLogin(dctx,context);
+	}
+	
+	/**
 	 * 手机app登录
 	 * @param dctx
 	 * @param context
@@ -245,5 +265,7 @@ public class SmsServices {
 		
 		return result;
 	}
+	
+	
 	
 }
