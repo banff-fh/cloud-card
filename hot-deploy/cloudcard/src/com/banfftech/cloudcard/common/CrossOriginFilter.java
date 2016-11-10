@@ -38,12 +38,8 @@ public class CrossOriginFilter implements Filter {
         Debug.logInfo("Request Origin:" + curOrigin, module);
         if(curOrigin != null && UtilValidate.isNotEmpty(allowList)) {  
             for (String origin : allowList) {
-            	if(origin.equals("*")){
-            		 httpResponse.setHeader("Access-Control-Allow-Origin", "*"); 
-            		 // 如果allowList里面配置了*，就不用去匹配了，直接allow
-            		 break;
-            	}
-                if(curOrigin.equals(origin)) {  
+            	 // 如果allowList里面配置了*，就不用去匹配了，直接allow
+                if("*".equals(origin) || curOrigin.equals(origin)) {  
                     httpResponse.setHeader("Access-Control-Allow-Origin", curOrigin);
                     break;
                 }
