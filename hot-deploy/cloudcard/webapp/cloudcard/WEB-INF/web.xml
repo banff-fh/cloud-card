@@ -53,7 +53,8 @@
         <filter-class>com.banfftech.cloudcard.common.CrossOriginFilter</filter-class>
         <init-param>
             <param-name>allowedOrigin</param-name>
-            <param-value>http://fanyi.baidu.com;http://192.168.1.111:8101;http://127.0.0.1:8101</param-value>
+<!--             <param-value>http://fanyi.baidu.com;http://192.168.1.113:8100;http://127.0.0.1:8100;http://localhost:8100</param-value> -->
+            <param-value>*</param-value>
         </init-param>
     </filter>
     <filter-mapping><filter-name>ContextFilter</filter-name><url-pattern>/*</url-pattern></filter-mapping>

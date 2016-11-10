@@ -37,17 +37,18 @@ public class CrossOriginFilter implements Filter {
         String curOrigin = httpRequest.getHeader("Origin");
         Debug.logInfo("Request Origin:" + curOrigin, module);
         if(curOrigin != null && UtilValidate.isNotEmpty(allowList)) {  
-            for (String origin : allowList) {  
+            for (String origin : allowList) {
+            	if(origin.equals("*")){
+            		 httpResponse.setHeader("Access-Control-Allow-Origin", "*"); 
+            		 // 如果allowList里面配置了*，就不用去匹配了，直接allow
+            		 break;
+            	}
                 if(curOrigin.equals(origin)) {  
-                    httpResponse.setHeader("Access-Control-Allow-Origin", curOrigin);  
-                }  
+                    httpResponse.setHeader("Access-Control-Allow-Origin", curOrigin);
+                    break;
+                }
             }  
-        } /*else { // 对于无来源的请求(比如在浏览器地址栏直接输入请求的)，那就只允许我们自己的机器可以吧  
-            httpResponse.setHeader("Access-Control-Allow-Origin", "http://127.0.0.1");  
-        }  
-        
-        
-        httpResponse.setHeader("Access-Control-Allow-Origin", "*");*/
+        } 
         chain.doFilter(request, response);
 	}
 

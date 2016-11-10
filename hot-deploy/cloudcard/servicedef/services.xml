@@ -8,10 +8,10 @@
     <service name="findFinAccountByPartyId" engine="java"
             location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="findFinAccountByPartyId" auth="true">
         <description>查询卡信息</description>
-        <attribute name="partyId" type="String" mode="IN" optional="false"/>
         <attribute name="viewIndex" type="Integer" mode="IN" optional="true"/>
         <attribute name="viewSize" type="Integer" mode="IN" optional="true"/>
         <attribute name="finAccountList" type="List" mode="OUT" optional="false"/>
+        
     </service>
     
     <service name="findPaymentByPartyId" engine="java"
