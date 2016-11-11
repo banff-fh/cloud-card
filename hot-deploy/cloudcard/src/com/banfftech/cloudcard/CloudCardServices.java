@@ -677,4 +677,69 @@ public class CloudCardServices {
 		
 		return retMap;
 	}
+	
+	/**
+	 * 批量生成卡号
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> genNewCloudCardCode(DispatchContext dctx, Map<String, Object> context){
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+        GenericValue userLogin = (GenericValue) context.get("userLogin");
+		String quantity = (String) context.get("quantity");
+		String currencyUomId = (String)context.get("currencyUomId");
+		String finAccountName = (String) context.get("finAccountName");
+		String organizationPartyId = (String) context.get("organizationPartyId");
+		
+		Map<String, Object> ensurePartyRoleOutMap;
+		try {
+			ensurePartyRoleOutMap = dispatcher.runSync("ensurePartyRole", 
+					UtilMisc.toMap("userLogin", userLogin, "partyId", organizationPartyId, "roleTypeId", "DISTRIBUTOR"));
+		} catch (GenericServiceException e1) {
+			Debug.logError(e1, module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		if (ServiceUtil.isError(ensurePartyRoleOutMap)) {
+			return ensurePartyRoleOutMap;
+		}
+		
+		for(int i = 0;i < Integer.valueOf(quantity);i++){
+			try {
+				//生成的卡号
+				String newCardCode = CloudCardHelper.generateCloudCardCode(19, delegator);
+				String finAccountId = delegator.getNextSeqId("FinAccount");
+				Map<String, Object> finAccountMap = FastMap.newInstance();
+				finAccountMap.put("finAccountId", finAccountId);
+				finAccountMap.put("finAccountTypeId", "GIFTCERT_ACCOUNT");
+				finAccountMap.put("statusId", "FNACT_CREATED");
+				finAccountMap.put("finAccountName", finAccountName);
+				finAccountMap.put("finAccountCode", newCardCode);
+				finAccountMap.put("organizationPartyId", "Company");
+				finAccountMap.put("ownerPartyId", "_NA_");
+				finAccountMap.put("currencyUomId", currencyUomId);
+				finAccountMap.put("postToGlAccountId", "213200");
+				finAccountMap.put("isRefundable", "Y");
+				
+				//保存finaccount数据
+				GenericValue finAccount = delegator.makeValue("FinAccount", finAccountMap);
+				finAccount.create();
+				
+				//保存finaccountRole数据
+				GenericValue finAccountRole = delegator.makeValue("FinAccountRole", UtilMisc.toMap( "finAccountId", finAccountId, "partyId", organizationPartyId, "roleTypeId", "DISTRIBUTOR","fromDate", UtilDateTime.nowTimestamp()));
+				finAccountRole.create();
+				
+			} catch (GenericEntityException e) {
+				Debug.logError(e.getMessage(), module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardGenCardNumberError", locale));
+			}
+		}
+		
+		
+		Map<String, Object> retMap = ServiceUtil.returnSuccess();
+		return retMap;
+	}
 }

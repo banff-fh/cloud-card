@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
@@ -389,5 +390,46 @@ public class CloudCardHelper {
         } else {
             return giftCards.get(0);
         }
+    }
+    
+    /**
+     * 生成卡云卡号
+     * @param cardCode 二维码信息
+     * @param delegator
+     * @return FinAccountAndPaymentMethodAndGiftCard
+     * @throws GenericEntityException
+     */
+    public static String generateCloudCardCode(int codeLength, Delegator delegator) throws GenericEntityException {
+        Random r = new Random();
+        boolean foundUniqueNewCode = false;
+        String newCardCode = null;
+        long count = 0;
+
+        while (!foundUniqueNewCode) {
+            Random rand = new Random();
+            boolean isValid = false;
+            String number = "";
+            for (int i = 0; i < 19; i++) {
+                int randInt = rand.nextInt(9);
+                number = number + randInt;
+            }
+            int check = UtilValidate.getLuhnCheckDigit(number);
+            newCardCode = number + check;
+        	
+        	GenericValue encryptedGiftCard = delegator.makeValue("FinAccount", UtilMisc.toMap("finAccountCode",newCardCode));
+            delegator.encryptFields(encryptedGiftCard);
+            
+            List<GenericValue> existingAccountsWithCode = delegator.findByAnd("FinAccount", UtilMisc.toMap("finAccountCode", encryptedGiftCard.getString("finAccountCode")));
+            if (UtilValidate.isEmpty(existingAccountsWithCode)) {
+                foundUniqueNewCode = true;
+            }
+
+            count++;
+            if (count > 1000) {
+                throw new GenericEntityException("Unable to locate unique FinAccountCode! Length [" + codeLength + "]");
+            }
+        }
+
+        return newCardCode.toString();
     }
 }

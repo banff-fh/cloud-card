@@ -149,4 +149,16 @@
         <attribute name="token" type="String" mode="OUT" optional="true"/>
         <attribute name="organizationPartyId" type="String" mode="OUT" optional="true"/>
 	</service>
+	
+	<service name="genNewCloudCardCode" engine="java"
+		location="com.banfftech.cloudcard.CloudCardServices" invoke="genNewCloudCardCode" auth="true">
+		<description>生成云卡卡号</description>
+		<attribute name="organizationPartyId" type="String" mode="IN" optional="false"/>
+        <attribute name="finAccountName" type="String" mode="IN" optional="false"/>
+        <attribute name="currencyUomId" type="String" mode="IN" optional="false"/>
+        <attribute name="quantity" type="String" mode="IN" optional="false"/>
+        <attribute name="String" type="String" mode="OUT" optional="true"/>
+	</service>
+	
+	
 </services>

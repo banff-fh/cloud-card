@@ -81,7 +81,7 @@
     </view-entity>
     
     <entity entity-name="SmsValidateCode" package-name="org.ofbiz.cloudcard.sms">
-		<field name="telNum" type="id"></field>
+		<field name="telNumber" type="id"></field>
 		<field name="smsType" type="id"></field>
 		<field name="captcha" type="id"></field>
 		<field name="isValid" type="id"></field>
