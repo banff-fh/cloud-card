@@ -231,7 +231,7 @@ public class CloudCardServices {
 		finAccountMap.put("finAccountName", finAccountName); 
 		finAccountMap.put("finAccountCode", cardCode);
 		finAccountMap.put("currencyUomId", DEFAULT_CURRENCY_UOM_ID);
-		finAccountMap.put("organizationPartyId", organizationPartyId);
+		finAccountMap.put("organizationPartyId", "Company");
 		finAccountMap.put("postToGlAccountId", "213200");// TODO 213500?
 		finAccountMap.put("ownerPartyId", customerPartyId);
 		finAccountMap.put("fromDate", UtilDateTime.nowTimestamp());
@@ -248,11 +248,11 @@ public class CloudCardServices {
 		}
 		String finAccountId = (String) finAccountOutMap.get("finAccountId");
 
-		// 给卡主 OWNER 角色
+		//TODO 给卖卡商户 DISTRIBUTOR 还是 REGULATORY_AGENCY 角色？
 		Map<String, Object> finAccountRoleOutMap;
 		try {
 			finAccountRoleOutMap = dispatcher.runSync("createFinAccountRole", 
-					UtilMisc.toMap("userLogin", userLogin, "locale", locale, "finAccountId", finAccountId, "partyId", customerPartyId, "roleTypeId","OWNER"));
+					UtilMisc.toMap("userLogin", userLogin, "locale", locale, "finAccountId", finAccountId, "partyId", organizationPartyId, "roleTypeId", "DISTRIBUTOR"));
 		} catch (GenericServiceException e1) {
 			Debug.logError(e1, module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
@@ -335,7 +335,7 @@ public class CloudCardServices {
 		
 
 
-		// 商户账户扣款（扣减开卡余额）
+		// 商户扣减开卡余额
 		Map<String, Object> createFinAccountAuthOutMap;
 		try {
 			createFinAccountAuthOutMap = dispatcher.runSync("createFinAccountAuth",

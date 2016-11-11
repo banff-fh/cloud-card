@@ -14,7 +14,6 @@ import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
-import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.party.party.PartyRelationshipHelper;
@@ -194,10 +193,10 @@ public class CloudCardHelper {
 			// 若客户与本商家没有客户关系,则建立关系
 			Map<String,Object> partyRelationshipValues = UtilMisc.toMap(
 					"userLogin", userLogin,
-					"partyIdFrom", customerPartyId,
-					"partyIdTo", organizationPartyId,
-					"roleTypeIdFrom", "CUSTOMER",
-					"roleTypeIdTo", "INTERNAL_ORGANIZATIO",
+					"partyIdFrom", organizationPartyId,
+					"partyIdTo", customerPartyId,
+					"roleTypeIdFrom", "_NA_",
+					"roleTypeIdTo", "CUSTOMER",
 					"partyRelationshipTypeId", "CUSTOMER_REL"
 					);
 			List<GenericValue> relations = PartyRelationshipHelper.getActivePartyRelationships(delegator, partyRelationshipValues);
