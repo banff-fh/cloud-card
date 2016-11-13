@@ -37,8 +37,8 @@
     </service>
 
 
-    <service name="activeCloudCard" engine="java"
-            location="com.banfftech.cloudcard.CloudCardServices" invoke="activeCloudCard" auth="true">
+    <service name="activateCloudCard" engine="java"
+            location="com.banfftech.cloudcard.CloudCardServices" invoke="activateCloudCard" auth="true">
         <description>云卡激活</description>
         <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家partyId</description></attribute>
         <attribute name="teleNumber" type="String" mode="IN" optional="false"><description>客户手机号码</description></attribute>
@@ -59,8 +59,8 @@
         <attribute name="actualBalance" type="BigDecimal" mode="OUT" optional="false"><description>可用余额</description></attribute>
 	</service>
 	
-	<service name="createCloudCardAndRecharge" engine="java"
-            location="com.banfftech.cloudcard.CloudCardServices" invoke="createCloudCardAndRecharge" auth="true">
+	<service name="activateCloudCardAndRecharge" engine="java"
+            location="com.banfftech.cloudcard.CloudCardServices" invoke="activateCloudCardAndRecharge" auth="true">
         <description>
         	开卡充值统一接口， 根据cardCode查询卡信息，查得到充值，查不到先开卡再充值，开卡需要teleNumber
         </description>
@@ -126,7 +126,7 @@
     <service name="getLoginCaptcha" engine="java"
 		location="com.banfftech.cloudcard.sms.SmsServices" invoke="getLoginCaptcha" auth="false">
 		<description>获取登录验证码</description>
-        <attribute name="telNumber" type="String" mode="IN" optional="false"/>
+        <attribute name="teleNumber" type="String" mode="IN" optional="false"/>
         <attribute name="status" type="String" mode="OUT" optional="true"/>
 	</service>
     

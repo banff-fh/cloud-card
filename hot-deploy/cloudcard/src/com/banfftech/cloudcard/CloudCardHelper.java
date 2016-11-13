@@ -402,21 +402,19 @@ public class CloudCardHelper {
      * @throws GenericEntityException
      */
     public static String generateCloudCardCode(int codeLength, Delegator delegator) throws GenericEntityException {
-        Random r = new Random();
+        Random rand = new Random();
         boolean foundUniqueNewCode = false;
         String newCardCode = null;
         long count = 0;
 
         while (!foundUniqueNewCode) {
-            Random rand = new Random();
-            boolean isValid = false;
             String number = "";
             for (int i = 0; i < 19; i++) {
                 int randInt = rand.nextInt(9);
                 number = number + randInt;
             }
             int check = UtilValidate.getLuhnCheckDigit(number);
-            newCardCode = number + check;
+            newCardCode = number + (check==10 ? "X" : check);
         	
         	GenericValue encryptedGiftCard = delegator.makeValue("FinAccount", UtilMisc.toMap("finAccountCode",newCardCode));
             delegator.encryptFields(encryptedGiftCard);

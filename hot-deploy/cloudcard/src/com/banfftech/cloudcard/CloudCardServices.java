@@ -84,7 +84,7 @@ public class CloudCardServices {
 	 * @param context
 	 * @return
 	 */
-	public static Map<String, Object> createCloudCardAndRecharge(DispatchContext dctx, Map<String, Object> context) {
+	public static Map<String, Object> activateCloudCardAndRecharge(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dctx.getDelegator();
 		GenericValue userLogin = (GenericValue) context.get("userLogin");
@@ -95,37 +95,32 @@ public class CloudCardServices {
 		String teleNumber = (String) context.get("teleNumber");
 		BigDecimal amount = (BigDecimal) context.get("amount");
 		
-		Map<String, Object> checkParamOut = checkInputParam(dctx, context);
-		if(ServiceUtil.isError(checkParamOut)){
-			return checkParamOut;
-		}
-
 		// TODO，数据权限检查，先放这里
 		if( !CloudCardHelper.isManager(delegator, userLogin.getString("partyId"), organizationPartyId)){
 			Debug.logError("partyId: " + userLogin.getString("partyId") + " 不是商户："+organizationPartyId + "的管理人员，不能进行开卡、充值操作", module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardUserLoginIsNotManager", locale));
 		}
+		
+		Map<String, Object> checkParamOut = checkInputParam(dctx, context);
+		if(ServiceUtil.isError(checkParamOut)){
+			return checkParamOut;
+		}
+		
 
 		
 		//1、根据二维码获取卡信息
-		GenericValue cloudCard;
+		GenericValue cloudCard = (GenericValue) checkParamOut.get("cloudCard");
 		String finAccountId;
 		String customerPartyId;
-		try {
-			cloudCard = CloudCardHelper.getCloudCardAccountFromCode(cardCode, delegator);
-		} catch (GenericEntityException e) {
-			Debug.logError(e.getMessage(), module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale)); 
-		}
-		if(null == cloudCard ){
-			// 没有激活的卡，调用开卡服务
+		if(!"FNACT_ACTIVE".equals(cloudCard.getString("statusId"))){
+			// 没有激活的卡，调用卡激活服务
 			if(UtilValidate.isEmpty(teleNumber)){
 				Debug.logInfo("激活新卡需要输入客户手机号码", module);
 				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardNeedTelenumber", locale)); 
 			}else{
 				Map<String, Object> createCloudCardOutMap;
 				try {
-					createCloudCardOutMap = dispatcher.runSync("activeCloudCard",
+					createCloudCardOutMap = dispatcher.runSync("activateCloudCard",
 							UtilMisc.toMap("userLogin", userLogin, "locale",locale,
 									"organizationPartyId", organizationPartyId, 
 									"teleNumber", teleNumber,
@@ -182,9 +177,8 @@ public class CloudCardServices {
 	 * @param context
 	 * @return
 	 */
-	public static Map<String, Object> activeCloudCard(DispatchContext dctx, Map<String, Object> context) {
+	public static Map<String, Object> activateCloudCard(DispatchContext dctx, Map<String, Object> context) {
         LocalDispatcher dispatcher = dctx.getDispatcher();
-        Delegator delegator = dctx.getDelegator();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
         Locale locale = (Locale) context.get("locale");
 
@@ -196,31 +190,20 @@ public class CloudCardServices {
 			return checkParamOut;
 		}
 
-		
-		
-
 		// 检查是否系统生成的卡
-		GenericValue cloudCard;
-		try {
-			cloudCard = CloudCardHelper.getCloudCardAccountFromCode(cardCode, delegator);
-		} catch (GenericEntityException e2) {
-			Debug.logError(e2.getMessage(), module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale)); 
-		}
-		if(null == cloudCard){
-			Debug.logInfo("此卡[" + cardCode + "]不存在", module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardNotFound", locale)); 
-		}
-
+		GenericValue cloudCard = (GenericValue) checkParamOut.get("cloudCard");
+		
+		
+		// 没有被导出系统，交付印卡的账户，不能激活
 		if(!"FNACT_PUBLISHED".equals(cloudCard.getString("statusId"))){
 			Debug.logInfo("此卡[" + cardCode + "]状态为[" + cloudCard.getString("statusId") + "]不能进行激活", module);
-			//TODO
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardCanNotActive", locale)); 
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardCanNotBeActivated", locale)); 
 		}
-		
-		//if()  TODO, 检查 卖卡商家与 organizationPartyId 是否匹配
-		
-		String finAccountName = cloudCard.getString("finAccountName");
+		// 不是本商家的卡
+		if(!organizationPartyId.equals(cloudCard.getString("distributorPartyId"))){
+			Debug.logInfo("此卡[" + cardCode + "]不是商家[" +organizationPartyId + "]发行的卡，不能进行激活", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardNotOurCardCanNotBeActivated", locale)); 
+		}
 		
 		// 1、根据teleNumber查找用户，不存在则创建 
 		context.put("ensureCustomerRelationship", true);
@@ -254,12 +237,12 @@ public class CloudCardServices {
 		String finAccountId = (String) finAccountOutMap.get("finAccountId");
 
 
-
 		// 创建PaymentMethod  GiftCard
+		String description = cloudCard.getString("finAccountName");
 		Map<String, Object> giftCardInMap = FastMap.newInstance();
 		giftCardInMap.putAll(context);
 		giftCardInMap.put("cardNumber", cardCode);
-		giftCardInMap.put("description", finAccountName);
+		giftCardInMap.put("description", description);
 		giftCardInMap.put("customerPartyId", customerPartyId);
 		giftCardInMap.put("finAccountId", finAccountId);
 		Map<String, Object> giftCardOutMap = CloudCardHelper.createPaymentMethodAndGiftCard(dctx, giftCardInMap);
@@ -282,7 +265,8 @@ public class CloudCardServices {
 	/**
 	 *	充值服务
 	 *   1、扣商户开卡余额
-	 *   2、存入用户账户
+	 *   2、商户账户收款
+	 *   3、商户账户将充值款项转入用户账户
 	 * @param dctx
 	 * @param context
 	 * @return
@@ -296,9 +280,8 @@ public class CloudCardServices {
 		String organizationPartyId = (String) context.get("organizationPartyId");
 		String finAccountId = (String) context.get("finAccountId");
 		BigDecimal amount = (BigDecimal) context.get("amount");
-		
+
 		Timestamp nowTimestamp = UtilDateTime.nowTimestamp();
-		
 
 		Map<String, Object> checkParamOut = checkInputParam(dctx, context);
 		if(ServiceUtil.isError(checkParamOut)){
@@ -307,14 +290,22 @@ public class CloudCardServices {
 //		GenericValue partyGroup = (GenericValue) checkParamOut.get("partyGroup");
 		GenericValue finAccount = (GenericValue) checkParamOut.get("finAccount");
 
-		// 1、扣商户开卡余额
+		
 		// 获取商户用于管理卖卡限额的金融账户
 		GenericValue creditLimitAccount = CloudCardHelper.getCreditLimitAccount(delegator, organizationPartyId);
         if (UtilValidate.isEmpty(creditLimitAccount)) {
-        	Debug.logError("商家[" + organizationPartyId + "]未配置卖卡额度账户", module);
-        	return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardConfigError", UtilMisc.toMap("organizationPartyId", organizationPartyId), locale));
+            Debug.logError("商家[" + organizationPartyId + "]未配置卖卡额度账户", module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardConfigError", UtilMisc.toMap("organizationPartyId", organizationPartyId), locale));
+        }
+        
+        // 获取商户用于收款的金融账户
+        GenericValue receiptAccount = CloudCardHelper.getReceiptAccount(delegator, organizationPartyId);
+        if (UtilValidate.isEmpty(receiptAccount)) {
+            Debug.logError("商家[" + organizationPartyId + "]未配置收款账户", module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardConfigError", UtilMisc.toMap("organizationPartyId", organizationPartyId), locale));
         }
 
+        // 1、扣商户开卡余额
 		String creditLimitAccountId = (String) creditLimitAccount.get("finAccountId");
 
 		// 检查开卡余额是否够用
@@ -326,8 +317,6 @@ public class CloudCardServices {
 			Debug.logInfo("商家["+organizationPartyId+"]可用卖卡余额不足, 余额：" + creditLimit.toPlainString(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardCreditIsNotEnough", UtilMisc.toMap("balance", creditLimit.toPlainString()), locale));
 		}
-		
-
 
 		// 商户扣减开卡余额
 		Map<String, Object> createFinAccountAuthOutMap;
@@ -351,8 +340,49 @@ public class CloudCardServices {
 		}
 		delegator.clearCacheLine(creditLimitAccount);
 		
-
-		// 用户账户存入
+		// 2、商户收款 用户--》商家
+		String receiptAccountId = receiptAccount.getString("finAccountId");
+		String customerPartyId = finAccount.getString("ownerPartyId");
+		Map<String, Object> receiptAccountDepositOutMap;
+		try {
+			receiptAccountDepositOutMap = dispatcher.runSync("createPaymentAndFinAccountTransForCloudCard",
+					UtilMisc.toMap("userLogin", userLogin, "locale",locale, "statusId", "PMNT_RECEIVED", "currencyUomId",
+							DEFAULT_CURRENCY_UOM_ID, "finAccountTransTypeId", "DEPOSIT", 
+							"paymentTypeId","CUSTOMER_DEPOSIT",// paymentType待定
+							"paymentMethodTypeId", "CASH", "finAccountId", receiptAccountId,
+							"partyIdFrom", customerPartyId, "partyIdTo", organizationPartyId
+							, "amount", amount, "comments", "充值，商家收款",
+							"reasonEnumId", "FATR_REPLENISH"));
+		} catch (GenericServiceException e1) {
+			Debug.logError(e1, module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
+		if (ServiceUtil.isError(receiptAccountDepositOutMap)) {
+			return receiptAccountDepositOutMap;
+		}
+		String receiptPaymentId = (String) receiptAccountDepositOutMap.get("paymentId");
+		
+		// 3、用户账户存入  
+		Map<String, Object> finAccountWithdrawOutMap;
+		try {
+			finAccountWithdrawOutMap = dispatcher.runSync("createFinAccountTrans",
+					UtilMisc.toMap("userLogin", userLogin, "locale",locale,
+							"finAccountId", receiptAccountId,
+							"partyId", customerPartyId,
+							"amount",amount,
+							"finAccountTransTypeId","WITHDRAWAL",
+							"reasonEnumId", "FATR_REPLENISH",
+							"glAccountId", "111000",//TODO 待定
+							"comments", "充值",
+							"statusId", "FINACT_TRNS_APPROVED"));
+		} catch (GenericServiceException e1) {
+			Debug.logError(e1, module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
+		if (ServiceUtil.isError(finAccountWithdrawOutMap)) {
+			return finAccountWithdrawOutMap;
+		}
+		
 		Map<String, Object> finAccountDepositOutMap;
 		try {
 			finAccountDepositOutMap = dispatcher.runSync("createPaymentAndFinAccountTransForCloudCard",
@@ -361,7 +391,7 @@ public class CloudCardServices {
 							"paymentTypeId","GC_DEPOSIT",// paymentType待定
 							"finAccountId", finAccountId,
 							"paymentMethodTypeId", "FIN_ACCOUNT", "partyIdFrom", organizationPartyId, "partyIdTo",
-							finAccount.get("ownerPartyId"), "amount", amount, "comments", "充值",
+							customerPartyId, "amount", amount, "comments", "充值，存入用户账户",
 							"reasonEnumId", "FATR_REPLENISH"));
 		} catch (GenericServiceException e1) {
 			Debug.logError(e1, module);
@@ -371,8 +401,28 @@ public class CloudCardServices {
 			return finAccountDepositOutMap;
 		}
 		
-//		String depositPaymentId = (String) finAccountDepositOutMap.get("paymentId");
+		String depositPaymentId = (String) finAccountDepositOutMap.get("paymentId");
 		
+		
+		
+		
+		//应用用户支付给商家，和商家存入用户账户 的两个payment
+		Map<String, Object> paymentApplicationOutMap;
+		try {
+			paymentApplicationOutMap = dispatcher.runSync("createPaymentApplication",
+					UtilMisc.toMap("userLogin", userLogin, "locale",locale,
+							"amountApplied", amount,
+							"paymentId", receiptPaymentId,
+							"toPaymentId", depositPaymentId));
+		} catch (GenericServiceException e1) {
+			Debug.logError(e1, module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
+		if (ServiceUtil.isError(paymentApplicationOutMap)) {
+			return paymentApplicationOutMap;
+		}
+		
+		// 因为余额自动更新了，重新查询一次
 		try {
 			finAccount.refresh();
 		} catch (GenericEntityException e) {
@@ -387,7 +437,7 @@ public class CloudCardServices {
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("actualBalance", actualBalance);
-		result.put("customerPartyId", finAccount.get("ownerPartyId"));
+		result.put("customerPartyId", customerPartyId);
 		result.put("amount", amount);
 		result.put("finAccountId", finAccountId);
 		return result;
@@ -627,6 +677,7 @@ public class CloudCardServices {
 
 		String organizationPartyId = (String) context.get("organizationPartyId");
 		String finAccountId = (String) context.get("finAccountId");
+		String cardCode = (String) context.get("cardCode");
 		BigDecimal amount = (BigDecimal) context.get("amount");
 		
 		Map<String, Object> retMap = ServiceUtil.returnSuccess();
@@ -669,6 +720,26 @@ public class CloudCardServices {
 			retMap.put("finAccount", finAccount);
 		}
 		
+		// 卡二维码
+		if(UtilValidate.isNotEmpty(cardCode)){
+			GenericValue cloudCard;
+			try {
+				cloudCard = CloudCardHelper.getCloudCardAccountFromCode(cardCode, delegator);
+			} catch (GenericEntityException e2) {
+				Debug.logError(e2.getMessage(), module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale)); 
+			}
+			if(null == cloudCard){
+				Debug.logInfo("找不到云卡，cardCode[" + cardCode + "]", module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardNotFound", locale)); 
+			}
+			
+			if("FNACT_CANCELLED".equals(cloudCard.getString("statusId")) || "FNACT_MANFROZEN".equals(cloudCard.getString("statusId"))){
+				Debug.logInfo("此卡[" + cloudCard.get("finAccountId") + "]状态不可用，当前状态[" + cloudCard.get("statusId") +"]", module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardHasBeenDisabled", locale)); 
+			}
+			retMap.put("cloudCard", cloudCard);
+		}
 		return retMap;
 	}
 	

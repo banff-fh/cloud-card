@@ -93,11 +93,11 @@ public class SmsServices {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
-		String telNumber = (String) context.get("telNumber");
+		String teleNumber = (String) context.get("teleNumber");
 		java.sql.Timestamp nowTimestamp  = UtilDateTime.nowTimestamp();
 
 		EntityConditionList<EntityCondition> captchaConditions = EntityCondition
-				.makeCondition(EntityCondition.makeCondition("telNumber", EntityOperator.EQUALS, telNumber),EntityUtil.getFilterByDateExpr(),EntityCondition.makeCondition("isValid", EntityOperator.EQUALS,"N"));
+				.makeCondition(EntityCondition.makeCondition("teleNumber", EntityOperator.EQUALS, teleNumber),EntityUtil.getFilterByDateExpr(),EntityCondition.makeCondition("isValid", EntityOperator.EQUALS,"N"));
 		
 		List<GenericValue> smsList = FastList.newInstance();
 		try {
@@ -114,7 +114,7 @@ public class SmsServices {
 			//生成验证码
 			String captcha = UtilFormatOut.padString(String.valueOf(Math.floor((Math.random()*10e6))), 6, false, '0');
 			Map<String,Object> smsValidateCodeMap = FastMap.newInstance();
-			smsValidateCodeMap.put("telNumber", telNumber);
+			smsValidateCodeMap.put("teleNumber", teleNumber);
 			smsValidateCodeMap.put("captcha", captcha);
 			smsValidateCodeMap.put("smsType", "LOGIN");
 			smsValidateCodeMap.put("isValid", "N");
@@ -129,7 +129,7 @@ public class SmsServices {
 			}
 			
 			//发送短信
-			context.put("phone", telNumber);
+			context.put("phone", teleNumber);
 			context.put("code", captcha);
 			context.put("product", "卡云卡");
 			SmsServices.sendMessage(dctx, context);
@@ -149,7 +149,7 @@ public class SmsServices {
 					return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardUserNotExistError", locale));
 				}
 				//发送短信
-				context.put("phone", telNumber);
+				context.put("phone", teleNumber);
 				context.put("code", sms.get("captcha"));
 				context.put("product", "卡云卡");
 				SmsServices.sendMessage(dctx, context);
@@ -215,7 +215,7 @@ public class SmsServices {
 			
 			//查找用户验证码是否存在
 			EntityConditionList<EntityCondition> captchaConditions = EntityCondition
-					.makeCondition(EntityCondition.makeCondition("telNumber", EntityOperator.EQUALS, teleNumber),EntityUtil.getFilterByDateExpr(),EntityCondition.makeCondition("isValid", EntityOperator.EQUALS, "N"));
+					.makeCondition(EntityCondition.makeCondition("teleNumber", EntityOperator.EQUALS, teleNumber),EntityUtil.getFilterByDateExpr(),EntityCondition.makeCondition("isValid", EntityOperator.EQUALS, "N"));
 			List<GenericValue> smsList = FastList.newInstance();
 			try {
 				smsList = delegator.findList("SmsValidateCode", captchaConditions, null,

@@ -8,9 +8,21 @@
         <value xml:lang="en">Organization Party[${organizationPartyId}] Configuration error, please contact the platform administrator</value>
         <value xml:lang="zh">商家[${organizationPartyId}]配置错误，请联系平台管理员</value>
     </property>
-    <property key="CloudCardCanNotActive">
-        <value xml:lang="en">This card has been activated</value>
-        <value xml:lang="zh">此卡已经激活，不能再次激活</value>
+    <property key="CloudCardCanNotBeActivated">
+        <value xml:lang="en">This card can not be activated</value>
+        <value xml:lang="zh">此卡状态不符，不能激活</value>
+    </property>
+    <property key="CloudCardHasBeenDisabled">
+        <value xml:lang="en">This card has been disabled</value>
+        <value xml:lang="zh">此卡已被禁用，不能使用</value>
+    </property>
+    <property key="CloudCardNotOurCardCanNotBeActivated">
+        <value xml:lang="en">Not our card, can not be activated</value>
+        <value xml:lang="zh">不是本店的卡，不能激活</value>
+    </property>
+    <property key="CloudCardNotOurCardCanNotRecharge">
+        <value xml:lang="en">Not our card, can not recharge</value>
+        <value xml:lang="zh">不是本店的卡，不能进行充值</value>
     </property>
     <property key="CloudCardNotFound">
         <value xml:lang="en">cloud card not found</value>

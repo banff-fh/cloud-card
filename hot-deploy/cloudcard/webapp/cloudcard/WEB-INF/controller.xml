@@ -27,8 +27,8 @@
 	</request-map>
 
 	<!-- 开卡充值统一接口 -->
-	<request-map uri="createCloudCardAndRecharge">
-    	<event type="service" invoke="createCloudCardAndRecharge"/>
+	<request-map uri="activateCloudCardAndRecharge">
+    	<event type="service" invoke="activateCloudCardAndRecharge"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
