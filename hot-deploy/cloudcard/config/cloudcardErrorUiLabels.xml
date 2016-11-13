@@ -72,4 +72,9 @@
         <value xml:lang="zh">获取验证码失败</value>
     </property>
     
+    <property key="CloudCardGenCardNumberError">
+        <value xml:lang="en">generate CardNumber failed</value>
+        <value xml:lang="zh">生成卡号失败</value>
+    </property>
+    
 </resource>
