@@ -8,13 +8,13 @@
         <value xml:lang="en">Organization Party[${organizationPartyId}] Configuration error, please contact the platform administrator</value>
         <value xml:lang="zh">商家[${organizationPartyId}]配置错误，请联系平台管理员</value>
     </property>
-    <property key="CloudCardAlreadyExist">
-        <value xml:lang="en">This card already exist</value>
+    <property key="CloudCardCanNotActive">
+        <value xml:lang="en">This card has been activated</value>
         <value xml:lang="zh">此卡已经激活，不能再次激活</value>
     </property>
     <property key="CloudCardNotFound">
         <value xml:lang="en">cloud card not found</value>
-        <value xml:lang="zh">未找到卡信息，可能此卡未激活</value>
+        <value xml:lang="zh">未找到卡信息</value>
     </property>
     <property key="CloudCardNeedTelenumber">
         <value xml:lang="zh">请输入手机号码</value>

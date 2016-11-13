@@ -27,7 +27,7 @@
     
     <service name="createCardAuth" engine="java"
     	location="com.banfftech.cloudcard.CloudCardServices" invoke="createCardAuth" auth="true">
-    	<description>卡授权</description>
+    	<description>云卡授权</description>
     	<attribute name="teleNumber" type="String" mode="IN" optional="false"/>
         <attribute name="finAccountId" type="String" mode="IN" optional="false"/>
         <attribute name="amount" type="BigDecimal" mode="IN" optional="false"/>
@@ -37,9 +37,9 @@
     </service>
 
 
-    <service name="createCloudCard" engine="java"
-            location="com.banfftech.cloudcard.CloudCardServices" invoke="createCloudCard" auth="true">
-        <description>开卡</description>
+    <service name="activeCloudCard" engine="java"
+            location="com.banfftech.cloudcard.CloudCardServices" invoke="activeCloudCard" auth="true">
+        <description>云卡激活</description>
         <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家partyId</description></attribute>
         <attribute name="teleNumber" type="String" mode="IN" optional="false"><description>客户手机号码</description></attribute>
         <attribute name="cardCode" type="String" mode="IN" optional="false"><description>卡二维码、条码等唯一标识数据</description></attribute>

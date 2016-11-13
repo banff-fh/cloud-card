@@ -125,7 +125,7 @@ public class CloudCardServices {
 			}else{
 				Map<String, Object> createCloudCardOutMap;
 				try {
-					createCloudCardOutMap = dispatcher.runSync("createCloudCard",
+					createCloudCardOutMap = dispatcher.runSync("activeCloudCard",
 							UtilMisc.toMap("userLogin", userLogin, "locale",locale,
 									"organizationPartyId", organizationPartyId, 
 									"teleNumber", teleNumber,
@@ -175,14 +175,14 @@ public class CloudCardServices {
 	
 	
 	/**
-	 * 开卡服务
-	 * 	1、根据teleNumber查找用户，不存在则创建
-	 *	2、创建FinAccount，关联卡上二维码等信息，并创建PaymentMethod
+	 * 激活卡服务
+	 * 	1、根据teleNumber查找用户，不存在则创建一个用户
+	 *	2、根据carCode找到FinAccount，修改ownerPartyId为用户id，并创建PaymentMethod
 	 * @param dctx
 	 * @param context
 	 * @return
 	 */
-	public static Map<String, Object> createCloudCard(DispatchContext dctx, Map<String, Object> context) {
+	public static Map<String, Object> activeCloudCard(DispatchContext dctx, Map<String, Object> context) {
         LocalDispatcher dispatcher = dctx.getDispatcher();
         Delegator delegator = dctx.getDelegator();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
@@ -196,11 +196,10 @@ public class CloudCardServices {
 			return checkParamOut;
 		}
 
-		GenericValue partyGroup = (GenericValue) checkParamOut.get("partyGroup");
-		String finAccountName = partyGroup.get("groupName")+" 的卡";//TODO
+		
 		
 
-		// 检查此二维码关联的卡是否存在
+		// 检查是否系统生成的卡
 		GenericValue cloudCard;
 		try {
 			cloudCard = CloudCardHelper.getCloudCardAccountFromCode(cardCode, delegator);
@@ -208,11 +207,21 @@ public class CloudCardServices {
 			Debug.logError(e2.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale)); 
 		}
-		if(null != cloudCard){
-			Debug.logInfo("此卡[" + cardCode + "]在系统中已经存在", module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardAlreadyExist", locale)); 
+		if(null == cloudCard){
+			Debug.logInfo("此卡[" + cardCode + "]不存在", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardNotFound", locale)); 
 		}
 
+		if(!"FNACT_PUBLISHED".equals(cloudCard.getString("statusId"))){
+			Debug.logInfo("此卡[" + cardCode + "]状态为[" + cloudCard.getString("statusId") + "]不能进行激活", module);
+			//TODO
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardCanNotActive", locale)); 
+		}
+		
+		//if()  TODO, 检查 卖卡商家与 organizationPartyId 是否匹配
+		
+		String finAccountName = cloudCard.getString("finAccountName");
+		
 		// 1、根据teleNumber查找用户，不存在则创建 
 		context.put("ensureCustomerRelationship", true);
 		Map<String, Object>	 getOrCreateCustomerOut  = CloudCardHelper.getOrCreateCustomer(dctx, context);
@@ -222,23 +231,19 @@ public class CloudCardServices {
 		String customerPartyId = (String) getOrCreateCustomerOut.get("customerPartyId");
 		
 		
-		// 2、创建finAccount 和 paymentMethod
+		// 2、更新finAccount状态，并创建paymentMethod
 		// finAccount
 		Map<String, Object> finAccountMap = FastMap.newInstance();
 		finAccountMap.put("userLogin", userLogin);
 		finAccountMap.put("locale", locale);
-		finAccountMap.put("finAccountTypeId", "GIFTCERT_ACCOUNT"); //TODO 类型待定
-		finAccountMap.put("finAccountName", finAccountName); 
-		finAccountMap.put("finAccountCode", cardCode);
-		finAccountMap.put("currencyUomId", DEFAULT_CURRENCY_UOM_ID);
-		finAccountMap.put("organizationPartyId", "Company");
-		finAccountMap.put("postToGlAccountId", "213200");// TODO 213500?
+		finAccountMap.put("finAccountId", cloudCard.get("finAccountId"));
+		finAccountMap.put("statusId", "FNACT_ACTIVE");
 		finAccountMap.put("ownerPartyId", customerPartyId);
 		finAccountMap.put("fromDate", UtilDateTime.nowTimestamp());
 		
 		Map<String, Object> finAccountOutMap;
 		try {
-			finAccountOutMap = dispatcher.runSync("createFinAccount", finAccountMap);
+			finAccountOutMap = dispatcher.runSync("updateFinAccount", finAccountMap);
 		} catch (GenericServiceException e) {
 			Debug.logError(e, module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
@@ -248,18 +253,7 @@ public class CloudCardServices {
 		}
 		String finAccountId = (String) finAccountOutMap.get("finAccountId");
 
-		//TODO 给卖卡商户 DISTRIBUTOR 还是 REGULATORY_AGENCY 角色？
-		Map<String, Object> finAccountRoleOutMap;
-		try {
-			finAccountRoleOutMap = dispatcher.runSync("createFinAccountRole", 
-					UtilMisc.toMap("userLogin", userLogin, "locale", locale, "finAccountId", finAccountId, "partyId", organizationPartyId, "roleTypeId", "DISTRIBUTOR"));
-		} catch (GenericServiceException e1) {
-			Debug.logError(e1, module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
-		}
-		if (ServiceUtil.isError(finAccountRoleOutMap)) {
-			return finAccountRoleOutMap;
-		}
+
 
 		// 创建PaymentMethod  GiftCard
 		Map<String, Object> giftCardInMap = FastMap.newInstance();
@@ -346,8 +340,8 @@ public class CloudCardServices {
 							//TODO 奇怪的BUG，如果fromDate直接用当前时间戳，
 							// 会导致FinAccountAuth相关的ECA（updateFinAccountBalancesFromAuth）
 							// 服务中，用当前时间进行 起止 时间筛选FinAccountAuth时漏掉了本次刚创建的这条记录，导致金额计算不正确
-							// 所以，这里人为地把fromDate时间提前100毫秒，让后面的ECA服务能找到本次创建的记录，以正确计算金额。
-							"fromDate", UtilDateTime.adjustTimestamp(nowTimestamp, Calendar.MILLISECOND, -100)));
+							// 所以，这里人为地把fromDate时间提前2秒，让后面的ECA服务能找到本次创建的记录，以正确计算金额。
+							"fromDate", UtilDateTime.adjustTimestamp(nowTimestamp, Calendar.SECOND, -2)));
 		} catch (GenericServiceException e1) {
 			Debug.logError(e1, module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
