@@ -38,6 +38,8 @@ public class CloudCardHelper {
 	public static final String resourceError = "cloudcardErrorUiLabels";
 	
 
+	public static final String PLATFORM_PARTY_ID="Company";
+	
 	/**
 	 * 判断当前partyId是否为organizationPartyId的管理人员
 	 * @param delegator
@@ -285,7 +287,7 @@ public class CloudCardHelper {
 	/**
 	 * 获取商家用于扣减开卡限额的金融账户
 	 * @param delegator
-	 * @param organizationPartyId
+	 * @param organizationPartyId 商家partyId
 	 * @return
 	 */
 	public static GenericValue getCreditLimitAccount(Delegator delegator,  String organizationPartyId){
@@ -296,14 +298,14 @@ public class CloudCardHelper {
 	/**
 	 * 获取商家用于扣减开卡限额的金融账户
 	 * @param delegator
-	 * @param organizationPartyId
+	 * @param organizationPartyId 商家partyId
 	 * @param useCache
 	 * @return
 	 */
 	public static GenericValue getCreditLimitAccount(Delegator delegator,  String organizationPartyId, boolean useCache) {
 		EntityCondition dateCond = EntityUtil.getFilterByDateExpr();
-		EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toMap("organizationPartyId", organizationPartyId,
-				"ownerPartyId", organizationPartyId, "finAccountTypeId", "BANK_ACCOUNT", "statusId", "FNACT_ACTIVE"));
+		EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toMap("organizationPartyId", PLATFORM_PARTY_ID,
+				"ownerPartyId", organizationPartyId, "finAccountTypeId", "SVCCRED_ACCOUNT", "statusId", "FNACT_ACTIVE"));
 		GenericValue partyGroupFinAccount = null;
 		try {
 			partyGroupFinAccount = EntityUtil
@@ -319,7 +321,7 @@ public class CloudCardHelper {
 	/**
 	 * 获取商家用于收款的金融账户
 	 * @param delegator
-	 * @param organizationPartyId
+	 * @param organizationPartyId 商家partyId
 	 * @return
 	 */
 	public static GenericValue getReceiptAccount(Delegator delegator,  String organizationPartyId) {
@@ -329,13 +331,13 @@ public class CloudCardHelper {
 	/**
 	 * 获取商家用于收款的金融账户
 	 * @param delegator
-	 * @param organizationPartyId
+	 * @param organizationPartyId 商家partyId
 	 * @param useCache
 	 * @return
 	 */
 	public static GenericValue getReceiptAccount(Delegator delegator,  String organizationPartyId, boolean useCache) {
 		EntityCondition dateCond = EntityUtil.getFilterByDateExpr();
-		EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toMap("organizationPartyId", organizationPartyId,
+		EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toMap("organizationPartyId", PLATFORM_PARTY_ID,
 				"ownerPartyId", organizationPartyId, "finAccountTypeId", "DEPOSIT_ACCOUNT", "statusId", "FNACT_ACTIVE"));
 		GenericValue partyGroupFinAccount = null;
 		try {
