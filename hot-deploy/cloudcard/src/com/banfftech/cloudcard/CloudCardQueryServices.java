@@ -268,7 +268,7 @@ public class CloudCardQueryServices {
 	 * @param response
 	 * @return
 	 */
-	public static String outCardExcel(HttpServletRequest request,HttpServletResponse response){
+	public static String exportCardExcel(HttpServletRequest request,HttpServletResponse response){
 		LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
 		String distributorPartyId = request.getParameter("distributorPartyId");
 		String finAccountName = request.getParameter("finAccountName");

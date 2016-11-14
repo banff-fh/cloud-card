@@ -124,10 +124,9 @@
     
     <!-- 导出卡 -->
 	<request-map uri="exportCardExcel">
-		<event type="java" path="com.banfftech.cloudcard.CloudCardQueryServices" invoke="outCardExcel"></event>
-		<response name="success" type="request" value="cardNumberDetails"></response>
+		<event type="java" path="com.banfftech.cloudcard.CloudCardQueryServices" invoke="exportCardExcel"></event>
+		<response name="success" type="request" value="findCard"></response>
 	</request-map>
-    
 
 	<!-- View Mappings -->
 	<view-map name="main" type="screen"
