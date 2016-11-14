@@ -20,4 +20,16 @@
         <value xml:lang="en">Liquidation</value>
         <value xml:lang="zh">清算</value>
     </property>
+    <property key="markCardMenu">
+        <value xml:lang="en">markCard</value>
+        <value xml:lang="zh">制卡</value>
+    </property>
+    <property key="findCardNumberMenu">
+        <value xml:lang="en">findCardNumber</value>
+        <value xml:lang="zh">查询云卡</value>
+    </property>
+    <property key="createCardNumberMenu">
+        <value xml:lang="en">CreateCardNumber</value>
+        <value xml:lang="zh">新建云卡</value>
+    </property>
 </resource>

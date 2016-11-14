@@ -21,9 +21,23 @@
 		<security https="true" auth="true" />
 		<response name="success" type="view" value="main" />
 	</request-map>
-	<request-map uri="findLiquidation">
+	
+	<!-- 制卡-->
+	<request-map uri="markCard">
 		<security https="true" auth="true" />
-		<response name="success" type="view" value="findLiquidation" />
+		<response name="success" type="view" value="markCard" />
+	</request-map>
+	
+	<!-- 查询商家 已生成的卡-->
+	<request-map uri="findCardNumber">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="findCardNumber" />
+	</request-map>
+	
+	<!-- 商家创建卡 -->
+	<request-map uri="createCardNumber">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="createCardNumber" />
 	</request-map>
 
 	<!-- 开卡充值统一接口 -->
@@ -96,11 +110,22 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
     
+    <!-- 导出卡 -->
+	<request-map uri="outCardNumberExcel">
+		<security https="false" auth="true" />
+		<event type="java" path="com.banfftech.cloudcard" invoke="outCardNumberExcel"></event>
+		<response name="success" type="request" value="cardNumberDetails"></response>
+	</request-map>
     
 
 	<!-- View Mappings -->
 	<view-map name="main" type="screen"
-		page="component://cloudcard/widget/cloudcardScreens.xml#main" />
-	<view-map name="findLiquidation" type="screen"
-		page="component://cloudcard/widget/cloudcardScreens.xml#findLiquidation" />
+		page="component://cloudcard/widget/CloudCardScreens.xml#main" />
+	<view-map name="markCard" type="screen"
+		page="component://cloudcard/widget/CloudCardScreens.xml#markCard" />
+	<view-map name="findCardNumber" type="screen"
+		page="component://cloudcard/widget/CloudCardScreens.xml#findCardNumber" />
+	<view-map name="createCardNumber" type="screen"
+		page="component://cloudcard/widget/CloudCardScreens.xml#createCardNumber" />
+		
 </site-conf>
