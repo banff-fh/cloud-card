@@ -105,7 +105,6 @@ public class CloudCardServices {
 		if(ServiceUtil.isError(checkParamOut)){
 			return checkParamOut;
 		}
-		
 
 		
 		//1、根据二维码获取卡信息
@@ -249,9 +248,7 @@ public class CloudCardServices {
 		if (ServiceUtil.isError(giftCardOutMap)) {
 			return giftCardOutMap;
 		}	
-		if (ServiceUtil.isError(giftCardOutMap)) {
-			return giftCardOutMap;
-		}
+
 
 		// 3、返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
