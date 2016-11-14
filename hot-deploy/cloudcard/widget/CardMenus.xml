@@ -20,17 +20,8 @@ under the License.
 <menus xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-menu.xsd">
 
     <menu name="CardSubTabBar" menu-container-style="button-bar button-style-2" default-selected-style="selected">
-        <menu-item name="EditProductCatalog" title="${uiLabelMap.newMarkCardMenu}" widget-style="buttontext create">
-            <link target="EditProdCatalog"/>
-        </menu-item>
-        <menu-item name="CreateSeo" title="${uiLabelMap.ProductCatalogSeoCreate}">
-            <condition>
-                <not><if-empty field="prodCatalog"/></not>
-            </condition>
-            <link target="CreateSeoProdCatalog">
-                <parameter param-name="prodCatalogId" from-field="parameters.prodCatalogId"/>
-            </link>
+        <menu-item name="createCard" title="${uiLabelMap.newMarkCardMenu}" widget-style="buttontext create">
+            <link target="createCard"/>
         </menu-item>
     </menu>
-
 </menus>
