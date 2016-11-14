@@ -19,10 +19,9 @@
     <screen name="findCard">
        <section>
             <actions>
-                <set field="titleProperty" value="PageTitleFindCatalog"/>
-                <set field="headerItem" value="catalogs"/>
+                <set field="titleProperty" value="PageTitleFindCard"/>
+                <set field="headerItem" value="cards"/>
                 <set field="tabButtonItem" value="FindCard"/>
-                <set field="labelTitleProperty" value="ProductCatalog"/>
             </actions>
             <widgets>
                 <decorator-screen name="cloudcardCommonDecorator" location="${parameters.mainDecoratorLocation}">
@@ -59,14 +58,14 @@
 	<screen name="createCard">
 		<section>
             <actions>
-                <set field="titleProperty" value="PageTitleEditProductCatalog"/>
-                <set field="tabButtonItem" value="productcatalog"/>
-                <set field="partyId" from-field="parameters.partyId"/>
+<!--                 <set field="titleProperty" value="PageTitleEditProductCatalog"/> -->
+<!--                 <set field="tabButtonItem" value="productcatalog"/> -->
+<!--                 <set field="partyId" from-field="parameters.partyId"/> -->
             </actions>
             <widgets>
                 <decorator-screen name="cloudcardCommonDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
-                        <screenlet title="${uiLabelMap.PageTitleEditPersonalInformation}">
+                        <screenlet title="${uiLabelMap.PageTitleEditCardInformation}">
                             <include-form name="EditCard" location="component://cloudcard/widget/CloudCardCreateCardForms.xml"/>
                         </screenlet>
                     </decorator-section>

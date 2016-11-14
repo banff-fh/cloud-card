@@ -128,6 +128,12 @@
 		<response name="success" type="request" value="findCard"></response>
 	</request-map>
 
+	<request-map uri="LookupPartyName">
+		<security auth="true" https="true" />
+		<response name="success" type="view" value="LookupPartyName" />
+	</request-map>
+	
+
 	<!-- View Mappings -->
 	<view-map name="main" type="screen"
 		page="component://cloudcard/widget/CloudCardScreens.xml#main" />
@@ -139,4 +145,7 @@
 		page="component://cloudcard/widget/CloudCardScreens.xml#createCard" />
 	<view-map name="EditCard" type="screen"
 		page="component://cloudcard/widget/CloudCardScreens.xml#EditCard" />
+	<view-map name="LookupPartyName" type="screen"
+		page="component://party/widget/partymgr/LookupScreens.xml#LookupPartyName" />
+	
 </site-conf>

@@ -42,7 +42,7 @@
     </property>
     <property key="organizationPartyId">
         <value xml:lang="en">OrganizationPartyId</value>
-        <value xml:lang="zh">机构ID</value>
+        <value xml:lang="zh">店铺</value>
     </property>
     <property key="finAccountName">
         <value xml:lang="en">FinAccountName</value>
@@ -67,6 +67,10 @@
     <property key="exportCard">
         <value xml:lang="en">ExportCard</value>
         <value xml:lang="zh">导出卡信息</value>
+    </property>
+    <property key="PageTitleEditCardInformation">
+        <value xml:lang="en">PageTitleEditCardInformation</value>
+        <value xml:lang="zh">批量生成卡</value>
     </property>
     
 </resource>
