@@ -323,7 +323,7 @@ public class CloudCardServices {
 							"currencyUomId", DEFAULT_CURRENCY_UOM_ID,  
 							"finAccountId", creditLimitAccountId,
 							"amount", amount,
-							//TODO 奇怪的BUG，如果fromDate直接用当前时间戳，
+							//FIXME 奇怪的BUG，如果fromDate直接用当前时间戳，
 							// 会导致FinAccountAuth相关的ECA（updateFinAccountBalancesFromAuth）
 							// 服务中，用当前时间进行 起止 时间筛选FinAccountAuth时漏掉了本次刚创建的这条记录，导致金额计算不正确
 							// 所以，这里人为地把fromDate时间提前2秒，让后面的ECA服务能找到本次创建的记录，以正确计算金额。
@@ -385,7 +385,7 @@ public class CloudCardServices {
 			finAccountDepositOutMap = dispatcher.runSync("createPaymentAndFinAccountTransForCloudCard",
 					UtilMisc.toMap("userLogin", userLogin, "locale",locale, "statusId", "PMNT_RECEIVED", "currencyUomId",
 							DEFAULT_CURRENCY_UOM_ID, "finAccountTransTypeId", "DEPOSIT", 
-							"paymentTypeId","GC_DEPOSIT",// paymentType待定
+							"paymentTypeId","GC_DEPOSIT",
 							"finAccountId", finAccountId,
 							"paymentMethodTypeId", "FIN_ACCOUNT", "partyIdFrom", organizationPartyId, "partyIdTo",
 							customerPartyId, "amount", amount, "comments", "充值，存入用户账户",
@@ -475,7 +475,7 @@ public class CloudCardServices {
 		
 		// 根据二维码获取用户用于支付的帐号
 		GenericValue cloudCard = (GenericValue) checkParamOut.get("cloudCard");
-		// 没有被导出系统，交付印卡的账户，不能激活
+		// 没有激活的账户，不能用于付款
 		if(!"FNACT_ACTIVE".equals(cloudCard.getString("statusId"))){
 			Debug.logInfo("此卡[" + cardCode + "]状态为[" + cloudCard.getString("statusId") + "]不能进行付款", module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardHasBeenDisabled", locale)); 
@@ -508,7 +508,7 @@ public class CloudCardServices {
 			finAccountWithdrawalOutMap = dispatcher.runSync("createPaymentAndFinAccountTransForCloudCard",
 					UtilMisc.toMap("userLogin", userLogin, "locale",locale, "statusId", "PMNT_SENT", "currencyUomId",
 							DEFAULT_CURRENCY_UOM_ID, "finAccountTransTypeId", "WITHDRAWAL", 
-							"paymentTypeId","GC_WITHDRAWAL",// TODO paymentType待定 
+							"paymentTypeId","GC_WITHDRAWAL",
 							"finAccountId", finAccountId,
 							"paymentMethodId",paymentMethodId,
 							"paymentMethodTypeId", "FIN_ACCOUNT", "partyIdFrom", customerPartyId, "partyIdTo",
@@ -618,11 +618,11 @@ public class CloudCardServices {
 								"currencyUomId", DEFAULT_CURRENCY_UOM_ID,  
 								"finAccountId", creditLimitAccountId,
 								"amount", amount.negate(),
-								//TODO 奇怪的BUG，如果fromDate直接用当前时间戳，
+								//FIXME 奇怪的BUG，如果fromDate直接用当前时间戳，
 								// 会导致FinAccountAuth相关的ECA（updateFinAccountBalancesFromAuth）
 								// 服务中，用当前时间进行 起止 时间筛选FinAccountAuth时漏掉了本次刚创建的这条记录，导致金额计算不正确
-								// 所以，这里人为地把fromDate时间提前100毫秒，让后面的ECA服务能找到本次创建的记录，以正确计算金额。
-								"fromDate", UtilDateTime.adjustTimestamp(UtilDateTime.nowTimestamp(), Calendar.MILLISECOND, -100)));
+								// 所以，这里人为地把fromDate时间提前2秒，让后面的ECA服务能找到本次创建的记录，以正确计算金额。
+								"fromDate", UtilDateTime.adjustTimestamp(UtilDateTime.nowTimestamp(), Calendar.SECOND, -2)));
 			} catch (GenericServiceException e1) {
 				Debug.logError(e1, module);
 				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
@@ -631,6 +631,22 @@ public class CloudCardServices {
 				return createFinAccountAuthOutMap;
 			}
 			delegator.clearCacheLine(creditLimitAccount);
+			
+			// 设置Payment状态为PMNT_CONFIRMED
+			Map<String, Object> setPaymentStatusOutMap;
+			try {
+				setPaymentStatusOutMap = dispatcher.runSync("setPaymentStatus",
+						UtilMisc.toMap("userLogin", userLogin, "locale",locale, 
+								"paymentId", withdrawalPaymentId,  
+								"statusId", "PMNT_CONFIRMED"
+								));
+			} catch (GenericServiceException e1) {
+				Debug.logError(e1, module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+			}
+			if (ServiceUtil.isError(setPaymentStatusOutMap)) {
+				return setPaymentStatusOutMap;
+			}
 		}
 		
 		try {
