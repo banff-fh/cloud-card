@@ -9,8 +9,9 @@
     <copyright></copyright>
     <version></version>
 	<view-entity entity-name="FinAccountAndPaymentMethodAndGiftCard" package-name="org.ofbiz.accounting.finaccount" title="Financial Account Authorization Sum">
-        <description>金融账户关联支付以及卡</description>
+        <description>云卡视图（金融账户、金融账户角色、礼品卡关联）</description>
         <member-entity entity-alias="FA" entity-name="FinAccount"/>
+        <member-entity entity-alias="FAR" entity-name="FinAccountRole"/>
         <member-entity entity-alias="PM" entity-name="PaymentMethod"/>
       	<member-entity entity-alias="GC" entity-name="GiftCard"/>
       	<alias entity-alias="FA" name="finAccountId" />
@@ -21,6 +22,7 @@
       	<alias entity-alias="FA" name="organizationPartyId" />
       	<alias entity-alias="FA" name="finAccountCode" />
       	<alias entity-alias="FA" name="actualBalance" />
+      	<alias entity-alias="FAR" name="distributorPartyId" field="partyId" />
 		<alias entity-alias="PM" name="paymentMethodId" />
 		<alias entity-alias="PM" name="paymentMethodTypeId" />
 		<alias entity-alias="PM" name="partyId" />
@@ -29,10 +31,19 @@
 		<alias entity-alias="GC" name="cardNumber" />
 		<alias entity-alias="GC" name="pinNumber" />
 		<alias entity-alias="GC" name="expireDate" />
-		<view-link entity-alias="FA" rel-entity-alias="PM">
+		<view-link entity-alias="FA" rel-entity-alias="FAR">
 			<key-map field-name="finAccountId" rel-field-name="finAccountId" />
+			<entity-condition>
+				<condition-expr entity-alias="FAR" field-name="roleTypeId" operator="equals" value="DISTRIBUTOR"/>
+			</entity-condition>
 		</view-link>
-		<view-link entity-alias="PM" rel-entity-alias="GC">
+		<view-link entity-alias="FA" rel-entity-alias="PM" rel-optional="true">
+			<key-map field-name="finAccountId" rel-field-name="finAccountId" />
+			<entity-condition>
+				<condition-expr entity-alias="FA" field-name="finAccountTypeId" operator="equals" value="GIFTCERT_ACCOUNT"/>
+			</entity-condition>
+		</view-link>
+		<view-link entity-alias="PM" rel-entity-alias="GC" rel-optional="true">
 			<key-map field-name="paymentMethodId" />
 		</view-link>
 		<relation type="one-nofk" rel-entity-name="PaymentMethod">
@@ -81,13 +92,13 @@
     </view-entity>
     
     <entity entity-name="SmsValidateCode" package-name="org.ofbiz.cloudcard.sms">
-		<field name="telNumber" type="id"></field>
+		<field name="teleNumber" type="id"></field>
 		<field name="smsType" type="id"></field>
 		<field name="captcha" type="id"></field>
 		<field name="isValid" type="id"></field>
 		<field name="fromDate" type="date-time"></field>
       	<field name="thruDate" type="date-time"></field>
-      	<prim-key field="telNum"/>
+      	<prim-key field="teleNumber"/>
       	<prim-key field="captcha"/>
 	    <prim-key field="fromDate"/>
 	</entity>
