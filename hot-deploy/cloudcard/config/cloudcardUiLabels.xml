@@ -38,7 +38,7 @@
     </property>
     <property key="quantity">
         <value xml:lang="en">CreateCardQuantity</value>
-        <value xml:lang="zh">生成卡数量</value>
+        <value xml:lang="zh">制卡数量</value>
     </property>
     <property key="organizationPartyId">
         <value xml:lang="en">OrganizationPartyId</value>
@@ -46,7 +46,7 @@
     </property>
     <property key="finAccountName">
         <value xml:lang="en">FinAccountName</value>
-        <value xml:lang="zh">卡名称</value>
+        <value xml:lang="zh">卡名</value>
     </property>
     <property key="finAccountCode">
         <value xml:lang="en">finAccountCode</value>
