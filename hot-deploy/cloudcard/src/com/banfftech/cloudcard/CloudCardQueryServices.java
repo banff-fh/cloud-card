@@ -1,22 +1,12 @@
 package com.banfftech.cloudcard;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilGenerics;
-import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilNumber;
 import org.ofbiz.base.util.UtilProperties;
@@ -31,7 +21,6 @@ import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
-import org.ofbiz.service.ModelService;
 import org.ofbiz.service.ServiceUtil;
 
 import javolution.util.FastList;
@@ -45,12 +34,12 @@ public class CloudCardQueryServices {
     public static final BigDecimal ZERO = BigDecimal.ZERO.setScale(decimals, rounding);
     
     /**
-	 * 查询卡信息
+	 * 查询用户卡列表
 	 * @param dctx
 	 * @param context
 	 * @return Map
 	 */
-	public static Map<String, Object> findFinAccountByPartyId(DispatchContext dctx, Map<String, Object> context) {
+	public static Map<String, Object> myCloudCards(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
@@ -78,23 +67,35 @@ public class CloudCardQueryServices {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
+		
+		if(ServiceUtil.isError(faResult)){
+			return faResult;
+		}
 
 		List<GenericValue> retList = UtilGenerics.checkList(faResult.get("list"));
-		List<Object> finaccountList = FastList.newInstance();
-
+		List<Object> cloudCardList = FastList.newInstance();
+		
 		//图片地址
 		for(GenericValue finaccount:retList){
 			Map<String, Object> finaccountMap = FastMap.newInstance();
-			finaccountMap.putAll(finaccount);
-			String organizationPartyId = finaccount.get("organizationPartyId").toString();
+//			finaccountMap.putAll(finaccount);
+			String organizationPartyId = finaccount.get("distributorPartyId").toString();
 			if(organizationPartyId != null){
 				finaccountMap.put("cardImg", EntityUtilProperties.getPropertyValue("cloudcard","cardImg."+organizationPartyId,delegator));
 			}
-			finaccountList.add(finaccountMap);
+			finaccountMap.put("cardName", finaccount.get("finAccountName")); //卡名
+			finaccountMap.put("cardCode", finaccount.get("cardNumber")); //卡二维码
+			finaccountMap.put("cardId", finaccount.get("paymentMethodId"));// 卡id
+			finaccountMap.put("cardBalance", finaccount.get("actualBalance")); //余额
+			finaccountMap.put("distributorPartyId", finaccount.get("distributorPartyId")); //发卡商家partyId
+			//卡主，如果此卡是别人授权给我用的，此字段就是原卡主
+			finaccountMap.put("ownerPartyId", finaccount.get("ownerPartyId")); 
+			cloudCardList.add(finaccountMap);
 		}
 		
 		Map<String, Object> result = ServiceUtil.returnSuccess();
-		result.put("finAccountList", finaccountList);
+		result.put("cloudCardList", cloudCardList);
+		result.put("listSize", faResult.get("listSize"));
 		return result;
 	}
 
