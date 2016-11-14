@@ -1,13 +1,23 @@
 package com.banfftech.cloudcard;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilGenerics;
+import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilNumber;
 import org.ofbiz.base.util.UtilProperties;
@@ -258,25 +268,29 @@ public class CloudCardQueryServices {
 	 * @param response
 	 * @return
 	 */
-	/*public static String outCardNumberExcel(HttpServletRequest request,HttpServletResponse response){
+	public static String outCardExcel(HttpServletRequest request,HttpServletResponse response){
 		LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
-		String ownerPartyId = request.getParameter("ownerPartyId");
+		String distributorPartyId = request.getParameter("distributorPartyId");
+		String finAccountName = request.getParameter("finAccountName");
+		String statusId = request.getParameter("statusId");
+		
 		Delegator delegator =  dispatcher.getDelegator();
 		Map<String,Object> context = UtilHttp.getParameterMap(request);
 		GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
 		Locale locale = (Locale) context.get("locale");
 		context.put("userLogin", userLogin);
-		context.put("ownerPartyId",ownerPartyId);
 		context.put("searchLx","excel");
 
 		Map<String,Object> results=null;
 		try {
 			Map<String, Object> inputFieldMap = FastMap.newInstance();
-			inputFieldMap.put("statusId", "FNACT_CREATED");
+			inputFieldMap.put("distributorPartyId", distributorPartyId);
+			inputFieldMap.put("finAccountName", finAccountName);
+			inputFieldMap.put("statusId", statusId);
 
 			Map<String, Object> ctxMap = FastMap.newInstance();
 			ctxMap.put("inputFields", inputFieldMap);
-			ctxMap.put("entityName", "FinAccount");
+			ctxMap.put("entityName", "FinAccountAndPaymentMethodAndGiftCard");
 			ctxMap.put("orderBy", "expireDate");
 			ctxMap.put("filterByDate", "Y");
 
@@ -287,38 +301,37 @@ public class CloudCardQueryServices {
 				Debug.logError(e.getMessage(), module);
 			}
 
-			List<Map<Object,Object>> list = (List<Map<Object, Object>>) faResult.get("list");
-						
+			List<Map<Object, Object>> list = (List<Map<Object, Object>>) faResult.get("list");
 
 			HSSFWorkbook wb = new HSSFWorkbook();
 			HSSFSheet sheet = wb.createSheet("卡云卡");
 			HSSFRow row1 = sheet.createRow(0);
-			HSSFCell cell0 = row1.createCell((short)0);
-			HSSFCell cell1 = row1.createCell((short)1);
-			HSSFCell cell2 = row1.createCell((short)2);
+			HSSFCell cell0 = row1.createCell((short) 0);
+			HSSFCell cell1 = row1.createCell((short) 1);
+			HSSFCell cell2 = row1.createCell((short) 2);
 			cell1.setCellValue("卡名");
 			cell1.setCellValue("卡号");
-			if(UtilValidate.isNotEmpty(list)){
-				for(int i=0;i<list.size();i++){
-					HSSFRow row = sheet.createRow(i+1);
-					HSSFCell ce0 = row.createCell((short)0);
-					Map<Object,Object> mm = list.get(i);
+			if (UtilValidate.isNotEmpty(list)) {
+				for (int i = 0; i < list.size(); i++) {
+					HSSFRow row = sheet.createRow(i + 1);
+					HSSFCell ce0 = row.createCell((short) 0);
+					Map<Object, Object> mm = list.get(i);
 					ce0.setCellValue(String.valueOf(mm.get("finAccountName")));
-					HSSFCell ce1 = row.createCell((short)1);
+					HSSFCell ce1 = row.createCell((short) 1);
 					ce1.setCellValue(String.valueOf(mm.get("finAccountCode")));
-					
+
 				}
-				   response.reset();
-				   response.addHeader("Content-Disposition", "attachment;filename=" + new String("交易明细.xls".getBytes("gb2312"), "ISO8859-1"));
-				   response.setContentType("application/msexcel;charset=utf-8");
-				   OutputStream toClient = response.getOutputStream();
-				   wb.write(toClient);
+				response.reset();
+				response.addHeader("Content-Disposition", "attachment;filename=" + new String("卡号.xls".getBytes("gb2312"), "ISO8859-1"));
+				response.setContentType("application/msexcel;charset=utf-8");
+				OutputStream toClient = response.getOutputStream();
+				wb.write(toClient);
 				toClient.flush();
-	            toClient.close();
+				toClient.close();
 			}
 		}  catch (IOException e) {
 			e.printStackTrace();
 		}
 		return "SUCCESS";
-	}*/
+	}
 }

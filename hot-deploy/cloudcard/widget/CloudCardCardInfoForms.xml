@@ -22,12 +22,20 @@ under the License.
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
     <form name="findCard" type="single" target="findCard" title="" default-map-name="cloudcard"
         header-row-style="header-row" default-table-style="basic-table" >
-        <field name="distributorPartyId" title="${uiLabelMap.distributorPartyId}"><text/></field>
+        <field name="distributorPartyId" title="${uiLabelMap.distributorPartyId}" ><text/></field>
         <field name="finAccountName" title="${uiLabelMap.finAccountName}"><text/></field>
         <field name="statusId" title="${uiLabelMap.statusId}"><text/></field>
         <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit">
             <submit button-type="button"/>
         </field>
+        
+<!--         <field name="exportCardExcel" title=" "  widget-style="smallSubmit"  also-hidden="false" action="exportCardExcel"> -->
+<!--             <hyperlink  target="exportCardExcel" target-type="content" description="${uiLabelMap.exportCard}"> -->
+<!--                <parameter param-name="distributorPartyId" from-field="distributorPartyId" /> -->
+<!--                <parameter param-name="finAccountName"/> -->
+<!--                <parameter param-name="statusId"/> -->
+<!--             </hyperlink> -->
+<!--         </field> -->
     </form>
     
     <form name="ListCard" list-name="listIt" target="" title="" type="list" paginate-target="findCard"

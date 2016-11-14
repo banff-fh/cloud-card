@@ -34,6 +34,17 @@
                                         <include-form name="findCard" location="component://cloudcard/widget/CloudCardCardInfoForms.xml"/>
                                     </decorator-section>
                                     <decorator-section name="search-results">
+										<section>
+											<widgets>
+												<container style="button-bar button-style-1">
+													<link target="exportCardExcel"  target-type="content" description="${uiLabelMap.exportCard}" text="${uiLabelMap.exportCard}">
+														<parameter param-name="distributorPartyId" from-field="parameters.distributorPartyId" />
+														<parameter param-name="finAccountName" from-field="parameters.finAccountName" />
+														<parameter param-name="statusId" from-field="parameters.statusId" />
+													</link>
+												</container>
+											</widgets>
+										</section>
                                         <include-form name="ListCard" location="component://cloudcard/widget/CloudCardCardInfoForms.xml"/>
                                     </decorator-section>
                                 </decorator-screen>
@@ -45,19 +56,23 @@
         </section>
     </screen>
 
-	<screen name="createCardNumber">
+	<screen name="createCard">
 		<section>
-			<actions>
-				<set field="headerItem" value="main" />
-			</actions>
-			<widgets>
-				<decorator-screen name="cloudcardCommonDecorator"
-					location="${parameters.mainDecoratorLocation}">
-					<decorator-section name="body">
-					</decorator-section>
-				</decorator-screen>
-			</widgets>
-		</section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditProductCatalog"/>
+                <set field="tabButtonItem" value="productcatalog"/>
+                <set field="partyId" from-field="parameters.partyId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="cloudcardCommonDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleEditPersonalInformation}">
+                            <include-form name="EditCard" location="component://cloudcard/widget/CloudCardCreateCardForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
 	</screen>
 
 </screens>

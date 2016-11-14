@@ -28,6 +28,12 @@
 		<response name="success" type="view" value="markCard" />
 	</request-map>
 	
+	<request-map uri="genNewCloudCardCode">
+		<event type="service" invoke="genNewCloudCardCode"/>
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="findCard" />
+	</request-map>
+	
 	<!-- 查询商家 已生成的卡-->
 	<request-map uri="findCard">
 		<security https="true" auth="true" />
@@ -35,9 +41,9 @@
 	</request-map>
 	
 	<!-- 商家创建卡 -->
-	<request-map uri="createCardNumber">
+	<request-map uri="createCard">
 		<security https="true" auth="true" />
-		<response name="success" type="view" value="createCardNumber" />
+		<response name="success" type="view" value="createCard" />
 	</request-map>
 
 	<!-- 开卡充值统一接口 -->
@@ -110,11 +116,15 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
+	
+	<request-map uri="editCard">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="EditCard" />
+	</request-map>
     
     <!-- 导出卡 -->
-	<request-map uri="outCardNumberExcel">
-		<security https="false" auth="true" />
-		<event type="java" path="com.banfftech.cloudcard" invoke="outCardNumberExcel"></event>
+	<request-map uri="exportCardExcel">
+		<event type="java" path="com.banfftech.cloudcard.CloudCardQueryServices" invoke="outCardExcel"></event>
 		<response name="success" type="request" value="cardNumberDetails"></response>
 	</request-map>
     
@@ -126,7 +136,8 @@
 		page="component://cloudcard/widget/CloudCardScreens.xml#markCard" />
 	<view-map name="findCard" type="screen"
 		page="component://cloudcard/widget/CloudCardScreens.xml#findCard" />
-	<view-map name="createCardNumber" type="screen"
-		page="component://cloudcard/widget/CloudCardScreens.xml#createCardNumber" />
-		
+	<view-map name="createCard" type="screen"
+		page="component://cloudcard/widget/CloudCardScreens.xml#createCard" />
+	<view-map name="EditCard" type="screen"
+		page="component://cloudcard/widget/CloudCardScreens.xml#EditCard" />
 </site-conf>
