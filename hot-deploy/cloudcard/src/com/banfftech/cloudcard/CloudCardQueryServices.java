@@ -189,12 +189,11 @@ public class CloudCardQueryServices {
 	
 	
 	/**
-	 * 查询卖卡余额和开卡额度
+	 * 根据二维码查询卡信息
 	 * @param dctx
 	 * @param context
 	 * @return Map
 	 */
-	
 	public static Map<String, Object> getCardInfoByCode(DispatchContext dctx, Map<String, Object> context) {
 		Delegator delegator = dctx.getDelegator();
 		Locale locale = (Locale) context.get("locale");
@@ -202,34 +201,51 @@ public class CloudCardQueryServices {
 //		String organizationPartyId = (String) context.get("organizationPartyId");
 		String cardCode = (String) context.get("cardCode");
 		
-		GenericValue cloudCardAccount;
+		GenericValue cloudCard;
 		try {
-			cloudCardAccount = CloudCardHelper.getCloudCardAccountFromCode(cardCode, delegator);
+			cloudCard = CloudCardHelper.getCloudCardAccountFromCode(cardCode, delegator);
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale)); 
 		}
 		
-		Map<String, Object> results = ServiceUtil.returnSuccess();
-
-		if(null != cloudCardAccount){
-			results.put("isExist", "Y");
-			BigDecimal actualBalance = cloudCardAccount.getBigDecimal("actualBalance");
-			if(null==actualBalance){
-				results.put("actualBalance", ZERO);
-			}else{
-				results.put("actualBalance", actualBalance);
-			}
-			String cardOrganizationPartyId = cloudCardAccount.get("organizationPartyId").toString();
-			if(cardOrganizationPartyId != null){
-				results.put("cardImg", EntityUtilProperties.getPropertyValue("cloudcard","cardImg." + cardOrganizationPartyId, delegator));
-			}
-			results.put("finAccountId", cloudCardAccount.getString("finAccountId"));
-			results.put("finAccountName", cloudCardAccount.getString("finAccountName"));
-			results.put("customerPartyId", cloudCardAccount.getString("customerPartyId"));
-		}else{
-			results.put("isExist", "N");
+		if(null == cloudCard){
+			Debug.logInfo("找不到云卡，cardCode[" + cardCode + "]", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardNotFound", locale)); 
 		}
+		
+		String statusId = cloudCard.getString("statusId");
+		if("FNACT_CANCELLED".equals(statusId) || "FNACT_MANFROZEN".equals(statusId)){
+			Debug.logInfo("此卡[finAccountId=" + cloudCard.get("finAccountId") + "]状态不可用，当前状态[" + statusId +"]", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardHasBeenDisabled", locale)); 
+		}
+		
+		
+		Map<String, Object> results = ServiceUtil.returnSuccess();
+		if("FNACT_ACTIVE".equals(statusId)){
+			results.put("isActivated", "Y");
+		}else{
+			results.put("isActivated", "N");
+		}
+		
+		BigDecimal actualBalance = cloudCard.getBigDecimal("actualBalance");
+		if(null==actualBalance){
+			results.put("cardBalance", ZERO);
+		}else{
+			results.put("cardBalance", actualBalance);
+		}
+		String cardOrganizationPartyId = cloudCard.getString("distributorPartyId");
+		if(cardOrganizationPartyId != null){
+			results.put("cardImg", EntityUtilProperties.getPropertyValue("cloudcard","cardImg." + cardOrganizationPartyId, delegator));
+			results.put("distributorPartyId", cardOrganizationPartyId); //发卡商家partyId
+		}
+		
+		results.put("cardName", cloudCard.get("finAccountName")); //卡名
+		results.put("cardCode", cardCode); //卡二维码
+		results.put("cardId", cloudCard.get("paymentMethodId"));// 卡id
+		results.put("customerPartyId", cloudCard.getString("partyId"));
+		//卡主，如果此卡是别人授权给我用的，此字段就是原卡主
+		results.put("ownerPartyId", cloudCard.get("ownerPartyId")); 
 		
 		return results;
 	}

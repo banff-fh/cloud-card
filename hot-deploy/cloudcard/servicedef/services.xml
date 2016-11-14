@@ -90,14 +90,16 @@
             location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="getCardInfoByCode" auth="true">
         <description>根据二维码查询卡信息</description>
         <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家partyId</description></attribute>
-        <attribute name="cardCode" type="String" mode="IN" optional="false"><description>卡二维码、条码等唯一标识数据</description></attribute>
+        <attribute name="cardCode" type="String" mode="INOUT" optional="false"><description>卡二维码、条码等唯一标识数据</description></attribute>
 
-        <attribute name="isExist" type="String" mode="OUT" optional="false"><description>此卡是否已开通（激活）</description></attribute>
-        <attribute name="finAccountId" type="String" mode="OUT" optional="true"><description>卡Id</description></attribute>
-        <attribute name="finAccountName" type="String" mode="OUT" optional="true"><description>卡名</description></attribute>
+        <attribute name="isActivated" type="String" mode="OUT" optional="false"><description>此卡是否已开通（激活）</description></attribute>
+        <attribute name="cardId" type="String" mode="OUT" optional="true"><description>卡Id</description></attribute>
+        <attribute name="cardName" type="String" mode="OUT" optional="true"><description>卡名</description></attribute>
         <attribute name="cardImg" type="String" mode="OUT" optional="true"><description>卡图片地址</description></attribute>
-        <attribute name="actualBalance" type="BigDecimal" mode="OUT" optional="true"><description>客户partyId</description></attribute>
-        <attribute name="customerPartyId" type="String" mode="OUT" optional="true"><description>可用余额</description></attribute>
+        <attribute name="cardBalance" type="BigDecimal" mode="OUT" optional="true"><description>可用余额</description></attribute>
+        <attribute name="distributorPartyId" type="String" mode="OUT" optional="true"><description>发卡商家partyId</description></attribute>
+        <attribute name="customerPartyId" type="String" mode="OUT" optional="true"><description>客户partyId</description></attribute>
+        <attribute name="ownerPartyId" type="String" mode="OUT" optional="true"><description>原卡主partyId</description></attribute>
 	</service>
 	
 	<service name="findLimitAndPresellInfo" engine="java"
