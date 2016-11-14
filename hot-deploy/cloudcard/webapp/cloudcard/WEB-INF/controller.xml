@@ -61,8 +61,9 @@
         <response name="error" type="request" value="json"/>
     </request-map>
     
-    <request-map uri="findFinAccountByPartyId">
-    	<event type="service" invoke="findFinAccountByPartyId"/>
+     <!-- 用户卡列表接口 -->
+    <request-map uri="myCloudCards">
+    	<event type="service" invoke="myCloudCards"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>

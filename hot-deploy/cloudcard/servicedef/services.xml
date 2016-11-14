@@ -5,13 +5,13 @@
     <vendor></vendor>
     <version>1.0</version>
     
-    <service name="findFinAccountByPartyId" engine="java"
-            location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="findFinAccountByPartyId" auth="true">
-        <description>查询卡信息</description>
+    <service name="myCloudCards" engine="java"
+            location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="myCloudCards" auth="true">
+        <description>查询用户卡列表</description>
         <attribute name="viewIndex" type="Integer" mode="IN" optional="true"/>
         <attribute name="viewSize" type="Integer" mode="IN" optional="true"/>
-        <attribute name="finAccountList" type="List" mode="OUT" optional="false"/>
-        
+        <attribute name="cloudCardList" type="List" mode="OUT" optional="false"/>
+        <attribute name="listSize" type="Integer" mode="OUT" optional="false"/>
     </service>
     
     <service name="findPaymentByPartyId" engine="java"
@@ -135,7 +135,6 @@
 		<description>商家手机登录</description>
         <attribute name="teleNumber" type="String" mode="IN" optional="false"/>
         <attribute name="captcha" type="String" mode="IN" optional="false"/>
-        <attribute name="status" type="String" mode="OUT" optional="false"/>
         <attribute name="token" type="String" mode="OUT" optional="true"/>
         <attribute name="organizationPartyId" type="String" mode="OUT" optional="true"/>
 	</service>
@@ -145,7 +144,6 @@
 		<description>用户手机登录</description>
         <attribute name="teleNumber" type="String" mode="IN" optional="false"/>
         <attribute name="captcha" type="String" mode="IN" optional="false"/>
-        <attribute name="status" type="String" mode="OUT" optional="false"/>
         <attribute name="token" type="String" mode="OUT" optional="true"/>
         <attribute name="organizationPartyId" type="String" mode="OUT" optional="true"/>
 	</service>
