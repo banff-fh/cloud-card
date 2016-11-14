@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
@@ -41,16 +42,15 @@ public class CloudCardServices {
 //		LocalDispatcher dispatcher = dctx.getDispatcher();
 //		Delegator delegator = dispatcher.getDelegator();
 //		Locale locale = (Locale) context.get("locale");
-		String finAccountId = (String) context.get("finAccountId");
+//		String cardId = (String) context.get("cardId");
 //		String amount = (String) context.get("amount");//TODO, 授权金额还未处理
 		
 		Map<String, Object> checkParamOut = checkInputParam(dctx, context);
 		if(ServiceUtil.isError(checkParamOut)){
 			return checkParamOut;
 		}
-		GenericValue finAccount = (GenericValue) checkParamOut.get("finAccount");
+		GenericValue cloudCard = (GenericValue) checkParamOut.get("cloudCard");
 
-		String cardCode = finAccount.getString("finAccountCode");
 		
 		// 授权时判断用户是否存在， 不存在则创建用户
 		Map<String, Object> getOrCreateCustomerOut = CloudCardHelper.getOrCreateCustomer(dctx, context);
@@ -60,10 +60,16 @@ public class CloudCardServices {
 		String customerPartyId = (String) getOrCreateCustomerOut.get("customerPartyId");
 		
 		//创建paymentMethod和giftCard
+		String finAccountName = cloudCard.getString("finAccountName");
+		Random rand = new Random();
+		String newCardCode = new StringBuilder(CloudCardHelper.AUTH_CARD_CODE_PREFIX)
+				.append(rand.nextInt(10)).append(rand.nextInt(10))
+				.append(customerPartyId)
+				.append(cloudCard.getString("finAccountCode")).toString();
 		Map<String, Object> giftCardInMap = FastMap.newInstance();
 		giftCardInMap.putAll(context);
-		giftCardInMap.put("cardNumber", cardCode);
-		giftCardInMap.put("description", "将账户" + finAccountId + "授权给" + customerPartyId);
+		giftCardInMap.put("cardNumber", newCardCode);
+		giftCardInMap.put("description", finAccountName + "授权给用户" + customerPartyId);
 		giftCardInMap.put("customerPartyId", customerPartyId);
 		Map<String, Object> giftCardOutMap = CloudCardHelper.createPaymentMethodAndGiftCard(dctx, giftCardInMap);
 		if (ServiceUtil.isError(giftCardOutMap)) {
@@ -678,6 +684,7 @@ public class CloudCardServices {
 		String organizationPartyId = (String) context.get("organizationPartyId");
 		String finAccountId = (String) context.get("finAccountId");
 		String cardCode = (String) context.get("cardCode");
+		String cardId = (String) context.get("cardId");
 		BigDecimal amount = (BigDecimal) context.get("amount");
 		
 		Map<String, Object> retMap = ServiceUtil.returnSuccess();
@@ -721,8 +728,8 @@ public class CloudCardServices {
 		}
 		
 		// 卡二维码
+		GenericValue cloudCard = null;
 		if(UtilValidate.isNotEmpty(cardCode)){
-			GenericValue cloudCard;
 			try {
 				cloudCard = CloudCardHelper.getCloudCardAccountFromCode(cardCode, delegator);
 			} catch (GenericEntityException e2) {
@@ -736,6 +743,27 @@ public class CloudCardServices {
 			
 			if("FNACT_CANCELLED".equals(cloudCard.getString("statusId")) || "FNACT_MANFROZEN".equals(cloudCard.getString("statusId"))){
 				Debug.logInfo("此卡[" + cloudCard.get("finAccountId") + "]状态不可用，当前状态[" + cloudCard.get("statusId") +"]", module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardHasBeenDisabled", locale)); 
+			}
+			retMap.put("cloudCard", cloudCard);
+		}
+		
+		// 卡ID
+		if(null == cloudCard && UtilValidate.isNotEmpty(cardId)){
+			try {
+				cloudCard = CloudCardHelper.getCloudCardAccountFromPaymentMethodId(cardId, delegator);
+			} catch (GenericEntityException e2) {
+				Debug.logError(e2.getMessage(), module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale)); 
+			}
+			if(null == cloudCard){
+				Debug.logInfo("找不到云卡，cardId[" + cardId + "]", module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardNotFound", locale)); 
+			}
+
+			String statusId = cloudCard.getString("statusId");
+			if("FNACT_CANCELLED".equals(statusId) || "FNACT_MANFROZEN".equals(statusId)){
+				Debug.logInfo("此卡[finAccountId = " + cloudCard.get("finAccountId") + "]状态不可用，当前状态[" + statusId +"]", module);
 				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardHasBeenDisabled", locale)); 
 			}
 			retMap.put("cloudCard", cloudCard);
@@ -775,7 +803,7 @@ public class CloudCardServices {
 		for(int i = 0;i < Integer.valueOf(quantity);i++){
 			try {
 				//生成的卡号
-				String newCardCode = CloudCardHelper.generateCloudCardCode(19, delegator);
+				String newCardCode = CloudCardHelper.generateCloudCardCode(delegator);
 				String finAccountId = delegator.getNextSeqId("FinAccount");
 				Map<String, Object> finAccountMap = FastMap.newInstance();
 				finAccountMap.put("finAccountId", finAccountId);

@@ -33,12 +33,13 @@ public class CloudCardHelper {
 	
 	public static final String module = CloudCardHelper.class.getName();
 	
-	public static final String DEFAULT_CURRENCY_UOM_ID = "CNY";
+	public static final String DEFAULT_CURRENCY_UOM_ID = "CNY"; // 默认币种
 	
 	public static final String resourceError = "cloudcardErrorUiLabels";
 	
-
-	public static final String PLATFORM_PARTY_ID="Company";
+	public static final String PLATFORM_PARTY_ID="Company"; // 平台partyId
+	
+	public static final String AUTH_CARD_CODE_PREFIX="auth:"; // 授权给别人的云卡卡号前缀
 	
 	/**
 	 * 判断当前partyId是否为organizationPartyId的管理人员
@@ -248,7 +249,7 @@ public class CloudCardHelper {
 		Map<String, Object> giftCardMap = FastMap.newInstance();
 		giftCardMap.put("userLogin", userLogin);
 		giftCardMap.put("partyId", customerPartyId); 
-		giftCardMap.put("description", description);  //TODO partyGroup.get("groupName")+" 的卡"
+		giftCardMap.put("description", description); 
 		giftCardMap.put("cardNumber", cardNumber);
 		Map<String, Object> giftCardOutMap;
 		try {
@@ -391,15 +392,27 @@ public class CloudCardHelper {
             return giftCards.get(0);
         }
     }
-    
     /**
-     * 生成卡云卡号
+     * 根据卡ID查询卡信息
      * @param cardCode 二维码信息
      * @param delegator
      * @return FinAccountAndPaymentMethodAndGiftCard
      * @throws GenericEntityException
      */
-    public static String generateCloudCardCode(int codeLength, Delegator delegator) throws GenericEntityException {
+    public static GenericValue getCloudCardAccountFromPaymentMethodId(String paymentMethodId, Delegator delegator) throws GenericEntityException {
+    	if (UtilValidate.isEmpty(paymentMethodId)) {
+    		return null;
+    	}
+    	return EntityUtil.getFirst( EntityUtil.filterByDate(delegator.findByAnd("FinAccountAndPaymentMethodAndGiftCard", UtilMisc.toMap("paymentMethodId", paymentMethodId))));
+    }
+    
+    /**
+     * 生成卡云卡号
+     * @param delegator
+     * @return 卡号（二维码）
+     * @throws GenericEntityException
+     */
+    public static String generateCloudCardCode(Delegator delegator) throws GenericEntityException {
         Random rand = new Random();
         boolean foundUniqueNewCode = false;
         String newCardCode = null;
@@ -424,7 +437,7 @@ public class CloudCardHelper {
 
             count++;
             if (count > 1000) {
-                throw new GenericEntityException("Unable to locate unique FinAccountCode! Length [" + codeLength + "]");
+                throw new GenericEntityException("Unable to locate unique FinAccountCode! Length [20]");
             }
         }
 

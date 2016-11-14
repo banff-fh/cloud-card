@@ -29,7 +29,7 @@
     	location="com.banfftech.cloudcard.CloudCardServices" invoke="createCardAuth" auth="true">
     	<description>云卡授权</description>
     	<attribute name="teleNumber" type="String" mode="IN" optional="false"/>
-        <attribute name="finAccountId" type="String" mode="IN" optional="false"/>
+        <attribute name="cardId" type="String" mode="IN" optional="false"/>
         <attribute name="amount" type="BigDecimal" mode="IN" optional="false"/>
         <attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
         <attribute name="thruDate" type="Timestamp" mode="IN" optional="false"/>

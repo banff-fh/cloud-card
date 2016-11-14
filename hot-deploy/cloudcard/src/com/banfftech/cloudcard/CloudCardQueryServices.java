@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilNumber;
@@ -76,21 +77,22 @@ public class CloudCardQueryServices {
 		List<Object> cloudCardList = FastList.newInstance();
 		
 		//图片地址
-		for(GenericValue finaccount:retList){
-			Map<String, Object> finaccountMap = FastMap.newInstance();
-//			finaccountMap.putAll(finaccount);
-			String organizationPartyId = finaccount.get("distributorPartyId").toString();
+		for(GenericValue cloudCard : retList){
+			Map<String, Object> cloudCardMap = FastMap.newInstance();
+//			cloudCardMap.putAll(cloudCard);
+			String organizationPartyId = cloudCard.get("distributorPartyId").toString();
 			if(organizationPartyId != null){
-				finaccountMap.put("cardImg", EntityUtilProperties.getPropertyValue("cloudcard","cardImg."+organizationPartyId,delegator));
+				cloudCardMap.put("cardImg", EntityUtilProperties.getPropertyValue("cloudcard","cardImg."+organizationPartyId,delegator));
 			}
-			finaccountMap.put("cardName", finaccount.get("finAccountName")); //卡名
-			finaccountMap.put("cardCode", finaccount.get("cardNumber")); //卡二维码
-			finaccountMap.put("cardId", finaccount.get("paymentMethodId"));// 卡id
-			finaccountMap.put("cardBalance", finaccount.get("actualBalance")); //余额
-			finaccountMap.put("distributorPartyId", finaccount.get("distributorPartyId")); //发卡商家partyId
+			String cardName = UtilFormatOut.checkEmpty(cloudCard.getString("description"), cloudCard.getString("finAccountName"));
+			cloudCardMap.put("cardName", cardName); //卡名
+			cloudCardMap.put("cardCode", cloudCard.get("cardNumber")); //卡二维码
+			cloudCardMap.put("cardId", cloudCard.get("paymentMethodId"));// 卡id
+			cloudCardMap.put("cardBalance", cloudCard.get("actualBalance")); //余额
+			cloudCardMap.put("distributorPartyId", cloudCard.get("distributorPartyId")); //发卡商家partyId
 			//卡主，如果此卡是别人授权给我用的，此字段就是原卡主
-			finaccountMap.put("ownerPartyId", finaccount.get("ownerPartyId")); 
-			cloudCardList.add(finaccountMap);
+			cloudCardMap.put("ownerPartyId", cloudCard.get("ownerPartyId")); 
+			cloudCardList.add(cloudCardMap);
 		}
 		
 		Map<String, Object> result = ServiceUtil.returnSuccess();
@@ -239,8 +241,8 @@ public class CloudCardQueryServices {
 			results.put("cardImg", EntityUtilProperties.getPropertyValue("cloudcard","cardImg." + cardOrganizationPartyId, delegator));
 			results.put("distributorPartyId", cardOrganizationPartyId); //发卡商家partyId
 		}
-		
-		results.put("cardName", cloudCard.get("finAccountName")); //卡名
+		String cardName = UtilFormatOut.checkEmpty(cloudCard.getString("description"), cloudCard.getString("finAccountName"));
+		results.put("cardName", cardName); //卡名
 		results.put("cardCode", cardCode); //卡二维码
 		results.put("cardId", cloudCard.get("paymentMethodId"));// 卡id
 		results.put("customerPartyId", cloudCard.getString("partyId"));
