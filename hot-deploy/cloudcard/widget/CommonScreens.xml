@@ -34,6 +34,7 @@
                                 <if-has-permission permission="CLOUDCARD" action="_VIEW"/>
                             </condition>
                             <widgets>
+                                <include-menu name="CardSubTabBar" location="component://cloudcard/widget/CardMenus.xml"/>
                                 <decorator-section-include name="body"/>
                             </widgets>
                             <fail-widgets>

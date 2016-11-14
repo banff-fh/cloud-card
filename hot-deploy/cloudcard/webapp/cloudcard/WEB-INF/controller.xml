@@ -29,9 +29,9 @@
 	</request-map>
 	
 	<!-- 查询商家 已生成的卡-->
-	<request-map uri="findCardNumber">
+	<request-map uri="findCard">
 		<security https="true" auth="true" />
-		<response name="success" type="view" value="findCardNumber" />
+		<response name="success" type="view" value="findCard" />
 	</request-map>
 	
 	<!-- 商家创建卡 -->
@@ -123,8 +123,8 @@
 		page="component://cloudcard/widget/CloudCardScreens.xml#main" />
 	<view-map name="markCard" type="screen"
 		page="component://cloudcard/widget/CloudCardScreens.xml#markCard" />
-	<view-map name="findCardNumber" type="screen"
-		page="component://cloudcard/widget/CloudCardScreens.xml#findCardNumber" />
+	<view-map name="findCard" type="screen"
+		page="component://cloudcard/widget/CloudCardScreens.xml#findCard" />
 	<view-map name="createCardNumber" type="screen"
 		page="component://cloudcard/widget/CloudCardScreens.xml#createCardNumber" />
 		

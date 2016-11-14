@@ -20,6 +20,10 @@
         <value xml:lang="en">Liquidation</value>
         <value xml:lang="zh">清算</value>
     </property>
+    <property key="newMarkCardMenu">
+        <value xml:lang="en">newMarkCard</value>
+        <value xml:lang="zh">批量生成卡</value>
+    </property>
     <property key="markCardMenu">
         <value xml:lang="en">markCard</value>
         <value xml:lang="zh">制卡</value>
@@ -32,4 +36,37 @@
         <value xml:lang="en">CreateCardNumber</value>
         <value xml:lang="zh">新建云卡</value>
     </property>
+    <property key="quantity">
+        <value xml:lang="en">CreateCardQuantity</value>
+        <value xml:lang="zh">生成卡数量</value>
+    </property>
+    <property key="organizationPartyId">
+        <value xml:lang="en">OrganizationPartyId</value>
+        <value xml:lang="zh">机构ID</value>
+    </property>
+    <property key="finAccountName">
+        <value xml:lang="en">FinAccountName</value>
+        <value xml:lang="zh">卡名称</value>
+    </property>
+    <property key="finAccountCode">
+        <value xml:lang="en">finAccountCode</value>
+        <value xml:lang="zh">卡号</value>
+    </property>
+    <property key="statusId">
+        <value xml:lang="en">statusId</value>
+        <value xml:lang="zh">状态</value>
+    </property>
+    <property key="distributorPartyId">
+        <value xml:lang="en">distributorPartyId</value>
+        <value xml:lang="zh">所属店铺</value>
+    </property>
+    <property key="currencyUomId">
+        <value xml:lang="en">CurrencyUomId</value>
+        <value xml:lang="zh">币种</value>
+    </property>
+    <property key="exportCard">
+        <value xml:lang="en">ExportCard</value>
+        <value xml:lang="zh">导出卡号</value>
+    </property>
+    
 </resource>
