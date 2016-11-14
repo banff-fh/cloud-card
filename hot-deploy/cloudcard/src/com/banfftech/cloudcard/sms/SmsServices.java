@@ -139,7 +139,7 @@ public class SmsServices {
 			int validTime = Integer.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","sms.validTime","900",delegator));
 			int intervalTime = Integer.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","sms.intervalTime","30",delegator));
 
-			//如果这次请求不在上一次请求一分钟内，修改短信开始时间并重新发送短信。
+			//如果这次请求不在上一次请求一分钟内，延长短信结束时间并重新发送短信。
 			if(UtilDateTime.adjustTimestamp((java.sql.Timestamp)sms.get("thruDate"), Calendar.SECOND,(intervalTime-validTime)).before(UtilDateTime.nowTimestamp())){
 				sms.set("thruDate",UtilDateTime.adjustTimestamp(nowTimestamp, Calendar.MINUTE,15));
 				try {
@@ -210,8 +210,10 @@ public class SmsServices {
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardUserNotExistError", locale));
 		}else{
 			//返回机构Id
-			Map<String, Object> organizationPartyMap = CloudCardHelper.getOrganizationPartyId(delegator, customer.get("partyId").toString());
-			result.put("organizationPartyId", organizationPartyMap.get("organizationPartyId"));
+			List<String> organizationList = CloudCardHelper.getOrganizationPartyId(delegator, customer.get("partyId").toString());
+			if(UtilValidate.isNotEmpty(organizationList)){
+				result.put("organizationPartyId", organizationList.get(0));
+			}
 			
 			//查找用户验证码是否存在
 			EntityConditionList<EntityCondition> captchaConditions = EntityCondition
@@ -231,9 +233,9 @@ public class SmsServices {
 				
 				if(sms.get("captcha").equals(captcha)){
 					//有效时间
-					long expirationTime = Long.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","token.expirationTime","60",delegator));
-					String iss = EntityUtilProperties.getPropertyValue("cloudcard","token.issuer","60L",delegator);
-					String tokenSecret = EntityUtilProperties.getPropertyValue("cloudcard","token.secret","60L",delegator);
+					long expirationTime = Long.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","token.expirationTime","172800L",delegator));
+					String iss = EntityUtilProperties.getPropertyValue("cloudcard","token.issuer",delegator);
+					String tokenSecret = EntityUtilProperties.getPropertyValue("cloudcard","token.secret",delegator);
 					//开始时间
 					final long iat = System.currentTimeMillis() / 1000L; // issued at claim 
 					//Token到期时间
@@ -252,8 +254,8 @@ public class SmsServices {
 					try {
 						sms.store();
 					} catch (GenericEntityException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						Debug.logError(e, module);
+						return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 					}
 					result.put("token", token);
 				}else{

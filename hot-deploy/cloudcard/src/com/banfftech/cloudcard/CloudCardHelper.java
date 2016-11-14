@@ -48,8 +48,8 @@ public class CloudCardHelper {
 	 */
 	public static boolean isManager(Delegator delegator, String partyId, String organizationPartyId) {
 		List<GenericValue> managerRels = PartyRelationshipHelper.getActivePartyRelationships(delegator, 
-				UtilMisc.toMap("partyIdFrom", partyId,
-						"partyIdTo",organizationPartyId,"roleTypeIdFrom","MANAGER","roleTypeIdTo","INTERNAL_ORGANIZATIO","partyRelationshipTypeId","EMPLOYMENT"));
+				UtilMisc.toMap("partyIdTo", partyId,
+						"partyIdFrom",organizationPartyId,"roleTypeIdTo","MANAGER","roleTypeIdFrom","INTERNAL_ORGANIZATIO","partyRelationshipTypeId","EMPLOYMENT"));
 		if(UtilValidate.isNotEmpty(managerRels)){
 			return true;
 		}
@@ -57,17 +57,16 @@ public class CloudCardHelper {
 	}
 	
 	/**
-	 * 获取partyId是否为organizationPartyId的管理人员的organizationPartyId
+	 * 获取partyId所管理的商家organizationPartyId列表
 	 * @param delegator
 	 * @param userLogin
 	 * @param organizationPartyId
 	 */
-	public static Map<String, Object> getOrganizationPartyId(Delegator delegator, String partyId) {
-		Map<String, Object> organizationPartyMap = FastMap.newInstance();
+	public static List<String> getOrganizationPartyId(Delegator delegator, String partyId) {
         List<EntityCondition> condList = FastList.newInstance();
-        condList.add(EntityCondition.makeCondition("partyIdFrom", partyId));
-        condList.add(EntityCondition.makeCondition("roleTypeIdFrom", "MANAGER"));
-        condList.add(EntityCondition.makeCondition("roleTypeIdTo", "INTERNAL_ORGANIZATIO"));
+        condList.add(EntityCondition.makeCondition("partyIdTo", partyId));
+        condList.add(EntityCondition.makeCondition("roleTypeIdTo", "MANAGER"));
+        condList.add(EntityCondition.makeCondition("roleTypeIdFrom", "INTERNAL_ORGANIZATIO"));
         condList.add(EntityCondition.makeCondition("partyRelationshipTypeId", "EMPLOYMENT"));
         condList.add(EntityUtil.getFilterByDateExpr());
         EntityCondition condition = EntityCondition.makeCondition(condList);
@@ -79,11 +78,10 @@ public class CloudCardHelper {
             Debug.logError(e, "Problem finding PartyRelationships. ", module);
             return null;
         }
-        if (UtilValidate.isNotEmpty(partyRelationships)) {
-			organizationPartyMap.put("organizationPartyId", partyRelationships.get(0).get("partyIdTo"));
+        if (UtilValidate.isEmpty(partyRelationships)) {
+        	return null;
         }
-		
-		return organizationPartyMap;
+        return EntityUtil.getFieldListFromEntityList(partyRelationships, "partyIdFrom", true);
 	}
 	
 
