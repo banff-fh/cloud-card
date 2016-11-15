@@ -285,8 +285,6 @@ public class CloudCardQueryServices {
 		context.put("userLogin", userLogin);
 		context.put("searchLx","excel");
 
-		Map<String,Object> results=null;
-		OutputStream out = null;
 		try {
 
 			Map<String, Object> inputFieldMap = FastMap.newInstance();
@@ -315,7 +313,6 @@ public class CloudCardQueryServices {
 			HSSFRow row1 = sheet.createRow(0);
 			HSSFCell cell0 = row1.createCell((short) 0);
 			HSSFCell cell1 = row1.createCell((short) 1);
-			HSSFCell cell2 = row1.createCell((short) 2);
 			cell0.setCellValue("卡名");
 			cell1.setCellValue("卡号");
 			List<GenericValue> finAccounts = FastList.newInstance();
@@ -342,13 +339,14 @@ public class CloudCardQueryServices {
 				response.reset();
 				response.addHeader("Content-Disposition", "attachment;filename=" + new String("卡云卡生成的卡号.xls".getBytes("gb2312"), "ISO8859-1"));
 				response.setContentType("application/msexcel;charset=utf-8");
-				out = response.getOutputStream();
+				OutputStream out = response.getOutputStream();
 				wb.write(out);
+				wb.close();
 				out.flush();
 				out.close();
 			}
 		} catch (GenericEntityException | IOException e) {
-			Debug.logError(e.getMessage(), module);
+			Debug.logError(e.getMessage(), module,locale);
 		}
 		return "SUCCESS";
 	}

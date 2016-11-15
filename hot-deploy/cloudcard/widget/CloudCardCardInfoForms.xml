@@ -62,5 +62,20 @@ under the License.
         <field name="statusId" title="${uiLabelMap.statusId}" sort-field="true"><display-entity entity-name="StatusItem"/>
         </field>
     </form>
-
+	
+	<form name="EditCard" type="single" target="genNewCloudCardCode"
+        focus-field-name="salutation" header-row-style="header-row" default-table-style="basic-table">
+        <field name="organizationPartyId" title="${uiLabelMap.organizationPartyId}" widget-style="required"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="finAccountName" title="${uiLabelMap.finAccountName}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="40" maxlength="60"/></field>
+        <field name="currencyUomId" title="${uiLabelMap.CommonCurrency}" widget-style="required">
+            <drop-down no-current-selected-key="${defaultOrganizationPartyCurrencyUomId}">
+                <entity-options key-field-name="uomId" description="${description} - ${abbreviation}" entity-name="Uom">
+                    <entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="quantity" title="${uiLabelMap.quantity}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="40" default-value="100"  maxlength="3"/></field>
+    	<field name="submitButton" title="${uiLabelMap.CommonSave}"><submit button-type="button"/></field>
+    </form>
 </forms>

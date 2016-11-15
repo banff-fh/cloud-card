@@ -57,16 +57,11 @@
 
 	<screen name="createCard">
 		<section>
-            <actions>
-<!--                 <set field="titleProperty" value="PageTitleEditProductCatalog"/> -->
-<!--                 <set field="tabButtonItem" value="productcatalog"/> -->
-<!--                 <set field="partyId" from-field="parameters.partyId"/> -->
-            </actions>
             <widgets>
                 <decorator-screen name="cloudcardCommonDecorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="body">
                         <screenlet title="${uiLabelMap.PageTitleEditCardInformation}">
-                            <include-form name="EditCard" location="component://cloudcard/widget/CloudCardCreateCardForms.xml"/>
+                            <include-form name="EditCard" location="component://cloudcard/widget/CloudCardCardInfoForms.xml"/>
                         </screenlet>
                     </decorator-section>
                 </decorator-screen>
