@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -30,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
@@ -48,6 +50,7 @@ import org.ofbiz.webapp.control.LoginWorker;
 import org.ofbiz.webapp.stats.VisitHandler;
 
 import com.auth0.jwt.JWTExpiredException;
+import com.auth0.jwt.JWTSigner;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.JWTVerifyException;
 
@@ -73,11 +76,12 @@ public class CloudCardLoginWorker {
         
         // 验证token
         Delegator defaultDelegator = DelegatorFactory.getDelegator("default");//万一出现多租户情况，应在主库中查配置
-        String tokenSecret = EntityUtilProperties.getPropertyValue("cloudcard","token.secret","60L", defaultDelegator);
+        String tokenSecret = EntityUtilProperties.getPropertyValue("cloudcard","token.secret", defaultDelegator);
+        String iss = EntityUtilProperties.getPropertyValue("cloudcard","token.issuer",delegator);
         
         Map<String, Object> claims;
         try {
-             JWTVerifier verifier = new JWTVerifier(tokenSecret);
+             JWTVerifier verifier = new JWTVerifier(tokenSecret, null, iss);//验证token和发布者（云平台）
              claims= verifier.verify(token);
         }catch(JWTExpiredException e1){
             Debug.logInfo("token过期：" + e1.getMessage(),module);
@@ -127,10 +131,34 @@ public class CloudCardLoginWorker {
             }
 
             LoginWorker.doBasicLogin(userLogin, request);
+            
+            //当token离到期时间少于多少秒，更新新的token，默认24小时（24*3600 = 86400L）
+            long secondsBeforeUpdatetoken = Long.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","token.secondsBeforeUpdate", "86400", defaultDelegator));
+            
+            long now = System.currentTimeMillis() / 1000L;  
+            Long oldExp = Long.valueOf(String.valueOf(claims.get("exp")));
+
+            if(oldExp - now < secondsBeforeUpdatetoken){
+            	// 快要过期了，新生成token
+            	long expirationTime = Long.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","token.expirationTime","172800",defaultDelegator));
+    			//开始时间
+    			//Token到期时间
+    			long exp = now + expirationTime; 
+    			//生成Token
+    			JWTSigner signer = new JWTSigner(tokenSecret);
+    			claims = new HashMap<String, Object>();
+    			claims.put("iss", iss);
+    			claims.put("user", userLoginId);
+    			claims.put("delegatorName", tokenDelegatorName);
+    			claims.put("exp", exp);
+    			claims.put("iat", now);
+    			request.setAttribute(TOKEN_KEY_ATTR, signer.sign(claims));
+            }
+            
         } else {
             Debug.logWarning("Could not find userLogin for token: " + token, module);
         }
-        //request.setAttribute(TOKEN_KEY_ATTR, "new token");
+        
         return "success";
     }
 
