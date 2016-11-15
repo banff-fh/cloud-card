@@ -22,38 +22,15 @@
         <response name="success" type="none"/>
     </request-map>
     
-	<!-- Request Mappings -->
-	<request-map uri="main">
-		<security https="true" auth="true" />
-		<response name="success" type="view" value="main" />
-	</request-map>
-	
-	<!-- 制卡-->
-	<request-map uri="markCard">
-		<security https="true" auth="true" />
-		<response name="success" type="view" value="markCard" />
-	</request-map>
-	
-	<request-map uri="genNewCloudCardCode">
-		<event type="service" invoke="genNewCloudCardCode"/>
-		<security https="true" auth="true" />
-		<response name="success" type="view" value="findCard" />
-	</request-map>
-	
-	<!-- 查询商家 已生成的卡-->
-	<request-map uri="findCard">
-		<security https="true" auth="true" />
-		<response name="success" type="view" value="findCard" />
-	</request-map>
-	
-	<!-- 商家创建卡 -->
-	<request-map uri="createCard">
-		<security https="true" auth="true" />
-		<response name="success" type="view" value="createCard" />
-	</request-map>
+    <!-- APP接口 -->
 
-	<!-- 开卡充值统一接口 -->
+    <!-- 开卡充值统一接口 -->
 	<request-map uri="activateCloudCardAndRecharge">
+		<!-- 
+			auth设置为false，否则ofbiz会直接跳转的是登录页面的html，而不是返回json，
+			后面事件里面的服务在定义时应当设置为需要登录 
+		-->
+		<security https="true" auth="false" />
     	<event type="service" invoke="activateCloudCardAndRecharge"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
@@ -61,6 +38,7 @@
     
     <!-- 卡授权接口 -->
 	<request-map uri="createCardAuth">
+		<security https="true" auth="false" />
     	<event type="service" invoke="createCardAuth"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
@@ -68,6 +46,7 @@
     
      <!-- 扫码支付接口 -->
 	<request-map uri="cloudCardWithdraw">
+		<security https="true" auth="false" />
     	<event type="service" invoke="cloudCardWithdraw"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
@@ -75,18 +54,21 @@
     
      <!-- 用户卡列表接口 -->
     <request-map uri="myCloudCards">
+    	<security https="true" auth="false" />
     	<event type="service" invoke="myCloudCards"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
     
     <request-map uri="findPaymentByPartyId">
+    	<security https="true" auth="false" />
     	<event type="service" invoke="findPaymentByPartyId"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
     
     <request-map uri="findLimitAndPresellInfo">
+    	<security https="true" auth="false" />
     	<event type="service" invoke="findLimitAndPresellInfo"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
@@ -94,6 +76,7 @@
 
 	<!-- 扫二维码获取卡信息 -->
     <request-map uri="getCardInfoByCode">
+    	<security https="true" auth="false" />
     	<event type="service" invoke="getCardInfoByCode"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
@@ -121,6 +104,36 @@
 		<event type="service" invoke="userAppLogin" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
+	</request-map>
+    
+	<!-- 后台页面部分 Request Mappings -->
+	<request-map uri="main">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="main" />
+	</request-map>
+	
+	<!-- 制卡-->
+	<request-map uri="markCard">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="markCard" />
+	</request-map>
+	
+	<request-map uri="genNewCloudCardCode">
+		<event type="service" invoke="genNewCloudCardCode"/>
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="findCard" />
+	</request-map>
+	
+	<!-- 查询商家 已生成的卡-->
+	<request-map uri="findCard">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="findCard" />
+	</request-map>
+	
+	<!-- 商家创建卡 -->
+	<request-map uri="createCard">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="createCard" />
 	</request-map>
 	
 	<request-map uri="editCard">
