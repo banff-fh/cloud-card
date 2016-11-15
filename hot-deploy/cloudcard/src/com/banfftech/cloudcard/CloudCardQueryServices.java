@@ -322,6 +322,17 @@ public class CloudCardQueryServices {
 					ce0.setCellValue(String.valueOf(mm.get("finAccountName")));
 					HSSFCell ce1 = row.createCell((short) 1);
 					ce1.setCellValue(String.valueOf(mm.get("finAccountCode")));
+					try {
+						//导出后更新finaccount状态
+						if(mm.get("statusId").toString().equalsIgnoreCase("FNACT_CREATED") ){
+							GenericValue finAccount = delegator.findByPrimaryKey("FinAccount",UtilMisc.toMap("finAccountId", mm.get("finAccountId")) );
+							finAccount.put("statusId", "FNACT_PUBLISHED");
+							finAccount.store();
+						}
+					} catch (GenericEntityException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 
 				}
 				response.reset();
