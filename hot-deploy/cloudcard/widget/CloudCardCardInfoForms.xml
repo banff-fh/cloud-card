@@ -52,19 +52,14 @@ under the License.
         </actions>
         <field name="distributorPartyId" title="${uiLabelMap.distributorPartyId}" sort-field="true">
             <display-entity entity-name="PartyNameView" description="${firstName} ${middleName} ${lastName} ${groupName}" key-field-name="partyId">
-                <sub-hyperlink description="[${distributorPartyId}]" target="viewprofile">
+                <sub-hyperlink  description="[${distributorPartyId}]"  target="/partymgr/control/viewprofile" target-type="inter-app">
                		<parameter param-name="partyId" from-field="distributorPartyId"/>
             	</sub-hyperlink>
             </display-entity>
         </field>
-        <field name="finAccountName" title="${uiLabelMap.finAccountName}" sort-field="true">
-            <hyperlink description="${finAccountName}"></hyperlink>
-        </field>
-        <field name="finAccountCode" title="${uiLabelMap.finAccountCode}" sort-field="true">
-            <hyperlink  description="${finAccountCode}"></hyperlink>
-        </field>
-        <field name="statusId" title="${uiLabelMap.statusId}" sort-field="true">
-            <display-entity entity-name="StatusItem"/>
+        <field name="finAccountName" title="${uiLabelMap.finAccountName}" ><display/></field>
+        <field name="finAccountCode" title="${uiLabelMap.finAccountCode}" ><display/></field>
+        <field name="statusId" title="${uiLabelMap.statusId}" sort-field="true"><display-entity entity-name="StatusItem"/>
         </field>
     </form>
 

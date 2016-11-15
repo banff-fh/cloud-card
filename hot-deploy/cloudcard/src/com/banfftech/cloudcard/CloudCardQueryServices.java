@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.jsp.PageContext;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -28,6 +29,7 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityConditionList;
 import org.ofbiz.entity.condition.EntityOperator;
+import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
@@ -285,7 +287,9 @@ public class CloudCardQueryServices {
 		context.put("searchLx","excel");
 
 		Map<String,Object> results=null;
+		OutputStream out = null;
 		try {
+
 			Map<String, Object> inputFieldMap = FastMap.newInstance();
 			inputFieldMap.put("distributorPartyId", distributorPartyId);
 			inputFieldMap.put("finAccountName", finAccountName);
@@ -294,17 +298,18 @@ public class CloudCardQueryServices {
 			Map<String, Object> ctxMap = FastMap.newInstance();
 			ctxMap.put("inputFields", inputFieldMap);
 			ctxMap.put("entityName", "FinAccountAndPaymentMethodAndGiftCard");
-			ctxMap.put("orderBy", "expireDate");
-			ctxMap.put("filterByDate", "Y");
 
 			Map<String, Object> faResult = null;
 			try {
-				faResult = dispatcher.runSync("performFindList", ctxMap);
+				faResult = dispatcher.runSync("performFind", ctxMap);
 			} catch (GenericServiceException e) {
 				Debug.logError(e.getMessage(), module);
 			}
-
-			List<Map<Object, Object>> list = (List<Map<Object, Object>>) faResult.get("list");
+			
+			List<GenericValue> list = FastList.newInstance();
+			EntityListIterator it = (EntityListIterator) faResult.get("listIt");
+            list = it.getCompleteList();
+            it.close();
 
 			HSSFWorkbook wb = new HSSFWorkbook();
 			HSSFSheet sheet = wb.createSheet("卡云卡");
@@ -312,13 +317,14 @@ public class CloudCardQueryServices {
 			HSSFCell cell0 = row1.createCell((short) 0);
 			HSSFCell cell1 = row1.createCell((short) 1);
 			HSSFCell cell2 = row1.createCell((short) 2);
-			cell1.setCellValue("卡名");
+			cell0.setCellValue("卡名");
 			cell1.setCellValue("卡号");
+			List<GenericValue> finAccounts = FastList.newInstance();
 			if (UtilValidate.isNotEmpty(list)) {
 				for (int i = 0; i < list.size(); i++) {
 					HSSFRow row = sheet.createRow(i + 1);
 					HSSFCell ce0 = row.createCell((short) 0);
-					Map<Object, Object> mm = list.get(i);
+					GenericValue mm = list.get(i);
 					ce0.setCellValue(String.valueOf(mm.get("finAccountName")));
 					HSSFCell ce1 = row.createCell((short) 1);
 					ce1.setCellValue(String.valueOf(mm.get("finAccountCode")));
@@ -327,24 +333,23 @@ public class CloudCardQueryServices {
 						if(mm.get("statusId").toString().equalsIgnoreCase("FNACT_CREATED") ){
 							GenericValue finAccount = delegator.findByPrimaryKey("FinAccount",UtilMisc.toMap("finAccountId", mm.get("finAccountId")) );
 							finAccount.put("statusId", "FNACT_PUBLISHED");
-							finAccount.store();
+							finAccounts.add(finAccount);
 						}
 					} catch (GenericEntityException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						Debug.logError(e.getMessage(), module);
 					}
-
 				}
+				delegator.storeAll(finAccounts);
 				response.reset();
-				response.addHeader("Content-Disposition", "attachment;filename=" + new String("卡号.xls".getBytes("gb2312"), "ISO8859-1"));
+				response.addHeader("Content-Disposition", "attachment;filename=" + new String("卡云卡生成的卡号.xls".getBytes("gb2312"), "ISO8859-1"));
 				response.setContentType("application/msexcel;charset=utf-8");
-				OutputStream toClient = response.getOutputStream();
-				wb.write(toClient);
-				toClient.flush();
-				toClient.close();
+				out = response.getOutputStream();
+				wb.write(out);
+				out.flush();
+				out.close();
 			}
-		}  catch (IOException e) {
-			e.printStackTrace();
+		} catch (GenericEntityException | IOException e) {
+			Debug.logError(e.getMessage(), module);
 		}
 		return "SUCCESS";
 	}
