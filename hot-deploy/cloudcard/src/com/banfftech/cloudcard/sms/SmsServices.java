@@ -108,7 +108,7 @@ public class SmsServices {
 		}
 		
 		if(UtilValidate.isEmpty(customer)){
-			Debug.logInfo("The user does not exist, can not get verfiy code", module);
+			Debug.logInfo("The user tel:[" + teleNumber + "] does not exist, can not get verfiy code", module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardUserNotExistError", locale));
 		}
 		
