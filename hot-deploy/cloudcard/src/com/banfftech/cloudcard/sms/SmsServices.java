@@ -75,7 +75,7 @@ public class SmsServices {
 		try {
 			rsp = client.execute(req);
 		} catch (ApiException e) {
-			Debug.logError(phone+"短信发送异常", module);
+			Debug.logError(phone+"短信发送异常" + e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardSendMessageServiceError", UtilMisc.toMap("phone", phone),locale));
 		}
 		
@@ -96,6 +96,24 @@ public class SmsServices {
 		String teleNumber = (String) context.get("teleNumber");
 		java.sql.Timestamp nowTimestamp  = UtilDateTime.nowTimestamp();
 
+		GenericValue customer;
+		try {
+			customer = EntityUtil.getFirst(delegator.findList("TelecomNumberAndUserLogin", 
+					EntityCondition.makeCondition(
+							EntityCondition.makeCondition(UtilMisc.toMap("contactNumber", teleNumber)), 
+							EntityUtil.getFilterByDateExpr()), null, UtilMisc.toList("partyId DESC"), null, false));
+		} catch (GenericEntityException e) {
+			Debug.logError(e, module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		if(UtilValidate.isEmpty(customer)){
+			Debug.logInfo("The user does not exist, can not get verfiy code", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardUserNotExistError", locale));
+		}
+		
+		
+		
 		EntityConditionList<EntityCondition> captchaConditions = EntityCondition
 				.makeCondition(EntityCondition.makeCondition("teleNumber", EntityOperator.EQUALS, teleNumber),EntityUtil.getFilterByDateExpr(),EntityCondition.makeCondition("isValid", EntityOperator.EQUALS,"N"));
 		
@@ -239,7 +257,7 @@ public class SmsServices {
 					//开始时间
 					final long iat = System.currentTimeMillis() / 1000L; // issued at claim 
 					//Token到期时间
-					final long exp = iat + expirationTime; // expires claim. In this case the token expires in 60 seconds
+					final long exp = iat + expirationTime; 
 					//生成Token
 					final JWTSigner signer = new JWTSigner(tokenSecret);
 					final HashMap<String, Object> claims = new HashMap<String, Object>();

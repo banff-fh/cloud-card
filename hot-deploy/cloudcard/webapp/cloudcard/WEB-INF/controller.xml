@@ -119,8 +119,8 @@
 	</request-map>
 	
 	<request-map uri="genNewCloudCardCode">
-		<event type="service" invoke="genNewCloudCardCode"/>
 		<security https="true" auth="true" />
+		<event type="service" invoke="genNewCloudCardCode"/>
 		<response name="success" type="view" value="findCard" />
 	</request-map>
 	
