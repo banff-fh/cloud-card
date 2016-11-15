@@ -117,6 +117,7 @@ public class CloudCardServices {
 		GenericValue cloudCard = (GenericValue) checkParamOut.get("cloudCard");
 		String finAccountId;
 		String customerPartyId;
+		String cardId;
 		if(!"FNACT_ACTIVE".equals(cloudCard.getString("statusId"))){
 			// 没有激活的卡，调用卡激活服务
 			if(UtilValidate.isEmpty(teleNumber)){
@@ -140,11 +141,13 @@ public class CloudCardServices {
 				
 				finAccountId = (String) createCloudCardOutMap.get("finAccountId");
 				customerPartyId = (String) createCloudCardOutMap.get("customerPartyId");
+				cardId = (String)createCloudCardOutMap.get("paymentMethodId");
 			}
 		}else{
 			finAccountId = cloudCard.getString("finAccountId");
 			// ownerPartyId 如果卡已授权给别人，partyId是被授权人，ownerPartyId是原主人
 			customerPartyId = cloudCard.getString("partyId");
+			cardId = cloudCard.getString("paymentMethodId");
 		}
 		
 		//2、充值
@@ -167,9 +170,9 @@ public class CloudCardServices {
 		//3、返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("amount", amount);
-		result.put("actualBalance", rechargeCloudCardOutMap.get("actualBalance"));
+		result.put("cardBalance", rechargeCloudCardOutMap.get("actualBalance"));
 		result.put("customerPartyId", customerPartyId);
-		result.put("finAccountId", finAccountId);
+		result.put("cardId", cardId);
 		return result;
 	}
 	
@@ -664,9 +667,9 @@ public class CloudCardServices {
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("amount", amount);
-		result.put("actualBalance", cloudCard.get("actualBalance"));
+		result.put("cardBalance", cloudCard.get("actualBalance"));
 		result.put("customerPartyId", customerPartyId);
-		result.put("finAccountId", finAccountId);
+		result.put("cardId", paymentMethodId);
 		return result;
 	}
 	
