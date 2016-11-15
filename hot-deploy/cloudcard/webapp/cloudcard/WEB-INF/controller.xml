@@ -144,7 +144,7 @@
     <!-- 导出卡 -->
 	<request-map uri="exportCardExcel">
 		<event type="java" path="com.banfftech.cloudcard.CloudCardQueryServices" invoke="exportCardExcel"></event>
-		<response name="success" type="request" value="findCard"></response>
+		<response name="success" type="none"></response>
 	</request-map>
 
 	<request-map uri="LookupPartyName">
