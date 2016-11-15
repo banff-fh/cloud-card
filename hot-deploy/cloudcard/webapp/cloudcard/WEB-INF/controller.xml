@@ -113,9 +113,9 @@
 	</request-map>
 	
 	<!-- 制卡-->
-	<request-map uri="markCard">
+	<request-map uri="makeCard">
 		<security https="true" auth="true" />
-		<response name="success" type="view" value="markCard" />
+		<response name="success" type="view" value="makeCard" />
 	</request-map>
 	
 	<request-map uri="genNewCloudCardCode">
@@ -156,8 +156,8 @@
 	<!-- View Mappings -->
 	<view-map name="main" type="screen"
 		page="component://cloudcard/widget/CloudCardScreens.xml#main" />
-	<view-map name="markCard" type="screen"
-		page="component://cloudcard/widget/CloudCardScreens.xml#markCard" />
+	<view-map name="makeCard" type="screen"
+		page="component://cloudcard/widget/CloudCardScreens.xml#makeCard" />
 	<view-map name="findCard" type="screen"
 		page="component://cloudcard/widget/CloudCardScreens.xml#findCard" />
 	<view-map name="createCard" type="screen"

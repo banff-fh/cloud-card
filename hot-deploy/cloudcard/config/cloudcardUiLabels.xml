@@ -20,8 +20,8 @@
         <value xml:lang="en">Liquidation</value>
         <value xml:lang="zh">清算</value>
     </property>
-    <property key="newMarkCardMenu">
-        <value xml:lang="en">newMarkCard</value>
+    <property key="newMakeCardMenu">
+        <value xml:lang="en">newMakeCard</value>
         <value xml:lang="zh">批量生成卡</value>
     </property>
     <property key="markCardMenu">
