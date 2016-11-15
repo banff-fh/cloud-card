@@ -140,7 +140,7 @@ public class SmsServices {
 			int intervalTime = Integer.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","sms.intervalTime","30",delegator));
 
 			//如果这次请求不在上一次请求一分钟内，延长短信结束时间并重新发送短信。
-			if(UtilDateTime.adjustTimestamp((java.sql.Timestamp)sms.get("thruDate"), Calendar.SECOND,(intervalTime-validTime)).before(UtilDateTime.nowTimestamp())){
+			if(UtilDateTime.nowTimestamp().after(UtilDateTime.adjustTimestamp((java.sql.Timestamp)sms.get("thruDate"), Calendar.SECOND,(intervalTime-validTime)))){
 				sms.set("thruDate",UtilDateTime.adjustTimestamp(nowTimestamp, Calendar.MINUTE,15));
 				try {
 					sms.store();
