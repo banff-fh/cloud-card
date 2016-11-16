@@ -129,7 +129,6 @@
 		location="com.banfftech.cloudcard.sms.SmsServices" invoke="getLoginCaptcha" auth="false">
 		<description>获取登录验证码</description>
         <attribute name="teleNumber" type="String" mode="IN" optional="false"/>
-        <attribute name="status" type="String" mode="OUT" optional="true"/>
 	</service>
     
     <service name="bizAppLogin" engine="java"
