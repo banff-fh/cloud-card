@@ -22,17 +22,18 @@ under the License.
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
 
     <!-- Test case for get Login captcha process-->
-    <simple-method method-name="testGetLoginCaptcha" short-description="auto test testGetLoginCaptcha service" login-required="false">
+	<simple-method method-name="testGetLoginCaptcha" short-description="auto test testGetLoginCaptcha service" login-required="false"> -->
         <set field="serviceInMap.teleNumber" value="18614055178"/>
+        
         <call-service service-name="getLoginCaptcha" in-map-name="serviceInMap">
         </call-service>
-     	<log level="info" message="get Captcha ${status}  successfully "/>
+        
+     	<log level="info" message="get Captcha successfully "/>
         
     </simple-method>
 
     <!-- Test case for bizlogin process-->
-	<simple-method method-name="testBizAppLogin"
-		short-description="auto test testBizAppLogin service" login-required="false">
+	<simple-method method-name="testBizAppLogin" short-description="auto test testBizAppLogin service" login-required="false">
 		<set field="serviceInMap.teleNumber" value="18614055178" />
 		<set field="serviceInMap.captcha" value="984660" />
 
@@ -41,8 +42,27 @@ under the License.
 			<result-to-field result-name="organizationPartyId" />
 		</call-service>
 
-		<log level="info"
-			message=" ${organizationPartyId} login successfully get ${token} " />
+		<log level="info" message=" ${organizationPartyId} login successfully get ${token} " />
 	</simple-method>
+	
+	<!-- Test case for genNewCloudCardCode process-->
+	<simple-method method-name="testGenNewCloudCardCode" short-description="auto test genNewCloudCardCode service" login-required="false">
+		<set field="serviceInMap.organizationPartyId" value="10000" />
+		<set field="serviceInMap.finAccountName" value="咖啡店储值卡" />
+		<set field="serviceInMap.currencyUomId" value="CNY" />
+		<set field="serviceInMap.quantity" value="1" />
+		<entity-one entity-name="UserLogin" value-field="userLogin">
+            <field-map field-name="userLoginId" value="system"/>
+        </entity-one>
+        <set field="serviceInMap.userLogin" from-field="userLogin"/>
+        
+		<call-service service-name="genNewCloudCardCode" in-map-name="serviceInMap">
+			<result-to-field result-name="result" />
+		</call-service>
+
+		<log level="info" message=" generate cloudcard code successfully" />
+	</simple-method>
+	
+	
 
 </simple-methods>

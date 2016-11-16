@@ -833,8 +833,8 @@ public class CloudCardServices {
 			}
 		}
 		
-		
 		Map<String, Object> retMap = ServiceUtil.returnSuccess();
+		retMap.put("result", "SUCCESS");
 		return retMap;
 	}
 }

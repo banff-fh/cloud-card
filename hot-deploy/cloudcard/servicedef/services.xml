@@ -156,8 +156,7 @@
         <attribute name="finAccountName" type="String" mode="IN" optional="false"/>
         <attribute name="currencyUomId" type="String" mode="IN" optional="false"/>
         <attribute name="quantity" type="String" mode="IN" optional="false"/>
-        <attribute name="String" type="String" mode="OUT" optional="true"/>
+        <attribute name="result" type="String" mode="OUT" optional="true"/>
 	</service>
-	
 	
 </services>
