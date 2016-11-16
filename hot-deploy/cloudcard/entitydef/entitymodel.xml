@@ -8,7 +8,7 @@
     <description>None</description>
     <copyright></copyright>
     <version></version>
-	<view-entity entity-name="FinAccountAndPaymentMethodAndGiftCard" package-name="org.ofbiz.accounting.finaccount" title="Financial Account Authorization Sum">
+	<view-entity entity-name="FinAccountAndPaymentMethodAndGiftCard" package-name="org.ofbiz.accounting.finaccount" title="cloud card info">
         <description>云卡视图（金融账户、金融账户角色、礼品卡关联）</description>
         <member-entity entity-alias="FA" entity-name="FinAccount"/>
         <member-entity entity-alias="FAR" entity-name="FinAccountRole"/>
