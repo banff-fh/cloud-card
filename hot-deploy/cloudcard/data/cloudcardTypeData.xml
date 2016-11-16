@@ -28,5 +28,8 @@
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="token.expirationTime" systemPropertyValue="1296000" description="token的有效时间"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="token.issuer" systemPropertyValue="cloudcard" description="token的issuer"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="token.secret" systemPropertyValue="{{secret used for signing}}" description="token的secret"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="jpush.appkey" systemPropertyValue="xxxxxx" description="极光推送appkey"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="jpush.secret" systemPropertyValue="xxxxxx" description="极光推送secret"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="jpush.expirationTime" systemPropertyValue="172800" description="极光推送有效时间"/>
 
 </entity-engine-xml>
