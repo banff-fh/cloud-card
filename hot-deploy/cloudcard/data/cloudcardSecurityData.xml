@@ -12,4 +12,9 @@
     <SecurityGroupPermission groupId="FLEXADMIN" permissionId="CLOUDCARD_VIEW"/>
     <SecurityGroupPermission groupId="VIEWADMIN" permissionId="CLOUDCARD_VIEW"/>
     <SecurityGroupPermission groupId="BIZADMIN" permissionId="CLOUDCARD_ADMIN"/>
+    
+    <Party partyId="_NA_" partyTypeId="PERSON"/>
+	<Person partyId="_NA_"/>
+	<PartyRole partyId="_NA_" roleTypeId="_NA_"/>
+    
 </entity-engine-xml>
