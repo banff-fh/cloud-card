@@ -115,7 +115,6 @@ public class CloudCardServices {
 		
 		//1、根据二维码获取卡信息
 		GenericValue cloudCard = (GenericValue) checkParamOut.get("cloudCard");
-		String finAccountId;
 		String customerPartyId;
 		String cardId;
 		if(!"FNACT_ACTIVE".equals(cloudCard.getString("statusId"))){
@@ -139,12 +138,10 @@ public class CloudCardServices {
 					return createCloudCardOutMap;
 				}
 				
-				finAccountId = (String) createCloudCardOutMap.get("finAccountId");
 				customerPartyId = (String) createCloudCardOutMap.get("customerPartyId");
 				cardId = (String)createCloudCardOutMap.get("paymentMethodId");
 			}
 		}else{
-			finAccountId = cloudCard.getString("finAccountId");
 			// ownerPartyId 如果卡已授权给别人，partyId是被授权人，ownerPartyId是原主人
 			customerPartyId = cloudCard.getString("partyId");
 			cardId = cloudCard.getString("paymentMethodId");
@@ -156,7 +153,7 @@ public class CloudCardServices {
 			rechargeCloudCardOutMap = dispatcher.runSync("rechargeCloudCard",
 					UtilMisc.toMap("userLogin", userLogin, "locale",locale,
 							"organizationPartyId", organizationPartyId, 
-							"finAccountId", finAccountId,
+							"cardId", cardId,
 							"amount", amount));
 		} catch (GenericServiceException e1) {
 			Debug.logError(e1, module);
@@ -284,7 +281,7 @@ public class CloudCardServices {
 		Locale locale = (Locale) context.get("locale");
 
 		String organizationPartyId = (String) context.get("organizationPartyId");
-		String finAccountId = (String) context.get("finAccountId");
+		String cardId = (String) context.get("cardId");
 		BigDecimal amount = (BigDecimal) context.get("amount");
 
 		Timestamp nowTimestamp = UtilDateTime.nowTimestamp();
@@ -294,8 +291,8 @@ public class CloudCardServices {
 			return checkParamOut;
 		}
 //		GenericValue partyGroup = (GenericValue) checkParamOut.get("partyGroup");
-		GenericValue finAccount = (GenericValue) checkParamOut.get("finAccount");
-
+		GenericValue cloudCard = (GenericValue) checkParamOut.get("cloudCard");
+		String finAccountId = cloudCard.getString("finAccountId");
 		
 		// 获取商户用于管理卖卡限额的金融账户
 		GenericValue creditLimitAccount = CloudCardHelper.getCreditLimitAccount(delegator, organizationPartyId);
@@ -348,7 +345,7 @@ public class CloudCardServices {
 		
 		// 2、商户收款 用户--》商家
 		String receiptAccountId = receiptAccount.getString("finAccountId");
-		String customerPartyId = finAccount.getString("ownerPartyId");
+		String customerPartyId = cloudCard.getString("ownerPartyId");
 		Map<String, Object> receiptAccountDepositOutMap;
 		try {
 			receiptAccountDepositOutMap = dispatcher.runSync("createPaymentAndFinAccountTransForCloudCard",
@@ -368,7 +365,8 @@ public class CloudCardServices {
 		}
 		String receiptPaymentId = (String) receiptAccountDepositOutMap.get("paymentId");
 		
-		// 3、用户账户存入  
+		// 3、用户账户存入
+		// 商家收款账户---》用户账户
 		Map<String, Object> finAccountWithdrawOutMap;
 		try {
 			finAccountWithdrawOutMap = dispatcher.runSync("createFinAccountTrans",
@@ -396,6 +394,7 @@ public class CloudCardServices {
 							DEFAULT_CURRENCY_UOM_ID, "finAccountTransTypeId", "DEPOSIT", 
 							"paymentTypeId","GC_DEPOSIT",
 							"finAccountId", finAccountId,
+							"paymentMethodId", cardId,
 							"paymentMethodTypeId", "FIN_ACCOUNT", "partyIdFrom", organizationPartyId, "partyIdTo",
 							customerPartyId, "amount", amount, "comments", "充值，存入用户账户",
 							"reasonEnumId", "FATR_REPLENISH"));
@@ -427,7 +426,7 @@ public class CloudCardServices {
 		}
 		
 		// 因为余额会被ECA更新，这里是旧值，
-		BigDecimal actualBalance = (BigDecimal) finAccount.get("actualBalance");
+		BigDecimal actualBalance = (BigDecimal) cloudCard.get("actualBalance");
 		if(null == actualBalance){
 			actualBalance = BigDecimal.ZERO;
 		}
@@ -436,7 +435,7 @@ public class CloudCardServices {
 		result.put("actualBalance", actualBalance.add(amount));
 		result.put("customerPartyId", customerPartyId);
 		result.put("amount", amount);
-		result.put("finAccountId", finAccountId);
+		result.put("cardId", cardId);
 		return result;
 	}
 	
