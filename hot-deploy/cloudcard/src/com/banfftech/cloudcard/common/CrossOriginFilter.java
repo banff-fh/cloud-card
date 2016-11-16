@@ -41,6 +41,8 @@ public class CrossOriginFilter implements Filter {
             	 // 如果allowList里面配置了*，就不用去匹配了，直接allow
                 if("*".equals(origin) || curOrigin.equals(origin)) {  
                     httpResponse.setHeader("Access-Control-Allow-Origin", curOrigin);
+                    httpResponse.setHeader("Access-Control-Allow-Methods", "POST");
+                    httpResponse.setHeader("Access-Control-Allow-Headers", "x-requested-with,content-type");
                     break;
                 }
             }  
