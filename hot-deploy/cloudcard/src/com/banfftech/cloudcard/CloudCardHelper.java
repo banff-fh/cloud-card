@@ -179,7 +179,7 @@ public class CloudCardHelper {
 			Map<String, Object> partyTelecomOutMap;
 			try {
 				partyTelecomOutMap = dispatcher.runSync("createPartyTelecomNumber", 
-						UtilMisc.toMap("userLogin", userLogin, "contactMechPurposeTypeId", "AS_USER_LOGIN_ID", "partyId", customerPartyId,
+						UtilMisc.toMap("userLogin", systemUser, "contactMechPurposeTypeId", "AS_USER_LOGIN_ID", "partyId", customerPartyId,
 								"contactNumber", teleNumber));
 			} catch (GenericServiceException e) {
 				Debug.logError(e, module);
@@ -246,8 +246,18 @@ public class CloudCardHelper {
 		Timestamp thruDate =(Timestamp)context.get("thruDate");
 
 		String paymentMethodId;
+		
+		GenericValue systemUser;
+		try {
+			systemUser = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+		} catch (GenericEntityException e1) {
+			Debug.logError(e1, module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		
 		Map<String, Object> giftCardMap = FastMap.newInstance();
-		giftCardMap.put("userLogin", userLogin);
+		giftCardMap.put("userLogin", systemUser);
 		giftCardMap.put("partyId", customerPartyId); 
 		giftCardMap.put("description", description); 
 		giftCardMap.put("cardNumber", cardNumber);
