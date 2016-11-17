@@ -27,6 +27,7 @@ import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityConditionList;
+import org.ofbiz.entity.condition.EntityExpr;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.entity.util.EntityUtilProperties;
@@ -113,42 +114,111 @@ public class CloudCardQueryServices {
 	}
 
 	/**
-	 * 查询交易流水
+	 * 查询用户交易流水
 	 * @param dctx
 	 * @param context
 	 * @return Map
 	 */
-	public static Map<String, Object> findPaymentByPartyId(DispatchContext dctx, Map<String, Object> context) {
+	public static Map<String, Object> getUserPayment(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
-		String partyIdFrom = (String) context.get("partyIdFrom");
-		String partyIdTo = (String) context.get("partyIdTo");
+		GenericValue userLogin = (GenericValue) context.get("userLogin");
+		String partyId = (String) userLogin.get("partyId");
 		String paymentTypeId = (String) context.get("paymentTypeId");
-		Integer viewIndex = (Integer) context.get("viewIndex");
-		Integer viewSize = (Integer) context.get("viewSize");
 
-		Map<String, Object> inputFieldMap = FastMap.newInstance();
-		inputFieldMap.put("partyIdFrom", partyIdFrom);
-		inputFieldMap.put("partyIdTo", partyIdTo);
-		inputFieldMap.put("paymentTypeId", paymentTypeId);
-
-		Map<String, Object> ctxMap = FastMap.newInstance();
-		ctxMap.put("inputFields", inputFieldMap);
-		ctxMap.put("entityName", "PaymentAndTypePartyNameView");
-		ctxMap.put("orderBy", "effectiveDate");
-		ctxMap.put("viewIndex", viewIndex);
-		ctxMap.put("viewSize", viewSize);
-
-		Map<String, Object> paymentResult = null;
+		List<EntityExpr> depositExprs = FastList.newInstance();
+        List<EntityExpr> withDrawalExprs = FastList.newInstance();
+        EntityConditionList<EntityCondition> paymentConditions = null;
+        if(paymentTypeId != null){
+        	if(paymentTypeId.equalsIgnoreCase("GC_DEPOSIT")){
+    	        depositExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_DEPOSIT"));
+    	        depositExprs.add(EntityCondition.makeCondition("partyIdTo", EntityOperator.EQUALS,partyId));
+    	        EntityCondition depositCondition = EntityCondition.makeCondition(depositExprs, EntityOperator.AND);
+    	        paymentConditions = EntityCondition.makeCondition(depositCondition);
+    		}else if(paymentTypeId.equalsIgnoreCase("GC_WITHDRAWAL")){
+    			withDrawalExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_WITHDRAWAL"));
+    	        withDrawalExprs.add(EntityCondition.makeCondition("partyIdFrom", EntityOperator.EQUALS,partyId));
+    	        EntityCondition depositCondition = EntityCondition.makeCondition(depositExprs, EntityOperator.AND);
+    	        paymentConditions = EntityCondition.makeCondition(depositCondition);
+    		}
+        }else{
+			depositExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_DEPOSIT"));
+	        depositExprs.add(EntityCondition.makeCondition("partyIdTo", EntityOperator.EQUALS,partyId));
+	        withDrawalExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_WITHDRAWAL"));
+	        withDrawalExprs.add(EntityCondition.makeCondition("partyIdFrom", EntityOperator.EQUALS,partyId));
+	        EntityCondition depositCondition = EntityCondition.makeCondition(depositExprs, EntityOperator.AND);
+	        EntityCondition withDrawalCondition = EntityCondition.makeCondition(withDrawalExprs, EntityOperator.AND);
+	        paymentConditions = EntityCondition.makeCondition(UtilMisc.toList(depositCondition,withDrawalCondition),EntityOperator.OR);
+		}
+		
+        EntityCondition depositCondition = EntityCondition.makeCondition(depositExprs, EntityOperator.AND);
+        EntityCondition withDrawalCondition = EntityCondition.makeCondition(withDrawalExprs, EntityOperator.AND);
+      
+        paymentConditions = EntityCondition.makeCondition(UtilMisc.toList(depositCondition,withDrawalCondition),EntityOperator.OR);
+		
+		List<GenericValue> payments = FastList.newInstance();
 		try {
-			paymentResult = dispatcher.runSync("performFindList", ctxMap);
-		} catch (GenericServiceException e) {
+			payments = delegator.findList("PaymentAndTypePartyNameView", paymentConditions, UtilMisc.toSet("amount","partyToGroupName","paymentTypeId"), UtilMisc.toList("effectiveDate"), null, false);
+		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
-
+		
 		Map<String, Object> result = ServiceUtil.returnSuccess();
-		result.put("paymentList", paymentResult.get("list"));
+		result.put("paymentList", payments);
+		return result;
+	}
+	
+	/**
+	 * 查询商铺交易流水
+	 * @param dctx
+	 * @param context
+	 * @return Map
+	 */
+	public static Map<String, Object> getBizPayment(DispatchContext dctx, Map<String, Object> context) {
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+		GenericValue userLogin = (GenericValue) context.get("userLogin");
+		String partyId = (String) userLogin.get("partyId");
+		String paymentTypeId = (String) context.get("paymentTypeId");
+
+		List<EntityExpr> depositExprs = FastList.newInstance();
+        List<EntityExpr> withDrawalExprs = FastList.newInstance();
+        EntityConditionList<EntityCondition> paymentConditions = null;
+        if(paymentTypeId != null){
+        	if(paymentTypeId.equalsIgnoreCase("GC_DEPOSIT")){
+    	        depositExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_DEPOSIT"));
+    	        depositExprs.add(EntityCondition.makeCondition("partyIdTo", EntityOperator.EQUALS,partyId));
+    	        EntityCondition depositCondition = EntityCondition.makeCondition(depositExprs, EntityOperator.AND);
+    	        paymentConditions = EntityCondition.makeCondition(depositCondition);
+    		}else if(paymentTypeId.equalsIgnoreCase("GC_WITHDRAWAL")){
+    			withDrawalExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_WITHDRAWAL"));
+    	        withDrawalExprs.add(EntityCondition.makeCondition("partyIdFrom", EntityOperator.EQUALS,partyId));
+    	        EntityCondition depositCondition = EntityCondition.makeCondition(depositExprs, EntityOperator.AND);
+    	        paymentConditions = EntityCondition.makeCondition(depositCondition);
+    		}
+        }else{
+			depositExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_DEPOSIT"));
+	        depositExprs.add(EntityCondition.makeCondition("partyIdTo", EntityOperator.EQUALS,partyId));
+	        withDrawalExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_WITHDRAWAL"));
+	        withDrawalExprs.add(EntityCondition.makeCondition("partyIdFrom", EntityOperator.EQUALS,partyId));
+	        EntityCondition depositCondition = EntityCondition.makeCondition(depositExprs, EntityOperator.AND);
+	        EntityCondition withDrawalCondition = EntityCondition.makeCondition(withDrawalExprs, EntityOperator.AND);
+	        paymentConditions = EntityCondition.makeCondition(UtilMisc.toList(depositCondition,withDrawalCondition),EntityOperator.OR);
+		}
+		
+		List<GenericValue> payments = FastList.newInstance();
+		try {
+			payments = delegator.findList("PaymentAndTypePartyNameView", paymentConditions, UtilMisc.toSet("amount","partyToGroupName","paymentTypeId"), UtilMisc.toList("effectiveDate"), null, false);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("paymentList", payments);
 		return result;
 	}
 	
@@ -158,7 +228,6 @@ public class CloudCardQueryServices {
 	 * @param context
 	 * @return Map
 	 */
-
 	public static Map<String, Object> findLimitAndPresellInfo(DispatchContext dctx, Map<String, Object> context) {
 		Delegator delegator = dctx.getDelegator();
 		Locale locale = (Locale) context.get("locale");
