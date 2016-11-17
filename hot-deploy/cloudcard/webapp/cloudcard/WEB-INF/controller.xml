@@ -60,9 +60,18 @@
         <response name="error" type="request" value="json"/>
     </request-map>
     
-    <request-map uri="findPaymentByPartyId">
-    	<!--<security https="true" auth="false" />-->
-    	<event type="service" invoke="findPaymentByPartyId"/>
+    <!-- 查询商家交易记录 -->
+    <request-map uri="getBizPayment">
+<!--     	<security https="true" auth="false" /> -->
+    	<event type="service" invoke="getBizPayment"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    
+    <!-- 查询用户交易记录 -->
+    <request-map uri="getUserPayment">
+<!--     	<security https="true" auth="false" /> -->
+    	<event type="service" invoke="getUserPayment"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
