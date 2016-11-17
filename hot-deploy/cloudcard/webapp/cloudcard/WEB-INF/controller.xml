@@ -30,7 +30,7 @@
 			auth设置为false，否则ofbiz会直接跳转的是登录页面的html，而不是返回json，
 			后面事件里面的服务在定义时应当设置为需要登录 
 		-->
-		<security https="true" auth="false" />
+		<!--<security https="true" auth="false" />-->
     	<event type="service" invoke="activateCloudCardAndRecharge"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
@@ -38,7 +38,7 @@
     
     <!-- 卡授权接口 -->
 	<request-map uri="createCardAuth">
-		<security https="true" auth="false" />
+		<!--<security https="true" auth="false" />-->
     	<event type="service" invoke="createCardAuth"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
@@ -46,7 +46,7 @@
     
      <!-- 扫码支付接口 -->
 	<request-map uri="cloudCardWithdraw">
-		<security https="true" auth="false" />
+		<!--<security https="true" auth="false" />-->
     	<event type="service" invoke="cloudCardWithdraw"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
@@ -54,21 +54,21 @@
     
      <!-- 用户卡列表接口 -->
     <request-map uri="myCloudCards">
-    	<security https="true" auth="false" />
+    	<!--<security https="true" auth="false" />-->
     	<event type="service" invoke="myCloudCards"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
     
     <request-map uri="findPaymentByPartyId">
-    	<security https="true" auth="false" />
+    	<!--<security https="true" auth="false" />-->
     	<event type="service" invoke="findPaymentByPartyId"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
     
     <request-map uri="findLimitAndPresellInfo">
-    	<security https="true" auth="false" />
+    	<!--<security https="true" auth="false" />-->
     	<event type="service" invoke="findLimitAndPresellInfo"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
@@ -76,7 +76,7 @@
 
 	<!-- 扫二维码获取卡信息 -->
     <request-map uri="getCardInfoByCode">
-    	<security https="true" auth="false" />
+    	<!--<security https="true" auth="false" />-->
     	<event type="service" invoke="getCardInfoByCode"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
@@ -84,7 +84,7 @@
     
     <!-- 验证码发送申请 -->
     <request-map uri="getLoginCaptcha">
-    	<security https="true" auth="false" />
+    	<!--<security https="true" auth="false" />-->
     	<event type="service" invoke="getLoginCaptcha"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
@@ -92,7 +92,7 @@
 
 	<!-- 商户app登录接口 -->
 	<request-map uri="bizAppLogin">
-		<security https="true" auth="false" />
+		<!--<security https="true" auth="false" />-->
 		<event type="service" invoke="bizAppLogin" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
@@ -100,7 +100,7 @@
 
 	<!-- 用户app登录接口 -->
 	<request-map uri="userAppLogin">
-		<security https="true" auth="false" />
+		<!--<security https="true" auth="false" />-->
 		<event type="service" invoke="userAppLogin" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
