@@ -150,12 +150,14 @@ public class CloudCardHelper {
 			customerPartyId = (String) personOutMap.get("partyId");
 			// UserLoginId通常是可以直接由用户输入的用户名，这里由系统生成，自定义个前缀CC  代表 Cloud Card，减少冲突
 			customerUserLoginId ="CC"+delegator.getNextSeqId("UserLogin");
-			GenericValue systemUser;
-			try {
-				systemUser = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system"));
-			} catch (GenericEntityException e1) {
-				Debug.logError(e1, module);
-				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+			GenericValue systemUser = (GenericValue) context.get("systemUser");
+			if(null == systemUser){
+				try {
+					systemUser = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+				} catch (GenericEntityException e1) {
+					Debug.logError(e1, module);
+					return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+				}
 			}
 			
 			Map<String, Object> createUserLoginMap = UtilMisc.toMap("userLogin", systemUser);
@@ -247,12 +249,14 @@ public class CloudCardHelper {
 
 		String paymentMethodId;
 		
-		GenericValue systemUser;
-		try {
-			systemUser = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system"));
-		} catch (GenericEntityException e1) {
-			Debug.logError(e1, module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		GenericValue systemUser = (GenericValue) context.get("systemUser");
+		if(null == systemUser){
+			try {
+				systemUser = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+			} catch (GenericEntityException e1) {
+				Debug.logError(e1, module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+			}
 		}
 		
 		
@@ -453,4 +457,30 @@ public class CloudCardHelper {
 
         return newCardCode.toString();
     }
+    
+    
+	/**
+	 * 通过查询FinAccountRole中是否有有效的 roleTypeId=SHAREHOLDER 的记录，来判断卡是否已经被授权其他用户使用
+	 * @param cloudCard
+	 * @param delegator
+	 * @return
+	 */
+	public static boolean cardIsAuthorized(GenericValue cloudCard, Delegator delegator) {
+		if (null == cloudCard)
+			return false;
+		String finAccountId = cloudCard.getString("finAccountId");
+		EntityCondition dateCond = EntityUtil.getFilterByDateExpr();
+		EntityCondition cond = EntityCondition
+				.makeCondition(UtilMisc.toMap("finAccountId", finAccountId, "roleTypeId", "SHAREHOLDER"));
+		try {
+			List<GenericValue> findList = delegator.findList("FinAccountRole",
+					EntityCondition.makeCondition(dateCond, cond), null, null, null, false);
+			if (findList.size() > 0) {
+				return true;
+			}
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+		}
+		return false;
+	}
 }

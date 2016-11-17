@@ -39,18 +39,53 @@ public class CloudCardServices {
 	 * 卡授权
 	 */
 	public static Map<String, Object> createCardAuth(DispatchContext dctx, Map<String, Object> context) {
-//		LocalDispatcher dispatcher = dctx.getDispatcher();
-//		Delegator delegator = dispatcher.getDelegator();
-//		Locale locale = (Locale) context.get("locale");
-//		String cardId = (String) context.get("cardId");
-//		String amount = (String) context.get("amount");//TODO, 授权金额还未处理
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+		BigDecimal amount = (BigDecimal) context.get("amount");
+		Timestamp fromDate =(Timestamp)context.get("fromDate");
+		if(UtilValidate.isEmpty(fromDate)){
+			fromDate = UtilDateTime.nowTimestamp();
+			context.put("fromDate", fromDate);
+		}
+		Timestamp thruDate =(Timestamp)context.get("thruDate");
 		
 		Map<String, Object> checkParamOut = checkInputParam(dctx, context);
 		if(ServiceUtil.isError(checkParamOut)){
 			return checkParamOut;
 		}
 		GenericValue cloudCard = (GenericValue) checkParamOut.get("cloudCard");
-
+		String finAccountId = cloudCard.getString("finAccountId");
+		
+		// 余额检查
+		BigDecimal balance = cloudCard.getBigDecimal("actualBalance");
+		if(balance.compareTo(amount)<0){
+			Debug.logError("This card balance is Not Enough, can NOT authorize", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardBalanceIsNotEnough", UtilMisc.toMap("finAccountId", finAccountId, "balance", balance), locale));
+		}
+		
+		// 检查是不是已经授权的卡
+		// 卡号的前缀是带有 auth: 字样，说明是别人授权给我的卡，不能再次授权
+		String cardCode = cloudCard.getString("cardNumber");
+		if(UtilValidate.isNotEmpty(cardCode)&& cardCode.startsWith(CloudCardHelper.AUTH_CARD_CODE_PREFIX)){
+			Debug.logError("This card has been authorized", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardHasBeenAuthorized", locale));
+		}
+		// 存在SHAREHOLDER 角色的，未过期的 finAccountRole，表示此卡已授权给他人，不能再次授权
+		if(CloudCardHelper.cardIsAuthorized(cloudCard, delegator)){
+			Debug.logError("This card has been authorized", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardHasBeenAuthorized", locale));
+		}
+		
+		// 用户自己的userLogin没有 诸如 创建partyContact之类的权限，需要用到system权限
+		GenericValue systemUser;
+		try {
+			systemUser = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+		} catch (GenericEntityException e1) {
+			Debug.logError(e1, module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
+		context.put("systemUser", systemUser);
 		
 		// 授权时判断用户是否存在， 不存在则创建用户
 		Map<String, Object> getOrCreateCustomerOut = CloudCardHelper.getOrCreateCustomer(dctx, context);
@@ -68,6 +103,7 @@ public class CloudCardServices {
 				.append(cloudCard.getString("finAccountCode")).toString();
 		Map<String, Object> giftCardInMap = FastMap.newInstance();
 		giftCardInMap.putAll(context);
+		giftCardInMap.put("finAccountId", finAccountId);
 		giftCardInMap.put("cardNumber", newCardCode);
 		giftCardInMap.put("description", finAccountName + "授权给用户" + customerPartyId);
 		giftCardInMap.put("customerPartyId", customerPartyId);
@@ -75,6 +111,30 @@ public class CloudCardServices {
 		if (ServiceUtil.isError(giftCardOutMap)) {
 			return giftCardOutMap;
 		}		
+		
+		// 为被授权人 创建finAccountRole，  SHAREHOLDER角色
+		Map<String, Object> createCloudCardOutMap;
+		try {
+			createCloudCardOutMap = dispatcher.runSync("createFinAccountRole",
+					UtilMisc.toMap("userLogin", systemUser, "locale",locale,
+							"finAccountId", finAccountId, 
+							"partyId", customerPartyId,
+							"roleTypeId", "SHAREHOLDER",
+							"fromDate", fromDate,
+							"thruDate", thruDate));
+		} catch (GenericServiceException e1) {
+			Debug.logError(e1, module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
+		if (ServiceUtil.isError(createCloudCardOutMap)) {
+			return createCloudCardOutMap;
+		}
+		
+		// 授权金额的处理
+		// TODO
+		
+		
+		
 		
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("customerPartyId", customerPartyId);

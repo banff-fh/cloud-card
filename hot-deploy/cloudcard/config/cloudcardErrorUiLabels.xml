@@ -85,4 +85,9 @@
         <value xml:lang="zh">生成卡号失败</value>
     </property>
     
+    <property key="CloudCardHasBeenAuthorized">
+        <value xml:lang="en">This card has been authorized</value>
+        <value xml:lang="zh">此卡已经被授权了</value>
+    </property>
+    
 </resource>
