@@ -384,8 +384,8 @@ public class CloudCardQueryServices {
         
 		Map<String, Object> results = ServiceUtil.returnSuccess();
 		results.put("presellAmount", presellAmount);
-		results.put("authAmount", partyGroupFinAccount.get("replenishLevel"));
-		results.put("actualBalance", partyGroupFinAccount.get("availableBalance"));
+		results.put("limitAmount", partyGroupFinAccount.get("replenishLevel"));
+		results.put("balance", partyGroupFinAccount.get("availableBalance"));
 		return results;
 	}
 	

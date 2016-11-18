@@ -116,8 +116,8 @@
 		<description>查询开卡额度和已卖卡金额信息</description>
         <attribute name="organizationPartyId" type="String" mode="IN" optional="false"/>
         <attribute name="presellAmount" type="BigDecimal" mode="OUT" optional="false"/>
-        <attribute name="authAmount" type="BigDecimal" mode="OUT" optional="false"/>
-        <attribute name="actualBalance" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="limitAmount" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="balance" type="BigDecimal" mode="OUT" optional="false"/>
 	</service>
 	
 	<service name="createPaymentAndFinAccountTransForCloudCard" engine="simple"
