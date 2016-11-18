@@ -17,15 +17,21 @@
     <service name="getBizPayment" engine="java"
             location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="getBizPayment" auth="true">
         <description>查询商户交易流水</description>
-        <attribute name="paymentTypeId" type="String" mode="IN" optional="false"/>
+        <attribute name="viewIndex" type="Integer" mode="IN" optional="true"/>
+        <attribute name="viewSize" type="Integer" mode="IN" optional="true"/>
+        <attribute name="paymentTypeId" type="String" mode="IN" optional="true"/>
         <attribute name="paymentList" type="List" mode="OUT" optional="false"/>
+        <attribute name="totalPage" type="Integer" mode="OUT" optional="false"/>
     </service>
     
     <service name="getUserPayment" engine="java"
             location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="getUserPayment" auth="true">
         <description>查询客户交易流水</description>
+       	<attribute name="viewIndex" type="Integer" mode="IN" optional="true"/>
+        <attribute name="viewSize" type="Integer" mode="IN" optional="true"/>
         <attribute name="paymentTypeId" type="String" mode="IN" optional="true"/>
         <attribute name="paymentList" type="List" mode="OUT" optional="false"/>
+        <attribute name="totalPage" type="Integer" mode="OUT" optional="false"/>
     </service>
     
     <service name="createCardAuth" engine="java"
