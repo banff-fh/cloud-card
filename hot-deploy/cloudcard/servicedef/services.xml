@@ -105,12 +105,12 @@
         <attribute name="ownerPartyId" type="String" mode="OUT" optional="true"><description>原卡主partyId</description></attribute>
 	</service>
 	
-	<service name="findLimitAndPresellInfo" engine="java"
-		location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="findLimitAndPresellInfo" auth="true">
+	<service name="getLimitAndPresellInfo" engine="java"
+		location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="getLimitAndPresellInfo" auth="true">
 		<description>查询开卡额度和已卖卡金额信息</description>
         <attribute name="organizationPartyId" type="String" mode="IN" optional="false"/>
         <attribute name="presellAmount" type="BigDecimal" mode="OUT" optional="false"/>
-        <attribute name="totalAmount" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="authAmount" type="BigDecimal" mode="OUT" optional="false"/>
         <attribute name="actualBalance" type="BigDecimal" mode="OUT" optional="false"/>
 	</service>
 	

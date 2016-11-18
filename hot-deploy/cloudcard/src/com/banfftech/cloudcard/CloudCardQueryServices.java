@@ -130,19 +130,18 @@ public class CloudCardQueryServices {
 		List<EntityExpr> depositExprs = FastList.newInstance();
         List<EntityExpr> withDrawalExprs = FastList.newInstance();
         EntityConditionList<EntityCondition> paymentConditions = null;
-        if(paymentTypeId != null){
-        	if(paymentTypeId.equalsIgnoreCase("GC_DEPOSIT")){
-    	        depositExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_DEPOSIT"));
-    	        depositExprs.add(EntityCondition.makeCondition("partyIdTo", EntityOperator.EQUALS,partyId));
-    	        EntityCondition depositCondition = EntityCondition.makeCondition(depositExprs, EntityOperator.AND);
-    	        paymentConditions = EntityCondition.makeCondition(depositCondition);
-    		}else if(paymentTypeId.equalsIgnoreCase("GC_WITHDRAWAL")){
-    			withDrawalExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_WITHDRAWAL"));
-    	        withDrawalExprs.add(EntityCondition.makeCondition("partyIdFrom", EntityOperator.EQUALS,partyId));
-    	        EntityCondition depositCondition = EntityCondition.makeCondition(depositExprs, EntityOperator.AND);
-    	        paymentConditions = EntityCondition.makeCondition(depositCondition);
-    		}
-        }else{
+        
+    	if(paymentTypeId.equalsIgnoreCase("GC_DEPOSIT")){
+	        depositExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_DEPOSIT"));
+	        depositExprs.add(EntityCondition.makeCondition("partyIdTo", EntityOperator.EQUALS,partyId));
+	        EntityCondition depositCondition = EntityCondition.makeCondition(depositExprs, EntityOperator.AND);
+	        paymentConditions = EntityCondition.makeCondition(depositCondition);
+		}else if(paymentTypeId.equalsIgnoreCase("GC_WITHDRAWAL")){
+			withDrawalExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_WITHDRAWAL"));
+	        withDrawalExprs.add(EntityCondition.makeCondition("partyIdFrom", EntityOperator.EQUALS,partyId));
+	        EntityCondition depositCondition = EntityCondition.makeCondition(withDrawalExprs, EntityOperator.AND);
+	        paymentConditions = EntityCondition.makeCondition(depositCondition);
+		}else{
 			depositExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_DEPOSIT"));
 	        depositExprs.add(EntityCondition.makeCondition("partyIdTo", EntityOperator.EQUALS,partyId));
 	        withDrawalExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_WITHDRAWAL"));
@@ -151,11 +150,6 @@ public class CloudCardQueryServices {
 	        EntityCondition withDrawalCondition = EntityCondition.makeCondition(withDrawalExprs, EntityOperator.AND);
 	        paymentConditions = EntityCondition.makeCondition(UtilMisc.toList(depositCondition,withDrawalCondition),EntityOperator.OR);
 		}
-		
-        EntityCondition depositCondition = EntityCondition.makeCondition(depositExprs, EntityOperator.AND);
-        EntityCondition withDrawalCondition = EntityCondition.makeCondition(withDrawalExprs, EntityOperator.AND);
-      
-        paymentConditions = EntityCondition.makeCondition(UtilMisc.toList(depositCondition,withDrawalCondition),EntityOperator.OR);
 		
 		List<GenericValue> payments = FastList.newInstance();
 		try {
@@ -187,19 +181,18 @@ public class CloudCardQueryServices {
 		List<EntityExpr> depositExprs = FastList.newInstance();
         List<EntityExpr> withDrawalExprs = FastList.newInstance();
         EntityConditionList<EntityCondition> paymentConditions = null;
-        if(paymentTypeId != null){
-        	if(paymentTypeId.equalsIgnoreCase("GC_DEPOSIT")){
-    	        depositExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_DEPOSIT"));
-    	        depositExprs.add(EntityCondition.makeCondition("partyIdTo", EntityOperator.EQUALS,partyId));
-    	        EntityCondition depositCondition = EntityCondition.makeCondition(depositExprs, EntityOperator.AND);
-    	        paymentConditions = EntityCondition.makeCondition(depositCondition);
-    		}else if(paymentTypeId.equalsIgnoreCase("GC_WITHDRAWAL")){
-    			withDrawalExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_WITHDRAWAL"));
-    	        withDrawalExprs.add(EntityCondition.makeCondition("partyIdFrom", EntityOperator.EQUALS,partyId));
-    	        EntityCondition depositCondition = EntityCondition.makeCondition(depositExprs, EntityOperator.AND);
-    	        paymentConditions = EntityCondition.makeCondition(depositCondition);
-    		}
-        }else{
+        
+    	if(paymentTypeId.equalsIgnoreCase("GC_DEPOSIT")){
+	        depositExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_DEPOSIT"));
+	        depositExprs.add(EntityCondition.makeCondition("partyIdTo", EntityOperator.EQUALS,partyId));
+	        EntityCondition depositCondition = EntityCondition.makeCondition(depositExprs, EntityOperator.AND);
+	        paymentConditions = EntityCondition.makeCondition(depositCondition);
+		}else if(paymentTypeId.equalsIgnoreCase("GC_WITHDRAWAL")){
+			withDrawalExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_WITHDRAWAL"));
+	        withDrawalExprs.add(EntityCondition.makeCondition("partyIdFrom", EntityOperator.EQUALS,partyId));
+	        EntityCondition depositCondition = EntityCondition.makeCondition(withDrawalExprs, EntityOperator.AND);
+	        paymentConditions = EntityCondition.makeCondition(depositCondition);
+		}else{
 			depositExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_DEPOSIT"));
 	        depositExprs.add(EntityCondition.makeCondition("partyIdTo", EntityOperator.EQUALS,partyId));
 	        withDrawalExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_WITHDRAWAL"));
@@ -220,6 +213,7 @@ public class CloudCardQueryServices {
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("paymentList", payments);
 		return result;
+		
 	}
 	
 	/**
@@ -228,10 +222,10 @@ public class CloudCardQueryServices {
 	 * @param context
 	 * @return Map
 	 */
-	public static Map<String, Object> findLimitAndPresellInfo(DispatchContext dctx, Map<String, Object> context) {
+	public static Map<String, Object> getLimitAndPresellInfo(DispatchContext dctx, Map<String, Object> context) {
 		Delegator delegator = dctx.getDelegator();
 		Locale locale = (Locale) context.get("locale");
-		BigDecimal incrementTotal = ZERO; 
+		BigDecimal presellAmount = ZERO; 
 
 		String organizationPartyId = (String) context.get("organizationPartyId");
 		// 获取商户金融账户
@@ -242,10 +236,8 @@ public class CloudCardQueryServices {
         }
 		//查询已卖卡金额
 		EntityConditionList<EntityCondition> incrementConditions = EntityCondition.makeCondition(UtilMisc.toList(
-				EntityCondition.makeCondition("finAccountId", EntityOperator.EQUALS,
-						partyGroupFinAccount.get("finAccountId")),
-				EntityCondition.makeCondition(
-						EntityCondition.makeCondition("amount", EntityOperator.GREATER_THAN, ZERO))),
+				EntityCondition.makeCondition("finAccountId", EntityOperator.EQUALS,partyGroupFinAccount.get("finAccountId")),
+				EntityCondition.makeCondition(EntityCondition.makeCondition("amount", EntityOperator.GREATER_THAN, ZERO))),
 				EntityOperator.AND);
 		
         List<GenericValue> finAccountAuthList = null;
@@ -258,13 +250,13 @@ public class CloudCardQueryServices {
 		//计算卖卡金额
 		if (finAccountAuthList != null) {
 			for (GenericValue finAccountAuth : finAccountAuthList) {
-				incrementTotal = incrementTotal.add(BigDecimal.valueOf(UtilMisc.toDouble(finAccountAuth.get("amount"))));
+				presellAmount = presellAmount.add(BigDecimal.valueOf(UtilMisc.toDouble(finAccountAuth.get("amount"))));
 			}
 		}
         
 		Map<String, Object> results = ServiceUtil.returnSuccess();
-		results.put("presellAmount", incrementTotal);
-		results.put("totalAmount", partyGroupFinAccount.get("actualBalance"));
+		results.put("presellAmount", presellAmount);
+		results.put("authAmount", partyGroupFinAccount.get("replenishLevel"));
 		results.put("actualBalance", partyGroupFinAccount.get("availableBalance"));
 		return results;
 	}
