@@ -42,10 +42,12 @@ public class CloudCardServices {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
+		GenericValue userLogin = (GenericValue) context.get("userLogin");
 		BigDecimal amount = (BigDecimal) context.get("amount");
 		Timestamp fromDate =(Timestamp)context.get("fromDate");
+		Timestamp nowTimestamp = UtilDateTime.nowTimestamp();
 		if(UtilValidate.isEmpty(fromDate)){
-			fromDate = UtilDateTime.nowTimestamp();
+			fromDate = nowTimestamp;
 			context.put("fromDate", fromDate);
 		}
 		Timestamp thruDate =(Timestamp)context.get("thruDate");
@@ -61,7 +63,8 @@ public class CloudCardServices {
 		BigDecimal balance = cloudCard.getBigDecimal("actualBalance");
 		if(balance.compareTo(amount)<0){
 			Debug.logError("This card balance is Not Enough, can NOT authorize", module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardBalanceIsNotEnough", UtilMisc.toMap("finAccountId", finAccountId, "balance", balance), locale));
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardBalanceIsNotEnough", 
+					UtilMisc.toMap("balance", balance.toPlainString()), locale));
 		}
 		
 		// 检查是不是已经授权的卡
@@ -131,11 +134,25 @@ public class CloudCardServices {
 		}
 		
 		// 授权金额的处理
-		// TODO
+		Map<String, Object> createFinAccountAuthOutMap;
+		try {
+			createFinAccountAuthOutMap = dispatcher.runSync("createFinAccountAuth",
+					UtilMisc.toMap("userLogin", userLogin, "locale",locale, 
+							"currencyUomId", DEFAULT_CURRENCY_UOM_ID,  
+							"finAccountId", finAccountId,
+							"amount", amount,
+							"fromDate", UtilDateTime.adjustTimestamp(nowTimestamp, Calendar.SECOND, -2),
+							"thruDate", thruDate)
+					);
+		} catch (GenericServiceException e1) {
+			Debug.logError(e1, module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
+		if (ServiceUtil.isError(createFinAccountAuthOutMap)) {
+			return createFinAccountAuthOutMap;
+		}
 		
-		
-		
-		
+		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("customerPartyId", customerPartyId);
 		return result;
@@ -354,6 +371,13 @@ public class CloudCardServices {
 		GenericValue cloudCard = (GenericValue) checkParamOut.get("cloudCard");
 		String finAccountId = cloudCard.getString("finAccountId");
 		
+		
+		// 不是本商家的卡
+		if(!organizationPartyId.equals(cloudCard.getString("distributorPartyId"))){
+			Debug.logInfo("此卡[" + cloudCard.getString("cardNumber") + "]不是商家[" +organizationPartyId + "]发行的卡，不能进行充值", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardNotOurCardCanNotRecharge", locale)); 
+		}
+		
 		// 获取商户用于管理卖卡限额的金融账户
 		GenericValue creditLimitAccount = CloudCardHelper.getCreditLimitAccount(delegator, organizationPartyId);
         if (UtilValidate.isEmpty(creditLimitAccount)) {
@@ -541,6 +565,7 @@ public class CloudCardServices {
 		}
 		String receiptAccountId = receiptAccount.getString("finAccountId");
 		
+		
 		// 根据二维码获取用户用于支付的帐号
 		GenericValue cloudCard = (GenericValue) checkParamOut.get("cloudCard");
 		// 没有激活的账户，不能用于付款
@@ -548,6 +573,14 @@ public class CloudCardServices {
 			Debug.logInfo("此卡[" + cardCode + "]状态为[" + cloudCard.getString("statusId") + "]不能进行付款", module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardHasBeenDisabled", locale)); 
 		}
+		// 是别人授权给我的卡
+		boolean isAuth2me =  cardCode.startsWith(CloudCardHelper.AUTH_CARD_CODE_PREFIX);
+		// 此卡已经授权给别人,不能进行交易
+		if(!isAuth2me && CloudCardHelper.cardIsAuthorized(cloudCard, delegator)){
+			Debug.logError("此卡["+cardCode+"]已经授权给[" + cloudCard.getString("partyId") + "],自己不能再使用", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardHasBeenAuthorizedToOthers", locale));
+		}
+		
 		
 		String finAccountId = cloudCard.getString("finAccountId");
 		String customerPartyId = cloudCard.getString("ownerPartyId");
@@ -567,10 +600,37 @@ public class CloudCardServices {
 		if (actualBalance.compareTo(amount) < 0) {
 			Debug.logError("余额不足, 余额：" + actualBalance.toPlainString(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardBalanceIsNotEnough", 
-					UtilMisc.toMap("finAccountId", finAccountId, "balance", actualBalance.toPlainString()), locale));
+					UtilMisc.toMap("balance", actualBalance.toPlainString()), locale));
 		}
 		
+		// 如果是授权给我的卡，还要检查授权金额, 并且创建金额为负的finAccountAuth
+		if(isAuth2me){
+			BigDecimal authAmount = CloudCardHelper.getCloudCardAuthBalance(finAccountId, delegator);
+			if (authAmount.compareTo(amount) < 0) {
+				Debug.logError("授权可用余额不足, 余额：" + authAmount.toPlainString(), module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardBalanceIsNotEnough", 
+						UtilMisc.toMap("balance", authAmount.toPlainString()), locale));
+			}
+			// 用被人授权的卡支付，授权剩余额度需要扣减，扣减方法：为此账户创建负数金额的finAccountAuth
+			Map<String, Object> createFinAccountAuthOutMap;
+			try {
+				createFinAccountAuthOutMap = dispatcher.runSync("createFinAccountAuth",
+						UtilMisc.toMap("userLogin", userLogin, "locale",locale, 
+								"currencyUomId", DEFAULT_CURRENCY_UOM_ID,  
+								"finAccountId", finAccountId,
+								"amount", amount.negate(),
+								"fromDate", UtilDateTime.adjustTimestamp(UtilDateTime.nowTimestamp(), Calendar.SECOND, -2),
+								"thruDate", cloudCard.getTimestamp("thruDate")));
+			} catch (GenericServiceException e1) {
+				Debug.logError(e1, module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+			}
+			if (ServiceUtil.isError(createFinAccountAuthOutMap)) {
+				return createFinAccountAuthOutMap;
+			}
+		}
 		
+		// 扣款
 		Map<String, Object> finAccountWithdrawalOutMap;
 		try {
 			finAccountWithdrawalOutMap = dispatcher.runSync("createPaymentAndFinAccountTransForCloudCard",

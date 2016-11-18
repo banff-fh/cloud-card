@@ -100,7 +100,18 @@ public class CloudCardQueryServices {
 			cloudCardMap.put("cardName", cardName); //卡名
 			cloudCardMap.put("cardCode", cloudCard.get("cardNumber")); //卡二维码
 			cloudCardMap.put("cardId", cloudCard.get("paymentMethodId"));// 卡id
-			cloudCardMap.put("cardBalance", cloudCard.get("actualBalance")); //余额
+			if(cloudCard.getString("cardNumber").startsWith(CloudCardHelper.AUTH_CARD_CODE_PREFIX)){
+				// 如果是别人授权给我的卡，显示授权给我的金额
+				cloudCardMap.put("cardBalance", CloudCardHelper.getCloudCardAuthBalance(cloudCard.getString("finAccountId"), delegator)); 
+				cloudCardMap.put("fromDate", cloudCard.getTimestamp("fromDate").toString()); // 授权开始时间
+				cloudCardMap.put("thruDate", cloudCard.getTimestamp("thruDate").toString()); // 授权结束时间
+			}else{
+				//账户实际余额
+				cloudCardMap.put("cardBalance", cloudCard.get("actualBalance"));
+				// TODO，如果是已经授权给别人的卡，要不要展示授权开始、结束时间，以及授权给谁呢？
+			}
+			
+			
 			cloudCardMap.put("distributorPartyId", cloudCard.get("distributorPartyId")); //发卡商家partyId
 			//卡主，如果此卡是别人授权给我用的，此字段就是原卡主
 			cloudCardMap.put("ownerPartyId", cloudCard.get("ownerPartyId")); 

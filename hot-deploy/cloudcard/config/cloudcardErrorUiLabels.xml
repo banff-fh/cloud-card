@@ -48,8 +48,8 @@
         <value xml:lang="zh">扣减开卡余额失败</value>
     </property>
     <property key="CloudCardBalanceIsNotEnough">
-        <value xml:lang="en">balance is not enough, finAccount:${finAccountId}, available balance: ${balance}</value>
-        <value xml:lang="zh">用户账户[${finAccountId}]余额不足，可用余额：${balance}</value>
+        <value xml:lang="en">balance is not enough,  available balance: ${balance}</value>
+        <value xml:lang="zh">用户卡内余额不足，可用余额：${balance}</value>
     </property>
     <property key="CloudCardAccountNotFound">
         <value xml:lang="en">Account[${finAccountId}] Not Found</value>
@@ -88,6 +88,10 @@
     <property key="CloudCardHasBeenAuthorized">
         <value xml:lang="en">This card has been authorized</value>
         <value xml:lang="zh">此卡已经被授权了</value>
+    </property>
+    <property key="CloudCardHasBeenAuthorizedToOthers">
+        <value xml:lang="en">This card has been authorized to others</value>
+        <value xml:lang="zh">此卡已经授权给其他用户了</value>
     </property>
     
 </resource>
