@@ -1,5 +1,6 @@
 package com.banfftech.cloudcard;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Locale;
@@ -9,12 +10,15 @@ import java.util.Random;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilNumber;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
+import org.ofbiz.entity.condition.EntityConditionList;
+import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.party.party.PartyRelationshipHelper;
@@ -40,6 +44,10 @@ public class CloudCardHelper {
 	public static final String PLATFORM_PARTY_ID="Company"; // 平台partyId
 	
 	public static final String AUTH_CARD_CODE_PREFIX="auth:"; // 授权给别人的云卡卡号前缀
+	
+	 public static int decimals = UtilNumber.getBigDecimalScale("finaccount.decimals");
+     public static int rounding = UtilNumber.getBigDecimalRoundingMode("finaccount.rounding");
+     public static final BigDecimal ZERO = BigDecimal.ZERO.setScale(decimals, rounding);
 	
 	/**
 	 * 判断当前partyId是否为organizationPartyId的管理人员
@@ -482,5 +490,34 @@ public class CloudCardHelper {
 			Debug.logError(e.getMessage(), module);
 		}
 		return false;
+	}
+	
+	/**
+	 * 获取卡授权金额
+	 * @param finAccountId
+	 * @param delegator
+	 * @return
+	 * @throws GenericEntityException
+	 */
+	public static BigDecimal getCloudCardAuthBalance(String finAccountId, Delegator delegator){
+		// find sum of all authorizations which are not expired
+		EntityConditionList<EntityCondition> authorizationConditions = EntityCondition.makeCondition(
+				UtilMisc.toList(EntityCondition.makeCondition("finAccountId", EntityOperator.EQUALS, finAccountId),
+						EntityUtil.getFilterByDateExpr()));
+		GenericValue authSum = null;
+		try {
+			authSum = EntityUtil.getFirst(delegator.findList("FinAccountAuthSum", authorizationConditions,
+					UtilMisc.toSet("amount"), null, null, false));
+		} catch (GenericEntityException e) {
+			Debug.logError("get cloud card auth amount error: " + e.getMessage(), module);
+		}
+		BigDecimal authorizationsTotal = null;
+		if (null != authSum) {
+			authorizationsTotal = authSum.getBigDecimal("amount");
+		}
+		if (null == authorizationsTotal) {
+			authorizationsTotal = ZERO;
+		}
+		return authorizationsTotal.setScale(decimals, rounding);
 	}
 }
