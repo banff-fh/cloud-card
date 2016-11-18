@@ -468,28 +468,34 @@ public class CloudCardHelper {
     
     
 	/**
-	 * 通过查询FinAccountRole中是否有有效的 roleTypeId=SHAREHOLDER 的记录，来判断卡是否已经被授权其他用户使用
+	 * 获取账户授权信息
+	 * 通过查询FinAccountRole中 有效期内的， 且 roleTypeId=SHAREHOLDER 的记录，来判断此卡当前是否处于被授权其他用户使用的状态
 	 * @param cloudCard
 	 * @param delegator
 	 * @return
 	 */
-	public static boolean cardIsAuthorized(GenericValue cloudCard, Delegator delegator) {
-		if (null == cloudCard)
-			return false;
+	public static Map<String, Object> getCardAuthorizeInfo(GenericValue cloudCard, Delegator delegator) {
+		Map<String,Object> retMap = UtilMisc.toMap("isAuthorized", false);
+		if (null == cloudCard){
+			return retMap;
+		}
 		String finAccountId = cloudCard.getString("finAccountId");
 		EntityCondition dateCond = EntityUtil.getFilterByDateExpr();
 		EntityCondition cond = EntityCondition
 				.makeCondition(UtilMisc.toMap("finAccountId", finAccountId, "roleTypeId", "SHAREHOLDER"));
 		try {
-			List<GenericValue> findList = delegator.findList("FinAccountRole",
-					EntityCondition.makeCondition(dateCond, cond), null, null, null, false);
-			if (findList.size() > 0) {
-				return true;
+			GenericValue authInfo =EntityUtil.getFirst(delegator.findList("FinAccountRole",
+					EntityCondition.makeCondition(cond, dateCond), null, null, null, false));
+			if (null != authInfo) {
+				retMap.put("isAuthorized", true);
+				retMap.put("fromDate", authInfo.getTimestamp("fromDate")); // 授权开始时间
+				retMap.put("thruDate", authInfo.getTimestamp("thruDate")); // 授权结束时间
+				retMap.put("toPartyId", authInfo.getString("partyId")); // 授权给谁了
 			}
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 		}
-		return false;
+		return retMap;
 	}
 	
 	/**

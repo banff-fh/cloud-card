@@ -3,6 +3,7 @@ package com.banfftech.cloudcard;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -101,19 +102,35 @@ public class CloudCardQueryServices {
 			cloudCardMap.put("cardCode", cloudCard.get("cardNumber")); //卡二维码
 			cloudCardMap.put("cardId", cloudCard.get("paymentMethodId"));// 卡id
 			if(cloudCard.getString("cardNumber").startsWith(CloudCardHelper.AUTH_CARD_CODE_PREFIX)){
-				// 如果是别人授权给我的卡，显示授权给我的金额
+				// 如果是别人授权给我的卡，显示授权金额的余额
 				cloudCardMap.put("cardBalance", CloudCardHelper.getCloudCardAuthBalance(cloudCard.getString("finAccountId"), delegator)); 
-				cloudCardMap.put("fromDate", cloudCard.getTimestamp("fromDate").toString()); // 授权开始时间
-				cloudCardMap.put("thruDate", cloudCard.getTimestamp("thruDate").toString()); // 授权结束时间
+				cloudCardMap.put("isAuthToMe", "Y"); // 已授权给我
+				cloudCardMap.put("isAuthToOthers", "N"); // 已授权给别人
+				cloudCardMap.put("authFromDate", cloudCard.getTimestamp("fromDate").toString()); // 授权开始时间
+				cloudCardMap.put("authThruDate", cloudCard.getTimestamp("thruDate").toString()); // 授权结束时间
+				cloudCardMap.put("authFromPartyId", cloudCard.get("ownerPartyId")); // 谁授权
+				cloudCardMap.put("authToPartyId", partyId); // 授权给谁
 			}else{
 				//账户实际余额
 				cloudCardMap.put("cardBalance", cloudCard.get("actualBalance"));
-				// TODO，如果是已经授权给别人的卡，要不要展示授权开始、结束时间，以及授权给谁呢？
+				// 如果是已经授权给别人的卡，展示授权开始、结束时间，以及授权给谁
+				Map<String, Object> cardAuthorizeInfo = CloudCardHelper.getCardAuthorizeInfo(cloudCard, delegator);
+				boolean isAuthorized = (boolean) cardAuthorizeInfo.get("isAuthorized");
+				if(isAuthorized){
+					cloudCardMap.put("isAuthToMe", "N"); // 已授权给我
+					cloudCardMap.put("isAuthToOthers", "Y"); // 已授权给别人
+					cloudCardMap.put("authFromDate", ((Timestamp)cardAuthorizeInfo.get("fromDate")).toString()); // 授权开始时间
+					cloudCardMap.put("authThruDate", ((Timestamp)cardAuthorizeInfo.get("thruDate")).toString()); // 授权结束时间
+					cloudCardMap.put("authFromPartyId", partyId); // 谁授权
+					cloudCardMap.put("authToPartyId", cardAuthorizeInfo.get("toPartyId")); // 授权给谁
+				}else{
+					cloudCardMap.put("isAuthToMe", "N"); // 已授权给我
+					cloudCardMap.put("isAuthToOthers", "N"); // 已授权给别人
+				}
 			}
 			
-			
 			cloudCardMap.put("distributorPartyId", cloudCard.get("distributorPartyId")); //发卡商家partyId
-			//卡主，如果此卡是别人授权给我用的，此字段就是原卡主
+			// 卡主
 			cloudCardMap.put("ownerPartyId", cloudCard.get("ownerPartyId")); 
 			cloudCardList.add(cloudCardMap);
 		}
