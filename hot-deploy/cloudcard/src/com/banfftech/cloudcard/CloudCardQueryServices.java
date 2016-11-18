@@ -126,17 +126,20 @@ public class CloudCardQueryServices {
 		GenericValue userLogin = (GenericValue) context.get("userLogin");
 		String partyId = (String) userLogin.get("partyId");
 		String paymentTypeId = (String) context.get("paymentTypeId");
+		// 分页相关
+        Integer viewIndex =  (Integer) context.get("viewIndex");
+        Integer viewSize  = (Integer) context.get("viewSize");
 
 		List<EntityExpr> depositExprs = FastList.newInstance();
         List<EntityExpr> withDrawalExprs = FastList.newInstance();
         EntityConditionList<EntityCondition> paymentConditions = null;
         
-    	if(paymentTypeId.equalsIgnoreCase("GC_DEPOSIT")){
+        if(paymentTypeId != null && paymentTypeId.equalsIgnoreCase("GC_DEPOSIT")){
 	        depositExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_DEPOSIT"));
 	        depositExprs.add(EntityCondition.makeCondition("partyIdTo", EntityOperator.EQUALS,partyId));
 	        EntityCondition depositCondition = EntityCondition.makeCondition(depositExprs, EntityOperator.AND);
 	        paymentConditions = EntityCondition.makeCondition(depositCondition);
-		}else if(paymentTypeId.equalsIgnoreCase("GC_WITHDRAWAL")){
+		}else if(paymentTypeId != null && paymentTypeId.equalsIgnoreCase("GC_WITHDRAWAL")){
 			withDrawalExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_WITHDRAWAL"));
 	        withDrawalExprs.add(EntityCondition.makeCondition("partyIdFrom", EntityOperator.EQUALS,partyId));
 	        EntityCondition depositCondition = EntityCondition.makeCondition(withDrawalExprs, EntityOperator.AND);
@@ -150,17 +153,44 @@ public class CloudCardQueryServices {
 	        EntityCondition withDrawalCondition = EntityCondition.makeCondition(withDrawalExprs, EntityOperator.AND);
 	        paymentConditions = EntityCondition.makeCondition(UtilMisc.toList(depositCondition,withDrawalCondition),EntityOperator.OR);
 		}
-		
-		List<GenericValue> payments = FastList.newInstance();
+		    	
+        //每页显示条数
+        int number =  (viewSize  == null || viewSize  == 0) ? 20 : viewSize ;
+        // 每页的开始记录 第一页为1 第二页为number +1
+        int lowIndex = viewIndex * viewSize + 1;  
+        //总页数
+        int totalPage = 0;
+        EntityListIterator eli  = null;
 		try {
-			payments = delegator.findList("PaymentAndTypePartyNameView", paymentConditions, UtilMisc.toSet("amount","partyToGroupName","paymentTypeId"), UtilMisc.toList("effectiveDate"), null, false);
+			eli = delegator.find("PaymentAndTypePartyNameView", paymentConditions, null, UtilMisc.toSet("amount","partyToGroupName","paymentTypeId"), UtilMisc.toList("effectiveDate"), null);
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
 		
+		List<GenericValue> paymentsList = null;
+		try {
+			paymentsList = eli.getPartialList(lowIndex, number);
+            eli.last();  
+			totalPage = (eli.getResultsSizeAfterPartialList()%2 == 0 ? eli.getResultsSizeAfterPartialList()/2:(eli.getResultsSizeAfterPartialList()/2)+1);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardPaymentPagingError", locale));
+		}finally {  
+            try {  
+                if (eli != null) {  
+                    eli.close();  
+                    eli = null;  
+                }  
+            } catch (GenericEntityException e) {  
+                Debug.logError(e.getMessage().toString(), module);  
+            }  
+        }
+		
 		Map<String, Object> result = ServiceUtil.returnSuccess();
-		result.put("paymentList", payments);
+		result.put("paymentList", paymentsList);
+		result.put("totalPage", totalPage);
+
 		return result;
 	}
 	
@@ -177,17 +207,20 @@ public class CloudCardQueryServices {
 		GenericValue userLogin = (GenericValue) context.get("userLogin");
 		String partyId = (String) userLogin.get("partyId");
 		String paymentTypeId = (String) context.get("paymentTypeId");
+		// 分页相关
+        Integer viewIndex =  (Integer) context.get("viewIndex");
+        Integer viewSize  = (Integer) context.get("viewSize");
 
 		List<EntityExpr> depositExprs = FastList.newInstance();
         List<EntityExpr> withDrawalExprs = FastList.newInstance();
         EntityConditionList<EntityCondition> paymentConditions = null;
         
-    	if(paymentTypeId.equalsIgnoreCase("GC_DEPOSIT")){
+        if(paymentTypeId != null && paymentTypeId.equalsIgnoreCase("GC_DEPOSIT")){
 	        depositExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_DEPOSIT"));
 	        depositExprs.add(EntityCondition.makeCondition("partyIdTo", EntityOperator.EQUALS,partyId));
 	        EntityCondition depositCondition = EntityCondition.makeCondition(depositExprs, EntityOperator.AND);
 	        paymentConditions = EntityCondition.makeCondition(depositCondition);
-		}else if(paymentTypeId.equalsIgnoreCase("GC_WITHDRAWAL")){
+		}else if(paymentTypeId != null && paymentTypeId.equalsIgnoreCase("GC_WITHDRAWAL")){
 			withDrawalExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_WITHDRAWAL"));
 	        withDrawalExprs.add(EntityCondition.makeCondition("partyIdFrom", EntityOperator.EQUALS,partyId));
 	        EntityCondition depositCondition = EntityCondition.makeCondition(withDrawalExprs, EntityOperator.AND);
@@ -201,17 +234,44 @@ public class CloudCardQueryServices {
 	        EntityCondition withDrawalCondition = EntityCondition.makeCondition(withDrawalExprs, EntityOperator.AND);
 	        paymentConditions = EntityCondition.makeCondition(UtilMisc.toList(depositCondition,withDrawalCondition),EntityOperator.OR);
 		}
-		
-		List<GenericValue> payments = FastList.newInstance();
+		    	
+        //每页显示条数
+        int number =  (viewSize  == null || viewSize  == 0) ? 20 : viewSize ;
+        // 每页的开始记录 第一页为1 第二页为number +1
+        int lowIndex = viewIndex * viewSize + 1;  
+        //总页数
+        int totalPage = 0;
+        EntityListIterator eli  = null;
 		try {
-			payments = delegator.findList("PaymentAndTypePartyNameView", paymentConditions, UtilMisc.toSet("amount","partyToGroupName","paymentTypeId"), UtilMisc.toList("effectiveDate"), null, false);
+			eli = delegator.find("PaymentAndTypePartyNameView", paymentConditions, null, UtilMisc.toSet("amount","partyToGroupName","paymentTypeId"), UtilMisc.toList("effectiveDate"), null);
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
 		
+		List<GenericValue> paymentsList = null;
+		try {
+			paymentsList = eli.getPartialList(lowIndex, number);
+            eli.last();  
+			totalPage = (eli.getResultsSizeAfterPartialList()%2 == 0 ? eli.getResultsSizeAfterPartialList()/2:(eli.getResultsSizeAfterPartialList()/2)+1);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardPaymentPagingError", locale));
+		}finally {  
+            try {  
+                if (eli != null) {  
+                    eli.close();  
+                    eli = null;  
+                }  
+            } catch (GenericEntityException e) {  
+                Debug.logError(e.getMessage().toString(), module);  
+            }  
+        }
+		
 		Map<String, Object> result = ServiceUtil.returnSuccess();
-		result.put("paymentList", payments);
+		result.put("paymentList", paymentsList);
+		result.put("totalPage", totalPage);
+
 		return result;
 		
 	}

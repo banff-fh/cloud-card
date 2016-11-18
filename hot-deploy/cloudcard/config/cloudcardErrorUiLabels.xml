@@ -89,5 +89,10 @@
         <value xml:lang="en">This card has been authorized</value>
         <value xml:lang="zh">此卡已经被授权了</value>
     </property>
+    <property key="CloudCardPaymentPagingError">
+        <value xml:lang="en">payment paging failure</value>
+        <value xml:lang="zh">查询流水分页失败</value>
+    </property>
+    
     
 </resource>
