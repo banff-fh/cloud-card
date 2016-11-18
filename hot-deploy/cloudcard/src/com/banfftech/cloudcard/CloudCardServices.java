@@ -75,7 +75,9 @@ public class CloudCardServices {
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardHasBeenAuthorized", locale));
 		}
 		// 存在SHAREHOLDER 角色的，未过期的 finAccountRole，表示此卡已授权给他人，不能再次授权
-		if(CloudCardHelper.cardIsAuthorized(cloudCard, delegator)){
+		Map<String, Object> cardAuthorizeInfo = CloudCardHelper.getCardAuthorizeInfo(cloudCard, delegator);
+		boolean isAuthorized = (boolean) cardAuthorizeInfo.get("isAuthorized");
+		if(isAuthorized){
 			Debug.logError("This card has been authorized", module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardHasBeenAuthorized", locale));
 		}
@@ -576,9 +578,13 @@ public class CloudCardServices {
 		// 是别人授权给我的卡
 		boolean isAuth2me =  cardCode.startsWith(CloudCardHelper.AUTH_CARD_CODE_PREFIX);
 		// 此卡已经授权给别人,不能进行交易
-		if(!isAuth2me && CloudCardHelper.cardIsAuthorized(cloudCard, delegator)){
-			Debug.logError("此卡["+cardCode+"]已经授权给[" + cloudCard.getString("partyId") + "],自己不能再使用", module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardHasBeenAuthorizedToOthers", locale));
+		if(!isAuth2me){
+			Map<String, Object> cardAuthorizeInfo = CloudCardHelper.getCardAuthorizeInfo(cloudCard, delegator);
+			boolean isAuthorized = (boolean) cardAuthorizeInfo.get("isAuthorized");
+			if(isAuthorized){
+				Debug.logError("此卡["+cardCode+"]已经授权给[" + cardAuthorizeInfo.get("toPartyId") + "],自己不能再使用", module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardHasBeenAuthorizedToOthers", locale));
+			}
 		}
 		
 		
