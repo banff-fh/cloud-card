@@ -71,7 +71,7 @@
 	<service name="activateCloudCardAndRecharge" engine="java"
             location="com.banfftech.cloudcard.CloudCardServices" invoke="activateCloudCardAndRecharge" auth="true">
         <description>
-        	开卡充值统一接口， 根据cardCode查询卡信息，查得到充值，查不到先开卡再充值，开卡需要teleNumber
+        	开卡(激活)充值统一接口， 根据cardCode查询卡信息，如果已经激活直接充值，没激活先激活再充值，激活需要teleNumber
         </description>
         <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家partyId</description></attribute>
         <attribute name="teleNumber" type="String" mode="IN" optional="true"><description>客户手机号码</description></attribute>
