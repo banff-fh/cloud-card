@@ -37,7 +37,7 @@
     <service name="createCardAuth" engine="java"
     	location="com.banfftech.cloudcard.CloudCardServices" invoke="createCardAuth" auth="true">
     	<description>云卡授权</description>
-    	<attribute name="teleNumber" type="String" mode="IN" optional="false"/>
+    	<attribute name="teleNumber" type="String" mode="IN" optional="false"><description>hahaahha</description></attribute>
         <attribute name="cardId" type="String" mode="IN" optional="false"/>
         <attribute name="amount" type="BigDecimal" mode="IN" optional="false"/>
         <attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
