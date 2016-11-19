@@ -130,7 +130,7 @@ public class SmsServices {
 		//判断短信是否存在，不存在创建验证码，否则判断短信是否需要重新发送。
 		if(UtilValidate.isEmpty(smsList)){
 			//生成验证码
-			String captcha = UtilFormatOut.padString(String.valueOf(Math.floor((Math.random()*10e6))), 6, false, '0');
+			String captcha = UtilFormatOut.padString(String.valueOf(Math.round((Math.random()*10e6))), 6, false, '0');
 			Map<String,Object> smsValidateCodeMap = FastMap.newInstance();
 			smsValidateCodeMap.put("teleNumber", teleNumber);
 			smsValidateCodeMap.put("captcha", captcha);
