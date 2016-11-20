@@ -186,7 +186,7 @@ public class CloudCardQueryServices {
         //每页显示条数
         int number =  (viewSize  == null || viewSize  == 0) ? 20 : viewSize ;
         // 每页的开始记录 第一页为1 第二页为number +1
-        int lowIndex = viewIndex * viewSize + 1;  
+        int lowIndex = viewIndex * number + 1;  
         //总页数
         int totalPage = 0;
         EntityListIterator eli  = null;
@@ -291,7 +291,7 @@ public class CloudCardQueryServices {
         //每页显示条数
         int number =  (viewSize  == null || viewSize  == 0) ? 20 : viewSize ;
         // 每页的开始记录 第一页为1 第二页为number +1
-        int lowIndex = viewIndex * viewSize + 1;  
+        int lowIndex = viewIndex * number + 1;  
         //总页数
         int totalPage = 0;
         EntityListIterator eli  = null;
