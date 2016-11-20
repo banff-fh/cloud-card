@@ -31,6 +31,7 @@ import org.ofbiz.entity.condition.EntityConditionList;
 import org.ofbiz.entity.condition.EntityExpr;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.util.EntityListIterator;
+import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
@@ -162,12 +163,12 @@ public class CloudCardQueryServices {
         List<EntityExpr> withDrawalExprs = FastList.newInstance();
         EntityConditionList<EntityCondition> paymentConditions = null;
         
-        if(type != null && type.equalsIgnoreCase("1")){
+        if("1".equals(type)){
 	        depositExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_DEPOSIT"));
 	        depositExprs.add(EntityCondition.makeCondition("partyIdTo", EntityOperator.EQUALS,partyId));
 	        EntityCondition depositCondition = EntityCondition.makeCondition(depositExprs, EntityOperator.AND);
 	        paymentConditions = EntityCondition.makeCondition(depositCondition);
-		}else if(type != null && type.equalsIgnoreCase("2")){
+		}else if("2".equals(type)){
 			withDrawalExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_WITHDRAWAL"));
 	        withDrawalExprs.add(EntityCondition.makeCondition("partyIdFrom", EntityOperator.EQUALS,partyId));
 	        EntityCondition depositCondition = EntityCondition.makeCondition(withDrawalExprs, EntityOperator.AND);
@@ -190,7 +191,7 @@ public class CloudCardQueryServices {
         int totalPage = 0;
         EntityListIterator eli  = null;
 		try {
-			eli = delegator.find("PaymentAndTypePartyNameView", paymentConditions, null, UtilMisc.toSet("amount","partyFromGroupName","partyToGroupName","paymentTypeId"), UtilMisc.toList("effectiveDate"), null);
+			eli = delegator.find("PaymentAndTypePartyNameView", paymentConditions, null, UtilMisc.toSet("amount","partyFromGroupName","partyToGroupName","paymentTypeId","effectiveDate"), UtilMisc.toList("effectiveDate"), null);
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
@@ -200,7 +201,7 @@ public class CloudCardQueryServices {
 		try {
 			payments = eli.getPartialList(lowIndex, number);
             eli.last();  
-			totalPage = (eli.getResultsSizeAfterPartialList()%2 == 0 ? eli.getResultsSizeAfterPartialList()/2:(eli.getResultsSizeAfterPartialList()/2)+1);
+			totalPage = (eli.getResultsSizeAfterPartialList()%number == 0 ? eli.getResultsSizeAfterPartialList()/number:(eli.getResultsSizeAfterPartialList()/number)+1);
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
@@ -218,12 +219,13 @@ public class CloudCardQueryServices {
 		for(GenericValue payment : payments){
 			Map<String, Object> paymentMap = FastMap.newInstance();
 			paymentMap.put("amount", payment.get("amount"));
-			if(payment.get("paymentTypeId").toString().equalsIgnoreCase("GC_DEPOSIT")){
+			paymentMap.put("transDate", payment.getTimestamp("effectiveDate").toString());
+			if("GC_DEPOSIT".equals(payment.getString("paymentTypeId"))){
 				paymentMap.put("storeName", payment.get("partyFromGroupName"));
 				paymentMap.put("typeDesc", "充值");
 				paymentMap.put("type", "1");
 				paymentsList.add(paymentMap);
-			}else if (payment.get("paymentTypeId").toString().equalsIgnoreCase("GC_WITHDRAWAL")){
+			}else if ("GC_WITHDRAWAL".equals(payment.getString("paymentTypeId"))){
 				paymentMap.put("storeName", payment.get("partyToGroupName"));
 				paymentMap.put("typeDesc", "支付");
 				paymentMap.put("type", "2");
@@ -266,12 +268,12 @@ public class CloudCardQueryServices {
         List<EntityExpr> withDrawalExprs = FastList.newInstance();
         EntityConditionList<EntityCondition> paymentConditions = null;
         
-        if(type != null && type.equalsIgnoreCase("1")){
+        if("1".equals(type)){
 	        depositExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_DEPOSIT"));
 	        depositExprs.add(EntityCondition.makeCondition("partyIdFrom", EntityOperator.EQUALS,organizationPartyId));
 	        EntityCondition depositCondition = EntityCondition.makeCondition(depositExprs, EntityOperator.AND);
 	        paymentConditions = EntityCondition.makeCondition(depositCondition);
-		}else if(type != null && type.equalsIgnoreCase("2")){
+		}else if("2".equals(type)){
 			withDrawalExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_WITHDRAWAL"));
 	        withDrawalExprs.add(EntityCondition.makeCondition("partyIdTo", EntityOperator.EQUALS,organizationPartyId));
 	        EntityCondition depositCondition = EntityCondition.makeCondition(withDrawalExprs, EntityOperator.AND);
@@ -294,7 +296,7 @@ public class CloudCardQueryServices {
         int totalPage = 0;
         EntityListIterator eli  = null;
 		try {
-			eli = delegator.find("PaymentAndTypePartyNameView", paymentConditions, null, UtilMisc.toSet("amount","partyToFirstName","partyFromFirstName","paymentTypeId"), UtilMisc.toList("effectiveDate"), null);
+			eli = delegator.find("PaymentAndTypePartyNameView", paymentConditions, null, UtilMisc.toSet("amount","partyToFirstName","partyFromFirstName","paymentTypeId","effectiveDate"), UtilMisc.toList("effectiveDate"), null);
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
@@ -304,7 +306,7 @@ public class CloudCardQueryServices {
 		try {
 			payments = eli.getPartialList(lowIndex, number);
             eli.last();  
-			totalPage = (eli.getResultsSizeAfterPartialList()%2 == 0 ? eli.getResultsSizeAfterPartialList()/2:(eli.getResultsSizeAfterPartialList()/2)+1);
+			totalPage = (eli.getResultsSizeAfterPartialList()%number == 0 ? eli.getResultsSizeAfterPartialList()/number:(eli.getResultsSizeAfterPartialList()/number)+1);
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
@@ -323,12 +325,13 @@ public class CloudCardQueryServices {
 		for(GenericValue payment : payments){
 			Map<String, Object> paymentMap = FastMap.newInstance();
 			paymentMap.put("amount", payment.get("amount"));
-			if(payment.get("paymentTypeId").toString().equalsIgnoreCase("GC_DEPOSIT")){
+			paymentMap.put("transDate", payment.getTimestamp("effectiveDate").toString());
+			if("GC_DEPOSIT".equals(payment.getString("paymentTypeId"))){
 				paymentMap.put("customerName", payment.get("partyToFirstName"));
 				paymentMap.put("typeDesc", "充值");
 				paymentMap.put("type", "1");
 				paymentsList.add(paymentMap);
-			}else if (payment.get("paymentTypeId").toString().equalsIgnoreCase("GC_WITHDRAWAL")){
+			}else if ("GC_WITHDRAWAL".equals(payment.getString("paymentTypeId"))){
 				paymentMap.put("customerName", payment.get("partyFromFirstName"));
 				paymentMap.put("typeDesc", "支付");
 				paymentMap.put("type", "2");
@@ -363,16 +366,18 @@ public class CloudCardQueryServices {
         	return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardConfigError", UtilMisc.toMap("organizationPartyId", organizationPartyId), locale));
         }
 		//查询已卖卡金额
-		EntityConditionList<EntityCondition> incrementConditions = EntityCondition.makeCondition(UtilMisc.toList(
-				EntityCondition.makeCondition("finAccountId", EntityOperator.EQUALS,partyGroupFinAccount.get("finAccountId")),
-				EntityCondition.makeCondition(EntityCondition.makeCondition("amount", EntityOperator.GREATER_THAN, ZERO))),
-				EntityOperator.AND);
+		EntityCondition incrementConditions = EntityCondition.makeCondition(
+						EntityCondition.makeCondition("finAccountId", EntityOperator.EQUALS, partyGroupFinAccount.get("finAccountId")),
+						EntityCondition.makeCondition("amount", EntityOperator.GREATER_THAN, ZERO),
+						EntityUtil.getFilterByDateExpr()
+				);
 		
         List<GenericValue> finAccountAuthList = null;
 		try {
 			finAccountAuthList = delegator.findList("FinAccountAuth", incrementConditions, UtilMisc.toSet("amount"), null, null, false);
 		} catch (GenericEntityException e) {
-			e.printStackTrace();
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
 		
 		//计算卖卡金额
