@@ -38,7 +38,7 @@ public class CloudCardServices {
 	/**
 	 * 卡授权
 	 * 1、手机号关联的用户不存在则创建，存在则找到Ta，
-	 * 		并为这个party创建一个关联到finAccount的 SHAREHOLDER 角色，带有起止时间，开始于当前，结束于传入的终止时间
+	 * 		并为这个party创建一个关联到finAccount的 SHAREHOLDER 角色，带有起止时间，与授权起止时间一致
 	 * 2、构造新卡号创建一个有起止时间的giftCard，关联到当前FinAccount
 	 * 3、根据授权金额创建finAccountAuth记录，有起止时间，开始于当前，结束于传入的终止时间
 	 */

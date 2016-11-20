@@ -2,6 +2,7 @@ package com.banfftech.cloudcard;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -248,7 +249,10 @@ public class CloudCardHelper {
 		String description = (String) context.get("description");
 		Timestamp fromDate =(Timestamp)context.get("fromDate");
 		if(UtilValidate.isEmpty(fromDate)){
-			fromDate = UtilDateTime.nowTimestamp();
+			//FIXME 跟授权中那个前面用当前时间创建记录，随后去查询当前是“有效”的记录却查不到，一样的bug，
+			// 而且用debug方式调试程序就不会出现这个bug，怪哉！
+			// 临时解决方案，将开始时间人为提前2秒
+			fromDate = UtilDateTime.adjustTimestamp(UtilDateTime.nowTimestamp(), Calendar.SECOND, -2);
 		}
 		
 		Timestamp thruDate =(Timestamp)context.get("thruDate");
