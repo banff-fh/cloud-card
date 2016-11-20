@@ -518,6 +518,27 @@ public class CloudCardServices {
 			return paymentApplicationOutMap;
 		}
 		
+		// 修改这两个payment的状态为PMNT_CONFIRMED
+		try {
+			Map<String, Object> setPaymentStatusOutMap = dispatcher.runSync("setPaymentStatus", UtilMisc.toMap("userLogin", userLogin,
+					"locale", locale, "paymentId", depositPaymentId, "statusId", "PMNT_CONFIRMED"));
+			
+			if (ServiceUtil.isError(setPaymentStatusOutMap)) {
+				return setPaymentStatusOutMap;
+			}
+
+			setPaymentStatusOutMap = dispatcher.runSync("setPaymentStatus", UtilMisc.toMap("userLogin", userLogin,
+					"locale", locale, "paymentId", receiptPaymentId, "statusId", "PMNT_CONFIRMED"));
+			
+			if (ServiceUtil.isError(setPaymentStatusOutMap)) {
+				return setPaymentStatusOutMap;
+			}
+		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		
 		// 因为余额会被ECA更新，这里是旧值，
 		BigDecimal actualBalance = (BigDecimal) cloudCard.get("actualBalance");
 		if(null == actualBalance){
