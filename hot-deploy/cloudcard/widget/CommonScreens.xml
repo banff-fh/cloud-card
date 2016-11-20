@@ -13,7 +13,7 @@
 
                 <set field="activeApp" value="cloudcard" global="true"/>
                 <set field="applicationMenuName" value="MainAppBar" global="true"/>
-                <set field="applicationMenuLocation" value="component://cloudcard/widget/cloudcardMenus.xml" global="true"/>
+                <set field="applicationMenuLocation" value="component://cloudcard/widget/CloudCardMenus.xml" global="true"/>
                 <set field="applicationTitle" value="${uiLabelMap.cloudcardApplication}" global="true"/>
             </actions>
             <widgets>

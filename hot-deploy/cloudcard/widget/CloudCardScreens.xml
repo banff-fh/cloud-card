@@ -36,7 +36,7 @@
 										<section>
 											<widgets>
 												<container style="button-bar button-style-1">
-													<link target="exportCardExcel"  target-type="content" description="${uiLabelMap.exportCard}" text="${uiLabelMap.exportCard}">
+													<link target="exportCardExcel" text="${uiLabelMap.exportCard}">
 														<parameter param-name="distributorPartyId" from-field="parameters.distributorPartyId" />
 														<parameter param-name="finAccountName" from-field="parameters.finAccountName" />
 														<parameter param-name="statusId" from-field="parameters.statusId" />
