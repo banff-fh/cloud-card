@@ -17,7 +17,6 @@ import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
-import org.ofbiz.entity.condition.EntityConditionList;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.util.EntityUtil;
@@ -241,7 +240,6 @@ public class CloudCardHelper {
 	public static Map<String, Object> createPaymentMethodAndGiftCard(DispatchContext dctx, Map<String, Object> context){
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dctx.getDelegator();
-//		GenericValue userLogin = (GenericValue) context.get("userLogin");
 		Locale locale = (Locale) context.get("locale");
 		
 		String cardNumber = (String) context.get("cardNumber");
@@ -255,54 +253,51 @@ public class CloudCardHelper {
 		
 		Timestamp thruDate =(Timestamp)context.get("thruDate");
 
-		String paymentMethodId;
-		
+		// 授权时，普通用户并没有为别的用户创建giftCard的权限，所以使用system用户来调用后面的服务
 		GenericValue systemUser = (GenericValue) context.get("systemUser");
 		if(null == systemUser){
 			try {
 				systemUser = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system"));
-			} catch (GenericEntityException e1) {
-				Debug.logError(e1, module);
+			} catch (GenericEntityException e) {
+				Debug.logError(e.getMessage(), module);
 				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 			}
 		}
 		
-		
+		// 创建giftCard
 		Map<String, Object> giftCardMap = FastMap.newInstance();
 		giftCardMap.put("userLogin", systemUser);
+		giftCardMap.put("locale", locale); 
 		giftCardMap.put("partyId", customerPartyId); 
 		giftCardMap.put("description", description); 
 		giftCardMap.put("cardNumber", cardNumber);
+		giftCardMap.put("fromDate", fromDate);
+		giftCardMap.put("thruDate", thruDate);
 		Map<String, Object> giftCardOutMap;
 		try {
 			giftCardOutMap = dispatcher.runSync("createGiftCard", giftCardMap);
 		} catch (GenericServiceException e) {
-			Debug.logError(e, module);
+			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
 		if (ServiceUtil.isError(giftCardOutMap)) {
 			return giftCardOutMap;
 		}
-		paymentMethodId = (String) giftCardOutMap.get("paymentMethodId");
-		GenericValue paymentMethod;
-		try {
-			paymentMethod = delegator.findByPrimaryKey("PaymentMethod", UtilMisc.toMap("paymentMethodId", paymentMethodId));
-		} catch (GenericEntityException e) {
-			Debug.logError(e, module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
-		}
+		
 		// 关联 paymentMethod 与 finAccount
-		paymentMethod.set("finAccountId", finAccountId);
-		paymentMethod.set("fromDate", fromDate);
-		paymentMethod.set("thruDate", thruDate);
+		String paymentMethodId = (String) giftCardOutMap.get("paymentMethodId");
 		try {
+			GenericValue paymentMethod = delegator.findByPrimaryKey("PaymentMethod", UtilMisc.toMap("paymentMethodId", paymentMethodId));
+			paymentMethod.set("finAccountId", finAccountId);
 			paymentMethod.store();
 		} catch (GenericEntityException e) {
-			Debug.logError(e, module);
+			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
 		
-		return giftCardOutMap;
+		Map<String, Object> retMap = ServiceUtil.returnSuccess();
+		retMap.put("paymentMethodId", paymentMethodId);
+		return retMap;
 	}
 	
 	/**
@@ -480,7 +475,18 @@ public class CloudCardHelper {
 			return retMap;
 		}
 		String finAccountId = cloudCard.getString("finAccountId");
-		EntityCondition dateCond = EntityUtil.getFilterByDateExpr();
+		// TODO
+		// 不能使用 EntityUtil.getFilterByDateExpr()创建时间条件
+		// 因为授权这个服务传入的fromDate 可能是“未来”的某一个时间，
+		// 就意味着 存在这样的情况:
+		//	授权 这个服务调用完成后 一段时间内(到授权fromDate前) 使用getCardAuthorizeInfo方法仍然得到此卡是未授权状态的错误结论，并能够再次授权
+		// 这与授权后的卡不能再授权的规则矛盾
+		//EntityCondition dateCond = EntityUtil.getFilterByDateExpr();
+		EntityCondition dateCond =  EntityCondition.makeCondition(
+			EntityCondition.makeCondition("thruDate", EntityOperator.EQUALS, null),
+			EntityOperator.OR,
+			EntityCondition.makeCondition("thruDate", EntityOperator.GREATER_THAN, UtilDateTime.nowTimestamp())
+		);
 		EntityCondition cond = EntityCondition
 				.makeCondition(UtilMisc.toMap("finAccountId", finAccountId, "roleTypeId", "SHAREHOLDER"));
 		try {
@@ -507,9 +513,8 @@ public class CloudCardHelper {
 	 */
 	public static BigDecimal getCloudCardAuthBalance(String finAccountId, Delegator delegator){
 		// find sum of all authorizations which are not expired
-		EntityConditionList<EntityCondition> authorizationConditions = EntityCondition.makeCondition(
-				UtilMisc.toList(EntityCondition.makeCondition("finAccountId", EntityOperator.EQUALS, finAccountId),
-						EntityUtil.getFilterByDateExpr()));
+		EntityCondition authorizationConditions = EntityCondition.makeCondition(
+				EntityCondition.makeCondition("finAccountId", finAccountId), EntityUtil.getFilterByDateExpr());
 		GenericValue authSum = null;
 		try {
 			authSum = EntityUtil.getFirst(delegator.findList("FinAccountAuthSum", authorizationConditions,

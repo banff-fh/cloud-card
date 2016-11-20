@@ -37,12 +37,17 @@ public class CloudCardServices {
 	
 	/**
 	 * 卡授权
+	 * 1、手机号关联的用户不存在则创建，存在则找到Ta，
+	 * 		并为这个party创建一个关联到finAccount的 SHAREHOLDER 角色，带有起止时间，开始于当前，结束于传入的终止时间
+	 * 2、构造新卡号创建一个有起止时间的giftCard，关联到当前FinAccount
+	 * 3、根据授权金额创建finAccountAuth记录，有起止时间，开始于当前，结束于传入的终止时间
 	 */
 	public static Map<String, Object> createCardAuth(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
 		GenericValue userLogin = (GenericValue) context.get("userLogin");
+		
 		BigDecimal amount = (BigDecimal) context.get("amount");
 		Timestamp fromDate =(Timestamp)context.get("fromDate");
 		Timestamp nowTimestamp = UtilDateTime.nowTimestamp();
@@ -99,7 +104,7 @@ public class CloudCardServices {
 		}		
 		String customerPartyId = (String) getOrCreateCustomerOut.get("customerPartyId");
 		
-		//创建paymentMethod和giftCard
+		//创建giftCard
 		String finAccountName = cloudCard.getString("finAccountName");
 		Random rand = new Random();
 		String newCardCode = new StringBuilder(CloudCardHelper.AUTH_CARD_CODE_PREFIX)
@@ -125,10 +130,11 @@ public class CloudCardServices {
 							"finAccountId", finAccountId, 
 							"partyId", customerPartyId,
 							"roleTypeId", "SHAREHOLDER",
+							// 卡授权一定有起止时间，
 							"fromDate", fromDate,
 							"thruDate", thruDate));
 		} catch (GenericServiceException e1) {
-			Debug.logError(e1, module);
+			Debug.logError(e1.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
 		if (ServiceUtil.isError(createCloudCardOutMap)) {
@@ -143,11 +149,12 @@ public class CloudCardServices {
 							"currencyUomId", DEFAULT_CURRENCY_UOM_ID,  
 							"finAccountId", finAccountId,
 							"amount", amount,
+							//FIXME 开始时间如果为当前的话，后面eca计算金额会漏算刚创建的这条auth记录。。
 							"fromDate", UtilDateTime.adjustTimestamp(nowTimestamp, Calendar.SECOND, -2),
 							"thruDate", thruDate)
 					);
-		} catch (GenericServiceException e1) {
-			Debug.logError(e1, module);
+		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
 		if (ServiceUtil.isError(createFinAccountAuthOutMap)) {
@@ -822,8 +829,20 @@ public class CloudCardServices {
 			Debug.logInfo("金额不合法，必须为正数", module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceAccountingError, "AccountingFinAccountMustBePositive", locale));
 		}
-
-		// organizationPartyId 必须存在
+		
+		// 起止时间的检查
+		Timestamp fromDate =(Timestamp)context.get("fromDate");
+		Timestamp thruDate =(Timestamp)context.get("thruDate");
+		if(null!=fromDate && null!=thruDate && fromDate.after(thruDate)){
+			Debug.logInfo("起止日期不合法，开始日期必须小于结束日期", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardFromDateMustBeforeThruDate", locale));
+		}
+		if(null!=thruDate && thruDate.before(UtilDateTime.nowTimestamp())){
+			Debug.logInfo("结束日期必须大于当前日期", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardThruDateMustAfterNow", locale));
+		}
+		
+		// organizationPartyId 必须在数据库中存在
 		if(UtilValidate.isNotEmpty(organizationPartyId)){
 			GenericValue partyGroup;
 			try {

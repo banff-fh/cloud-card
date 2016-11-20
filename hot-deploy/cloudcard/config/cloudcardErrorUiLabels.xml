@@ -93,5 +93,13 @@
         <value xml:lang="en">This card has been authorized to others</value>
         <value xml:lang="zh">此卡已经授权给其他用户了</value>
     </property>
+    <property key="CloudCardFromDateMustBeforeThruDate">
+        <value xml:lang="en">fromDate Must Before thruDate!</value>
+        <value xml:lang="zh">开始日期必须在结束日期之前</value>
+    </property>
+    <property key="CloudCardThruDateMustAfterNow">
+        <value xml:lang="en">thruDate Must After Now!</value>
+        <value xml:lang="zh">结束日期必须在当前时间之后</value>
+    </property>
     
 </resource>
