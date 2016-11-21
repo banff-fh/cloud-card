@@ -49,7 +49,7 @@ public class CloudCardQueryServicesTest extends OFBizTestCase {
         ctx.put("userLogin", userLogin);
         ctx.put("organizationPartyId", organizationPartyIds.get(0));
         resp = dispatcher.runSync("getLimitAndPresellInfo", ctx);
-        assertTrue("Service 'getBizPayment' result success", ServiceUtil.isSuccess(resp));
+        assertTrue("Service 'organizationPartyId' result success", ServiceUtil.isSuccess(resp));
         BigDecimal presellAmount = (BigDecimal) resp.get("presellAmount");
         BigDecimal limitAmount = (BigDecimal) resp.get("limitAmount");
         BigDecimal balance = (BigDecimal) resp.get("balance");
@@ -57,7 +57,31 @@ public class CloudCardQueryServicesTest extends OFBizTestCase {
         assertEquals("10000.00", String.valueOf(limitAmount));
         assertEquals("8900.00",String.valueOf(balance));
         ctx.clear();
-
+        
+        //根据二维码查询卡信息
+        ctx.put("userLogin", userLogin);
+        ctx.put("organizationPartyId", organizationPartyIds.get(0));
+        ctx.put("cardCode", "00812134736130161527");
+        
+        resp = dispatcher.runSync("getCardInfoByCode", ctx);
+        assertTrue("Service 'getCardInfoByCode' result success", ServiceUtil.isSuccess(resp));
+        String isActivated = (String) resp.get("isActivated");
+        String cardId = (String) resp.get("cardId");
+        String cardName = (String) resp.get("cardName");
+        String cardImg = (String) resp.get("cardImg");
+        BigDecimal cardBalance = (BigDecimal) resp.get("cardBalance");
+        String distributorPartyId = (String) resp.get("distributorPartyId");
+        String customerPartyId = (String)  resp.get("customerPartyId");
+        String ownerPartyId = (String) resp.get("ownerPartyId");
+        assertEquals("Y", isActivated);
+        assertEquals("10000", cardId);
+        assertEquals("咖啡店储值卡", cardName);
+        assertEquals("", cardImg);
+        assertEquals("1200.00", String.valueOf(cardBalance));
+        assertEquals("10000", distributorPartyId);
+        assertEquals("10010", customerPartyId);
+        assertEquals("10010", ownerPartyId);
+        ctx.clear();
         
     }
 }
