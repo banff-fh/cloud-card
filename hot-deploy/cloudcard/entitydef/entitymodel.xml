@@ -106,14 +106,14 @@
 	</entity>
 	
 	<view-entity entity-name="CloudCardCrossStorePaymentView" package-name="org.ofbiz.cloudcard.payment" title="跨店流水">
-        <description>
-        	所有跨店消费的支付流水
-        		即 支付所用的云卡的 发卡商家  与 支付的 party_id_to 不相等的记录
-        </description>
-      	<member-entity entity-alias="P" entity-name="Payment"/>
-        <member-entity entity-alias="PM" entity-name="PaymentMethod"/>
-        <member-entity entity-alias="FA" entity-name="FinAccount"/>
-        <member-entity entity-alias="FAR" entity-name="FinAccountRole"/>
+		<description>
+			所有跨店消费的支付流水
+				即 支付所用的云卡的 发卡商家  与 支付的 party_id_to 不相等的记录
+		</description>
+		<member-entity entity-alias="P" entity-name="Payment"/>
+		<member-entity entity-alias="PM" entity-name="PaymentMethod"/>
+		<member-entity entity-alias="FA" entity-name="FinAccount"/>
+		<member-entity entity-alias="FAR" entity-name="FinAccountRole"/>
 		<alias entity-alias="P" name="paymentId" />
 		<alias entity-alias="P" name="paymentMethodTypeId" />
 		<alias entity-alias="P" name="cardId" field="paymentMethodId" ><description>paymentMethodId即是云卡id</description></alias>
@@ -155,6 +155,69 @@
 		<relation type="one-nofk" rel-entity-name="FinAccount">
 			<key-map field-name="finAccountId" />
 		</relation>
-    </view-entity>
+	</view-entity>
+	
+	<view-entity entity-name="CloudCardPlatformArApView" package-name="org.ofbiz.cloudcard.payment" title="平台对商家应收应付金额统计视图">
+		<description>
+			用于查询平台对各个商家应收应付金额
+		</description>
+		<member-entity entity-alias="PG" entity-name="PartyGroup"/>
+		<member-entity entity-alias="PR" entity-name="PartyRole"/>
+		<member-entity entity-alias="AR" entity-name="CloudCardCrossStorePaymentView"/>
+		<member-entity entity-alias="AP" entity-name="CloudCardCrossStorePaymentView"/>
+
+		<alias entity-alias="PG" name="partyId"  group-by="true"/>
+		<alias entity-alias="PG" name="groupName" group-by="true"/>
+		
+		<alias entity-alias="AR" name="arAmount" function="sum" >
+			<description>平台应从商家收取金额</description>
+			<complex-alias operator="">
+				<complex-alias-field entity-alias="AR"  field="amount" default-value="0"/>
+			</complex-alias>
+		</alias>
+		<alias entity-alias="AR" name="arCount"  function="count" field="paymentId">
+			<description>平台应收那部分支付流水的总条数</description>
+		</alias>
+
+		<alias entity-alias="AP" name="apAmount"  function="sum">
+			<description>平台应付给商家金额</description>
+			<complex-alias operator="">
+				<complex-alias-field entity-alias="AP"  field="amount" default-value="0"/>
+			</complex-alias>
+		</alias>
+		<alias entity-alias="AP" name="apCount"  function="count" field="paymentId">
+			<description>平台应付那部分支付流水的总条数</description>
+		</alias>
+
+		<alias name="reconciliationAmount"  function="sum">
+			<description>实际结算金额，为正表示需要从商家收款，为负表示需要付款给商家</description>
+			<complex-alias operator="-">
+				<complex-alias-field entity-alias="AR"  field="amount" default-value="0"/>
+				<complex-alias-field entity-alias="AP"  field="amount" default-value="0"/>
+			</complex-alias>
+		</alias>
+		<view-link entity-alias="PG" rel-entity-alias="PR">
+			<key-map field-name="partyId"  />
+			<entity-condition>
+				<condition-expr entity-alias="PR" field-name="roleTypeId" operator="equals" value="DISTRIBUTOR"/>
+			</entity-condition>
+		</view-link>
+		
+		<view-link entity-alias="PG" rel-entity-alias="AR" rel-optional="true">
+			<key-map field-name="partyId"  rel-field-name="distributorPartyId"/>
+			<entity-condition>
+				<condition-expr entity-alias="AR" field-name="statusId" operator="equals" value="PMNT_SENT"/>
+			</entity-condition>
+		</view-link>
+		
+		<view-link entity-alias="PG" rel-entity-alias="AP" rel-optional="true">
+			<key-map field-name="partyId"  rel-field-name="tradePartyId"/>
+			<entity-condition>
+				<condition-expr entity-alias="AP" field-name="statusId" operator="equals" value="PMNT_SENT"/>
+			</entity-condition>
+		</view-link>
+		
+	</view-entity>
+	
 	
 </entitymodel>
