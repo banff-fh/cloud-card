@@ -22,14 +22,12 @@ under the License.
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
 
     <!-- Test case for get Login captcha process-->
-	<simple-method method-name="testGetLoginCaptcha" short-description="auto test testGetLoginCaptcha service" login-required="false"> -->
+	<simple-method method-name="testGetLoginCaptcha" short-description="auto test testGetLoginCaptcha service" login-required="false">
         <set field="serviceInMap.teleNumber" value="18614055178"/>
         
         <call-service service-name="getLoginCaptcha" in-map-name="serviceInMap">
         </call-service>
-        
      	<log level="info" message="get Captcha successfully "/>
-        
     </simple-method>
 
     <!-- Test case for bizlogin process-->

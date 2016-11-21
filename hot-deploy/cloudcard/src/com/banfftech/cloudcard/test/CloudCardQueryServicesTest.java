@@ -49,7 +49,7 @@ public class CloudCardQueryServicesTest extends OFBizTestCase {
         ctx.put("userLogin", userLogin);
         ctx.put("organizationPartyId", organizationPartyIds.get(0));
         resp = dispatcher.runSync("getLimitAndPresellInfo", ctx);
-        assertTrue("Service 'organizationPartyId' result success", ServiceUtil.isSuccess(resp));
+        assertTrue("Service 'getLimitAndPresellInfo' result success", ServiceUtil.isSuccess(resp));
         BigDecimal presellAmount = (BigDecimal) resp.get("presellAmount");
         BigDecimal limitAmount = (BigDecimal) resp.get("limitAmount");
         BigDecimal balance = (BigDecimal) resp.get("balance");
