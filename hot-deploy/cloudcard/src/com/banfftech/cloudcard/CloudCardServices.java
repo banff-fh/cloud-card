@@ -955,6 +955,9 @@ public class CloudCardServices {
 		String finAccountName = (String) context.get("finAccountName");
 		String organizationPartyId = (String) context.get("organizationPartyId");
 		
+		
+		//TODO， 这个可以优化，不应该也不必在每次生成卡号前来“确保/创建”商家的DISTRIBUTOR角色，
+		// 应该在创建商家的时候就应该加上这个角色
 		Map<String, Object> ensurePartyRoleOutMap;
 		try {
 			ensurePartyRoleOutMap = dispatcher.runSync("ensurePartyRole", 
@@ -963,6 +966,7 @@ public class CloudCardServices {
 			Debug.logError(e1, module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
+		
 		
 		if (ServiceUtil.isError(ensurePartyRoleOutMap)) {
 			return ensurePartyRoleOutMap;
