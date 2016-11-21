@@ -92,7 +92,8 @@
         </relation>
     </view-entity>
     
-    <entity entity-name="SmsValidateCode" package-name="org.ofbiz.cloudcard.sms">
+    <entity entity-name="SmsValidateCode" package-name="org.ofbiz.cloudcard.sms" title="短信验证码">
+		<description>短信验证码，过期的 且 isValid=Y 的数据都可以清理</description>
 		<field name="teleNumber" type="id"></field>
 		<field name="smsType" type="id"></field>
 		<field name="captcha" type="id"></field>
@@ -103,4 +104,57 @@
       	<prim-key field="captcha"/>
 	    <prim-key field="fromDate"/>
 	</entity>
+	
+	<view-entity entity-name="CloudCardCrossStorePaymentView" package-name="org.ofbiz.cloudcard.payment" title="跨店流水">
+        <description>
+        	所有跨店消费的支付流水
+        		即 支付所用的云卡的 发卡商家  与 支付的 party_id_to 不相等的记录
+        </description>
+      	<member-entity entity-alias="P" entity-name="Payment"/>
+        <member-entity entity-alias="PM" entity-name="PaymentMethod"/>
+        <member-entity entity-alias="FA" entity-name="FinAccount"/>
+        <member-entity entity-alias="FAR" entity-name="FinAccountRole"/>
+		<alias entity-alias="P" name="paymentId" />
+		<alias entity-alias="P" name="paymentMethodTypeId" />
+		<alias entity-alias="P" name="cardId" field="paymentMethodId" ><description>paymentMethodId即是云卡id</description></alias>
+		<alias entity-alias="P" name="partyIdFrom" />
+		<alias entity-alias="P" name="tradePartyId"  field="partyIdTo"><description>交易所在商家</description></alias>
+		<alias entity-alias="P" name="effectiveDate" />
+		<alias entity-alias="P" name="amount" />
+		<alias entity-alias="P" name="currencyUomId" />
+		<alias entity-alias="P" name="statusId" />
+		<alias entity-alias="P" name="comments" />
+		<alias entity-alias="PM" name="cardName"  field="description"/>
+		<alias entity-alias="PM" name="customerPartyId" field="partyId"><description>持卡人、客户</description></alias>
+		<alias entity-alias="FAR" name="distributorPartyId" field="partyId"><description>发行卡的商家</description></alias>
+		
+		<view-link entity-alias="P" rel-entity-alias="PM">
+			<key-map field-name="paymentMethodId" />
+			<entity-condition>
+				<!-- 只查交易流水， paymentTypeId = GC_WITHDRAWAL -->
+				<condition-expr field-name="paymentTypeId" operator="equals" value="GC_WITHDRAWAL"/>
+			</entity-condition>
+		</view-link>
+		
+		<view-link entity-alias="PM" rel-entity-alias="FA">
+			<key-map field-name="finAccountId" />
+		</view-link>
+		
+		<view-link entity-alias="FA" rel-entity-alias="FAR">
+			<key-map field-name="finAccountId" rel-field-name="finAccountId" />
+			<entity-condition>
+				<condition-list combine="and">
+					<condition-expr entity-alias="FAR" field-name="roleTypeId" operator="equals" value="DISTRIBUTOR"/>
+					<condition-expr entity-alias="P" field-name="partyIdTo" operator="not-equals" rel-entity-alias="FAR" rel-field-name="partyId"/>
+				</condition-list>
+			</entity-condition>
+		</view-link>
+		<relation type="one-nofk" rel-entity-name="PaymentMethod">
+			<key-map field-name="paymentMethodId" />
+		</relation>
+		<relation type="one-nofk" rel-entity-name="FinAccount">
+			<key-map field-name="finAccountId" />
+		</relation>
+    </view-entity>
+	
 </entitymodel>
