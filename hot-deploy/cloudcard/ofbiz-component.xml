@@ -33,7 +33,8 @@
     <service-resource type="group" loader="main" location="servicedef/groups.xml"/>
     -->
 
-    <test-suite loader="main" location="testdef/cloudcardTests.xml"/>
+    <test-suite loader="main" location="testdef/cloudcardLoginTests.xml"/>
+    <test-suite loader="main" location="testdef/cloudcardQueryTests.xml"/>
 
     <!-- web applications; will be mounted when using the embedded container -->
     <webapp name="cloudcard"

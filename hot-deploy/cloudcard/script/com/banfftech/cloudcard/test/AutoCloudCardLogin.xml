@@ -35,7 +35,7 @@ under the License.
     <!-- Test case for bizlogin process-->
 	<simple-method method-name="testBizAppLogin" short-description="auto test testBizAppLogin service" login-required="false">
 		<set field="serviceInMap.teleNumber" value="18614055178" />
-		<set field="serviceInMap.captcha" value="984660" />
+		<set field="serviceInMap.captcha" value="485442" />
 
 		<call-service service-name="bizAppLogin" in-map-name="serviceInMap">
 			<result-to-field result-name="token" />
