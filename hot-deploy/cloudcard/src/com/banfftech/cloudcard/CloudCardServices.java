@@ -724,19 +724,28 @@ public class CloudCardServices {
 			return invoiceItemOutMap;
 		}
 		
-		// 3、修改发票状态为INVOICE_APPROVED时，会自动创建 PaymentApplication 
-		Map<String, Object> setInvoiceStatusOutMap;
+		// 3、创建 PaymentApplication 应用 发票 与  付款payment，  并修改发票状态为INVOICE_APPROVED
 		try {
-			setInvoiceStatusOutMap = dispatcher.runSync("setInvoiceStatus",
-					UtilMisc.toMap("userLogin", userLogin, "locale",locale,
-							"invoiceId",invoiceId,
-							"statusId", "INVOICE_APPROVED"));
-		} catch (GenericServiceException e1) {
-			Debug.logError(e1, module);
+			//TODO, NOTE 将商家开的invoice和客户付款的payment进行应用，
+			// 虽然后面修改发票状态为INVOICE_APPROVED会触发ECA去自动去找payment与invoice进行应用
+			// 但是，既然这里能拿到paymentId和invoiceId，就直接创建好PaymentApplication，
+			// 免得 setInvoiceStatus的后续的ECA去搜索payment，
+			// 既费时，也还可能出现找到的paymentId 不是前面刚生成的withdrawalPaymentId的情况，导致自动创建paymentApplication失败
+			Map<String, Object> paymentApplicationOutMap = dispatcher.runSync("createPaymentApplication",
+					UtilMisc.toMap("userLogin", userLogin, "locale", locale, "amountApplied", amount, "paymentId",
+							withdrawalPaymentId, "invoiceId", invoiceId));
+			if (ServiceUtil.isError(paymentApplicationOutMap)) {
+				return paymentApplicationOutMap;
+			}
+			
+			Map<String, Object> setInvoiceStatusOutMap = dispatcher.runSync("setInvoiceStatus", UtilMisc.toMap(
+					"userLogin", userLogin, "locale", locale, "invoiceId", invoiceId, "statusId", "INVOICE_APPROVED"));
+			if (ServiceUtil.isError(setInvoiceStatusOutMap)) {
+				return setInvoiceStatusOutMap;
+			}
+		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
-		}
-		if (ServiceUtil.isError(setInvoiceStatusOutMap)) {
-			return setInvoiceStatusOutMap;
 		}
 		
 		// 4、商家收款账户入账
@@ -760,7 +769,6 @@ public class CloudCardServices {
 		if (ServiceUtil.isError(finAccountDepositOutMap)) {
 			return finAccountDepositOutMap;
 		}
-		
 		
 		// 5、如果同店消费，直接回冲卖卡限额
 		if(isSameStore){
