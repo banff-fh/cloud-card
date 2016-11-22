@@ -1,11 +1,13 @@
 package com.banfftech.cloudcard.test;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
@@ -43,9 +45,7 @@ public class CloudCardServicesTest extends OFBizTestCase {
 
         BigDecimal amount = (BigDecimal) resp.get("amount");
         BigDecimal cardBalance = (BigDecimal) resp.get("cardBalance");
-
         assertEquals("200.0", String.valueOf(amount));
-        assertEquals("10020", "10020");
         assertEquals("200.0", String.valueOf(cardBalance));
         ctx.clear();
         //充值业务
@@ -55,10 +55,41 @@ public class CloudCardServicesTest extends OFBizTestCase {
         ctx.put("userLogin", userLogin);
         resp = dispatcher.runSync("rechargeCloudCard", ctx, 2000,true);
         assertTrue("Service 'rechargeCloudCard' result success", ServiceUtil.isSuccess(resp));
-
+      
+        String customerPartyId = (String) resp.get("customerPartyId");
         amount = (BigDecimal) resp.get("amount");
         BigDecimal actualBalance = (BigDecimal) resp.get("actualBalance");
         assertEquals("1400.00", String.valueOf(actualBalance));
+        assertEquals("10010", customerPartyId);
+        ctx.clear();
+
+        //支付服务
+        ctx.put("organizationPartyId", organizationPartyIds.get(0));
+        ctx.put("cardCode", "00812134736130161527");
+        ctx.put("amount", amountBig.add(BigDecimal.valueOf(UtilMisc.toDouble("100.00"))));
+        ctx.put("userLogin", userLogin);
+        resp = dispatcher.runSync("cloudCardWithdraw", ctx, 2000,true);
+        assertTrue("Service 'cloudCardWithdraw' result success", ServiceUtil.isSuccess(resp));
+
+        amount = (BigDecimal) resp.get("amount");
+        cardBalance = (BigDecimal) resp.get("cardBalance");
+        customerPartyId = (String) resp.get("customerPartyId");
+        assertEquals("100.0", String.valueOf(amount));
+        assertEquals("1300.00", String.valueOf(cardBalance));
+        assertEquals("10010", customerPartyId);
+        ctx.clear();
+        
+        //卡授权
+        Timestamp dateTime = UtilDateTime.nowTimestamp();
+        ctx.put("teleNumber", "18711112222");
+        ctx.put("cardId", "10000");
+        ctx.put("amount", amountBig.add(BigDecimal.valueOf(UtilMisc.toDouble("100.00"))));
+        ctx.put("fromDate", dateTime);
+        ctx.put("thruDate", UtilDateTime.addDaysToTimestamp(dateTime, 1));
+        ctx.put("userLogin", userLogin);
+        resp = dispatcher.runSync("createCardAuth", ctx, 2000,true);
+        assertTrue("Service 'cloudCardWithdraw' result success", ServiceUtil.isSuccess(resp));
+        ctx.clear();
         
 	}
 }
