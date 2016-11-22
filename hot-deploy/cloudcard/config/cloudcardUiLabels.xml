@@ -16,9 +16,9 @@
         <value xml:lang="en">You are not allowed to view this page.</value>
         <value xml:lang="zh">不允许你浏览这个页面。</value>
     </property>
-    <property key="liquidationMenu">
-        <value xml:lang="en">Liquidation</value>
-        <value xml:lang="zh">清算</value>
+    <property key="settlementMenu">
+        <value xml:lang="en">settlement</value>
+        <value xml:lang="zh">商家结算</value>
     </property>
     <property key="newMakeCardMenu">
         <value xml:lang="en">newMakeCard</value>
@@ -71,6 +71,42 @@
     <property key="PageTitleEditCardInformation">
         <value xml:lang="en">PageTitleEditCardInformation</value>
         <value xml:lang="zh">批量生成卡</value>
+    </property>
+    <property key="settlementHistory">
+        <value xml:lang="en">settlementHistory</value>
+        <value xml:lang="zh">商家结算记录</value>
+    </property>
+    <property key="LookupStoreId">
+        <value xml:lang="en">Store ID</value>
+        <value xml:lang="zh">商家标识</value>
+    </property>
+    <property key="LookupStoreName">
+        <value xml:lang="en">Store Name</value>
+        <value xml:lang="zh">商家名称</value>
+    </property>
+    <property key="LookupStoreComments">
+        <value xml:lang="en">Store Comments</value>
+        <value xml:lang="zh">商家备注</value>
+    </property>
+    <property key="arAmount">
+        <value xml:lang="en">receivable amount</value>
+        <value xml:lang="zh">平台应收金额</value>
+    </property>
+    <property key="apAmount">
+        <value xml:lang="en">payable amount</value>
+        <value xml:lang="zh">平台应付金额</value>
+    </property>
+    <property key="arapDetailCountLabel">
+        <value xml:lang="en">rows detail</value>
+        <value xml:lang="zh">条明细</value>
+    </property>
+    <property key="reconciliationAmount">
+        <value xml:lang="en">reconciliation Amount</value>
+        <value xml:lang="zh">需要结算的金额</value>
+    </property>
+    <property key="doSettlement">
+        <value xml:lang="en">do Settlement</value>
+        <value xml:lang="zh">结算</value>
     </property>
     
 </resource>

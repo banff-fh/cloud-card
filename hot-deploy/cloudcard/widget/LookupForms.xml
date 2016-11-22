@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+
+  
+    
+    <form name="LookupCloudCardSeller" type="single" target="LookupCloudCardSeller" default-table-style="basic-table">
+        <field name="roleTypeId"><hidden value="DISTRIBUTOR"/></field>
+        <field name="partyId" title="${uiLabelMap.LookupStoreId}"><text-find/></field>
+        <field name="groupName" title="${uiLabelMap.LookupStoreName}"><text-find/></field>
+        <field name="noConditionFind"><hidden value="Y"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}"><submit button-type="button"/></field>
+    </form>
+    
+    <form name="listLookupCloudCardSeller" type="list" list-name="listIt" paginate-target="LookupCloudCardSeller"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar">
+        <actions>
+            <set field="entityName" value="PartyRoleAndPartyDetail"/>
+            <set field="parameters.roleTypeId" value="DISTRIBUTOR"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" from-field="entityName"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        </actions>
+        <field name="partyId" title="${uiLabelMap.LookupStoreId}"><display/></field>
+        <field name="groupName" title="${uiLabelMap.LookupStoreName}"><display/></field>
+        <field name="comments" title="${uiLabelMap.LookupStoreComments}"><display/></field>
+        <field name="partyId" title="${uiLabelMap.LookupStoreId}" widget-style="smallSubmit">
+            <hyperlink also-hidden="false" target-type="plain" description="${partyId}" target="javascript:set_value('${partyId}')"/>
+        </field>
+    </form>
+    
+    
+</forms>
