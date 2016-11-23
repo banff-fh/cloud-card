@@ -16,9 +16,9 @@
         <value xml:lang="en">You are not allowed to view this page.</value>
         <value xml:lang="zh">不允许你浏览这个页面。</value>
     </property>
-    <property key="liquidationMenu">
-        <value xml:lang="en">Liquidation</value>
-        <value xml:lang="zh">清算</value>
+    <property key="settlementMenu">
+        <value xml:lang="en">settlement</value>
+        <value xml:lang="zh">商家结算</value>
     </property>
     <property key="newMakeCardMenu">
         <value xml:lang="en">newMakeCard</value>
@@ -71,6 +71,74 @@
     <property key="PageTitleEditCardInformation">
         <value xml:lang="en">PageTitleEditCardInformation</value>
         <value xml:lang="zh">批量生成卡</value>
+    </property>
+    <property key="settlementHistory">
+        <value xml:lang="en">settlementHistory</value>
+        <value xml:lang="zh">商家结算记录</value>
+    </property>
+    <property key="LookupStoreId">
+        <value xml:lang="en">Store ID</value>
+        <value xml:lang="zh">商家标识</value>
+    </property>
+    <property key="LookupStoreName">
+        <value xml:lang="en">Store Name</value>
+        <value xml:lang="zh">商家名称</value>
+    </property>
+    <property key="LookupStoreComments">
+        <value xml:lang="en">Store Comments</value>
+        <value xml:lang="zh">商家备注</value>
+    </property>
+    <property key="arAmount">
+        <value xml:lang="en">receivable amount</value>
+        <value xml:lang="zh">平台应收金额</value>
+    </property>
+    <property key="apAmount">
+        <value xml:lang="en">payable amount</value>
+        <value xml:lang="zh">平台应付金额</value>
+    </property>
+    <property key="arapDetailCountLabel">
+        <value xml:lang="en">rows detail</value>
+        <value xml:lang="zh">条明细</value>
+    </property>
+    <property key="reconciliationAmount">
+        <value xml:lang="en">reconciliation Amount</value>
+        <value xml:lang="zh">需要结算的金额</value>
+    </property>
+    <property key="doSettlement">
+        <value xml:lang="en">do Settlement</value>
+        <value xml:lang="zh">结算</value>
+    </property>
+    <property key="paymentTradePartyId">
+        <value xml:lang="en">trade party id</value>
+        <value xml:lang="zh">交易发生商家</value>
+    </property>
+    <property key="paymentDistributorPartyId">
+        <value xml:lang="en">distributor party id</value>
+        <value xml:lang="zh">发卡商家</value>
+    </property>
+    <property key="paymentCustomerPartyId">
+        <value xml:lang="en">customer party id</value>
+        <value xml:lang="zh">客户标识</value>
+    </property>
+    <property key="paymentPaymentId">
+        <value xml:lang="en">payment Id</value>
+        <value xml:lang="zh">支付标识</value>
+    </property>
+    <property key="paymentCardId">
+        <value xml:lang="en">card Id</value>
+        <value xml:lang="zh">云卡标识</value>
+    </property>
+    <property key="paymentAmount">
+        <value xml:lang="en">amount</value>
+        <value xml:lang="zh">金额</value>
+    </property>
+    <property key="paymentEffectiveDate">
+        <value xml:lang="en">effective date</value>
+        <value xml:lang="zh">交易时间</value>
+    </property>
+    <property key="paymentComments">
+        <value xml:lang="en">comments</value>
+        <value xml:lang="zh">交易备注</value>
     </property>
     
 </resource>

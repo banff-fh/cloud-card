@@ -2,9 +2,9 @@
 <menus xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-menu.xsd">
     <menu name="MainAppBar" title="${uiLabelMap.cloudcardApplication}" extends="CommonAppBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
         <menu-item name="main" title="${uiLabelMap.CommonMain}"><link target="main"/></menu-item>
-<!--    		<menu-item name="liquidation" title="${uiLabelMap.liquidationMenu}"><link target="findLiquidation"/></menu-item> -->
    		<menu-item name="markCardMenu" title="${uiLabelMap.markCardMenu}"><link target="findCard"/></menu-item>
 <!--    		<menu-item name="findCardNumber" title="${uiLabelMap.findCardNumberMenu}"><link target="findCardNumber"/></menu-item> -->
 <!--    		<menu-item name="createCardNumber" title="${uiLabelMap.createCardNumberMenu}"><link target="createCardNumber"/></menu-item> -->
+   		<menu-item name="settlementMenu" title="${uiLabelMap.settlementMenu}"><link target="settlement"/></menu-item>
     </menu>
 </menus>
