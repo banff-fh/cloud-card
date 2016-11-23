@@ -114,6 +114,14 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
+	
+	<!-- 检查app版本 -->
+	<request-map uri="checkAppVersion">
+		<!--<security https="true" auth="false" />-->
+		<event type="service" invoke="checkAppVersion" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
     
 	<!-- 后台页面部分 Request Mappings -->
 	<request-map uri="main">

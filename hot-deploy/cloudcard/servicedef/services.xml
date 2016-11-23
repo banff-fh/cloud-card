@@ -168,4 +168,15 @@
         <attribute name="result" type="String" mode="OUT" optional="true"/>
 	</service>
 	
+	<service name="checkAppVersion" engine="java"
+		location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="checkAppVersion" auth="false">
+		<description>检查app版本号</description>
+		<attribute name="curVersion" type="String" mode="IN" optional="false"><description>设备类型</description></attribute>
+        <attribute name="deviceType" type="String" mode="IN" optional="false"><description>设备类型</description></attribute>
+        <attribute name="appType" type="String" mode="IN" optional="false"><description>app类型</description></attribute>
+        <attribute name="latestVersion" type="String" mode="OUT" optional="false"><description>最新版本</description></attribute>
+        <attribute name="updateType" type="Integer" mode="OUT" optional="false"><description>是否强制更新</description></attribute>
+        <attribute name="url" type="String" mode="OUT" optional="true"><description>app更新地址</description></attribute>
+	</service>
+	
 </services>
