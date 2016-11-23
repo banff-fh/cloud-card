@@ -108,5 +108,37 @@
         <value xml:lang="en">do Settlement</value>
         <value xml:lang="zh">结算</value>
     </property>
+    <property key="paymentTradePartyId">
+        <value xml:lang="en">trade party id</value>
+        <value xml:lang="zh">交易发生商家</value>
+    </property>
+    <property key="paymentDistributorPartyId">
+        <value xml:lang="en">distributor party id</value>
+        <value xml:lang="zh">发卡商家</value>
+    </property>
+    <property key="paymentCustomerPartyId">
+        <value xml:lang="en">customer party id</value>
+        <value xml:lang="zh">客户标识</value>
+    </property>
+    <property key="paymentPaymentId">
+        <value xml:lang="en">payment Id</value>
+        <value xml:lang="zh">支付标识</value>
+    </property>
+    <property key="paymentCardId">
+        <value xml:lang="en">card Id</value>
+        <value xml:lang="zh">云卡标识</value>
+    </property>
+    <property key="paymentAmount">
+        <value xml:lang="en">amount</value>
+        <value xml:lang="zh">金额</value>
+    </property>
+    <property key="paymentEffectiveDate">
+        <value xml:lang="en">effective date</value>
+        <value xml:lang="zh">交易时间</value>
+    </property>
+    <property key="paymentComments">
+        <value xml:lang="en">comments</value>
+        <value xml:lang="zh">交易备注</value>
+    </property>
     
 </resource>

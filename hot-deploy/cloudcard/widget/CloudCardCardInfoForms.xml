@@ -113,15 +113,17 @@ under the License.
 		<field name="arAmount"><display/></field>
 		<field name="arAmount" title="${uiLabelMap.arAmount}" sort-field="true" use-when="${arAmount @gt 0}">
 			<hyperlink description="${arAmount}  [${arCount}${uiLabelMap.arapDetailCountLabel}]"
-				target="/" target-type="inter-app">
-				<parameter param-name="partyId" />
+				target="crossStorePayment" url-mode="intra-app">
+				<parameter param-name="distributorPartyId"  from-field="partyId"/>
+				<parameter param-name="statusId"  value="PMNT_SENT"/>
 			</hyperlink>
 		</field>
 		<field name="apAmount"><display/></field>
 		<field name="apAmount" title="${uiLabelMap.apAmount}" sort-field="true"  use-when="${apAmount @gt 0}">
 			<hyperlink description="${apAmount}  [${apCount}${uiLabelMap.arapDetailCountLabel}]"
-				target="/" target-type="inter-app">
-					<parameter param-name="partyId" from-field="partyId" />
+				target="crossStorePayment" url-mode="intra-app">
+				<parameter param-name="tradePartyId"  from-field="partyId"/>
+				<parameter param-name="statusId"  value="PMNT_SENT"/>
 			</hyperlink>
 		</field>
 		<field name="reconciliationAmount" title="${uiLabelMap.reconciliationAmount}" sort-field="true">
@@ -137,5 +139,73 @@ under the License.
 				<parameter param-name="partyId" />
 			</hyperlink>
 		</field>
+	</form>
+	
+    <form name="FindCrossStorePayment" type="single" target="crossStorePayment" title="" default-map-name="cloudcard"
+        header-row-style="header-row" default-table-style="basic-table" >
+        <field name="tradePartyId" title="${uiLabelMap.paymentTradePartyId}" position="1"><lookup target-form-name="LookupCloudCardSeller"/></field>
+        <field name="distributorPartyId" title="${uiLabelMap.paymentDistributorPartyId}" position="1"><lookup target-form-name="LookupCloudCardSeller"/></field>
+        <field name="customerPartyId" title="${uiLabelMap.paymentCustomerPartyId}" position="1"><lookup target-form-name="LookupCustomerName"/></field>
+        <field name="effectiveDate" title="${uiLabelMap.paymentEffectiveDate}" position="1"><date-find/></field>
+        <field name="statusId"  title="${uiLabelMap.statusId}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="StatusItem" description="${description}">
+                    <entity-constraint name="statusTypeId" value="PMNT_STATUS"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit">
+            <submit button-type="button"/>
+        </field>
+    </form>
+    <form name="ListCrossStorePayment" list-name="listIt" target="" title="" type="list" paginate-target="crossStorePayment"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" header-row-style="header-row-2">
+        <actions>
+            <set field="entityName" value="CloudCardCrossStorePaymentView"/>
+            <set field="parameters.sortField" from-field="parameters.sortField" default-value="-effectiveDate"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" from-field="entityName"/>
+                <field-map field-name="orderBy" from-field="parameters.sortField"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        </actions>
+        <field name="paymentId" title="${uiLabelMap.paymentPaymentId}" widget-style="buttontext">
+        	<hyperlink description="${paymentId}" target="/accounting/control/paymentOverview" target-type="inter-app">
+        		<parameter param-name="paymentId"/>
+        	</hyperlink>
+        </field>
+        
+		<field name="cardId" title="${uiLabelMap.paymentCardId}" sort-field="true">
+			<display description="${cardName}[${cardId}]"></display>
+		</field>
+		<field name="distributorPartyId" title="${uiLabelMap.paymentDistributorPartyId}" sort-field="true">
+			<display-entity entity-name="PartyNameView" description="${groupName}" key-field-name="partyId">
+				<sub-hyperlink description="[${distributorPartyId}]" target="/partymgr/control/viewprofile" target-type="inter-app">
+					<parameter param-name="partyId" from-field="distributorPartyId" />
+				</sub-hyperlink>
+			</display-entity>
+		</field>
+		<field name="amount" title="${uiLabelMap.paymentAmount}" sort-field="true"><display type="currency"/></field>
+	
+		<field name="customerPartyId" title="${uiLabelMap.paymentCustomerPartyId}" sort-field="true">
+			<display-entity entity-name="PartyNameView" description="${firstName} ${middleName} ${lastName}" key-field-name="partyId">
+				<sub-hyperlink description="[${customerPartyId}]" target="/partymgr/control/viewprofile" target-type="inter-app">
+					<parameter param-name="partyId" from-field="customerPartyId" />
+				</sub-hyperlink>
+			</display-entity>
+		</field>
+		<field name="tradePartyId" title="${uiLabelMap.paymentTradePartyId}" sort-field="true">
+			<display-entity entity-name="PartyNameView" description="${groupName}" key-field-name="partyId">
+				<sub-hyperlink description="[${tradePartyId}]" target="/partymgr/control/viewprofile" target-type="inter-app">
+					<parameter param-name="partyId" from-field="tradePartyId" />
+				</sub-hyperlink>
+			</display-entity>
+		</field>
+		<field name="effectiveDate" sort-field="true"  title="${uiLabelMap.paymentEffectiveDate}" ><display type="date-time"/></field>
+		<field name="comments"  title="${uiLabelMap.paymentComments}" ><display/></field>
+		<field name="statusId" title="${uiLabelMap.statusId}" sort-field="true"><display-entity entity-name="StatusItem"/></field>
 	</form>
 </forms>

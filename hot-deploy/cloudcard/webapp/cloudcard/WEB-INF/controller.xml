@@ -158,9 +158,22 @@
 		<response name="error" type="view" value="settlement" />
 	</request-map>
 
+	<!-- 商家跨店交易记录 -->
+	<request-map uri="crossStorePayment">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="crossStorePayment" />
+		<response name="error" type="view" value="crossStorePayment" />
+	</request-map>
+
+
+
 	<request-map uri="LookupCloudCardSeller">
 		<security auth="true" https="true"/>
 		<response name="success" type="view" value="LookupCloudCardSeller"/>
+	</request-map>
+	<request-map uri="LookupCustomerName">
+		<security auth="true" https="true"/>
+		<response name="success" type="view" value="LookupCustomerName"/>
 	</request-map>
 	
 
@@ -175,6 +188,9 @@
 		page="component://cloudcard/widget/CloudCardScreens.xml#EditCard" />
 	<view-map name="settlement" type="screen"
 		page="component://cloudcard/widget/CloudCardScreens.xml#settlement" />
+	<view-map name="crossStorePayment" type="screen"
+		page="component://cloudcard/widget/CloudCardScreens.xml#crossStorePayment" />
 	
 	<view-map name="LookupCloudCardSeller" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#LookupCloudCardSeller"/>
+	<view-map name="LookupCustomerName" type="screen" page="component://party/widget/partymgr/LookupScreens.xml#LookupCustomerName"/>
 </site-conf>
