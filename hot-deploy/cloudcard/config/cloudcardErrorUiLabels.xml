@@ -35,6 +35,10 @@
         <value xml:lang="en">Not the store manager can not operate</value>
         <value xml:lang="zh">不是本店管理员无法操作</value>
     </property>
+    <property key="CloudCardBizLoginIsNotManager">
+        <value xml:lang="en">non-administrators， can not login</value>
+        <value xml:lang="zh">该用户不是店铺管理员，不允许登录商家客户端</value>
+    </property>
     <property key="CloudCardOrganizationPartyNotFound">
         <value xml:lang="en">No organizationPartyId found: ${organizationPartyId}</value>
         <value xml:lang="zh">找不到商家[${organizationPartyId}]</value>

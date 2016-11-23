@@ -185,6 +185,7 @@ public class SmsServices {
 	 * @return
 	 */
 	public static Map<String, Object> userAppLogin(DispatchContext dctx, Map<String, Object> context) {
+		context.put("appType", "user");
 		return appLogin(dctx,context);
 	}
 	
@@ -195,6 +196,7 @@ public class SmsServices {
 	 * @return
 	 */
 	public static Map<String, Object> bizAppLogin(DispatchContext dctx, Map<String, Object> context) {
+		context.put("appType", "biz");
 		return appLogin(dctx,context);
 	}
 	
@@ -210,6 +212,9 @@ public class SmsServices {
 		Locale locale = (Locale) context.get("locale");
 		String teleNumber = (String) context.get("teleNumber");
 		String captcha = (String) context.get("captcha");
+		String appType = (String) context.get("appType");
+		GenericValue userLogin = (GenericValue) context.get("userLogin");
+
 		String token = null;
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 
@@ -229,8 +234,17 @@ public class SmsServices {
 		}else{
 			//返回机构Id
 			List<String> organizationList = CloudCardHelper.getOrganizationPartyId(delegator, customer.get("partyId").toString());
+			
 			if(UtilValidate.isNotEmpty(organizationList)){
 				result.put("organizationPartyId", organizationList.get(0));
+			}
+			
+			//判断商户app登录权限
+			if("biz".equals(appType)){
+				if(null == result.get("organizationPartyId")){
+					Debug.logError(teleNumber+"不是商户管理人员，不能登录 商户app", module);
+					return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardBizLoginIsNotManager", locale));
+				}
 			}
 			
 			//查找用户验证码是否存在
