@@ -213,17 +213,22 @@ public class CloudCardHelper {
 					);
 			List<GenericValue> relations = PartyRelationshipHelper.getActivePartyRelationships(delegator, partyRelationshipValues);
 			if (UtilValidate.isEmpty(relations)) {
-				Map<String, Object> relationOutMap;
 				try {
-					dispatcher.runSync("ensurePartyRole", UtilMisc.toMap("partyId", customerPartyId, "roleTypeId", "CUSTOMER"));
-					relationOutMap = dispatcher.runSync("createPartyRelationship", partyRelationshipValues);
+					// 保证 客户partyId 具有 customer角色
+					Map<String, Object> ensurePartyRoleOut = dispatcher.runSync("ensurePartyRole", UtilMisc.toMap("partyId", customerPartyId, "roleTypeId", "CUSTOMER"));
+					if(ServiceUtil.isError(ensurePartyRoleOut)){
+						return ensurePartyRoleOut;
+					}
+					// 创建 客户 与 商家 的关系
+					Map<String, Object> relationOutMap = dispatcher.runSync("createPartyRelationship", partyRelationshipValues);
+					if (ServiceUtil.isError(relationOutMap)) {
+						return relationOutMap;
+					}
 				} catch (GenericServiceException e) {
 					Debug.logError(e, module);
 					return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 				}
-				if (ServiceUtil.isError(relationOutMap)) {
-					return relationOutMap;
-				}
+				
 			}
 		}
 		Map<String, Object> retMap =  ServiceUtil.returnSuccess();

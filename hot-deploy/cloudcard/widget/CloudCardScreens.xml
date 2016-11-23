@@ -16,6 +16,28 @@
         </section>
     </screen>
 
+	<screen name="LookupCloudCardSeller" use-cache="true">
+		<section>
+			<condition>
+				<if-service-permission service-name="partyBasePermissionCheck" main-action="VIEW" />
+			</condition>
+			<actions>
+				<property-map resource="cloudcardUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true" />
+			</actions>
+			<widgets>
+				<decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
+					<decorator-section name="search-options">
+						<include-form name="LookupCloudCardSeller" location="component://cloudcard/widget/LookupForms.xml" />
+					</decorator-section>
+					<decorator-section name="search-results">
+						<include-form name="listLookupCloudCardSeller" location="component://cloudcard/widget/LookupForms.xml" />
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
     <screen name="findCard">
        <section>
             <actions>
@@ -69,4 +91,74 @@
         </section>
 	</screen>
 
+    <screen name="settlement">
+       <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleSettlement"/>
+                <set field="headerItem" value="cards"/>
+                <set field="tabButtonItem" value="settlement"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="cloudcardCommonDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                                    <decorator-section name="search-options">
+                                        <include-form name="FindSettlement" location="component://cloudcard/widget/CloudCardCardInfoForms.xml"/>
+                                    </decorator-section>
+                                    <decorator-section name="search-results">
+										<section>
+											<widgets>
+												<container style="button-bar button-style-1">
+													<link target="settlementHistory" text="${uiLabelMap.settlementHistory}"></link>
+												</container>
+											</widgets>
+										</section>
+                                        <include-form name="ListSettlement" location="component://cloudcard/widget/CloudCardCardInfoForms.xml"/>
+                                    </decorator-section>
+                                </decorator-screen>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="crossStorePayment">
+       <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleCrossStorePaymen"/>
+                <set field="headerItem" value="cards"/>
+                <set field="tabButtonItem" value="crossStorePaymen"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="cloudcardCommonDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                                    <decorator-section name="search-options">
+                                        <include-form name="FindCrossStorePayment" location="component://cloudcard/widget/CloudCardCardInfoForms.xml"/>
+                                    </decorator-section>
+                                    <decorator-section name="search-results">
+										<section>
+											<widgets>
+												<container style="button-bar button-style-1">
+													<link target="settlementHistory" text="${uiLabelMap.settlementHistory}"></link>
+												</container>
+											</widgets>
+										</section>
+                                        <include-form name="ListCrossStorePayment" location="component://cloudcard/widget/CloudCardCardInfoForms.xml"/>
+                                    </decorator-section>
+                                </decorator-screen>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
 </screens>
