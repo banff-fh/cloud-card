@@ -13,9 +13,9 @@
 	
 	
 	<SystemProperty systemResourceId="cloudcard" systemPropertyId="cardImg.10011" systemPropertyValue="123" description="卡图片地址"/>
-    <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.appkey" systemPropertyValue="23525875" description="短信平台appkey"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.appkey" systemPropertyValue="xxxx" description="短信平台appkey"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.intervalTime" systemPropertyValue="60" description="第二次与第一次短信发送间隔时间"/>
-    <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.secret" systemPropertyValue="4b7a953e901247d908209208f5f84203" description="短信平台secret"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.secret" systemPropertyValue="xxxxxxxxxxxxxxxxxxxxxxxxx" description="短信平台secret"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsFreeSignName" systemPropertyValue="登录验证" description="短信平台配置签名"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsTemplateCode" systemPropertyValue="SMS_25720222" description="短信平台模版号"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.url" systemPropertyValue="http://gw.api.taobao.com/router/rest" description="短信平台请求地址"/>
@@ -26,5 +26,12 @@
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="jpush.appkey" systemPropertyValue="xxxxxx" description="极光推送appkey"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="jpush.secret" systemPropertyValue="xxxxxx" description="极光推送secret"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="jpush.expirationTime" systemPropertyValue="172800" description="极光推送有效时间"/>
-
+	<SystemProperty systemResourceId="cloudcard" systemPropertyId="app.android.biz.update" systemPropertyValue="0" description="商户app安卓版是否强制更新"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="app.android.biz.version" systemPropertyValue="1.0" description="商户app安卓版本号"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="app.android.user.update" systemPropertyValue="0" description="用户app安卓版是否强制更新"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="app.android.user.version" systemPropertyValue="1.0" description="商户app安卓版本号"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="app.ios.biz.update" systemPropertyValue="0" description="商户app苹果版是否强制更新"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="app.ios.biz.version" systemPropertyValue="1.0" description="商户app苹果版本号"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="app.ios.user.update" systemPropertyValue="0" description="用户app苹果版是否强制更新"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="app.ios.user.version" systemPropertyValue="1.0" description="用户app苹果版本号"/>
 </entity-engine-xml>

@@ -552,29 +552,30 @@ public class CloudCardQueryServices {
 	 * @return Map
 	 */
 	public static Map<String, Object> checkAppVersion(DispatchContext dctx, Map<String, Object> context) {
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
 		String curVersion = (String) context.get("curVersion");
 		String deviceType = (String) context.get("deviceType");
 		String appType = (String) context.get("appType");
 		String latestVersion = null;
 		int updateType = 0;
-
-		String url = null;
+		String version = EntityUtilProperties.getPropertyValue("cloudcard","app."+deviceType+"."+appType+".version",delegator);
+		String isUpdate = EntityUtilProperties.getPropertyValue("cloudcard","app."+deviceType+"."+appType+".update",delegator);
+		String url = "http://fir.im/6nzd";
 		//判断appType是商家或用户
 		if("biz".equals(appType)){
 			//判断当前设备是ios或android
 			if("ios".equals(deviceType)){
-				if(!"1.0".equals(curVersion)){
-					latestVersion = "1.0";
-					updateType = 0;
-					url = "http://fir.im/6nzd";
+				if(!version.equals(curVersion)){
+					latestVersion = version;
+					updateType = Integer.valueOf(isUpdate);
 				}else{
 					latestVersion = curVersion;
 				}
 			}else if("android".equals(deviceType)){
-				if(!"1.0".equals(curVersion)){
-					latestVersion = "1.0";
-					updateType = 0;
-					url = "http://fir.im/6nzd";
+				if(!version.equals(curVersion)){
+					latestVersion = version;
+					updateType = Integer.valueOf(isUpdate);
 				}else{
 					latestVersion = curVersion;
 				}
@@ -582,18 +583,16 @@ public class CloudCardQueryServices {
 		}else if("user".equals(appType)){
 			//判断当前设备是ios或android
 			if("ios".equals(deviceType)){
-				if(!"1.0".equals(curVersion)){
-					latestVersion = "1.0";
-					updateType = 1;
-					url = "http://fir.im/6nzd";
+				if(!version.equals(curVersion)){
+					latestVersion = version;
+					updateType = Integer.valueOf(isUpdate);
 				}else{
 					latestVersion = curVersion;
 				}
 			}else if("android".equals(deviceType)){
-				if(!"1.0".equals(curVersion)){
-					latestVersion = "1.0";
-					updateType = 1;
-					url = "http://fir.im/6nzd";
+				if(!version.equals(curVersion)){
+					latestVersion = version;
+					updateType = Integer.valueOf(isUpdate);
 				}else{
 					latestVersion = curVersion;
 				}
