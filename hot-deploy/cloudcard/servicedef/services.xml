@@ -179,4 +179,15 @@
         <attribute name="url" type="String" mode="OUT" optional="true"><description>app更新地址</description></attribute>
 	</service>
 	
+	
+	
+	<service name="doSettlement" engine="java"
+		location="com.banfftech.cloudcard.CloudCardServices" invoke="doSettlement" auth="true">
+		<description>商家结算</description>
+		<attribute name="partyId" type="String" mode="INOUT" optional="false"><description>商家partyId</description></attribute>
+		<attribute name="arAmount" type="BigDecimal" mode="OUT" optional="true"><description>平台应从商家收取金额</description></attribute>
+		<attribute name="apAmount" type="BigDecimal" mode="OUT" optional="true"><description>平台应付给商家金额</description></attribute>
+		<attribute name="settlementAmount" type="BigDecimal" mode="OUT" optional="true"><description>结算余额</description></attribute>
+	</service>
+	
 </services>

@@ -107,8 +107,8 @@
 	
 	<view-entity entity-name="CloudCardCrossStorePaymentView" package-name="org.ofbiz.cloudcard.payment" title="跨店流水">
 		<description>
-			所有跨店消费的支付流水
-				即 支付所用的云卡的 发卡商家  与 支付的 party_id_to 不相等的记录
+			所有跨店消费的未结算流水
+				即 支付所用的云卡的 发卡商家  与 支付的 party_id_to 不相等statusId 为 PMNT_NOT_PAID 或 PMNT_SENT 的记录
 		</description>
 		<member-entity entity-alias="P" entity-name="Payment"/>
 		<member-entity entity-alias="PM" entity-name="PaymentMethod"/>
@@ -131,8 +131,15 @@
 		<view-link entity-alias="P" rel-entity-alias="PM">
 			<key-map field-name="paymentMethodId" />
 			<entity-condition>
-				<!-- 只查交易流水， paymentTypeId = GC_WITHDRAWAL -->
-				<condition-expr field-name="paymentTypeId" operator="equals" value="GC_WITHDRAWAL"/>
+				<condition-list>
+					<!-- 只查交易流水， paymentTypeId = GC_WITHDRAWAL -->
+					<condition-expr field-name="paymentTypeId" operator="equals" value="GC_WITHDRAWAL"/>
+					<condition-list combine="or">
+						<condition-expr field-name="statusId" operator="equals" value="PMNT_SENT"/>
+						<condition-expr field-name="statusId" operator="equals" value="PMNT_P_NOT_RCV_SENT"/>
+						<condition-expr field-name="statusId" operator="equals" value="PMNT_P_NOT_SENT_RCV"/>
+					</condition-list>
+				</condition-list>
 			</entity-condition>
 		</view-link>
 		
@@ -157,18 +164,15 @@
 		</relation>
 	</view-entity>
 	
-	<view-entity entity-name="CloudCardPlatformArApView" package-name="org.ofbiz.cloudcard.payment" title="平台对商家应收应付金额统计视图">
+	
+	
+	<view-entity entity-name="CloudCardPlatformAccountReceivableView" package-name="org.ofbiz.cloudcard.payment" title="平台对商家应收金额统计视图">
 		<description>
-			用于查询平台对各个商家应收应付金额
+			用于查询平台对各个商家应收金额
 		</description>
-		<member-entity entity-alias="PG" entity-name="PartyGroup"/>
-		<member-entity entity-alias="PR" entity-name="PartyRole"/>
 		<member-entity entity-alias="AR" entity-name="CloudCardCrossStorePaymentView"/>
-		<member-entity entity-alias="AP" entity-name="CloudCardCrossStorePaymentView"/>
-
-		<alias entity-alias="PG" name="partyId"  group-by="true"/>
-		<alias entity-alias="PG" name="groupName" group-by="true"/>
 		
+		<alias entity-alias="AR" name="partyId" field="distributorPartyId" group-by="true"></alias>
 		<alias entity-alias="AR" name="arAmount" function="sum" >
 			<description>平台应从商家收取金额</description>
 			<complex-alias operator="">
@@ -178,9 +182,24 @@
 		<alias entity-alias="AR" name="arCount"  function="count" field="paymentId">
 			<description>平台应收那部分支付流水的总条数</description>
 		</alias>
-
-		<alias entity-alias="AP" name="apAmount"  function="sum">
-			<description>平台应付给商家金额</description>
+		<entity-condition>
+			<condition-list combine="or">
+				<condition-expr entity-alias="AR" field-name="statusId" operator="equals" value="PMNT_SENT"/>
+				<condition-expr entity-alias="AR" field-name="statusId" operator="equals" value="PMNT_P_NOT_RCV_SENT"/>
+			</condition-list>
+		</entity-condition>
+		
+	</view-entity>
+	
+	<view-entity entity-name="CloudCardPlatformAccountPayableView" package-name="org.ofbiz.cloudcard.payment" title="平台对商家应付金额统计视图">
+		<description>
+			用于查询平台对各个商家应付金额
+		</description>
+		<member-entity entity-alias="AP" entity-name="CloudCardCrossStorePaymentView"/>
+		
+		<alias entity-alias="AP" name="partyId" field="tradePartyId" group-by="true"></alias>
+		<alias entity-alias="AP" name="apAmount" function="sum" >
+			<description>平台应付商家金额</description>
 			<complex-alias operator="">
 				<complex-alias-field entity-alias="AP"  field="amount" default-value="0"/>
 			</complex-alias>
@@ -188,12 +207,56 @@
 		<alias entity-alias="AP" name="apCount"  function="count" field="paymentId">
 			<description>平台应付那部分支付流水的总条数</description>
 		</alias>
+		<entity-condition>
+			<condition-list combine="or">
+				<condition-expr entity-alias="AP" field-name="statusId" operator="equals" value="PMNT_SENT"/>
+				<condition-expr entity-alias="AP" field-name="statusId" operator="equals" value="PMNT_P_NOT_SENT_RCV"/>
+			</condition-list>
+		</entity-condition>
+		
+	</view-entity>
+	
+	
+	
+	<view-entity entity-name="CloudCardPlatformArApView" package-name="org.ofbiz.cloudcard.payment" title="平台对商家应收应付金额统计视图">
+		<description>
+			用于查询平台对各个商家应收应付金额
+		</description>
+		<member-entity entity-alias="PG" entity-name="PartyGroup"/>
+		<member-entity entity-alias="PR" entity-name="PartyRole"/>
+		<member-entity entity-alias="AR" entity-name="CloudCardPlatformAccountReceivableView"/>
+		<member-entity entity-alias="AP" entity-name="CloudCardPlatformAccountPayableView"/>
 
-		<alias name="reconciliationAmount"  function="sum">
+		<alias entity-alias="PG" name="partyId" />
+		<alias entity-alias="PG" name="groupName" />
+		
+		<alias entity-alias="AR" name="arAmount" >
+			<complex-alias operator="">
+				<complex-alias-field entity-alias="AR"  field="arAmount" default-value="0"/>
+			</complex-alias>
+		</alias>
+		<alias entity-alias="AR" name="arCount" >
+			<complex-alias operator="">
+				<complex-alias-field entity-alias="AR"  field="arCount" default-value="0"/>
+			</complex-alias>
+		</alias>
+		
+		<alias entity-alias="AP" name="apAmount" >
+			<complex-alias operator="">
+				<complex-alias-field entity-alias="AP"  field="apAmount" default-value="0"/>
+			</complex-alias>
+		</alias>
+		<alias entity-alias="AP" name="apCount" >
+			<complex-alias operator="">
+				<complex-alias-field entity-alias="AP"  field="apCount" default-value="0"/>
+			</complex-alias>
+		</alias>
+
+		<alias name="reconciliationAmount" >
 			<description>实际结算金额，为正表示需要从商家收款，为负表示需要付款给商家</description>
 			<complex-alias operator="-">
-				<complex-alias-field entity-alias="AR"  field="amount" default-value="0"/>
-				<complex-alias-field entity-alias="AP"  field="amount" default-value="0"/>
+				<complex-alias-field entity-alias="AR"  field="arAmount" default-value="0"/>
+				<complex-alias-field entity-alias="AP"  field="apAmount" default-value="0"/>
 			</complex-alias>
 		</alias>
 		<view-link entity-alias="PG" rel-entity-alias="PR">
@@ -204,17 +267,11 @@
 		</view-link>
 		
 		<view-link entity-alias="PG" rel-entity-alias="AR" rel-optional="true">
-			<key-map field-name="partyId"  rel-field-name="distributorPartyId"/>
-			<entity-condition>
-				<condition-expr entity-alias="AR" field-name="statusId" operator="equals" value="PMNT_SENT"/>
-			</entity-condition>
+			<key-map field-name="partyId" />
 		</view-link>
 		
 		<view-link entity-alias="PG" rel-entity-alias="AP" rel-optional="true">
-			<key-map field-name="partyId"  rel-field-name="tradePartyId"/>
-			<entity-condition>
-				<condition-expr entity-alias="AP" field-name="statusId" operator="equals" value="PMNT_SENT"/>
-			</entity-condition>
+			<key-map field-name="partyId" />
 		</view-link>
 		
 	</view-entity>

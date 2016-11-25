@@ -171,6 +171,14 @@
 		<response name="success" type="view" value="settlement" />
 		<response name="error" type="view" value="settlement" />
 	</request-map>
+	
+	<!-- 进行结算 -->
+	<request-map uri="doSettlement">
+		<security https="true" auth="true" />
+		<event type="service" invoke="doSettlement"/>
+		<response name="success" type="view" value="settlement" />
+		<response name="error" type="view" value="settlement" />
+	</request-map>
 
 	<!-- 商家跨店交易记录 -->
 	<request-map uri="crossStorePayment">
