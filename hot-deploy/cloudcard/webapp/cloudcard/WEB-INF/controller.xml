@@ -159,6 +159,12 @@
 		<response name="success" type="none"></response>
 	</request-map>
 	
+	<!-- 支付结果 -->
+	<request-map uri="receiveNotify">
+		<event type="java" path="com.banfftech.cloudcard.pay.alipay.AsynAlipayNotifyServices" invoke="receiveNotify"></event>
+		<response name="success" type="none"></response>
+	</request-map>
+	
     <!-- 商家结算页面 -->
 	<request-map uri="settlement">
 		<security https="true" auth="true" />

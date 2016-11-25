@@ -18,6 +18,7 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityConditionList;
 import org.ofbiz.entity.condition.EntityOperator;
+import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
@@ -103,7 +104,7 @@ public class SmsServices {
 							EntityCondition.makeCondition(UtilMisc.toMap("contactNumber", teleNumber)), 
 							EntityUtil.getFilterByDateExpr()), null, UtilMisc.toList("partyId DESC"), null, false));
 		} catch (GenericEntityException e) {
-			Debug.logError(e, module);
+			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
 		
@@ -112,23 +113,46 @@ public class SmsServices {
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardUserNotExistError", locale));
 		}
 		
+		EntityCondition captchaCondition = EntityCondition.makeCondition(
+						EntityCondition.makeCondition("teleNumber", EntityOperator.EQUALS, teleNumber),
+						EntityUtil.getFilterByDateExpr(),
+						EntityCondition.makeCondition("isValid", EntityOperator.EQUALS,"N"));
 		
-		
-		EntityConditionList<EntityCondition> captchaConditions = EntityCondition
-				.makeCondition(EntityCondition.makeCondition("teleNumber", EntityOperator.EQUALS, teleNumber),EntityUtil.getFilterByDateExpr(),EntityCondition.makeCondition("isValid", EntityOperator.EQUALS,"N"));
-		
-		List<GenericValue> smsList = FastList.newInstance();
+		GenericValue sms = null;
 		try {
-			smsList = delegator.findList("SmsValidateCode", captchaConditions, null,
-					null, null, false);
+			sms = EntityUtil.getFirst( 
+					delegator.findList("SmsValidateCode", captchaCondition, null,UtilMisc.toList("-" + ModelEntity.CREATE_STAMP_FIELD), null, false)
+					);
 		} catch (GenericEntityException e) {
-			Debug.logError(e, module);
+			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardGetCAPTCHAFailedError", locale));
 		}
 		
-		Map<String, Object> result = ServiceUtil.returnSuccess();
-		//判断短信是否存在，不存在创建验证码，否则判断短信是否需要重新发送。
-		if(UtilValidate.isEmpty(smsList)){
+		
+		int validTime = Integer.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","sms.validTime","900",delegator));
+		int intervalTime = Integer.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","sms.intervalTime","60",delegator));
+		
+		
+		boolean sendSMS = false;
+		if(UtilValidate.isEmpty(sms)){
+			sendSMS = true;
+		}else{
+			Debug.logInfo("The user tel:[" + teleNumber + "]  verfiy code[" + sms.getString("captcha") + "], check the interval time , if we'll send new code", module);
+			// 如果已有未验证的记录存在，则检查是否过了再次重发的时间间隔，没过就忽略本次请求
+			if(UtilDateTime.nowTimestamp().after(UtilDateTime.adjustTimestamp((java.sql.Timestamp)sms.get("fromDate"), Calendar.SECOND, intervalTime))){
+				sms.set("thruDate", nowTimestamp);
+				try {
+					sms.store();
+				} catch (GenericEntityException e) {
+					Debug.logError(e, module);
+					return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+				}
+				Debug.logInfo("The user tel:[" + teleNumber + "]  will get new verfiy code!", module);
+				sendSMS = true;
+			}
+		}
+		
+		if(sendSMS){
 			//生成验证码
 			String captcha = UtilFormatOut.padString(String.valueOf(Math.round((Math.random()*10e6))), 6, false, '0');
 			Map<String,Object> smsValidateCodeMap = FastMap.newInstance();
@@ -137,7 +161,7 @@ public class SmsServices {
 			smsValidateCodeMap.put("smsType", "LOGIN");
 			smsValidateCodeMap.put("isValid", "N");
 			smsValidateCodeMap.put("fromDate", nowTimestamp);
-			smsValidateCodeMap.put("thruDate",UtilDateTime.adjustTimestamp(nowTimestamp, Calendar.MINUTE,15));
+			smsValidateCodeMap.put("thruDate",UtilDateTime.adjustTimestamp(nowTimestamp, Calendar.SECOND, validTime));
 			try {
 				GenericValue smstGV = delegator.makeValue("SmsValidateCode", smsValidateCodeMap);
 				smstGV.create();
@@ -151,31 +175,8 @@ public class SmsServices {
 			context.put("code", captcha);
 			context.put("product", "卡云卡");
 			SmsServices.sendMessage(dctx, context);
-		}else{
-			GenericValue sms = smsList.get(0);
-			//获取短信发送间隔时间
-			int validTime = Integer.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","sms.validTime","900",delegator));
-			int intervalTime = Integer.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","sms.intervalTime","30",delegator));
-
-			//如果这次请求不在上一次请求一分钟内，延长短信结束时间并重新发送短信。
-			if(UtilDateTime.nowTimestamp().after(UtilDateTime.adjustTimestamp((java.sql.Timestamp)sms.get("thruDate"), Calendar.SECOND,(intervalTime-validTime)))){
-				sms.set("thruDate",UtilDateTime.adjustTimestamp(nowTimestamp, Calendar.MINUTE,15));
-				try {
-					sms.store();
-				} catch (GenericEntityException e) {
-					Debug.logError(e, module);
-					return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardUserNotExistError", locale));
-				}
-				//发送短信
-				context.put("phone", teleNumber);
-				context.put("code", sms.get("captcha"));
-				context.put("product", "卡云卡");
-				SmsServices.sendMessage(dctx, context);
-			}
-			
 		}
-		
-		return result;
+		return ServiceUtil.returnSuccess();
 	}
 	
 	/**
@@ -213,7 +214,6 @@ public class SmsServices {
 		String teleNumber = (String) context.get("teleNumber");
 		String captcha = (String) context.get("captcha");
 		String appType = (String) context.get("appType");
-		GenericValue userLogin = (GenericValue) context.get("userLogin");
 
 		String token = null;
 		Map<String, Object> result = ServiceUtil.returnSuccess();
