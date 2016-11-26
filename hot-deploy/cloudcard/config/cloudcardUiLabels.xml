@@ -60,6 +60,26 @@
         <value xml:lang="en">distributorPartyId</value>
         <value xml:lang="zh">所属店铺</value>
     </property>
+    <property key="CloudCardOwnerPartyId">
+        <value xml:lang="en">cloud card owner</value>
+        <value xml:lang="zh">卡主</value>
+    </property>
+    <property key="CloudCardPartyId">
+        <value xml:lang="en">Card holder</value>
+        <value xml:lang="zh">持卡人</value>
+    </property>
+    <property key="CloudCardBalance">
+        <value xml:lang="en">cloud card balance</value>
+        <value xml:lang="zh">余额</value>
+    </property>
+    <property key="CloudCardFromDate">
+        <value xml:lang="en">cloud card fromDate</value>
+        <value xml:lang="zh">生效时间</value>
+    </property>
+    <property key="CloudCardThuDate">
+        <value xml:lang="en">cloud card thuDate</value>
+        <value xml:lang="zh">失效时间</value>
+    </property>
     <property key="currencyUomId">
         <value xml:lang="en">CurrencyUomId</value>
         <value xml:lang="zh">币种</value>

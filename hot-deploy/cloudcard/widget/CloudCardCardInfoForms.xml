@@ -50,17 +50,41 @@ under the License.
                 <field-map field-name="noConditionFind" value="Y"/>
             </service>
         </actions>
+        <field name="finAccountId"><hidden/></field>
         <field name="distributorPartyId" title="${uiLabelMap.distributorPartyId}" sort-field="true">
-            <display-entity entity-name="PartyNameView" description="${firstName} ${middleName} ${lastName} ${groupName}" key-field-name="partyId">
+            <display-entity entity-name="PartyGroup" description="${groupName}" key-field-name="partyId">
                 <sub-hyperlink  description="[${distributorPartyId}]"  target="/partymgr/control/viewprofile" target-type="inter-app">
                		<parameter param-name="partyId" from-field="distributorPartyId"/>
             	</sub-hyperlink>
             </display-entity>
-        </field>
-        <field name="finAccountName" title="${uiLabelMap.finAccountName}" ><display/></field>
-        <field name="finAccountCode" title="${uiLabelMap.finAccountCode}" ><display/></field>
-        <field name="statusId" title="${uiLabelMap.statusId}" sort-field="true"><display-entity entity-name="StatusItem"/>
-        </field>
+	    </field>
+		<field name="finAccountName" title="${uiLabelMap.finAccountName}">
+			<display description="${description}" default-value="${finAccountName}"/>
+		</field>
+		<field name="finAccountCode" title="${uiLabelMap.finAccountCode}">
+			<display description="${cardNumber}" default-value="${finAccountCode}" />
+		</field>
+		<field name="statusId" title="${uiLabelMap.statusId}" sort-field="true">
+			<display-entity entity-name="StatusItem" />
+		</field>
+		<field name="ownerPartyId" title="${uiLabelMap.CloudCardOwnerPartyId}" use-when="${groovy: ownerPartyId != '_NA_'}">
+			<display-entity entity-name="Person" description="${firstName} ${middleName} ${lastName}" key-field-name="partyId" >
+				<sub-hyperlink description="[${ownerPartyId}]" target="/partymgr/control/viewprofile" target-type="inter-app">
+					<parameter param-name="partyId" from-field="ownerPartyId" />
+				</sub-hyperlink>
+			</display-entity>
+		</field>
+		<field name="partyId" title="${uiLabelMap.CloudCardPartyId}" use-when="${groovy: partyId != null }">
+			<display-entity entity-name="Person" description="${firstName} ${middleName} ${lastName}" key-field-name="partyId" >
+				<sub-hyperlink description="[${partyId}]" target="/partymgr/control/viewprofile" target-type="inter-app">
+					<parameter param-name="partyId" />
+				</sub-hyperlink>
+			</display-entity>
+		</field>
+		<field name="actualBalance" title="${uiLabelMap.CloudCardBalance}" use-when="${groovy: ownerPartyId == partyId}"><display type="currency"/></field>
+		<field name="actualBalance" title="${uiLabelMap.CloudCardBalance}" use-when="${groovy: ownerPartyId != partyId}"><display description="${groovy: com.banfftech.cloudcard.CloudCardHelper.getCloudCardAuthBalance(finAccountId,delegator)}" type="currency"/></field>
+		<field name="fromDate" title="${uiLabelMap.CloudCardFromDate}"><display type="date-time"/></field>
+		<field name="thruDate" title="${uiLabelMap.CloudCardThuDate}"><display type="date-time"/></field>
     </form>
 	
 	<form name="EditCard" type="single" target="genNewCloudCardCode"
