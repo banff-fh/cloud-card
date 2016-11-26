@@ -133,13 +133,18 @@
 	<request-map uri="genNewCloudCardCode">
 		<security https="true" auth="true" />
 		<event type="service" invoke="genNewCloudCardCode"/>
-		<response name="success" type="view" value="findCard" />
+		<response name="success" type="request-redirect" value="findCard">
+			<redirect-parameter name="distributorPartyId" from="organizationPartyId"/>
+			<redirect-parameter name="statusId" value="FNACT_CREATED"/>
+		</response>
+		<response name="error" type="request-redirect-noparam" value="createCard"></response>
 	</request-map>
 	
 	<!-- 查询商家 已生成的卡-->
 	<request-map uri="findCard">
 		<security https="true" auth="true" />
 		<response name="success" type="view" value="findCard" />
+		<response name="error" type="view" value="findCard" />
 	</request-map>
 	
 	<!-- 商家创建卡 -->
