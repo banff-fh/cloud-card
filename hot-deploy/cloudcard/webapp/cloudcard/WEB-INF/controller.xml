@@ -135,6 +135,7 @@
 		<event type="service" invoke="genNewCloudCardCode"/>
 		<response name="success" type="request-redirect" value="findCard">
 			<redirect-parameter name="distributorPartyId" from="organizationPartyId"/>
+			<redirect-parameter name="finAccountName"/>
 			<redirect-parameter name="statusId" value="FNACT_CREATED"/>
 		</response>
 		<response name="error" type="request-redirect-noparam" value="createCard"></response>
@@ -161,7 +162,8 @@
     <!-- 导出卡 -->
 	<request-map uri="exportCardExcel">
 		<event type="java" path="com.banfftech.cloudcard.CloudCardQueryServices" invoke="exportCardExcel"></event>
-		<response name="success" type="none"></response>
+		<response name="success" type="request-redirect-noparam" value="findCard"/>
+		<response name="error" type="request-redirect-noparam" value="findCard"/>
 	</request-map>
 	
 	<!-- 支付结果 -->
