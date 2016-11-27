@@ -99,7 +99,12 @@ public class CloudCardServices {
 			Debug.logError("This card has been authorized", module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardHasBeenAuthorized", locale));
 		}
-		
+
+		if(!"FNACT_ACTIVE".equals(cloudCard.getString("statusId"))){
+			Debug.logInfo("此卡[" + cardCode + "]状态为[" + cloudCard.getString("statusId") + "]不能进行授权", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardCanNotBeAuthorized", locale)); 
+		}
+
 		// 用户自己的userLogin没有 诸如 创建partyContact之类的权限，需要用到system权限
 		GenericValue systemUser;
 		try {
@@ -116,6 +121,11 @@ public class CloudCardServices {
 			return getOrCreateCustomerOut;
 		}		
 		String customerPartyId = (String) getOrCreateCustomerOut.get("customerPartyId");
+		
+		if(customerPartyId.equals(userLogin.getString("partyId"))){
+			Debug.logInfo("用户partyId:[" + customerPartyId + "]试图授权cardNumber:[" + cardCode + "]给自己", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardCanNotBeAuthorizedToYourself", locale));
+		}
 		
 		//创建giftCard
 		String finAccountName = cloudCard.getString("finAccountName");
