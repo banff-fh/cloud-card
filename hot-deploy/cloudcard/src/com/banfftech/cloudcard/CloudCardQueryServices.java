@@ -466,29 +466,66 @@ public class CloudCardQueryServices {
 	public static String exportCardExcel(HttpServletRequest request,HttpServletResponse response){
 		LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
 		String distributorPartyId = request.getParameter("distributorPartyId");
-		if(null == distributorPartyId){
+		/*if(null == distributorPartyId){
 			distributorPartyId = "";
-		}
+		}*/
 		String finAccountName = request.getParameter("finAccountName");
+		String finAccountName_op = request.getParameter("finAccountName_op");
+		String finAccountId = request.getParameter("finAccountId");
 		String statusId = request.getParameter("statusId");
+		String cardCode = request.getParameter("cardCode");
+		String ownerPartyId = request.getParameter("ownerPartyId");
+		String partyId = request.getParameter("partyId");
+		String filterByDate = request.getParameter("filterByDate");
 		
 		Delegator delegator =  dispatcher.getDelegator();
 		Map<String,Object> context = UtilHttp.getParameterMap(request);
 		GenericValue userLogin = (GenericValue) request.getSession().getAttribute("userLogin");
 		Locale locale = (Locale) context.get("locale");
-		context.put("userLogin", userLogin);
-		context.put("searchLx","excel");
+		
 
 		try {
-
-			Map<String, Object> inputFieldMap = FastMap.newInstance();
-			inputFieldMap.put("distributorPartyId", distributorPartyId);
-			inputFieldMap.put("finAccountName", finAccountName);
-			inputFieldMap.put("statusId", statusId);
-
 			Map<String, Object> ctxMap = FastMap.newInstance();
+			ctxMap.put("noConditionFind", "Y");
+			Map<String, Object> inputFieldMap = FastMap.newInstance();
+			// 有可能是“null” 这样的字符串。。。
+			if(UtilValidate.isNotEmpty(cardCode) && !"null".equals(cardCode)){
+				GenericValue cloudCard = CloudCardHelper.getCloudCardAccountFromCode(cardCode, false, delegator);
+				if(null!=cloudCard){
+					inputFieldMap.put("finAccountId", cloudCard.getString("finAccountId"));
+				}else{
+					ctxMap.put("noConditionFind", "N");
+				}
+			}
+			if(UtilValidate.isNotEmpty(distributorPartyId) && !"null".equals(distributorPartyId)){
+				inputFieldMap.put("distributorPartyId", distributorPartyId);
+			}
+			if(UtilValidate.isNotEmpty(finAccountName) && !"null".equals(finAccountName)){
+				inputFieldMap.put("finAccountName", finAccountName);
+			}
+			if(UtilValidate.isNotEmpty(finAccountName_op) && !"null".equals(finAccountName_op)){
+				inputFieldMap.put("finAccountName_op", finAccountName_op);
+			}
+			if(UtilValidate.isNotEmpty(finAccountId) && !"null".equals(finAccountId)){
+				inputFieldMap.put("finAccountId", finAccountId);
+			}
+			if(UtilValidate.isNotEmpty(partyId) && !"null".equals(partyId)){
+				inputFieldMap.put("partyId", partyId);
+			}
+			if(UtilValidate.isNotEmpty(ownerPartyId) && !"null".equals(ownerPartyId)){
+				inputFieldMap.put("ownerPartyId", ownerPartyId);
+			}
+			if(UtilValidate.isNotEmpty(statusId) && !"null".equals(statusId)){
+				inputFieldMap.put("statusId", statusId);
+			}
+			if(UtilValidate.isNotEmpty(filterByDate) && !"null".equals(filterByDate)){
+				inputFieldMap.put("filterByDate", filterByDate);
+			}
+
 			ctxMap.put("inputFields", inputFieldMap);
+			ctxMap.put("userLogin", userLogin);
 			ctxMap.put("entityName", "FinAccountAndPaymentMethodAndGiftCard");
+			
 
 			Map<String, Object> faResult = null;
 			try {
@@ -498,9 +535,13 @@ public class CloudCardQueryServices {
 			}
 			
 			List<GenericValue> list = FastList.newInstance();
+			Integer listSize = (Integer) faResult.get("listSize");
+			if(null == listSize || listSize < 1){
+				return "SUCCESS";
+			}
 			EntityListIterator it = (EntityListIterator) faResult.get("listIt");
-            list = it.getCompleteList();
-            it.close();
+			list = it.getCompleteList();
+			it.close();
 
 			HSSFWorkbook wb = new HSSFWorkbook();
 			HSSFSheet sheet = wb.createSheet("卡云卡");

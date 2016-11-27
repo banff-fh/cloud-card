@@ -128,6 +128,10 @@
         <value xml:lang="en">do Settlement</value>
         <value xml:lang="zh">结算</value>
     </property>
+    <property key="PlzConfirmHasBeenSettlement">
+        <value xml:lang="en">Please confirm has been with the merchant for financial settlement, settlement amount:${reconciliationAmount}</value>
+        <value xml:lang="zh">请确认已经与商家进行资金结算，结算金额：${reconciliationAmount}</value>
+    </property>
     <property key="paymentTradePartyId">
         <value xml:lang="en">trade party id</value>
         <value xml:lang="zh">交易发生商家</value>
@@ -159,6 +163,10 @@
     <property key="paymentComments">
         <value xml:lang="en">comments</value>
         <value xml:lang="zh">交易备注</value>
+    </property>
+    <property key="HideExpiredCards">
+        <value xml:lang="en">hide expired cards</value>
+        <value xml:lang="zh">隐藏过期的卡</value>
     </property>
     
 </resource>

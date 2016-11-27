@@ -399,7 +399,9 @@ public class CloudCardHelper {
 		return partyGroupFinAccount;
 	}
 	
-	
+	 public static GenericValue getCloudCardAccountFromCode(String cardCode, Delegator delegator) throws GenericEntityException {
+		 return getCloudCardAccountFromCode(cardCode, true, delegator);
+	 }
 	
 	
     /**
@@ -409,7 +411,7 @@ public class CloudCardHelper {
      * @return FinAccountAndPaymentMethodAndGiftCard
      * @throws GenericEntityException
      */
-    public static GenericValue getCloudCardAccountFromCode(String cardCode, Delegator delegator) throws GenericEntityException {
+    public static GenericValue getCloudCardAccountFromCode(String cardCode, boolean filterByDate, Delegator delegator) throws GenericEntityException {
         if (UtilValidate.isEmpty(cardCode)) {
             return null;
         }
@@ -422,19 +424,22 @@ public class CloudCardHelper {
         delegator.encryptFields(encryptedGiftCard);
         String encryptedCardNumber = encryptedGiftCard.getString("cardNumber");
         List<GenericValue> giftCards = delegator.findByAnd("FinAccountAndPaymentMethodAndGiftCard", UtilMisc.toMap("cardNumber", encryptedCardNumber));
-        giftCards =  EntityUtil.filterByDate(giftCards);
+        if(filterByDate){
+        	giftCards =  EntityUtil.filterByDate(giftCards);
+        }
         
         if (UtilValidate.isEmpty(giftCards)) {
         	//扫描的物理卡 去FinAccount里面找
         	GenericValue encryptedFinAccount = delegator.makeValue("FinAccount", UtilMisc.toMap("finAccountCode",cardCode));
             delegator.encryptFields(encryptedFinAccount);
             String encryptedFinAccountCode = encryptedFinAccount.getString("finAccountCode");
-            EntityCondition dateCond = EntityUtil.getFilterByDateExpr();
             EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toMap("finAccountCode", encryptedFinAccountCode));
+            if(filterByDate){
+            	cond = EntityCondition.makeCondition(cond, EntityUtil.getFilterByDateExpr());
+            }
             
             // 既然是物理卡，fromDate应该是最小的吧
-            List<GenericValue> accounts = delegator.findList("FinAccountAndPaymentMethodAndGiftCard", EntityCondition.makeCondition(cond, dateCond), null, UtilMisc.toList("fromDate"), null, false);
-            accounts = EntityUtil.filterByDate(accounts);
+            List<GenericValue> accounts = delegator.findList("FinAccountAndPaymentMethodAndGiftCard", cond, null, UtilMisc.toList("fromDate"), null, false);
             return EntityUtil.getFirst(accounts);
         } else if (giftCards.size() > 1) {
             Debug.logError("一个二维码找到多张卡？", module);

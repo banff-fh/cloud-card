@@ -58,10 +58,15 @@
 										<section>
 											<widgets>
 												<container style="button-bar button-style-1">
-													<link target="exportCardExcel" text="${uiLabelMap.exportCard}">
+													<link target="exportCardExcel" text="${uiLabelMap.exportCard}" url-mode="intra-app">
 														<parameter param-name="distributorPartyId" from-field="parameters.distributorPartyId" />
+														<parameter param-name="finAccountName_op" from-field="parameters.finAccountName_op" />
 														<parameter param-name="finAccountName" from-field="parameters.finAccountName" />
+														<parameter param-name="cardCode"  from-field="parameters.cardCode"/>
+														<parameter param-name="ownerPartyId"  from-field="parameters.ownerPartyId"/>
+														<parameter param-name="partyId"  from-field="parameters.partyId"/>
 														<parameter param-name="statusId" from-field="parameters.statusId" />
+														<parameter param-name="filterByDate" from-field="parameters.filterByDate" />
 													</link>
 												</container>
 											</widgets>
