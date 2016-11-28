@@ -22,6 +22,7 @@
       	<alias entity-alias="FA" name="organizationPartyId" />
       	<alias entity-alias="FA" name="finAccountCode" />
       	<alias entity-alias="FA" name="actualBalance" />
+      	<alias entity-alias="FA" name="availableBalance" />
       	<alias entity-alias="FAR" name="distributorPartyId" field="partyId" />
 		<alias entity-alias="PM" name="paymentMethodId" />
 		<alias entity-alias="PM" name="paymentMethodTypeId" />

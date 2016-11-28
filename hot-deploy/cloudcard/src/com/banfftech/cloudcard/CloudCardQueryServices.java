@@ -70,7 +70,7 @@ public class CloudCardQueryServices {
 		Map<String, Object> ctxMap = FastMap.newInstance();
 		ctxMap.put("inputFields", inputFieldMap);
 		ctxMap.put("entityName", "FinAccountAndPaymentMethodAndGiftCard");
-		ctxMap.put("orderBy", "expireDate");
+		ctxMap.put("orderBy", "-fromDate");
 		ctxMap.put("viewIndex", viewIndex);
 		ctxMap.put("viewSize", viewSize);
 		ctxMap.put("filterByDate", "Y");
@@ -103,6 +103,13 @@ public class CloudCardQueryServices {
 			cloudCardMap.put("cardName", cardName); //卡名
 			cloudCardMap.put("cardCode", cloudCard.get("cardNumber")); //卡二维码
 			cloudCardMap.put("cardId", cloudCard.get("paymentMethodId"));// 卡id
+			
+			BigDecimal actualBalance = cloudCard.getBigDecimal("actualBalance");
+			BigDecimal availableBalance = cloudCard.getBigDecimal("availableBalance");
+			if(null == actualBalance) actualBalance = CloudCardHelper.ZERO;
+			if(null == availableBalance) availableBalance = CloudCardHelper.ZERO;
+			BigDecimal authAmount = actualBalance.subtract(availableBalance);
+			
 			if(cloudCard.getString("cardNumber").startsWith(CloudCardHelper.AUTH_CARD_CODE_PREFIX)){
 				// 如果是别人授权给我的卡，显示授权金额的余额
 				cloudCardMap.put("cardBalance", CloudCardHelper.getCloudCardAuthBalance(cloudCard.getString("finAccountId"), delegator)); 
@@ -115,9 +122,10 @@ public class CloudCardQueryServices {
 				cloudCardMap.put("authThruDate", authThruDate); // 授权结束时间
 				cloudCardMap.put("authFromPartyId", cloudCard.get("ownerPartyId")); // 谁授权
 				cloudCardMap.put("authToPartyId", partyId); // 授权给谁
+				cloudCardMap.put("authAmount", authAmount); // 授权金额
 			}else{
-				//账户实际余额
-				cloudCardMap.put("cardBalance", cloudCard.get("actualBalance"));
+				//账户可用余额
+				cloudCardMap.put("cardBalance", availableBalance);
 				// 如果是已经授权给别人的卡，展示授权开始、结束时间，以及授权给谁
 				Map<String, Object> cardAuthorizeInfo = CloudCardHelper.getCardAuthorizeInfo(cloudCard, delegator);
 				boolean isAuthorized = (boolean) cardAuthorizeInfo.get("isAuthorized");
@@ -131,6 +139,7 @@ public class CloudCardQueryServices {
 					cloudCardMap.put("authThruDate", authThruDate); // 授权结束时间
 					cloudCardMap.put("authFromPartyId", partyId); // 谁授权
 					cloudCardMap.put("authToPartyId", cardAuthorizeInfo.get("toPartyId")); // 授权给谁
+					cloudCardMap.put("authAmount", authAmount); // 授权金额
 				}else{
 					cloudCardMap.put("isAuthToMe", "N"); // 已授权给我
 					cloudCardMap.put("isAuthToOthers", "N"); // 已授权给别人

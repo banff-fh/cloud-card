@@ -56,13 +56,13 @@ public class CloudCardServices {
 		BigDecimal amount = (BigDecimal) context.get("amount");
 		Integer days = (Integer) context.get("days");
 		
-		// 起止时间，前端只填入日期，默认 开始为 当日0:00:00，结束为当日 23:59:59
+		// 起止时间，前端只填入日期，默认 开始为 当前时间
 		Timestamp nowTimestamp = UtilDateTime.nowTimestamp();
 		Timestamp fromDate =(Timestamp)context.get("fromDate");
 		if(UtilValidate.isEmpty(fromDate)){
 			fromDate = nowTimestamp;
 		}
-		fromDate = UtilDateTime.getDayStart(fromDate);
+		fromDate = UtilDateTime.adjustTimestamp(fromDate, Calendar.SECOND, -2);
 		context.put("fromDate", fromDate);
 
 		Timestamp thruDate =(Timestamp)context.get("thruDate");
@@ -81,7 +81,7 @@ public class CloudCardServices {
 		String finAccountId = cloudCard.getString("finAccountId");
 		
 		// 余额检查
-		BigDecimal balance = cloudCard.getBigDecimal("actualBalance");
+		BigDecimal balance = cloudCard.getBigDecimal("availableBalance");// actualBalance
 		if(null == amount){
 			amount = balance;
 		}
@@ -285,9 +285,6 @@ public class CloudCardServices {
 		return result;
 	}
 
-	
-	
-	
 	
 	
 	/**
@@ -726,14 +723,15 @@ public class CloudCardServices {
 		}
 		// 是别人授权给我的卡
 		boolean isAuth2me =  cardCode.startsWith(CloudCardHelper.AUTH_CARD_CODE_PREFIX);
+		boolean isAuthorizedToOthers = false;
 		if(!isAuth2me){
 			Map<String, Object> cardAuthorizeInfo = CloudCardHelper.getCardAuthorizeInfo(cloudCard, delegator);
-			boolean isAuthorized = (boolean) cardAuthorizeInfo.get("isAuthorized");
-			// 此卡已经授权给别人,不能进行交易
-			if(isAuthorized){
-				Debug.logError("此卡["+cardCode+"]已经授权给[" + cardAuthorizeInfo.get("toPartyId") + "],自己不能再使用", module);
-				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardHasBeenAuthorizedToOthers", locale));
-			}
+			isAuthorizedToOthers = (boolean) cardAuthorizeInfo.get("isAuthorized");
+			// 此卡已经授权给别人
+//			if(isAuthorizedToOthers){
+//				Debug.logError("此卡["+cardCode+"]已经授权给[" + cardAuthorizeInfo.get("toPartyId") + "],自己不能再使用", module);
+//				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardHasBeenAuthorizedToOthers", locale));
+//			}
 		}
 		
 		
@@ -747,8 +745,8 @@ public class CloudCardServices {
 		}
 
 		// 1、扣除用户余额
-		// 检查余额是否够用
-		BigDecimal actualBalance = cloudCard.getBigDecimal("actualBalance");
+		// 检查余额是否够用, 如果卡已经授权给别人，而自己支付的时候，以availableBalance为准，避免把授权出去那部分金额给用掉了
+		BigDecimal actualBalance = isAuthorizedToOthers ? cloudCard.getBigDecimal("availableBalance"): cloudCard.getBigDecimal("actualBalance") ; //actualBalance
 		if(null==actualBalance){
 			actualBalance = BigDecimal.ZERO;
 		}
