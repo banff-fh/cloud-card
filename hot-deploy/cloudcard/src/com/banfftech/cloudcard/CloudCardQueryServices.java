@@ -99,6 +99,7 @@ public class CloudCardQueryServices {
 				cloudCardMap.put("cardImg", EntityUtilProperties.getPropertyValue("cloudcard","cardImg."+organizationPartyId,delegator));
 			}
 			String cardName = UtilFormatOut.checkEmpty(cloudCard.getString("description"), cloudCard.getString("finAccountName"));
+			String authThruDate="";
 			cloudCardMap.put("cardName", cardName); //卡名
 			cloudCardMap.put("cardCode", cloudCard.get("cardNumber")); //卡二维码
 			cloudCardMap.put("cardId", cloudCard.get("paymentMethodId"));// 卡id
@@ -108,7 +109,10 @@ public class CloudCardQueryServices {
 				cloudCardMap.put("isAuthToMe", "Y"); // 已授权给我
 				cloudCardMap.put("isAuthToOthers", "N"); // 已授权给别人
 				cloudCardMap.put("authFromDate", cloudCard.getTimestamp("fromDate").toString()); // 授权开始时间
-				cloudCardMap.put("authThruDate", cloudCard.getTimestamp("thruDate").toString()); // 授权结束时间
+				if(UtilValidate.isNotEmpty(cloudCard.getTimestamp("thruDate"))){
+					authThruDate = cloudCard.getTimestamp("thruDate").toString();
+				}
+				cloudCardMap.put("authThruDate", authThruDate); // 授权结束时间
 				cloudCardMap.put("authFromPartyId", cloudCard.get("ownerPartyId")); // 谁授权
 				cloudCardMap.put("authToPartyId", partyId); // 授权给谁
 			}else{
@@ -121,7 +125,10 @@ public class CloudCardQueryServices {
 					cloudCardMap.put("isAuthToMe", "N"); // 已授权给我
 					cloudCardMap.put("isAuthToOthers", "Y"); // 已授权给别人
 					cloudCardMap.put("authFromDate", ((Timestamp)cardAuthorizeInfo.get("fromDate")).toString()); // 授权开始时间
-					cloudCardMap.put("authThruDate", ((Timestamp)cardAuthorizeInfo.get("thruDate")).toString()); // 授权结束时间
+					if(UtilValidate.isNotEmpty(cardAuthorizeInfo.get("thruDate"))){
+						authThruDate = ((Timestamp)cardAuthorizeInfo.get("thruDate")).toString();
+					}
+					cloudCardMap.put("authThruDate", authThruDate); // 授权结束时间
 					cloudCardMap.put("authFromPartyId", partyId); // 谁授权
 					cloudCardMap.put("authToPartyId", cardAuthorizeInfo.get("toPartyId")); // 授权给谁
 				}else{

@@ -54,6 +54,7 @@ public class CloudCardServices {
 		GenericValue userLogin = (GenericValue) context.get("userLogin");
 		
 		BigDecimal amount = (BigDecimal) context.get("amount");
+		Integer days = (Integer) context.get("days");
 		
 		// 起止时间，前端只填入日期，默认 开始为 当日0:00:00，结束为当日 23:59:59
 		Timestamp nowTimestamp = UtilDateTime.nowTimestamp();
@@ -65,10 +66,12 @@ public class CloudCardServices {
 		context.put("fromDate", fromDate);
 
 		Timestamp thruDate =(Timestamp)context.get("thruDate");
-		if(thruDate !=null){
-			thruDate =  UtilDateTime.getDayEnd(thruDate);
-			context.put("thruDate", thruDate);
+		if(thruDate != null){
+			thruDate =  UtilDateTime.getDayStart(thruDate, 1);
+		}else if(days != null && days > 0){
+			thruDate = UtilDateTime.getDayStart(fromDate, days);
 		}
+		context.put("thruDate", thruDate);
 		
 		Map<String, Object> checkParamOut = checkInputParam(dctx, context);
 		if(ServiceUtil.isError(checkParamOut)){
@@ -79,7 +82,10 @@ public class CloudCardServices {
 		
 		// 余额检查
 		BigDecimal balance = cloudCard.getBigDecimal("actualBalance");
-		if(balance.compareTo(amount)<0){
+		if(null == amount){
+			amount = balance;
+		}
+		if(balance.compareTo(amount)<0 || balance.compareTo(CloudCardHelper.ZERO)<=0){
 			Debug.logError("This card balance is Not Enough, can NOT authorize", module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardBalanceIsNotEnough", 
 					UtilMisc.toMap("balance", balance.toPlainString()), locale));
@@ -1217,7 +1223,7 @@ public class CloudCardServices {
 			finAccountWithdrawOutMap = dispatcher.runSync("createFinAccountTrans",
 					UtilMisc.toMap("userLogin", userLogin, "locale",locale,
 							"finAccountId", partyAccountId,
-							"partyId", CloudCardHelper.PLATFORM_PARTY_ID,
+							"partyId", partyId,
 							"amount", reconciliationAmount.negate(),
 							"finAccountTransTypeId","ADJUSTMENT",
 							//"reasonEnumId", "FATR_PURCHASE",//TODO

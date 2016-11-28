@@ -39,9 +39,10 @@
     	<description>云卡授权</description>
     	<attribute name="teleNumber" type="String" mode="IN" optional="false"><description>客户手机号码</description></attribute>
         <attribute name="cardId" type="String" mode="IN" optional="false"><description>卡Id</description></attribute>
-        <attribute name="amount" type="BigDecimal" mode="IN" optional="false"><description>授权金额</description></attribute>
-        <attribute name="fromDate" type="Timestamp" mode="IN" optional="false"><description>授权开始时间</description></attribute>
-        <attribute name="thruDate" type="Timestamp" mode="IN" optional="false"><description>授权结束时间</description></attribute>
+        <attribute name="amount" type="BigDecimal" mode="IN" optional="true"><description>授权金额</description></attribute>
+        <attribute name="fromDate" type="Timestamp" mode="IN" optional="true"><description>授权开始时间，默认当天开始</description></attribute>
+        <attribute name="thruDate" type="Timestamp" mode="IN" optional="true"><description>授权结束时间</description></attribute>
+        <attribute name="days" type="Integer" mode="IN" optional="true"><description>授权几天</description></attribute>
         <attribute name="customerPartyId" type="String" mode="OUT" optional="false"><description>客户partyId</description></attribute>
     </service>
 
