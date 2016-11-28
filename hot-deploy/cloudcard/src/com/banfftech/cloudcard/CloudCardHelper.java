@@ -399,6 +399,13 @@ public class CloudCardHelper {
 		return partyGroupFinAccount;
 	}
 	
+	/**
+	 * 根据二维码查询卡信息
+	 * @param cardCode 二维码信息
+	 * @param delegator
+	 * @return FinAccountAndPaymentMethodAndGiftCard
+	 * @throws GenericEntityException
+	 */
 	 public static GenericValue getCloudCardAccountFromCode(String cardCode, Delegator delegator) throws GenericEntityException {
 		 return getCloudCardAccountFromCode(cardCode, true, delegator);
 	 }
@@ -407,6 +414,7 @@ public class CloudCardHelper {
     /**
      * 根据二维码查询卡信息
      * @param cardCode 二维码信息
+     * @param filterByDate 传入true时，不查找已过期的卡
      * @param delegator
      * @return FinAccountAndPaymentMethodAndGiftCard
      * @throws GenericEntityException
@@ -526,8 +534,7 @@ public class CloudCardHelper {
 			EntityOperator.OR,
 			EntityCondition.makeCondition("thruDate", EntityOperator.GREATER_THAN, UtilDateTime.nowTimestamp())
 		);
-		EntityCondition cond = EntityCondition
-				.makeCondition(UtilMisc.toMap("finAccountId", finAccountId, "roleTypeId", "SHAREHOLDER"));
+		EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toMap("finAccountId", finAccountId, "roleTypeId", "SHAREHOLDER"));
 		try {
 			GenericValue authInfo =EntityUtil.getFirst(delegator.findList("FinAccountRole",
 					EntityCondition.makeCondition(cond, dateCond), null, null, null, false));

@@ -194,7 +194,101 @@ public class CloudCardServices {
 		result.put("customerPartyId", customerPartyId);
 		return result;
 	}
+	
+	/**
+	 * 解除卡授权
+	 * 1、使相关finAccountRole失效
+	 * 2、使相关giftCard，失效
+	 * 3、使相关finAccountAuth失效
+	 */
+	public static Map<String, Object> revokeCardAuth(DispatchContext dctx, Map<String, Object> context) {
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+		GenericValue userLogin = (GenericValue) context.get("userLogin");
+		
+		Map<String, Object> checkParamOut = checkInputParam(dctx, context);
+		if(ServiceUtil.isError(checkParamOut)){
+			return checkParamOut;
+		}
+		GenericValue cloudCard = (GenericValue) checkParamOut.get("cloudCard");
+		
+		// 检查是不是已经授权的卡
+		Map<String, Object> cardAuthorizeInfo = CloudCardHelper.getCardAuthorizeInfo(cloudCard, delegator);
+		boolean isAuthorized = (boolean) cardAuthorizeInfo.get("isAuthorized");
+		if(!isAuthorized){
+			// 未授权的卡调用此接口直接忽略
+			Debug.logWarning("This card has not been authorized, No need to revoke authorization", module);
+			return ServiceUtil.returnSuccess();
+		}
+		
+		String finAccountId = cloudCard.getString("finAccountId");
+		Timestamp authFromDate =  (Timestamp) cardAuthorizeInfo.get("fromDate");// 授权开始时间
+		String toPartyId =  (String) cardAuthorizeInfo.get("toPartyId");// 授权给谁了
+		String roleTypeId = "SHAREHOLDER";
+		
+		Timestamp nowTimestamp = UtilDateTime.adjustTimestamp(UtilDateTime.nowTimestamp(), Calendar.SECOND, -2) ;
 
+		// 1、更新finAccountRole，使之失效
+		Map<String, Object> updateFinAccountRoleOut;
+		try {
+			updateFinAccountRoleOut = dispatcher.runSync("updateFinAccountRole", UtilMisc.toMap("userLogin", userLogin, "finAccountId", finAccountId, 
+					"fromDate", authFromDate, "partyId", toPartyId, "roleTypeId", roleTypeId, "thruDate", nowTimestamp));
+		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		if (ServiceUtil.isError(updateFinAccountRoleOut)) {
+			return updateFinAccountRoleOut;
+		}
+		
+		
+		// 2、使用 finAccountId 和 toPartyId 查找所有未过期PaymentMethod，置为过期
+		EntityCondition  filterByDateCond =  EntityUtil.getFilterByDateExpr();
+		EntityCondition paymentMethodCond = EntityCondition.makeCondition(UtilMisc.toMap("finAccountId",finAccountId, "partyId", toPartyId));
+		try {
+			List<GenericValue> paymentMethodList = delegator.findList("PaymentMethod", EntityCondition.makeCondition(paymentMethodCond, filterByDateCond),
+					null, null, null, false);
+			if(UtilValidate.isNotEmpty(paymentMethodList)){
+				for(GenericValue g: paymentMethodList){
+					g.set("thruDate", nowTimestamp);
+				}
+				delegator.storeAll(paymentMethodList);
+			}
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		
+		// 3、使用finAccountId查找所有未过期 finAccountAuth，置为过期
+		EntityCondition finAccountAuthCond = EntityCondition.makeCondition("finAccountId", finAccountId);
+		finAccountAuthCond = EntityCondition.makeCondition(finAccountAuthCond, filterByDateCond);
+		
+		try {
+			List<GenericValue> finAccountAuthList = delegator.findList("FinAccountAuth", finAccountAuthCond, null, null, null, false);
+			if(UtilValidate.isNotEmpty(finAccountAuthList)){
+				for(GenericValue g: finAccountAuthList){
+					g.set("thruDate", nowTimestamp);
+				}
+				delegator.storeAll(finAccountAuthList);
+			}
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		
+		// 返回结果
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		return result;
+	}
+
+	
+	
+	
+	
 	
 	/**
 	 *	开卡、充值统一服务,手机接口调用

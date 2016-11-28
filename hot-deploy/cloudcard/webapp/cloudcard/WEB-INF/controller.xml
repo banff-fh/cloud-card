@@ -44,6 +44,14 @@
         <response name="error" type="request" value="json"/>
     </request-map>
     
+    <!-- 解除卡授权接口 -->
+	<request-map uri="revokeCardAuth">
+		<!--<security https="true" auth="false" />-->
+    	<event type="service" invoke="revokeCardAuth"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    
      <!-- 扫码支付接口 -->
 	<request-map uri="cloudCardWithdraw">
 		<!--<security https="true" auth="false" />-->

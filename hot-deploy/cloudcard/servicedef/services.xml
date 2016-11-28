@@ -45,6 +45,11 @@
         <attribute name="days" type="Integer" mode="IN" optional="true"><description>授权几天</description></attribute>
         <attribute name="customerPartyId" type="String" mode="OUT" optional="false"><description>客户partyId</description></attribute>
     </service>
+    <service name="revokeCardAuth" engine="java"
+    	location="com.banfftech.cloudcard.CloudCardServices" invoke="revokeCardAuth" auth="true">
+    	<description>撤销云卡授权</description>
+        <attribute name="cardId" type="String" mode="IN" optional="false"><description>要解除授权的卡Id</description></attribute>
+    </service>
 
 
     <service name="activateCloudCard" engine="java"
