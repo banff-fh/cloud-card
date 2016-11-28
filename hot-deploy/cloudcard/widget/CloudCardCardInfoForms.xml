@@ -248,4 +248,58 @@ under the License.
 		<field name="comments"  title="${uiLabelMap.paymentComments}" ><display/></field>
 		<field name="statusId" title="${uiLabelMap.statusId}" sort-field="true"><display-entity entity-name="StatusItem"/></field>
 	</form>
+	
+	<!-- SettlementHistory -->
+	<form name="FindSettlementHistory" type="single" target="settlementHistory" title="" default-map-name="cloudcard"
+        header-row-style="header-row" default-table-style="basic-table" >
+        <actions>
+			<entity-condition entity-name="StatusItem" list="paymentStatusList" >
+				<condition-list combine="or">
+					<condition-expr  field-name="statusId" value="PMNT_SENT"/>
+					<condition-expr field-name="statusId" value="PMNT_P_NOT_SENT_RCV"/>
+					<condition-expr field-name="statusId" value="PMNT_P_NOT_RCV_SENT"/>
+				</condition-list>
+			</entity-condition>
+        </actions>
+        <field name="partyId" title="${uiLabelMap.paymentTradePartyId}" position="1"><lookup target-form-name="LookupCloudCardSeller"/></field>
+        <field name="transactionDate" title="${uiLabelMap.paymentEffectiveDate}" position="1"><date-find/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit">
+            <submit button-type="button"/>
+        </field>
+    </form>
+    <form name="ListSettlementHistory" list-name="listIt" target="" title="" type="list" paginate-target="settlementHistory"
+        odd-row-style="alternate-row" default-table-style="basic-table hover-bar" header-row-style="header-row-2">
+        <actions>
+            <set field="entityName" value="FinAccountTrans"/>
+            <set field="parameters.sortField" from-field="parameters.sortField" default-value="-transactionDate"/>
+            <set field="parameters.finAccountTransTypeId" value="ADJUSTMENT"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" from-field="entityName"/>
+                <field-map field-name="orderBy" from-field="parameters.sortField"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        </actions>
+        <field name="partyId" title="${uiLabelMap.paymentTradePartyId}" sort-field="true">
+			<display-entity entity-name="PartyGroup" description="${groupName}" key-field-name="partyId">
+				<sub-hyperlink description="[${partyId}]" target="/partymgr/control/viewprofile" target-type="inter-app">
+					<parameter param-name="partyId"/>
+				</sub-hyperlink>
+			</display-entity>
+		</field>
+        
+		<field name="amount" title="${uiLabelMap.arAmount}" sort-field="true"><display type="currency" description="${groovy:-amount}"/></field>
+	
+		<field name="performedByPartyId" title="${uiLabelMap.settlementPerformedByPartyId}" sort-field="true">
+			<display-entity entity-name="PartyNameView" description="${firstName} ${middleName} ${lastName}" key-field-name="partyId">
+				<sub-hyperlink description="[${performedByPartyId}]" target="/partymgr/control/viewprofile" target-type="inter-app">
+					<parameter param-name="partyId" from-field="performedByPartyId" />
+				</sub-hyperlink>
+			</display-entity>
+		</field>
+		<field name="transactionDate" sort-field="true"  title="${uiLabelMap.paymentEffectiveDate}" ><display type="date-time"/></field>
+	</form>
+	
 </forms>

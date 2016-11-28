@@ -166,4 +166,32 @@
         </section>
     </screen>
     
+    <screen name="settlementHistory">
+       <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleSettlementHistory"/>
+                <set field="headerItem" value="cards"/>
+                <set field="tabButtonItem" value="settlementHistory"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="cloudcardCommonDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                                    <decorator-section name="search-options">
+                                        <include-form name="FindSettlementHistory" location="component://cloudcard/widget/CloudCardCardInfoForms.xml"/>
+                                    </decorator-section>
+                                    <decorator-section name="search-results">
+                                        <include-form name="ListSettlementHistory" location="component://cloudcard/widget/CloudCardCardInfoForms.xml"/>
+                                    </decorator-section>
+                                </decorator-screen>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
 </screens>

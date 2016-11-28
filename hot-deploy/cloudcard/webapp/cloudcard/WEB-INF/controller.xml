@@ -44,6 +44,14 @@
         <response name="error" type="request" value="json"/>
     </request-map>
     
+    <!-- 解除卡授权接口 -->
+	<request-map uri="revokeCardAuth">
+		<!--<security https="true" auth="false" />-->
+    	<event type="service" invoke="revokeCardAuth"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    
      <!-- 扫码支付接口 -->
 	<request-map uri="cloudCardWithdraw">
 		<!--<security https="true" auth="false" />-->
@@ -191,6 +199,13 @@
 		<response name="success" type="view" value="crossStorePayment" />
 		<response name="error" type="view" value="crossStorePayment" />
 	</request-map>
+	
+	<!-- 结算历史记录 -->
+	<request-map uri="settlementHistory">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="settlementHistory" />
+		<response name="error" type="view" value="settlementHistory" />
+	</request-map>
 
 
 
@@ -210,6 +225,7 @@
 	<view-map name="createCard" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#createCard" />
 	<view-map name="settlement" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#settlement" />
 	<view-map name="crossStorePayment" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#crossStorePayment" />
+	<view-map name="settlementHistory" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#settlementHistory" />
 	
 	<view-map name="LookupCloudCardSeller" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#LookupCloudCardSeller"/>
 	<view-map name="LookupCustomerName" type="screen" page="component://party/widget/partymgr/LookupScreens.xml#LookupCustomerName"/>
