@@ -229,11 +229,12 @@ public class CloudCardServices {
 		
 		Timestamp nowTimestamp = UtilDateTime.adjustTimestamp(UtilDateTime.nowTimestamp(), Calendar.SECOND, -2) ;
 
-		// 1、更新finAccountRole，使之失效
+		// 1、删除finAccountRole
+		// 删除以前的finAccountRole，而不是更新thruDate使之失效 因为 finAccountRole中 fromDate是主键，如果回收授权后再次授权，fromDate一样的情况下会逐渐冲突
 		Map<String, Object> updateFinAccountRoleOut;
 		try {
-			updateFinAccountRoleOut = dispatcher.runSync("updateFinAccountRole", UtilMisc.toMap("userLogin", userLogin, "finAccountId", finAccountId, 
-					"fromDate", authFromDate, "partyId", toPartyId, "roleTypeId", roleTypeId, "thruDate", nowTimestamp));
+			updateFinAccountRoleOut = dispatcher.runSync("deleteFinAccountRole", UtilMisc.toMap("userLogin", userLogin, "finAccountId", finAccountId, 
+					"fromDate", authFromDate, "partyId", toPartyId, "roleTypeId", roleTypeId));
 		} catch (GenericServiceException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
