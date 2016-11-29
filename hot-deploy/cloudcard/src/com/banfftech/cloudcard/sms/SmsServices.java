@@ -79,7 +79,9 @@ public class SmsServices {
 			Debug.logError(phone+"短信发送异常" + e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardSendMessageServiceError", UtilMisc.toMap("phone", phone),locale));
 		}
-		
+		if(rsp!=null && !rsp.isSuccess()){
+			Debug.logWarning("something wrong when send the short message, response body:" + rsp.getBody(), module);
+		}
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		return result;
 	}
@@ -225,7 +227,7 @@ public class SmsServices {
 							EntityCondition.makeCondition(UtilMisc.toMap("contactNumber", teleNumber)), 
 							EntityUtil.getFilterByDateExpr()), null, UtilMisc.toList("partyId DESC"), null, false));
 		} catch (GenericEntityException e) {
-			Debug.logError(e, module);
+			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
 		
@@ -253,9 +255,10 @@ public class SmsServices {
 			List<GenericValue> smsList = FastList.newInstance();
 			try {
 				smsList = delegator.findList("SmsValidateCode", captchaConditions, null,
-						null, null, false);
+						UtilMisc.toList("-" + ModelEntity.CREATE_STAMP_FIELD), null, false);
 			} catch (GenericEntityException e) {
-				Debug.logError(e, module);
+				Debug.logError(e.getMessage(), module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 			}
 			
 			if(UtilValidate.isEmpty(smsList)){
@@ -286,7 +289,7 @@ public class SmsServices {
 					try {
 						sms.store();
 					} catch (GenericEntityException e) {
-						Debug.logError(e, module);
+						Debug.logError(e.getMessage(), module);
 						return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 					}
 					result.put("token", token);
@@ -295,7 +298,7 @@ public class SmsServices {
 				}
 			}
 		}
-		
+
 		return result;
 	}
 	
