@@ -1238,7 +1238,7 @@ public class CloudCardServices {
 			apList = delegator.findList("CloudCardCrossStorePaymentView", apCond, null, null, null, false);
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardGenCardNumberError", locale));
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
 		
 		// 统计结算金额
@@ -1306,7 +1306,7 @@ public class CloudCardServices {
 				);
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardGenCardNumberError", locale));
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
 		
 		// 调整商家结算账号余额
@@ -1325,7 +1325,7 @@ public class CloudCardServices {
 							"statusId", "FINACT_TRNS_APPROVED"));
 		} catch (GenericServiceException e) {
 			Debug.logError(e.getMessage(), module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardGenCardNumberError", locale));
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
 		if (ServiceUtil.isError(finAccountWithdrawOutMap)) {
 			return finAccountWithdrawOutMap;
