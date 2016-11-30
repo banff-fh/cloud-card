@@ -20,7 +20,6 @@ import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.base.util.UtilNumber;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
@@ -44,9 +43,6 @@ import javolution.util.FastMap;
 public class CloudCardQueryServices {
 	public static final String module = CloudCardQueryServices.class.getName();
 	public static final String resourceError = "cloudcardErrorUiLabels";
-	public static int decimals = UtilNumber.getBigDecimalScale("finaccount.decimals");
-    public static int rounding = UtilNumber.getBigDecimalRoundingMode("finaccount.rounding");
-    public static final BigDecimal ZERO = BigDecimal.ZERO.setScale(decimals, rounding);
     
     /**
 	 * 查询用户卡列表
@@ -90,12 +86,12 @@ public class CloudCardQueryServices {
 		List<GenericValue> retList = UtilGenerics.checkList(faResult.get("list"));
 		List<Object> cloudCardList = FastList.newInstance();
 		
-		//图片地址
 		for(GenericValue cloudCard : retList){
 			Map<String, Object> cloudCardMap = FastMap.newInstance();
 //			cloudCardMap.putAll(cloudCard);
 			String organizationPartyId = cloudCard.get("distributorPartyId").toString();
 			if(organizationPartyId != null){
+				//图片地址
 				cloudCardMap.put("cardImg", EntityUtilProperties.getPropertyValue("cloudcard","cardImg."+organizationPartyId,delegator));
 			}
 			String cardName = UtilFormatOut.checkEmpty(cloudCard.getString("description"), cloudCard.getString("finAccountName"));
@@ -372,7 +368,7 @@ public class CloudCardQueryServices {
 	public static Map<String, Object> getLimitAndPresellInfo(DispatchContext dctx, Map<String, Object> context) {
 		Delegator delegator = dctx.getDelegator();
 		Locale locale = (Locale) context.get("locale");
-		BigDecimal presellAmount = ZERO; 
+		BigDecimal presellAmount = CloudCardHelper.ZERO; 
 
 		String organizationPartyId = (String) context.get("organizationPartyId");
 		// 获取商户卖卡额度金融账户
@@ -384,7 +380,7 @@ public class CloudCardQueryServices {
 		//查询已卖卡金额
 		EntityCondition incrementConditions = EntityCondition.makeCondition(
 						EntityCondition.makeCondition("finAccountId", EntityOperator.EQUALS, partyGroupFinAccount.get("finAccountId")),
-						EntityCondition.makeCondition("amount", EntityOperator.GREATER_THAN, ZERO),
+						EntityCondition.makeCondition("amount", EntityOperator.GREATER_THAN, CloudCardHelper.ZERO),
 						EntityUtil.getFilterByDateExpr()
 				);
 		
@@ -463,12 +459,16 @@ public class CloudCardQueryServices {
 			results.put("isActivated", "N");
 		}
 		
-		BigDecimal actualBalance = cloudCard.getBigDecimal("actualBalance");
-		if(null==actualBalance){
-			results.put("cardBalance", ZERO);
-		}else{
-			results.put("cardBalance", actualBalance);
+		BigDecimal cardBalance = cloudCard.getBigDecimal("availableBalance");
+		if(null == cardBalance){
+			cardBalance = CloudCardHelper.ZERO;
 		}
+		// 如果是授权卡，余额显示授权的可用余额
+		if(cardCode.startsWith(CloudCardHelper.AUTH_CARD_CODE_PREFIX)){
+			cardBalance = CloudCardHelper.getCloudCardAuthBalance(cloudCard.getString("finAccountId"), delegator);
+		}
+		results.put("cardBalance", cardBalance);
+
 		String cardOrganizationPartyId = cloudCard.getString("distributorPartyId");
 		if(cardOrganizationPartyId != null){
 			results.put("cardImg", EntityUtilProperties.getPropertyValue("cloudcard","cardImg." + cardOrganizationPartyId, delegator));
