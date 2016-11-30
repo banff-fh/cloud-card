@@ -72,6 +72,10 @@
         <value xml:lang="en">cloud card balance</value>
         <value xml:lang="zh">余额</value>
     </property>
+    <property key="CloudCardAvailableBalance">
+        <value xml:lang="en">cloud card available balance</value>
+        <value xml:lang="zh">可用余额</value>
+    </property>
     <property key="CloudCardFromDate">
         <value xml:lang="en">cloud card fromDate</value>
         <value xml:lang="zh">生效时间</value>

@@ -747,23 +747,23 @@ public class CloudCardServices {
 
 		// 1、扣除用户余额
 		// 检查余额是否够用, 如果卡已经授权给别人，而自己支付的时候，以availableBalance为准，避免把授权出去那部分金额给用掉了
-		BigDecimal actualBalance = isAuthorizedToOthers ? cloudCard.getBigDecimal("availableBalance"): cloudCard.getBigDecimal("actualBalance") ; //actualBalance
-		if(null==actualBalance){
-			actualBalance = BigDecimal.ZERO;
+		BigDecimal cardBalance = isAuthorizedToOthers ? cloudCard.getBigDecimal("availableBalance"): cloudCard.getBigDecimal("actualBalance") ; //actualBalance
+		if(null==cardBalance){
+			cardBalance = BigDecimal.ZERO;
 		}
-		if (actualBalance.compareTo(amount) < 0) {
-			Debug.logError("余额不足, 余额：" + actualBalance.toPlainString(), module);
+		if (cardBalance.compareTo(amount) < 0) {
+			Debug.logError("余额不足, 余额：" + cardBalance.toPlainString(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardBalanceIsNotEnough", 
-					UtilMisc.toMap("balance", actualBalance.toPlainString()), locale));
+					UtilMisc.toMap("balance", cardBalance.toPlainString()), locale));
 		}
 		
 		// 如果是授权给我的卡，还要检查授权金额余额是否足够, 并且扣减本次消费的余额
 		if(isAuth2me){
-			BigDecimal authBalance = CloudCardHelper.getCloudCardAuthBalance(finAccountId, delegator);
-			if (authBalance.compareTo(amount) < 0) {
-				Debug.logError("授权可用余额不足, 余额：" + authBalance.toPlainString(), module);
+			cardBalance = CloudCardHelper.getCloudCardAuthBalance(finAccountId, delegator);
+			if (cardBalance.compareTo(amount) < 0) {
+				Debug.logError("授权可用余额不足, 余额：" + cardBalance.toPlainString(), module);
 				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardBalanceIsNotEnough", 
-						UtilMisc.toMap("balance", authBalance.toPlainString()), locale));
+						UtilMisc.toMap("balance", cardBalance.toPlainString()), locale));
 			}
 			// 用被人授权的卡支付，授权剩余额度需要扣减，扣减方法：为此账户创建负数金额的finAccountAuth
 			Map<String, Object> createFinAccountAuthOutMap;
@@ -997,16 +997,11 @@ public class CloudCardServices {
 
 		}
 		
-		try {
-			cloudCard.refresh();
-		} catch (GenericEntityException e) {
-			Debug.logError(e, module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
-		}
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("amount", amount);
-		result.put("cardBalance", cloudCard.get("actualBalance"));
+		//只是显示一下余额，不用再去数据库查询了直接减掉
+		result.put("cardBalance", cardBalance.subtract(amount)); 
 		result.put("customerPartyId", customerPartyId);
 		result.put("cardId", paymentMethodId);
 		return result;
