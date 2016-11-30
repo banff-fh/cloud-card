@@ -588,7 +588,7 @@ public class CloudCardQueryServices {
 				}
 				delegator.storeAll(finAccounts);
 				response.reset();
-				response.addHeader("Content-Disposition", "attachment;filename=" + new String("卡云卡生成的卡号.xls".getBytes("gb2312"), "ISO8859-1"));
+				response.addHeader("Content-Disposition", "attachment;filename=" + new String("卡云卡生成的卡号.xls".getBytes("utf-8"), "ISO8859-1"));
 				response.setContentType("application/msexcel;charset=utf-8");
 				OutputStream out = response.getOutputStream();
 				wb.write(out);
