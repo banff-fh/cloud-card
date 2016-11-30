@@ -89,8 +89,12 @@ under the License.
 				</sub-hyperlink>
 			</display-entity>
 		</field>
+		
 		<field name="actualBalance" title="${uiLabelMap.CloudCardBalance}" use-when="${groovy: ownerPartyId == partyId}"><display type="currency"/></field>
-		<field name="actualBalance" title="${uiLabelMap.CloudCardBalance}" use-when="${groovy: ownerPartyId != partyId}"><display description="${groovy: com.banfftech.cloudcard.CloudCardHelper.getCloudCardAuthBalance(finAccountId,delegator)}" type="currency"/></field>
+		<field name="actualBalance" title="${uiLabelMap.CloudCardBalance}" use-when="${groovy: ownerPartyId != partyId}"><display description="${uiLabelMap.CommonEmptyHeader}"/></field>
+		
+		<field name="availableBalance" title="${uiLabelMap.CloudCardAvailableBalance}" use-when="${groovy: ownerPartyId == partyId}"><display type="currency"/></field>
+		<field name="availableBalance" title="${uiLabelMap.CloudCardAvailableBalance}" use-when="${groovy: ownerPartyId != partyId}"><display description="${groovy: com.banfftech.cloudcard.CloudCardHelper.getCloudCardAuthBalance(finAccountId,delegator)}" type="currency"/></field>
 		<field name="fromDate" title="${uiLabelMap.CloudCardFromDate}"><display type="date-time"/></field>
 		<field name="thruDate" title="${uiLabelMap.CloudCardThuDate}"><display type="date-time"/></field>
     </form>

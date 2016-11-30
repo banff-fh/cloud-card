@@ -375,7 +375,7 @@ public class CloudCardQueryServices {
 		BigDecimal presellAmount = ZERO; 
 
 		String organizationPartyId = (String) context.get("organizationPartyId");
-		// 获取商户金融账户
+		// 获取商户卖卡额度金融账户
 		GenericValue partyGroupFinAccount = CloudCardHelper.getCreditLimitAccount(delegator, organizationPartyId);
         if (UtilValidate.isEmpty(partyGroupFinAccount)) {
         	Debug.logError("商家[" + organizationPartyId + "]未配置卖卡额度账户", module);
@@ -402,11 +402,23 @@ public class CloudCardQueryServices {
 				presellAmount = presellAmount.add(BigDecimal.valueOf(UtilMisc.toDouble(finAccountAuth.get("amount"))));
 			}
 		}
+		
+		GenericValue partySettlementFinAccount = CloudCardHelper.getSettlementAccount(delegator, organizationPartyId);
+        if (UtilValidate.isEmpty(partySettlementFinAccount)) {
+        	Debug.logError("商家[" + organizationPartyId + "]未配置平台结算账户", module);
+        	return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardConfigError", UtilMisc.toMap("organizationPartyId", organizationPartyId), locale));
+        }
+		BigDecimal settlementAmount = partySettlementFinAccount.getBigDecimal("actualBalance");
+		if(null == settlementAmount){
+			settlementAmount = CloudCardHelper.ZERO;
+		}
         
 		Map<String, Object> results = ServiceUtil.returnSuccess();
 		results.put("presellAmount", presellAmount);
 		results.put("limitAmount", partyGroupFinAccount.get("replenishLevel"));
 		results.put("balance", partyGroupFinAccount.get("availableBalance"));
+		// 账户余额本身表示应付给平台金额，店家应该看到的是应从平台收取
+		results.put("settlementAmount", settlementAmount.negate());
 		return results;
 	}
 	

@@ -124,6 +124,7 @@
         <attribute name="presellAmount" type="BigDecimal" mode="OUT" optional="false"/>
         <attribute name="limitAmount" type="BigDecimal" mode="OUT" optional="false"/>
         <attribute name="balance" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="settlementAmount" type="BigDecimal" mode="OUT" optional="false"/>
 	</service>
 	
 	<service name="createPaymentAndFinAccountTransForCloudCard" engine="simple"
