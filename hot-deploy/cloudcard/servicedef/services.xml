@@ -17,6 +17,7 @@
     <service name="getBizPayment" engine="java"
             location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="getBizPayment" auth="true">
         <description>查询商户交易流水</description>
+        <attribute name="organizationPartyId" type="String" mode="IN" optional="false"/>
         <attribute name="viewIndex" type="Integer" mode="IN" optional="true" default-value="0"/>
         <attribute name="viewSize" type="Integer" mode="IN" optional="true" default-value="20"/>
         <attribute name="type" type="String" mode="IN" optional="true"/>
