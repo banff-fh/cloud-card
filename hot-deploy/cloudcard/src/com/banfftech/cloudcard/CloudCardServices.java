@@ -759,11 +759,11 @@ public class CloudCardServices {
 		
 		// 如果是授权给我的卡，还要检查授权金额余额是否足够, 并且扣减本次消费的余额
 		if(isAuth2me){
-			BigDecimal authAmount = CloudCardHelper.getCloudCardAuthBalance(finAccountId, delegator);
-			if (authAmount.compareTo(amount) < 0) {
-				Debug.logError("授权可用余额不足, 余额：" + authAmount.toPlainString(), module);
+			BigDecimal authBalance = CloudCardHelper.getCloudCardAuthBalance(finAccountId, delegator);
+			if (authBalance.compareTo(amount) < 0) {
+				Debug.logError("授权可用余额不足, 余额：" + authBalance.toPlainString(), module);
 				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardBalanceIsNotEnough", 
-						UtilMisc.toMap("balance", authAmount.toPlainString()), locale));
+						UtilMisc.toMap("balance", authBalance.toPlainString()), locale));
 			}
 			// 用被人授权的卡支付，授权剩余额度需要扣减，扣减方法：为此账户创建负数金额的finAccountAuth
 			Map<String, Object> createFinAccountAuthOutMap;
