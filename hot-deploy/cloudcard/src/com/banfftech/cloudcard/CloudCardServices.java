@@ -737,7 +737,7 @@ public class CloudCardServices {
 		
 		
 		String finAccountId = cloudCard.getString("finAccountId");
-		String customerPartyId = cloudCard.getString("partyId");// ownerPartyId 是原卡主， partyId 才是持卡人
+		String customerPartyId = cloudCard.getString("ownerPartyId");// ownerPartyId 是原卡主， partyId 是持卡人，交易记录记录在卡主上
 		String paymentMethodId = cloudCard.getString("paymentMethodId");
 		String distributorPartyId = cloudCard.getString("distributorPartyId");
 		boolean isSameStore = false; //是否 店内消费（本店卖出去的卡在本店消费）
