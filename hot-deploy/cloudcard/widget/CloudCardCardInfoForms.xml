@@ -42,7 +42,7 @@ under the License.
         </field>
     </form>
     
-    <form name="ListCard" list-name="listIt" target="" title="" type="list" paginate-target="findCard"
+    <form name="ListCard" list-name="listIt" target="" title="" type="list" list-entry-name="cloudcard" default-map-name="cloudcard" paginate-target="findCard"
         odd-row-style="alternate-row" default-table-style="basic-table hover-bar" header-row-style="header-row-2">
         <actions>
             <set field="entityName" value="FinAccountAndPaymentMethodAndGiftCard"/>
@@ -61,40 +61,39 @@ under the License.
         <field name="finAccountId"><hidden/></field>
         <field name="distributorPartyId" title="${uiLabelMap.distributorPartyId}" sort-field="true">
             <display-entity entity-name="PartyGroup" description="${groupName}" key-field-name="partyId">
-                <sub-hyperlink  description="[${distributorPartyId}]"  target="/partymgr/control/viewprofile" target-type="inter-app">
+                <sub-hyperlink  description="[${cloudcard.distributorPartyId}]"  target="/partymgr/control/viewprofile" target-type="inter-app">
                		<parameter param-name="partyId" from-field="distributorPartyId"/>
             	</sub-hyperlink>
             </display-entity>
 	    </field>
 		<field name="finAccountName" title="${uiLabelMap.finAccountName}">
-			<display description="${description}" default-value="${finAccountName}"/>
+			<display description="${cloudcard.description}" default-value="${cloudcard.finAccountName}"/>
 		</field>
 		<field name="finAccountCode" title="${uiLabelMap.finAccountCode}">
-			<display description="${cardNumber}" default-value="${finAccountCode}" />
+			<display description="${cloudcard.cardNumber}" default-value="${cloudcard.finAccountCode}" />
 		</field>
 		<field name="statusId" title="${uiLabelMap.statusId}" sort-field="true">
 			<display-entity entity-name="StatusItem" />
 		</field>
-		<field name="ownerPartyId" title="${uiLabelMap.CloudCardOwnerPartyId}" use-when="${groovy: ownerPartyId != '_NA_'}" sort-field="true">
-			<display-entity entity-name="Person" description="${firstName} ${middleName} ${lastName}" key-field-name="partyId" >
-				<sub-hyperlink description="[${ownerPartyId}]" target="/partymgr/control/viewprofile" target-type="inter-app">
+		<field name="ownerPartyId" title="${uiLabelMap.CloudCardOwnerPartyId}" use-when="${groovy: cloudcard.ownerPartyId != '_NA_'}" sort-field="true">
+			<display-entity entity-name="Person" description="${cloudcard.lastName} ${cloudcard.firstName} ${cloudcard.middleName}" key-field-name="partyId" >
+				<sub-hyperlink description="[${cloudcard.ownerPartyId}]" target="/partymgr/control/viewprofile" target-type="inter-app">
 					<parameter param-name="partyId" from-field="ownerPartyId" />
 				</sub-hyperlink>
 			</display-entity>
 		</field>
-		<field name="partyId" title="${uiLabelMap.CloudCardPartyId}" use-when="${groovy: partyId != null }" sort-field="true">
-			<display-entity entity-name="Person" description="${firstName} ${middleName} ${lastName}" key-field-name="partyId" >
-				<sub-hyperlink description="[${partyId}]" target="/partymgr/control/viewprofile" target-type="inter-app">
+		<field name="partyId" title="${uiLabelMap.CloudCardPartyId}" use-when="${groovy: cloudcard.partyId != null }" sort-field="true">
+			<display-entity entity-name="Person" description="${cloudcard.lastName} ${cloudcard.firstName} ${cloudcard.middleName}" key-field-name="partyId" >
+				<sub-hyperlink description="[${cloudcard.partyId}]" target="/partymgr/control/viewprofile" target-type="inter-app">
 					<parameter param-name="partyId" />
 				</sub-hyperlink>
 			</display-entity>
 		</field>
 		
-		<field name="actualBalance" title="${uiLabelMap.CloudCardBalance}" use-when="${groovy: ownerPartyId == partyId}"><display type="currency"/></field>
-		<field name="actualBalance" title="${uiLabelMap.CloudCardBalance}" use-when="${groovy: ownerPartyId != partyId}"><display description="${uiLabelMap.CommonEmptyHeader}"/></field>
+		<field name="actualBalance" title="${uiLabelMap.CloudCardBalance}" use-when="${groovy: cloudcard.ownerPartyId == cloudcard.partyId}"><display type="currency"/></field>
+		<field name="actualBalance" title="${uiLabelMap.CloudCardBalance}" use-when="${groovy: cloudcard.ownerPartyId != cloudcard.partyId}"><display description="${uiLabelMap.CommonEmptyHeader}"/></field>
 		
-		<field name="availableBalance" title="${uiLabelMap.CloudCardAvailableBalance}" use-when="${groovy: ownerPartyId == partyId}"><display type="currency"/></field>
-		<field name="availableBalance" title="${uiLabelMap.CloudCardAvailableBalance}" use-when="${groovy: ownerPartyId != partyId}"><display description="${groovy: com.banfftech.cloudcard.CloudCardHelper.getCloudCardAuthBalance(finAccountId,delegator)}" type="currency"/></field>
+		<field name="availableBalance" title="${uiLabelMap.CloudCardAvailableBalance}"><display description="${groovy: com.banfftech.cloudcard.CloudCardHelper.getCloudCardBalance(cloudcard)}" type="currency"/></field>
 		<field name="fromDate" title="${uiLabelMap.CloudCardFromDate}"><display type="date-time"/></field>
 		<field name="thruDate" title="${uiLabelMap.CloudCardThuDate}"><display type="date-time"/></field>
     </form>

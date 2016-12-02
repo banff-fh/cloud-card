@@ -97,18 +97,13 @@ public class CloudCardQueryServices {
 			String cardName = UtilFormatOut.checkEmpty(cloudCard.getString("description"), cloudCard.getString("finAccountName"));
 			String authThruDate="";
 			cloudCardMap.put("cardName", cardName); //卡名
-			cloudCardMap.put("cardCode", cloudCard.get("cardNumber")); //卡二维码
+			String cardCode = cloudCard.getString("cardNumber");
+			cloudCardMap.put("cardCode", cardCode); //卡二维码
 			cloudCardMap.put("cardId", cloudCard.get("paymentMethodId"));// 卡id
 			
-			BigDecimal actualBalance = cloudCard.getBigDecimal("actualBalance");
-			BigDecimal availableBalance = cloudCard.getBigDecimal("availableBalance");
-			if(null == actualBalance) actualBalance = CloudCardHelper.ZERO;
-			if(null == availableBalance) availableBalance = CloudCardHelper.ZERO;
-			BigDecimal authAmount = actualBalance.subtract(availableBalance);
-			
-			if(cloudCard.getString("cardNumber").startsWith(CloudCardHelper.AUTH_CARD_CODE_PREFIX)){
+			boolean isAuthorized = false;
+			if(cardCode.startsWith(CloudCardHelper.AUTH_CARD_CODE_PREFIX)){
 				// 如果是别人授权给我的卡，显示授权金额的余额
-				cloudCardMap.put("cardBalance", CloudCardHelper.getCloudCardAuthBalance(cloudCard.getString("finAccountId"), delegator)); 
 				cloudCardMap.put("isAuthToMe", "Y"); // 已授权给我
 				cloudCardMap.put("isAuthToOthers", "N"); // 已授权给别人
 				cloudCardMap.put("authFromDate", cloudCard.getTimestamp("fromDate").toString()); // 授权开始时间
@@ -118,13 +113,11 @@ public class CloudCardQueryServices {
 				cloudCardMap.put("authThruDate", authThruDate); // 授权结束时间
 				cloudCardMap.put("authFromPartyId", cloudCard.get("ownerPartyId")); // 谁授权
 				cloudCardMap.put("authToPartyId", partyId); // 授权给谁
-				cloudCardMap.put("authAmount", authAmount); // 授权金额
 			}else{
 				//账户可用余额
-				cloudCardMap.put("cardBalance", availableBalance);
 				// 如果是已经授权给别人的卡，展示授权开始、结束时间，以及授权给谁
 				Map<String, Object> cardAuthorizeInfo = CloudCardHelper.getCardAuthorizeInfo(cloudCard, delegator);
-				boolean isAuthorized = (boolean) cardAuthorizeInfo.get("isAuthorized");
+				isAuthorized = (boolean) cardAuthorizeInfo.get("isAuthorized");
 				if(isAuthorized){
 					cloudCardMap.put("isAuthToMe", "N"); // 已授权给我
 					cloudCardMap.put("isAuthToOthers", "Y"); // 已授权给别人
@@ -135,13 +128,12 @@ public class CloudCardQueryServices {
 					cloudCardMap.put("authThruDate", authThruDate); // 授权结束时间
 					cloudCardMap.put("authFromPartyId", partyId); // 谁授权
 					cloudCardMap.put("authToPartyId", cardAuthorizeInfo.get("toPartyId")); // 授权给谁
-					cloudCardMap.put("authAmount", authAmount); // 授权金额
 				}else{
 					cloudCardMap.put("isAuthToMe", "N"); // 已授权给我
 					cloudCardMap.put("isAuthToOthers", "N"); // 已授权给别人
 				}
 			}
-			
+			cloudCardMap.put("cardBalance", CloudCardHelper.getCloudCardBalance(cloudCard, isAuthorized));
 			cloudCardMap.put("distributorPartyId", cloudCard.get("distributorPartyId")); //发卡商家partyId
 			// 卡主
 			cloudCardMap.put("ownerPartyId", cloudCard.get("ownerPartyId")); 
@@ -459,15 +451,7 @@ public class CloudCardQueryServices {
 			results.put("isActivated", "N");
 		}
 		
-		BigDecimal cardBalance = cloudCard.getBigDecimal("availableBalance");
-		if(null == cardBalance){
-			cardBalance = CloudCardHelper.ZERO;
-		}
-		// 如果是授权卡，余额显示授权的可用余额
-		if(cardCode.startsWith(CloudCardHelper.AUTH_CARD_CODE_PREFIX)){
-			cardBalance = CloudCardHelper.getCloudCardAuthBalance(cloudCard.getString("finAccountId"), delegator);
-		}
-		results.put("cardBalance", cardBalance);
+		results.put("cardBalance", CloudCardHelper.getCloudCardBalance(cloudCard));
 
 		String cardOrganizationPartyId = cloudCard.getString("distributorPartyId");
 		if(cardOrganizationPartyId != null){

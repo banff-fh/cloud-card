@@ -18,6 +18,7 @@ import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityJoinOperator;
+import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
@@ -247,7 +248,13 @@ public class CloudCardServices {
 		
 		
 		// 2、使用 finAccountId 和 toPartyId 查找所有未过期PaymentMethod，置为过期
-		EntityCondition  filterByDateCond =  EntityUtil.getFilterByDateExpr();
+//		EntityCondition  filterByDateCond =  EntityUtil.getFilterByDateExpr();
+		EntityCondition  filterByDateCond =  EntityCondition.makeCondition(
+				EntityCondition.makeCondition("thruDate", EntityOperator.EQUALS, null),
+				EntityOperator.OR,
+				EntityCondition.makeCondition("thruDate", EntityOperator.GREATER_THAN, UtilDateTime.nowTimestamp())
+			);
+		
 		EntityCondition paymentMethodCond = EntityCondition.makeCondition(UtilMisc.toMap("finAccountId",finAccountId, "partyId", toPartyId));
 		try {
 			List<GenericValue> paymentMethodList = delegator.findList("PaymentMethod", EntityCondition.makeCondition(paymentMethodCond, filterByDateCond),

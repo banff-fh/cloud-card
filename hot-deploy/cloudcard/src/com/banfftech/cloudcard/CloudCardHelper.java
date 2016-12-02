@@ -526,7 +526,7 @@ public class CloudCardHelper {
 		// 不能使用 EntityUtil.getFilterByDateExpr()创建时间条件
 		// 因为授权这个服务传入的fromDate 可能是“未来”的某一个时间，
 		// 就意味着 存在这样的情况:
-		//	授权 这个服务调用完成后 一段时间内(到授权fromDate前) 使用getCardAuthorizeInfo方法仍然得到此卡是未授权状态的错误结论，并能够再次授权
+		//	授权 这个服务调用完成后 一段时间内(直到授权fromDate前) 使用getCardAuthorizeInfo方法仍然得到此卡是未授权状态的错误结论，并能够再次授权
 		// 这与授权后的卡不能再授权的规则矛盾
 		//EntityCondition dateCond = EntityUtil.getFilterByDateExpr();
 		EntityCondition dateCond =  EntityCondition.makeCondition(
@@ -576,5 +576,64 @@ public class CloudCardHelper {
 			authorizationsTotal = ZERO;
 		}
 		return authorizationsTotal.setScale(decimals, rounding);
+	}
+	
+	
+	/**
+	 * 获取云卡可用余额
+	 * <p>如果授权给别人了，取自己的availableBalance，否则取actualBalance</p>
+	 * <pre>
+	 * * 为什么不一直取 availableBalance？
+	 *     因为卡授权给别人到期后 availableBalance不会自动恢复，除非有finAccountAuth的修改触发了计算更新availableBalance的ECA，
+	 *     所以干脆每次查看余额的时候都去判断是否此卡被授权，没有授权就取actualBalance，有授权取 availableBalance
+	 * </pre>
+	 * <p>如果此卡是别人授权给我的，取授权金额，在授权未过期的情况下，授权金额余额可以用 actualBalance.subtract(availableBalance)得到</p>
+	 * @param finAccountId
+	 * @param isAuthorized
+	 * @return
+	 * @throws GenericEntityException
+	 */
+	public static BigDecimal getCloudCardBalance(GenericValue cloudCard, boolean isAuthorized){
+
+		if(null == cloudCard) return CloudCardHelper.ZERO;
+
+		BigDecimal actualBalance = cloudCard.getBigDecimal("actualBalance");
+		BigDecimal availableBalance = cloudCard.getBigDecimal("availableBalance");
+		if(null == actualBalance) actualBalance = CloudCardHelper.ZERO;
+		if(null == availableBalance) availableBalance = CloudCardHelper.ZERO;
+		
+		BigDecimal cardBalance = actualBalance;
+		
+		String cardCode = cloudCard.getString("cardNumber");
+		boolean isAuthToMe = cardCode.startsWith(CloudCardHelper.AUTH_CARD_CODE_PREFIX);
+		
+		if(isAuthToMe){
+			// 如果是别人授权给我的卡，获取授权余额
+			//cardBalance = CloudCardHelper.getCloudCardAuthBalance(cloudCard.getString("finAccountId"), delegator); 
+			Timestamp thruDate = cloudCard.getTimestamp("thruDate");
+			if(null != thruDate && UtilDateTime.nowTimestamp().after(thruDate)){
+				// 已经过期的授权卡
+				Debug.logInfo("cardId:["+cloudCard.getString("paymentMethodId")+"] thruDate:["+thruDate+"], this card has expired... cardBalance return Zero", module);
+				cardBalance = ZERO; 
+			}else{
+				cardBalance = actualBalance.subtract(availableBalance).setScale(decimals, rounding); 
+			}
+		}else{
+			if(isAuthorized){
+				cardBalance = availableBalance;
+			}
+		}
+		
+		return cardBalance;
+	}
+
+	public static BigDecimal getCloudCardBalance(GenericValue cloudCard){
+
+		if(null == cloudCard) return CloudCardHelper.ZERO;
+
+		Delegator delegator = cloudCard.getDelegator();
+		Map<String, Object> cardAuthorizeInfo = CloudCardHelper.getCardAuthorizeInfo(cloudCard, delegator);
+		boolean isAuthorized = (boolean) cardAuthorizeInfo.get("isAuthorized");
+		return getCloudCardBalance(cloudCard, isAuthorized);
 	}
 }
