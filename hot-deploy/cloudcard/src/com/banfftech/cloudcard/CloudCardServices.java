@@ -81,7 +81,7 @@ public class CloudCardServices {
 		String finAccountId = cloudCard.getString("finAccountId");
 		
 		// 余额检查
-		BigDecimal balance = cloudCard.getBigDecimal("availableBalance");// actualBalance
+		BigDecimal balance = cloudCard.getBigDecimal("actualBalance");// availableBalance
 		if(null == amount){
 			amount = balance;
 		}
@@ -178,7 +178,8 @@ public class CloudCardServices {
 							"currencyUomId", DEFAULT_CURRENCY_UOM_ID,  
 							"finAccountId", finAccountId,
 							"amount", amount,
-							"fromDate", fromDate,
+							//不管授权什么时候生效，金额应该立马就划出去
+							"fromDate", UtilDateTime.adjustTimestamp(nowTimestamp, Calendar.SECOND, -2),
 							"thruDate", thruDate)
 					);
 		} catch (GenericServiceException e) {
