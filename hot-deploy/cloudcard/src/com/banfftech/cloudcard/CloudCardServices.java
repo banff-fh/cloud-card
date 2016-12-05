@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Random;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
@@ -1365,6 +1366,61 @@ public class CloudCardServices {
 		retMap.put("arAmount", arAmount);
 		retMap.put("apAmount", apAmount);
 		retMap.put("settlementAmount", reconciliationAmount);
+		return retMap;
+	}
+	
+	
+	/**
+	 * 注册设备ID
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> regJpushRegId(DispatchContext dctx, Map<String, Object> context){
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+		String regId = (String) context.get("regId");
+        GenericValue userLogin = (GenericValue) context.get("userLogin");
+		String partyId = userLogin.getString("partyId");
+
+		Map<String, Object> fields = FastMap.newInstance();
+		fields.put("partyId", partyId);
+		fields.put("partyIdentificationTypeId","JPUSH_REG_ID" );
+
+		//查询该用户是否存在regId
+		GenericValue partyIdentification = null;
+		try {
+			partyIdentification = delegator.findByPrimaryKey("PartyIdentification", fields);
+		} catch (GenericEntityException e1) {
+			Debug.logError(e1.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));	
+		}
+		//判断该用户是否存在regId,如果不存在，插入一条新数据，否则修改该partyId的regId
+		if(UtilValidate.isEmpty(partyIdentification)){
+			Map<String,Object> partyIdentificationMap = FastMap.newInstance();
+			partyIdentificationMap.put("partyId", partyId);
+			partyIdentificationMap.put("partyIdentificationTypeId","JPUSH_REG_ID" );
+			partyIdentificationMap.put("idValue",regId);
+
+			GenericValue partyIdentificationGV = delegator.makeValue("PartyIdentification", partyIdentificationMap);
+			try {
+				partyIdentificationGV.create();
+			} catch (GenericEntityException e) {
+				Debug.logError(e.getMessage(), module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));			
+			}
+		}else{
+			partyIdentification.set("idValue", regId);
+			try {
+				delegator.store(partyIdentification);
+			} catch (GenericEntityException e) {
+				Debug.logError(e.getMessage(), module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));			
+			}
+		}
+
+		Map<String, Object> retMap = ServiceUtil.returnSuccess();
 		return retMap;
 	}
 }

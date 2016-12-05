@@ -198,4 +198,9 @@
 		<attribute name="settlementAmount" type="BigDecimal" mode="OUT" optional="true"><description>结算余额</description></attribute>
 	</service>
 	
+	<service name="regJpushRegId" engine="java"
+		location="com.banfftech.cloudcard.CloudCardServices" invoke="regJpushRegId" auth="true">
+		<description>注册设备regId</description>
+		<attribute name="regId" type="String" mode="IN" optional="true"><description>设备Id</description></attribute>
+	</service>
 </services>

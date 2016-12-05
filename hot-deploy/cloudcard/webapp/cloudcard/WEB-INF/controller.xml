@@ -130,7 +130,13 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-
+	
+	<!-- 注册设备regId -->
+	<request-map uri="regJpushRegId">
+		<event type="service" invoke="regJpushRegId"  />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
 
 
 	<!-- 后台页面部分 Request Mappings -->
@@ -206,8 +212,7 @@
 		<response name="success" type="view" value="settlementHistory" />
 		<response name="error" type="view" value="settlementHistory" />
 	</request-map>
-
-
+	
 
 	<request-map uri="LookupCloudCardSeller">
 		<security auth="true" https="true"/>
