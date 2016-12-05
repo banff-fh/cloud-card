@@ -605,7 +605,8 @@ public class CloudCardHelper {
 		BigDecimal cardBalance = actualBalance;
 		
 		String cardCode = cloudCard.getString("cardNumber");
-		boolean isAuthToMe = cardCode.startsWith(CloudCardHelper.AUTH_CARD_CODE_PREFIX);
+		if(null == cardCode) cardCode = cloudCard.getString("finAccountCode");
+		boolean isAuthToMe = null!=cardCode && cardCode.startsWith(CloudCardHelper.AUTH_CARD_CODE_PREFIX);
 		
 		if(isAuthToMe){
 			// 如果是别人授权给我的卡，获取授权余额
