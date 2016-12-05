@@ -76,14 +76,14 @@ under the License.
 			<display-entity entity-name="StatusItem" />
 		</field>
 		<field name="ownerPartyId" title="${uiLabelMap.CloudCardOwnerPartyId}" use-when="${groovy: cloudcard.ownerPartyId != '_NA_'}" sort-field="true">
-			<display-entity entity-name="Person" description="${cloudcard.lastName} ${cloudcard.firstName} ${cloudcard.middleName}" key-field-name="partyId" >
+			<display-entity entity-name="Person" description="${lastName} ${firstName} ${middleName}" key-field-name="partyId" >
 				<sub-hyperlink description="[${cloudcard.ownerPartyId}]" target="/partymgr/control/viewprofile" target-type="inter-app">
 					<parameter param-name="partyId" from-field="ownerPartyId" />
 				</sub-hyperlink>
 			</display-entity>
 		</field>
 		<field name="partyId" title="${uiLabelMap.CloudCardPartyId}" use-when="${groovy: cloudcard.partyId != null }" sort-field="true">
-			<display-entity entity-name="Person" description="${cloudcard.lastName} ${cloudcard.firstName} ${cloudcard.middleName}" key-field-name="partyId" >
+			<display-entity entity-name="Person" description="${lastName} ${firstName} ${middleName}" key-field-name="partyId" >
 				<sub-hyperlink description="[${cloudcard.partyId}]" target="/partymgr/control/viewprofile" target-type="inter-app">
 					<parameter param-name="partyId" />
 				</sub-hyperlink>
@@ -91,9 +91,7 @@ under the License.
 		</field>
 		
 		<field name="actualBalance" title="${uiLabelMap.CloudCardBalance}" use-when="${groovy: cloudcard.ownerPartyId == cloudcard.partyId}"><display type="currency"/></field>
-		<field name="actualBalance" title="${uiLabelMap.CloudCardBalance}" use-when="${groovy: cloudcard.ownerPartyId != cloudcard.partyId}"><display description="${uiLabelMap.CommonEmptyHeader}"/></field>
-		
-		<field name="availableBalance" title="${uiLabelMap.CloudCardAvailableBalance}"><display description="${groovy: com.banfftech.cloudcard.CloudCardHelper.getCloudCardBalance(cloudcard)}" type="currency"/></field>
+		<field name="availableBalance" title="${uiLabelMap.CloudCardAvailableBalance}" use-when="${groovy: cloudcard.ownerPartyId != '_NA_'}"><display description="${groovy: com.banfftech.cloudcard.CloudCardHelper.getCloudCardBalance(cloudcard)}" type="currency"/></field>
 		<field name="fromDate" title="${uiLabelMap.CloudCardFromDate}"><display type="date-time"/></field>
 		<field name="thruDate" title="${uiLabelMap.CloudCardThuDate}"><display type="date-time"/></field>
     </form>
