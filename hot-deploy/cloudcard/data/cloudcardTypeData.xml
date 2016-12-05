@@ -39,9 +39,10 @@
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="token.expirationTime" systemPropertyValue="1296000" description="token的有效时间"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="token.issuer" systemPropertyValue="cloudcard" description="token的issuer"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="token.secret" systemPropertyValue="{{secret used for signing}}" description="token的secret"/>
-    <SystemProperty systemResourceId="cloudcard" systemPropertyId="jpush.appkey" systemPropertyValue="xxxxxx" description="极光推送appkey"/>
-    <SystemProperty systemResourceId="cloudcard" systemPropertyId="jpush.secret" systemPropertyValue="xxxxxx" description="极光推送secret"/>
-    <SystemProperty systemResourceId="cloudcard" systemPropertyId="jpush.expirationTime" systemPropertyValue="172800" description="极光推送有效时间"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="jpush.bizAppKey" systemPropertyValue="xxxxxx" description="极光推送商户appkey"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="jpush.bizSecret" systemPropertyValue="xxxxxx" description="极光推送商户secret"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="jpush.userAppKey" systemPropertyValue="xxxxxx" description="极光推送用户appkey"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="jpush.userSecret" systemPropertyValue="xxxxxx" description="极光推送用户secret"/>
 	<SystemProperty systemResourceId="cloudcard" systemPropertyId="app.android.biz.update" systemPropertyValue="0" description="商户app安卓版是否强制更新"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="app.android.biz.version" systemPropertyValue="1.0" description="商户app安卓版本号"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="app.android.user.update" systemPropertyValue="0" description="用户app安卓版是否强制更新"/>
