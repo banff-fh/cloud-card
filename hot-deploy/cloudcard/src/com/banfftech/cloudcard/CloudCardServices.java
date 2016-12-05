@@ -1423,4 +1423,33 @@ public class CloudCardServices {
 		Map<String, Object> retMap = ServiceUtil.returnSuccess();
 		return retMap;
 	}
+	
+	/**
+	 * 退出登录删除设备ID
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> removeJpushRegId(DispatchContext dctx, Map<String, Object> context){
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+
+		GenericValue userLogin = (GenericValue) context.get("userLogin");
+		String partyId = userLogin.getString("partyId");
+		Map<String,Object> partyIdentificationMap = FastMap.newInstance();
+		partyIdentificationMap.put("partyId", partyId);
+		partyIdentificationMap.put("partyIdentificationTypeId","JPUSH_REG_ID" );
+		
+		try {
+			delegator.removeByAnd("PartyIdentification", partyIdentificationMap);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));	
+		}
+		
+		Map<String, Object> retMap = ServiceUtil.returnSuccess();
+		return retMap;
+	}
+	
 }

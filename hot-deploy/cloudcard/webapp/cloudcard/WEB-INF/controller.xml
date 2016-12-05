@@ -137,6 +137,13 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
+	
+	<!-- 退出登录删除regId -->
+	<request-map uri="removeJpushRegId">
+		<event type="service" invoke="removeJpushRegId"  />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
 
 
 	<!-- 后台页面部分 Request Mappings -->

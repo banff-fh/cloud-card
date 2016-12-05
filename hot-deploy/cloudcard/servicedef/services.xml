@@ -203,4 +203,10 @@
 		<description>注册设备regId</description>
 		<attribute name="regId" type="String" mode="IN" optional="true"><description>设备Id</description></attribute>
 	</service>
+	
+	<service name="removeJpushRegId" engine="java"
+		location="com.banfftech.cloudcard.CloudCardServices" invoke="removeJpushRegId" auth="true">
+		<description>退出登录删除regId</description>
+	</service>
+	
 </services>
