@@ -50,5 +50,9 @@
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="app.ios.biz.version" systemPropertyValue="1.0" description="商户app苹果版本号"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="app.ios.user.update" systemPropertyValue="0" description="用户app苹果版是否强制更新"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="app.ios.user.version" systemPropertyValue="1.0" description="用户app苹果版本号"/>
- 	<PartyIdentificationType partyIdentificationTypeId="JPUSH_REG_ID" description="极光推送设备ID" />    
+ 	<PartyIdentificationType partyIdentificationTypeId="JPUSH_ANDROID_BIZ" description="极光推送安卓商家" />  
+ 	<PartyIdentificationType partyIdentificationTypeId="JPUSH_ANDROID_USER" description="极光推送安卓用户" />  
+ 	<PartyIdentificationType partyIdentificationTypeId="JPUSH_IOS_BIZ" description="极光推送苹果商家" />  
+ 	<PartyIdentificationType partyIdentificationTypeId="JPUSH_IOS_USER" description="极光推送苹果用户" />    
+ 	   	
 </entity-engine-xml>

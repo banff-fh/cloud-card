@@ -1381,16 +1381,33 @@ public class CloudCardServices {
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
 		String regId = (String) context.get("regId");
+		String deviceType = (String) context.get("deviceType");
+		String appType = (String) context.get("appType");
+		String partyIdentificationTypeId = null;
         GenericValue userLogin = (GenericValue) context.get("userLogin");
 		String partyId = userLogin.getString("partyId");
 
 		Map<String, Object> fields = FastMap.newInstance();
 		fields.put("partyId", partyId);
-		fields.put("partyIdentificationTypeId","JPUSH_REG_ID" );
-
+		
+		if(deviceType.equals("android")){
+			if(appType.equals("biz")){
+				partyIdentificationTypeId = "JPUSH_ANDROID_BIZ";
+			}else if(appType.equals("user")){
+				partyIdentificationTypeId = "JPUSH_ANDROID_USER";
+			}
+		}else if(deviceType.equals("ios")){
+			if(appType.equals("biz")){
+				partyIdentificationTypeId = "JPUSH_IOS_BIZ";
+			}else if(appType.equals("user")){
+				partyIdentificationTypeId = "JPUSH_IOS_USER";
+			}
+		}
+		
 		//查询该用户是否存在regId
 		GenericValue partyIdentification = null;
 		try {
+			fields.put("partyIdentificationTypeId", partyIdentificationTypeId);
 			partyIdentification = delegator.findByPrimaryKey("PartyIdentification", fields);
 		} catch (GenericEntityException e1) {
 			Debug.logError(e1.getMessage(), module);
@@ -1400,9 +1417,8 @@ public class CloudCardServices {
 		if(UtilValidate.isEmpty(partyIdentification)){
 			Map<String,Object> partyIdentificationMap = FastMap.newInstance();
 			partyIdentificationMap.put("partyId", partyId);
-			partyIdentificationMap.put("partyIdentificationTypeId","JPUSH_REG_ID" );
+			partyIdentificationMap.put("partyIdentificationTypeId", partyIdentificationTypeId);
 			partyIdentificationMap.put("idValue",regId);
-
 			GenericValue partyIdentificationGV = delegator.makeValue("PartyIdentification", partyIdentificationMap);
 			try {
 				partyIdentificationGV.create();
@@ -1411,6 +1427,7 @@ public class CloudCardServices {
 				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));			
 			}
 		}else{
+			partyIdentification.set("partyIdentification", partyIdentification);
 			partyIdentification.set("idValue", regId);
 			try {
 				delegator.store(partyIdentification);
@@ -1434,20 +1451,22 @@ public class CloudCardServices {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
+		String regId = (String) context.get("regId");
 
 		GenericValue userLogin = (GenericValue) context.get("userLogin");
 		String partyId = userLogin.getString("partyId");
-		Map<String,Object> partyIdentificationMap = FastMap.newInstance();
+		Map<String, Object> partyIdentificationMap = FastMap.newInstance();
 		partyIdentificationMap.put("partyId", partyId);
-		partyIdentificationMap.put("partyIdentificationTypeId","JPUSH_REG_ID" );
-		
+		partyIdentificationMap.put("idValue", regId);
+
 		try {
 			delegator.removeByAnd("PartyIdentification", partyIdentificationMap);
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));	
+			return ServiceUtil
+					.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		Map<String, Object> retMap = ServiceUtil.returnSuccess();
 		return retMap;
 	}
