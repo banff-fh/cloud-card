@@ -26,8 +26,6 @@ import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
-import org.ofbiz.entity.condition.EntityConditionList;
-import org.ofbiz.entity.condition.EntityExpr;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.entity.util.EntityUtil;
@@ -159,40 +157,35 @@ public class CloudCardQueryServices {
 		GenericValue userLogin = (GenericValue) context.get("userLogin");
 		String partyId = (String) userLogin.get("partyId");
 		String type = (String) context.get("type");
+		String cardId = (String) context.get("cardId");
+		
 		// 分页相关
         Integer viewIndex =  (Integer) context.get("viewIndex");
         Integer viewSize  = (Integer) context.get("viewSize");
-
-		List<EntityExpr> depositExprs = FastList.newInstance();
-        List<EntityExpr> withDrawalExprs = FastList.newInstance();
-        EntityConditionList<EntityCondition> paymentConditions = null;
+		
+        EntityCondition paymentConditions = null;
         
         if("1".equals(type)){
-	        depositExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_DEPOSIT"));
-	        depositExprs.add(EntityCondition.makeCondition("partyIdTo", EntityOperator.EQUALS,partyId));
-	        EntityCondition depositCondition = EntityCondition.makeCondition(depositExprs, EntityOperator.AND);
-	        paymentConditions = EntityCondition.makeCondition(depositCondition);
+	        paymentConditions = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdTo", partyId));
 		}else if("2".equals(type)){
-			withDrawalExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_WITHDRAWAL"));
-	        withDrawalExprs.add(EntityCondition.makeCondition("partyIdFrom", EntityOperator.EQUALS,partyId));
-	        EntityCondition depositCondition = EntityCondition.makeCondition(withDrawalExprs, EntityOperator.AND);
-	        paymentConditions = EntityCondition.makeCondition(depositCondition);
+	        paymentConditions = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdFrom", partyId));
 		}else{
-			depositExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_DEPOSIT"));
-	        depositExprs.add(EntityCondition.makeCondition("partyIdTo", EntityOperator.EQUALS,partyId));
-	        withDrawalExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_WITHDRAWAL"));
-	        withDrawalExprs.add(EntityCondition.makeCondition("partyIdFrom", EntityOperator.EQUALS,partyId));
-	        EntityCondition depositCondition = EntityCondition.makeCondition(depositExprs, EntityOperator.AND);
-	        EntityCondition withDrawalCondition = EntityCondition.makeCondition(withDrawalExprs, EntityOperator.AND);
-	        paymentConditions = EntityCondition.makeCondition(UtilMisc.toList(depositCondition,withDrawalCondition),EntityOperator.OR);
+			EntityCondition depositCond = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdTo", partyId));
+	        EntityCondition withDrawalCond = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdFrom", partyId));
+	        paymentConditions = EntityCondition.makeCondition(EntityOperator.OR, depositCond, withDrawalCond);
 		}
-		    	
+
+        if(UtilValidate.isNotEmpty(cardId)){
+        	paymentConditions = EntityCondition.makeCondition(paymentConditions, EntityCondition.makeCondition("paymentMethodId", cardId));
+        }
+
         //每页显示条数
         int number =  (viewSize  == null || viewSize  == 0) ? 20 : viewSize ;
         // 每页的开始记录 第一页为1 第二页为number +1
         int lowIndex = viewIndex * number + 1;  
         //总页数
         int totalPage = 0;
+        int listSize = 0;
         EntityListIterator eli  = null;
 		try {
 			eli = delegator.find("PaymentAndTypePartyNameView", paymentConditions, null, UtilMisc.toSet("amount","partyFromGroupName","partyToGroupName","paymentTypeId","effectiveDate"), UtilMisc.toList("-effectiveDate"), null);
@@ -204,8 +197,9 @@ public class CloudCardQueryServices {
 		List<GenericValue> payments = FastList.newInstance();
 		try {
 			payments = eli.getPartialList(lowIndex, number);
-            eli.last();  
-			totalPage = (eli.getResultsSizeAfterPartialList()%number == 0 ? eli.getResultsSizeAfterPartialList()/number:(eli.getResultsSizeAfterPartialList()/number)+1);
+            eli.last();
+            listSize = eli.getResultsSizeAfterPartialList();
+			totalPage = listSize % number == 0 ? listSize/number : (listSize/number)+1;
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
@@ -261,43 +255,31 @@ public class CloudCardQueryServices {
 			Debug.logError("partyId: " + userLogin.getString("partyId") + " 不是商户："+organizationPartyId + "的管理人员，不能进行账户流水查询操作", module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardUserLoginIsNotManager", locale));
 		}
-//		organizationPartyId = CloudCardHelper.getOrganizationPartyId(delegator, partyId).get(0);
 
 		String type = (String) context.get("type");
 		// 分页相关
         Integer viewIndex =  (Integer) context.get("viewIndex");
         Integer viewSize  = (Integer) context.get("viewSize");
 
-		List<EntityExpr> depositExprs = FastList.newInstance();
-        List<EntityExpr> withDrawalExprs = FastList.newInstance();
-        EntityConditionList<EntityCondition> paymentConditions = null;
-        
+        EntityCondition paymentConditions = null;
+
         if("1".equals(type)){
-	        depositExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_DEPOSIT"));
-	        depositExprs.add(EntityCondition.makeCondition("partyIdFrom", EntityOperator.EQUALS,organizationPartyId));
-	        EntityCondition depositCondition = EntityCondition.makeCondition(depositExprs, EntityOperator.AND);
-	        paymentConditions = EntityCondition.makeCondition(depositCondition);
+			paymentConditions = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdFrom", organizationPartyId));
 		}else if("2".equals(type)){
-			withDrawalExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_WITHDRAWAL"));
-	        withDrawalExprs.add(EntityCondition.makeCondition("partyIdTo", EntityOperator.EQUALS,organizationPartyId));
-	        EntityCondition depositCondition = EntityCondition.makeCondition(withDrawalExprs, EntityOperator.AND);
-	        paymentConditions = EntityCondition.makeCondition(depositCondition);
+			paymentConditions = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdTo", organizationPartyId));
 		}else{
-			depositExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_DEPOSIT"));
-	        depositExprs.add(EntityCondition.makeCondition("partyIdFrom", EntityOperator.EQUALS,organizationPartyId));
-	        withDrawalExprs.add(EntityCondition.makeCondition("paymentTypeId", EntityOperator.EQUALS,"GC_WITHDRAWAL"));
-	        withDrawalExprs.add(EntityCondition.makeCondition("partyIdTo", EntityOperator.EQUALS,organizationPartyId));
-	        EntityCondition depositCondition = EntityCondition.makeCondition(depositExprs, EntityOperator.AND);
-	        EntityCondition withDrawalCondition = EntityCondition.makeCondition(withDrawalExprs, EntityOperator.AND);
-	        paymentConditions = EntityCondition.makeCondition(UtilMisc.toList(depositCondition,withDrawalCondition),EntityOperator.OR);
+			EntityCondition depositCondition = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdFrom", organizationPartyId));
+			EntityCondition withDrawalCondition = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdTo", organizationPartyId));
+			paymentConditions = EntityCondition.makeCondition(EntityOperator.OR, depositCondition, withDrawalCondition);
 		}
-		    	
+
         //每页显示条数
         int number =  (viewSize  == null || viewSize  == 0) ? 20 : viewSize ;
         // 每页的开始记录 第一页为1 第二页为number +1
         int lowIndex = viewIndex * number + 1;  
         //总页数
         int totalPage = 0;
+        int listSize = 0;
         EntityListIterator eli  = null;
 		try {
 			eli = delegator.find("PaymentAndTypePartyNameView", paymentConditions, null, UtilMisc.toSet("amount","partyToFirstName","partyFromFirstName","paymentTypeId","effectiveDate"), UtilMisc.toList("-effectiveDate"), null);
@@ -309,8 +291,9 @@ public class CloudCardQueryServices {
 		List<GenericValue> payments = null;
 		try {
 			payments = eli.getPartialList(lowIndex, number);
-            eli.last();  
-			totalPage = (eli.getResultsSizeAfterPartialList()%number == 0 ? eli.getResultsSizeAfterPartialList()/number:(eli.getResultsSizeAfterPartialList()/number)+1);
+            eli.last();
+			listSize = eli.getResultsSizeAfterPartialList();
+			totalPage = listSize % number == 0 ? listSize/number : (listSize/number)+1;
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
@@ -331,11 +314,13 @@ public class CloudCardQueryServices {
 			paymentMap.put("amount", payment.get("amount"));
 			paymentMap.put("transDate", payment.getTimestamp("effectiveDate").toString());
 			if("GC_DEPOSIT".equals(payment.getString("paymentTypeId"))){
+				//partyToLastName partyToFirstName
 				paymentMap.put("customerName", payment.get("partyToFirstName"));
 				paymentMap.put("typeDesc", "充值");
 				paymentMap.put("type", "1");
 				paymentsList.add(paymentMap);
 			}else if ("GC_WITHDRAWAL".equals(payment.getString("paymentTypeId"))){
+				//partyFromLastName  partyFromFirstName
 				paymentMap.put("customerName", payment.get("partyFromFirstName"));
 				paymentMap.put("typeDesc", "支付");
 				paymentMap.put("type", "2");
