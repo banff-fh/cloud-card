@@ -113,5 +113,8 @@
         <value xml:lang="en">thruDate Must After Now!</value>
         <value xml:lang="zh">结束日期必须在当前时间之后</value>
     </property>
-    
+    <property key="CloudCardDeviceTypeOrAppTypeInvalid">
+        <value xml:lang="en">deviceType Or appType is invalid!</value>
+        <value xml:lang="zh">参数错误：deviceType 或 appType 非法</value>
+    </property>
 </resource>

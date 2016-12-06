@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Random;
 
 import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.StringUtil;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
@@ -37,10 +36,32 @@ public class CloudCardServices {
 	
 	public static final String module = CloudCardServices.class.getName();
 	
+	/**
+	 * 默认币种 {@value}
+	 */
 	public static final String DEFAULT_CURRENCY_UOM_ID = "CNY";
 	
 	public static final String resourceError = "cloudcardErrorUiLabels";
 	public static final String resourceAccountingError = "AccountingErrorUiLabels";
+	
+	
+	/**
+	 * android用户端 和 商户端 用来存储 极光推送的id 的  partyIdentificationTypeId 映射
+	 */
+	public static final Map<String, String> ANDROID_APPTYPE_PIFT_MAP = FastMap.newInstance();
+	static{
+		ANDROID_APPTYPE_PIFT_MAP.put("biz", "JPUSH_ANDROID_BIZ");
+		ANDROID_APPTYPE_PIFT_MAP.put("user", "JPUSH_ANDROID_USER");
+	}
+	
+	/**
+	 * ios 用户端 和 商户端 用来存储 极光推送的id 的  partyIdentificationTypeId 映射
+	 */
+	public static final Map<String, String> IOS_APPTYPE_PIFT_MAP = FastMap.newInstance();
+	static{
+		IOS_APPTYPE_PIFT_MAP.put("biz", "JPUSH_IOS_BIZ");
+		IOS_APPTYPE_PIFT_MAP.put("user", "JPUSH_IOS_USER");
+	}
 	
 	/**
 	 * 卡授权
@@ -1383,58 +1404,39 @@ public class CloudCardServices {
 		String regId = (String) context.get("regId");
 		String deviceType = (String) context.get("deviceType");
 		String appType = (String) context.get("appType");
-		String partyIdentificationTypeId = null;
         GenericValue userLogin = (GenericValue) context.get("userLogin");
 		String partyId = userLogin.getString("partyId");
 
-		Map<String, Object> fields = FastMap.newInstance();
-		fields.put("partyId", partyId);
-		
-		if(deviceType.equals("android")){
-			if(appType.equals("biz")){
-				partyIdentificationTypeId = "JPUSH_ANDROID_BIZ";
-			}else if(appType.equals("user")){
-				partyIdentificationTypeId = "JPUSH_ANDROID_USER";
-			}
-		}else if(deviceType.equals("ios")){
-			if(appType.equals("biz")){
-				partyIdentificationTypeId = "JPUSH_IOS_BIZ";
-			}else if(appType.equals("user")){
-				partyIdentificationTypeId = "JPUSH_IOS_USER";
-			}
+		String partyIdentificationTypeId = null;
+		if( "android".equalsIgnoreCase(deviceType)){
+			partyIdentificationTypeId = ANDROID_APPTYPE_PIFT_MAP.get(appType);
+		}else if("ios".equalsIgnoreCase(deviceType)){
+			partyIdentificationTypeId = IOS_APPTYPE_PIFT_MAP.get(appType);
 		}
-		
+
+		if(null == partyIdentificationTypeId){
+			Debug.logError("appType invalid", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardDeviceTypeOrAppTypeInvalid", locale));
+		}
+
 		//查询该用户是否存在regId
 		GenericValue partyIdentification = null;
+		Map<String, Object> lookupFields = FastMap.newInstance();
+		lookupFields.put("partyId", partyId);
+		lookupFields.put("partyIdentificationTypeId", partyIdentificationTypeId);
 		try {
-			fields.put("partyIdentificationTypeId", partyIdentificationTypeId);
-			partyIdentification = delegator.findByPrimaryKey("PartyIdentification", fields);
-		} catch (GenericEntityException e1) {
-			Debug.logError(e1.getMessage(), module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));	
-		}
-		//判断该用户是否存在regId,如果不存在，插入一条新数据，否则修改该partyId的regId
-		if(UtilValidate.isEmpty(partyIdentification)){
-			Map<String,Object> partyIdentificationMap = FastMap.newInstance();
-			partyIdentificationMap.put("partyId", partyId);
-			partyIdentificationMap.put("partyIdentificationTypeId", partyIdentificationTypeId);
-			partyIdentificationMap.put("idValue",regId);
-			GenericValue partyIdentificationGV = delegator.makeValue("PartyIdentification", partyIdentificationMap);
-			try {
-				partyIdentificationGV.create();
-			} catch (GenericEntityException e) {
-				Debug.logError(e.getMessage(), module);
-				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));			
+			partyIdentification = delegator.findByPrimaryKey("PartyIdentification", lookupFields);
+			//判断该用户是否存在regId,如果不存在，插入一条新数据，否则修改该partyId的regId
+			if(UtilValidate.isEmpty(partyIdentification)){
+				lookupFields.put("idValue", regId);
+				delegator.makeValue("PartyIdentification", lookupFields).create();
+			}else{
+				partyIdentification.set("idValue", regId);
+				partyIdentification.store();
 			}
-		}else{
-			partyIdentification.set("partyIdentification", partyIdentification);
-			partyIdentification.set("idValue", regId);
-			try {
-				delegator.store(partyIdentification);
-			} catch (GenericEntityException e) {
-				Debug.logError(e.getMessage(), module);
-				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));			
-			}
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
 
 		Map<String, Object> retMap = ServiceUtil.returnSuccess();
@@ -1463,8 +1465,7 @@ public class CloudCardServices {
 			delegator.removeByAnd("PartyIdentification", partyIdentificationMap);
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
-			return ServiceUtil
-					.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
 
 		Map<String, Object> retMap = ServiceUtil.returnSuccess();
