@@ -251,7 +251,7 @@ public class CloudCardQueryServices {
 		GenericValue userLogin = (GenericValue) context.get("userLogin");
 		String partyId = (String) userLogin.get("partyId");
 		String organizationPartyId = (String) context.get("organizationPartyId");
-		if(UtilValidate.isEmpty(CloudCardHelper.getOrganizationPartyId(delegator, partyId))){
+		if(!CloudCardHelper.isManager(delegator, partyId, organizationPartyId)){
 			Debug.logError("partyId: " + userLogin.getString("partyId") + " 不是商户："+organizationPartyId + "的管理人员，不能进行账户流水查询操作", module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardUserLoginIsNotManager", locale));
 		}
