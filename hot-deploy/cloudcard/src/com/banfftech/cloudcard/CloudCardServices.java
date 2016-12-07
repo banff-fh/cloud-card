@@ -25,6 +25,8 @@ import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
+import com.banfftech.cloudcard.jpush.JPushServices;
+
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
@@ -45,23 +47,6 @@ public class CloudCardServices {
 	public static final String resourceAccountingError = "AccountingErrorUiLabels";
 	
 	
-	/**
-	 * android用户端 和 商户端 用来存储 极光推送的id 的  partyIdentificationTypeId 映射
-	 */
-	public static final Map<String, String> ANDROID_APPTYPE_PIFT_MAP = FastMap.newInstance();
-	static{
-		ANDROID_APPTYPE_PIFT_MAP.put("biz", "JPUSH_ANDROID_BIZ");
-		ANDROID_APPTYPE_PIFT_MAP.put("user", "JPUSH_ANDROID_USER");
-	}
-	
-	/**
-	 * ios 用户端 和 商户端 用来存储 极光推送的id 的  partyIdentificationTypeId 映射
-	 */
-	public static final Map<String, String> IOS_APPTYPE_PIFT_MAP = FastMap.newInstance();
-	static{
-		IOS_APPTYPE_PIFT_MAP.put("biz", "JPUSH_IOS_BIZ");
-		IOS_APPTYPE_PIFT_MAP.put("user", "JPUSH_IOS_USER");
-	}
 	
 	/**
 	 * 卡授权
@@ -1409,9 +1394,9 @@ public class CloudCardServices {
 
 		String partyIdentificationTypeId = null;
 		if( "android".equalsIgnoreCase(deviceType)){
-			partyIdentificationTypeId = ANDROID_APPTYPE_PIFT_MAP.get(appType);
+			partyIdentificationTypeId = JPushServices.ANDROID_APPTYPE_PIFT_MAP.get(appType);
 		}else if("ios".equalsIgnoreCase(deviceType)){
-			partyIdentificationTypeId = IOS_APPTYPE_PIFT_MAP.get(appType);
+			partyIdentificationTypeId = JPushServices.IOS_APPTYPE_PIFT_MAP.get(appType);
 		}
 
 		if(null == partyIdentificationTypeId){

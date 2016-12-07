@@ -4,18 +4,19 @@ import java.util.List;
 import java.util.Map;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
-import org.ofbiz.entity.condition.EntityConditionList;
-import org.ofbiz.entity.condition.EntityExpr;
 import org.ofbiz.entity.condition.EntityOperator;
+import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.service.ServiceUtil;
 
 import cn.jiguang.common.resp.APIConnectionException;
 import cn.jiguang.common.resp.APIRequestException;
@@ -25,6 +26,7 @@ import cn.jpush.api.push.model.Message;
 import cn.jpush.api.push.model.Options;
 import cn.jpush.api.push.model.Platform;
 import cn.jpush.api.push.model.PushPayload;
+import cn.jpush.api.push.model.PushPayload.Builder;
 import cn.jpush.api.push.model.audience.Audience;
 import cn.jpush.api.push.model.notification.AndroidNotification;
 import cn.jpush.api.push.model.notification.IosNotification;
@@ -37,6 +39,25 @@ public class JPushServices {
 	public static final String module = JPushServices.class.getName();
 	public static final String resourceError = "cloudcardErrorUiLabels";
 
+	/**
+	 * android用户端 和 商户端 用来存储 极光推送的id 的  partyIdentificationTypeId 映射
+	 */
+	public static final Map<String, String> ANDROID_APPTYPE_PIFT_MAP = FastMap.newInstance();
+	static{
+		ANDROID_APPTYPE_PIFT_MAP.put("biz", "JPUSH_ANDROID_BIZ");
+		ANDROID_APPTYPE_PIFT_MAP.put("user", "JPUSH_ANDROID_USER");
+	}
+	
+	/**
+	 * ios 用户端 和 商户端 用来存储 极光推送的id 的  partyIdentificationTypeId 映射
+	 */
+	public static final Map<String, String> IOS_APPTYPE_PIFT_MAP = FastMap.newInstance();
+	static{
+		IOS_APPTYPE_PIFT_MAP.put("biz", "JPUSH_IOS_BIZ");
+		IOS_APPTYPE_PIFT_MAP.put("user", "JPUSH_IOS_USER");
+	}
+	
+	
 	//注册jPushClient
 	private static JPushClient getJPushClient(Delegator delegator,String appType) {
 		JPushClient jPushClient = null;
@@ -52,106 +73,117 @@ public class JPushServices {
 		}
 		return jPushClient;
 	}
+
 	
 	// 推送消息
-	public static void pushNotifOrMessage(DispatchContext dctx, Map<String, Object> context) {
+	public static Map<String,Object> pushNotifOrMessage(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
+		
+		// biz 、user
 		String appType = (String) context.get("appType");
+		
+		// all 所有人
 		String sendType = (String) context.get("sendType");
 		String title = (String) context.get("title");
+
+		// 通知消息
 		String content = (String) context.get("content");
+
+		// 透传消息
 		String message = (String) context.get("message");
+
 		String partyId = (String) context.get("partyId");
+		
+		Map<String, String> extras = UtilGenerics.checkMap(context.get("extras"));
+		if(null==extras){
+			extras = FastMap.newInstance();
+		}
+
+		PushResult pushResult = null;
+		
+		if("all".equals(sendType)){
+			// 推送到全平台所有人
+			JPushClient jPushClient = getJPushClient(delegator, appType);
+			PushPayload payload = null;
+			// TODO 全平台不能通知推送消息和通知吗？
+			if(UtilValidate.isNotEmpty(content)){
+				payload = PushPayload.alertAll(content);
+			}
+			if(UtilValidate.isNotEmpty(message)){
+				payload = PushPayload.messageAll(message);
+			}
+			try {
+				pushResult = jPushClient.sendPush(payload);
+				if (200 != pushResult.getResponseCode()) {
+					Debug.logError("推送通知[" + content + "], 消息[" + message + "]失败: code:" + pushResult.getResponseCode() + " response: " + pushResult.getOriginalContent(), module);
+				}
+			} catch (APIConnectionException e) {
+				Debug.logError("推送通知[" + content + "], 消息[" + message + "]失败:" + e.getMessage(), module);
+			} catch (APIRequestException e) {
+				Debug.logError("推送通知[" + content + "], 消息[" + message + "]失败:" + e.getMessage(), module);
+			}
+			return ServiceUtil.returnSuccess();
+		}
+
 
 		// 查询registrationID
-		Map<String, Object> fields = FastMap.newInstance();
-		fields.put("partyId", partyId);
-		
-		EntityConditionList<EntityCondition> pConditions = null;
-        EntityCondition.makeCondition("partyId", EntityOperator.EQUALS,partyId);
-        List<EntityExpr> devTypeExprs = FastList.newInstance();
-		if ("biz".equals(appType)) {
-	        devTypeExprs.add(EntityCondition.makeCondition("partyIdentificationTypeId", EntityOperator.EQUALS,"JPUSH_ANDROID_BIZ"));
-	        devTypeExprs.add(EntityCondition.makeCondition("partyIdentificationTypeId", EntityOperator.EQUALS,"JPUSH_IOS_BIZ"));
-	        EntityCondition devCondition = EntityCondition.makeCondition(devTypeExprs, EntityOperator.OR);
-	        pConditions = EntityCondition.makeCondition(UtilMisc.toList(EntityCondition.makeCondition("partyId", EntityOperator.EQUALS,partyId),devCondition),EntityOperator.AND);
-		} else if ("user".equals(appType)) {
-	        devTypeExprs.add(EntityCondition.makeCondition("partyIdentificationTypeId", EntityOperator.EQUALS,"JPUSH_ANDROID_USER"));
-	        devTypeExprs.add(EntityCondition.makeCondition("partyIdentificationTypeId", EntityOperator.EQUALS,"JPUSH_IOS_USER"));
-	        EntityCondition devCondition = EntityCondition.makeCondition(devTypeExprs, EntityOperator.OR);
-	        pConditions = EntityCondition.makeCondition(UtilMisc.toList(EntityCondition.makeCondition("partyId", EntityOperator.EQUALS,partyId),devCondition),EntityOperator.AND);
-		}
-		
+		EntityCondition pConditions = EntityCondition.makeCondition("partyId", partyId);
+		List<EntityCondition> devTypeExprs = FastList.newInstance();
+		devTypeExprs.add(EntityCondition.makeCondition("partyIdentificationTypeId", ANDROID_APPTYPE_PIFT_MAP.get(appType)));
+		devTypeExprs.add(EntityCondition.makeCondition("partyIdentificationTypeId", IOS_APPTYPE_PIFT_MAP.get(appType)));
+		EntityCondition devCondition = EntityCondition.makeCondition(devTypeExprs, EntityOperator.OR);
+		pConditions = EntityCondition.makeCondition(pConditions, devCondition);
+
 		//查找regId
 		List<GenericValue> partyIdentifications = FastList.newInstance();
 		try {
-        	partyIdentifications = delegator.findList("PartyIdentification", pConditions, UtilMisc.toSet("idValue"), null, null, false);
+			partyIdentifications = delegator.findList("PartyIdentification", pConditions, UtilMisc.toSet("idValue"), null, null, false);
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 		}
 		
-		//如果partyIdentifications大于0，获取regId,并推送消息
-		if(partyIdentifications.size() > 0){
-			JPushClient jPushClient = getJPushClient(delegator, appType);
-			String registrationID = partyIdentifications.get(0).getString("idValue");
-			PushPayload payload = null;
-			PushResult pushResult = null;
-			try {
-				if (("0").equals(sendType)) {
-					if(UtilValidate.isNotEmpty(message) && UtilValidate.isNotEmpty(content)){
-						payload = PushPayload.newBuilder().setPlatform(Platform.all()).setAudience(Audience.registrationId(registrationID))
-								.setNotification(Notification.newBuilder()
-										.addPlatformNotification(
-												IosNotification.newBuilder().setAlert(content).setBadge(5).build())
-										.addPlatformNotification(AndroidNotification.newBuilder().setAlert(content)
-												.setTitle(title).build())
-										.build())
-								.setMessage(Message.newBuilder()
-				                        .setMsgContent(message)
-				                        .build())
-								.setOptions(Options.newBuilder()
-				                         .setApnsProduction(true)
-				                         .build())
-								.build();
-					}else if(UtilValidate.isNotEmpty(content) && UtilValidate.isEmpty(message)){
-						payload = PushPayload.newBuilder().setPlatform(Platform.all()).setAudience(Audience.registrationId(registrationID))
-								.setNotification(Notification.newBuilder()
-										.addPlatformNotification(
-												IosNotification.newBuilder().setAlert(content).setBadge(5).build())
-										.addPlatformNotification(AndroidNotification.newBuilder().setAlert(content)
-												.setTitle(title).build())
-										.build())
-								.setOptions(Options.newBuilder()
-				                         .setApnsProduction(true)
-				                         .build())
-								.build();
-					}else if(UtilValidate.isNotEmpty(message) && UtilValidate.isEmpty(content)){
-						payload = PushPayload.newBuilder().setPlatform(Platform.all()).setAudience(Audience.registrationId(registrationID))
-								.setMessage(Message.newBuilder()
-				                        .setMsgContent(message)
-				                        .build())
-								.setOptions(Options.newBuilder()
-				                         .setApnsProduction(true)
-				                         .build())
-								.build();
-					}
-				} else {
-					payload = PushPayload.alertAll(content);
-				}
-				
-				// 发送消息
-				pushResult = jPushClient.sendPush(payload);
-
-				if (UtilValidate.isEmpty(pushResult)) {
-					Debug.logError(registrationID + ":推送消息失败:" + content, module);
-				}
-
-			} catch (APIConnectionException e) {
-				Debug.logError(registrationID + ":推送消息失败" + content, module);
-			} catch (APIRequestException e) {
-				Debug.logError(registrationID + ":推送消息失败" + content, module);
-			}
+		if(UtilValidate.isEmpty(partyIdentifications)){
+			Debug.logWarning("没有推送目标", module);
+			return ServiceUtil.returnSuccess();
 		}
+		
+		List<String> idValues = EntityUtil.getFieldListFromEntityList(partyIdentifications, "idValue", false);
+		JPushClient jPushClient = getJPushClient(delegator, appType);
+		
+		Builder payloadBuilder = PushPayload.newBuilder()
+				.setPlatform(Platform.all())
+				.setAudience(Audience.registrationId(idValues))
+				.setOptions(Options.newBuilder().setApnsProduction(true).build());
+
+		// 发送透传消息
+		if(UtilValidate.isNotEmpty(message)){
+			payloadBuilder.setMessage(
+					Message.newBuilder().setMsgContent(message).addExtras(extras).build());
+		}
+
+		// 发送通知
+		if(UtilValidate.isNotEmpty(content)){
+			payloadBuilder.setNotification(
+					Notification.newBuilder().addPlatformNotification(
+							IosNotification.newBuilder().setAlert(content).addExtras(extras).build())
+					.addPlatformNotification(
+							AndroidNotification.newBuilder().setAlert(content).setTitle(title).addExtras(extras).build())
+					.build());
+		}
+
+		// 发送消息
+		try {
+			pushResult = jPushClient.sendPush(payloadBuilder.build());
+			if (200 != pushResult.getResponseCode()) {
+				Debug.logError("推送通知[" + content + "], 消息[" + message + "]失败: code:" + pushResult.getResponseCode() + " response: " + pushResult.getOriginalContent(), module);
+			}
+		} catch (APIConnectionException e) {
+			Debug.logError("推送通知[" + content + "], 消息[" + message + "]失败:" + e.getMessage(), module);
+		} catch (APIRequestException e) {
+			Debug.logError("推送通知[" + content + "], 消息[" + message + "]失败:" + e.getMessage(), module);
+		}
+
+		return ServiceUtil.returnSuccess();
 	}
 }
