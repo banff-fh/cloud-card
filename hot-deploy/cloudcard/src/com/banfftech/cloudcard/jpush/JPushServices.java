@@ -7,6 +7,7 @@ import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
+import org.ofbiz.base.util.string.FlexibleStringExpander;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
@@ -89,9 +90,15 @@ public class JPushServices {
 
 		// 通知消息
 		String content = (String) context.get("content");
+		if(UtilValidate.isNotEmpty(content) && content.indexOf("${")>0){
+			content = FlexibleStringExpander.expandString(content, context);
+		}
 
 		// 透传消息
 		String message = (String) context.get("message");
+		if(UtilValidate.isNotEmpty(message) && message.indexOf("${")>0){
+			message = FlexibleStringExpander.expandString(message, context);
+		}
 
 		String partyId = (String) context.get("partyId");
 		
@@ -106,7 +113,7 @@ public class JPushServices {
 			// 推送到全平台所有人
 			JPushClient jPushClient = getJPushClient(delegator, appType);
 			PushPayload payload = null;
-			// TODO 全平台不能通知推送消息和通知吗？
+			// TODO 全平台的情况下不能同时推送消息和通知吗？
 			if(UtilValidate.isNotEmpty(content)){
 				payload = PushPayload.alertAll(content);
 			}
@@ -153,7 +160,7 @@ public class JPushServices {
 		
 		Builder payloadBuilder = PushPayload.newBuilder()
 				.setPlatform(Platform.all())
-				.setAudience(Audience.registrationId(idValues))
+				.setAudience(Audience.registrationId(idValues)) // FIXME 多个regId的情况下，一个id出错全错？
 				.setOptions(Options.newBuilder().setApnsProduction(true).build());
 
 		// 发送透传消息

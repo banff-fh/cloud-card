@@ -224,5 +224,9 @@
 		<attribute name="message" type="String" mode="IN" optional="true"><description>透传消息</description></attribute>
 		<attribute name="partyId" type="String" mode="IN" optional="true"><description>发送到哪个用户</description></attribute>
 		<attribute name="extras" type="Map" mode="IN" optional="true"><description>推送的extrasMap</description></attribute>
+	
+		<attribute name="cardId" type="String" mode="IN" optional="true"><description>卡Id</description></attribute>
+		<attribute name="amount" type="BigDecimal" mode="IN" optional="true"><description>金额</description></attribute>
+		<attribute name="cardBalance" type="BigDecimal" mode="IN" optional="true"><description>余额</description></attribute>
 	</service>
 </services>
