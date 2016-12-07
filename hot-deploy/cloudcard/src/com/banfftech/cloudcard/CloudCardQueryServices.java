@@ -385,11 +385,20 @@ public class CloudCardQueryServices {
 		if(null == settlementAmount){
 			settlementAmount = CloudCardHelper.ZERO;
 		}
+		BigDecimal limitAmount =  partyGroupFinAccount.getBigDecimal("replenishLevel");
+		if(null == limitAmount){
+			limitAmount = CloudCardHelper.ZERO;
+		}
+		BigDecimal balance = partySettlementFinAccount.getBigDecimal("availableBalance");
+		if(null == balance){
+			balance = CloudCardHelper.ZERO;
+		}
         
 		Map<String, Object> results = ServiceUtil.returnSuccess();
 		results.put("presellAmount", presellAmount);
-		results.put("limitAmount", partyGroupFinAccount.get("replenishLevel"));
-		results.put("balance", partyGroupFinAccount.get("availableBalance"));
+		results.put("limitAmount", limitAmount);
+		results.put("balance", balance);
+		results.put("liabilities", limitAmount.subtract(balance));
 		// 账户余额本身表示应付给平台金额，店家应该看到的是应从平台收取
 		results.put("settlementAmount", settlementAmount.negate());
 		return results;

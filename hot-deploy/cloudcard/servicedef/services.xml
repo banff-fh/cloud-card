@@ -122,11 +122,14 @@
 	<service name="getLimitAndPresellInfo" engine="java"
 		location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="getLimitAndPresellInfo" auth="true">
 		<description>查询开卡额度和已卖卡金额信息</description>
-        <attribute name="organizationPartyId" type="String" mode="IN" optional="false"/>
-        <attribute name="presellAmount" type="BigDecimal" mode="OUT" optional="false"/>
-        <attribute name="limitAmount" type="BigDecimal" mode="OUT" optional="false"/>
-        <attribute name="balance" type="BigDecimal" mode="OUT" optional="false"/>
-        <attribute name="settlementAmount" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家partyId</description></attribute>
+        <attribute name="presellAmount" type="BigDecimal" mode="OUT" optional="false"><description>已卖卡总额</description></attribute>
+        <attribute name="limitAmount" type="BigDecimal" mode="OUT" optional="false"><description>卖卡额度</description></attribute>
+        <attribute name="balance" type="BigDecimal" mode="OUT" optional="false"><description>卖卡余额</description></attribute>
+        <attribute name="liabilities" type="BigDecimal" mode="OUT" optional="false"><description>负债，所有客户手中卡内总金额</description></attribute>
+        <attribute name="settlementAmount" type="BigDecimal" mode="OUT" optional="false">
+        	<description>待结算金额，负数表示需要付给平台，正数表示平台需要付给商家</description>
+        </attribute>
 	</service>
 	
 	<service name="createPaymentAndFinAccountTransForCloudCard" engine="simple"
