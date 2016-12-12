@@ -389,7 +389,7 @@ public class CloudCardQueryServices {
 		if(null == limitAmount){
 			limitAmount = CloudCardHelper.ZERO;
 		}
-		BigDecimal balance = partySettlementFinAccount.getBigDecimal("availableBalance");
+		BigDecimal balance = partyGroupFinAccount.getBigDecimal("availableBalance");
 		if(null == balance){
 			balance = CloudCardHelper.ZERO;
 		}
