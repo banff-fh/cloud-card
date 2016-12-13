@@ -157,11 +157,13 @@ public class JPushServices {
 		
 		List<String> idValues = EntityUtil.getFieldListFromEntityList(partyIdentifications, "idValue", false);
 		JPushClient jPushClient = getJPushClient(delegator, appType);
-		
+
+		boolean setApnsProduction = "1".equals(EntityUtilProperties.getPropertyValue("cloudcard", "jpush.setApnsProduction", "0", delegator));
+
 		Builder payloadBuilder = PushPayload.newBuilder()
 				.setPlatform(Platform.all())
 				.setAudience(Audience.registrationId(idValues)) // FIXME 多个regId的情况下，一个id出错全错？
-				.setOptions(Options.newBuilder().setApnsProduction(true).build());
+				.setOptions(Options.newBuilder().setApnsProduction(setApnsProduction).build());
 
 		// 发送透传消息
 		if(UtilValidate.isNotEmpty(message)){
