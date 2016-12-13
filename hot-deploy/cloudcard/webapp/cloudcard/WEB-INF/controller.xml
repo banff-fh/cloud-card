@@ -145,6 +145,13 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 
+	<!-- 根据二维码获取商家信息，用户可扫商家码后付款 -->
+	<request-map uri="getStoreInfoByQRcode">
+		<event type="service" invoke="getStoreInfoByQRcode"  />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+
 
 	<!-- 后台页面部分 Request Mappings -->
 

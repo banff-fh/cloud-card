@@ -117,4 +117,8 @@
         <value xml:lang="en">deviceType Or appType is invalid!</value>
         <value xml:lang="zh">参数错误：deviceType 或 appType 非法</value>
     </property>
+    <property key="CloudCardStoreQRcodeInvalid">
+        <value xml:lang="en">store qrCode is invalid!</value>
+        <value xml:lang="zh">二维码非法！</value>
+    </property>
 </resource>
