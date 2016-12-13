@@ -232,4 +232,14 @@
 		<attribute name="amount" type="BigDecimal" mode="IN" optional="true"><description>金额</description></attribute>
 		<attribute name="cardBalance" type="BigDecimal" mode="IN" optional="true"><description>余额</description></attribute>
 	</service>
+	
+	<service name="getStoreInfoByQRcode" engine="java"
+		location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="getStoreInfoByQRcode" auth="true">
+		<description>通过二维码查询商家信息</description>
+		<attribute name="qrCode" type="String" mode="IN" optional="false"><description>商家二维码</description></attribute>
+
+		<attribute name="storeId" type="String" mode="OUT" optional="true"><description>商家Id</description></attribute>
+		<attribute name="storeName" type="String" mode="OUT" optional="true"><description>商家店名</description></attribute>
+		<attribute name="storeImgUrl" type="String" mode="OUT" optional="true"><description>商家图片(卡图片)</description></attribute>
+	</service>
 </services>

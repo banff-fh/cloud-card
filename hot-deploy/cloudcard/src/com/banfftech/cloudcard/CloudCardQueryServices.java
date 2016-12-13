@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -602,54 +603,71 @@ public class CloudCardQueryServices {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
 		String curVersion = (String) context.get("curVersion");
-		String deviceType = (String) context.get("deviceType");
-		String appType = (String) context.get("appType");
-		String latestVersion = null;
+		String deviceType = (String) context.get("deviceType");// ios android
+		String appType = (String) context.get("appType"); // biz user
 		int updateType = 0;
 		String version = EntityUtilProperties.getPropertyValue("cloudcard","app."+deviceType+"."+appType+".version",delegator);
 		String isUpdate = EntityUtilProperties.getPropertyValue("cloudcard","app."+deviceType+"."+appType+".update",delegator);
 		String url = "http://fir.im/6nzd";
-		//判断appType是商家或用户
-		if("biz".equals(appType)){
-			//判断当前设备是ios或android
-			if("ios".equals(deviceType)){
-				if(!version.equals(curVersion)){
-					latestVersion = version;
-					updateType = Integer.valueOf(isUpdate);
-				}else{
-					latestVersion = curVersion;
-				}
-			}else if("android".equals(deviceType)){
-				if(!version.equals(curVersion)){
-					latestVersion = version;
-					updateType = Integer.valueOf(isUpdate);
-				}else{
-					latestVersion = curVersion;
-				}
-			}
-		}else if("user".equals(appType)){
-			//判断当前设备是ios或android
-			if("ios".equals(deviceType)){
-				if(!version.equals(curVersion)){
-					latestVersion = version;
-					updateType = Integer.valueOf(isUpdate);
-				}else{
-					latestVersion = curVersion;
-				}
-			}else if("android".equals(deviceType)){
-				if(!version.equals(curVersion)){
-					latestVersion = version;
-					updateType = Integer.valueOf(isUpdate);
-				}else{
-					latestVersion = curVersion;
-				}
-			}
+
+		String latestVersion = curVersion;
+		if(!version.equals(curVersion)){
+			latestVersion = version;
+			updateType = Integer.valueOf(isUpdate);
 		}
-		
+
 		Map<String, Object> results = ServiceUtil.returnSuccess();
 		results.put("latestVersion", latestVersion);
 		results.put("updateType", updateType);
 		results.put("url", url);
+		return results;
+	}
+
+	
+	/**
+	 * 根据条码获取商家信息
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> getStoreInfoByQRcode(DispatchContext dctx, Map<String, Object> context) {
+		Delegator delegator = dctx.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+
+		String qrCode = (String) context.get("qrCode");
+
+		// 简单校验传入的 二维码是否合法
+		boolean isValid = qrCode.startsWith(CloudCardHelper.STORE_QR_CODE_PREFIX);
+		if(isValid){
+			try{
+				UUID.fromString(qrCode.substring(CloudCardHelper.STORE_QR_CODE_PREFIX.length()));
+			}catch(Exception e){
+				isValid = false;
+			}
+		}
+
+		if(!isValid){
+			Debug.logError("invalide store qrCode[" + qrCode + "]", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardStoreQRcodeInvalid", locale));
+		}
+
+		GenericValue partyGroup;
+		try {
+			partyGroup = CloudCardHelper.getPartyGroupByQRcode(qrCode, delegator);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
+
+		String storeName = partyGroup.getString("groupName");
+		String storeId = partyGroup.getString("partyId");
+//		String storeImgUrl = partyGroup.getString("logoImageUrl");
+		String storeImgUrl = EntityUtilProperties.getPropertyValue("cloudcard","cardImg." + storeId,delegator);
+
+		Map<String, Object> results = ServiceUtil.returnSuccess();
+		results.put("storeId", storeId);
+		results.put("storeName", storeName);
+		results.put("storeImgUrl", storeImgUrl);
 		return results;
 	}
 

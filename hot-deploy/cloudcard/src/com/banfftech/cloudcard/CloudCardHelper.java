@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
@@ -36,14 +37,28 @@ import javolution.util.FastMap;
 public class CloudCardHelper {
 	
 	public static final String module = CloudCardHelper.class.getName();
-	
-	public static final String DEFAULT_CURRENCY_UOM_ID = "CNY"; // 默认币种
-	
+
+	/**
+	 * 默认币种 {@value}
+	 */
+	public static final String DEFAULT_CURRENCY_UOM_ID = "CNY"; 
+
 	public static final String resourceError = "cloudcardErrorUiLabels";
+
+	/**
+	 * 平台partyId {@value}
+	 */
+	public static final String PLATFORM_PARTY_ID="Company";
+
+	/**
+	 * 授权给别人的云卡卡号前缀 {@value}
+	 */
+	public static final String AUTH_CARD_CODE_PREFIX="auth:";
 	
-	public static final String PLATFORM_PARTY_ID="Company"; // 平台partyId
-	
-	public static final String AUTH_CARD_CODE_PREFIX="auth:"; // 授权给别人的云卡卡号前缀
+	/**
+	 * 商家二维码前缀 {@value}
+	 */
+	public static final String STORE_QR_CODE_PREFIX="ccs-";
 	
 	 public static int decimals = UtilNumber.getBigDecimalScale("finaccount.decimals");
      public static int rounding = UtilNumber.getBigDecimalRoundingMode("finaccount.rounding");
@@ -637,4 +652,81 @@ public class CloudCardHelper {
 		boolean isAuthorized = (boolean) cardAuthorizeInfo.get("isAuthorized");
 		return getCloudCardBalance(cloudCard, isAuthorized);
 	}
+	
+	
+	/**
+	 * 从 PartyIdentification 获取店家的二维码，如果没有则生成一个
+	 * @param organizationPartyId 店家partyId
+	 * @param delegator
+	 * @return 店家二维码
+	 * @throws GenericEntityException
+	 */
+	public static String getOrGeneratePartyGroupQRcode(String organizationPartyId, Delegator delegator) throws GenericEntityException{
+
+		String qrCodeStr = null;
+		Map<String, Object> lookupFields = FastMap.newInstance();
+		lookupFields.put("partyId", organizationPartyId);
+		lookupFields.put("partyIdentificationTypeId", "STORE_QR_CODE");
+		GenericValue partyIdentification = delegator.findByPrimaryKey("PartyIdentification", lookupFields);
+		if(UtilValidate.isEmpty(partyIdentification)){
+			qrCodeStr = STORE_QR_CODE_PREFIX + UUID.randomUUID().toString();
+			lookupFields.put("idValue", qrCodeStr);
+			delegator.makeValue("PartyIdentification", lookupFields).create();
+		}else{
+			qrCodeStr = partyIdentification.getString("idValue");
+		}
+		return qrCodeStr;
+	}
+	
+	/**
+	 * 从 PartyIdentification 获取店家的二维码，如果没有则生成一个
+	 * @param organizationPartyId 店家partyId
+	 * @param delegator
+	 * @return 店家二维码，若发生异常则返回null
+	 */
+	public static String getOrGeneratePartyGroupQRcodeNoException(String organizationPartyId, Delegator delegator){
+		String qrCodeStr = null;
+		try {
+			qrCodeStr = getOrGeneratePartyGroupQRcode(organizationPartyId, delegator);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+		}
+		return qrCodeStr;
+	}
+	
+	/**
+	 * 根据商家二维码获取商家partyGroup实体
+	 * @param qrCode 商家二维码
+	 * @param delegator
+	 * @return 返回对应的商家实体，若未找到返回null
+	 * @throws GenericEntityException
+	 */
+	public static GenericValue getPartyGroupByQRcode(String qrCode, Delegator delegator) throws GenericEntityException{
+		GenericValue partyGroup = null;
+		Map<String, Object> lookupFields = FastMap.newInstance();
+		lookupFields.put("idValue", qrCode);
+		lookupFields.put("partyIdentificationTypeId", "STORE_QR_CODE");
+		GenericValue partyIdentification = EntityUtil.getFirst(delegator.findByAnd("PartyIdentification", lookupFields));
+		if(UtilValidate.isNotEmpty(partyIdentification)){
+			partyGroup = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", partyIdentification.getString("partyId")));
+		}
+		return partyGroup;
+	}
+
+	/**
+	 * 根据商家二维码获取商家partyGroup实体
+	 * @param qrCode 商家二维码
+	 * @param delegator
+	 * @return 返回对应的商家实体，若未找到或发生异常都返回null
+	 */
+	public static GenericValue getPartyGroupByQRcodeNoException(String qrCode, Delegator delegator){
+		GenericValue partyGroup = null;
+		try {
+			partyGroup = getPartyGroupByQRcode(qrCode, delegator);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+		}
+		return partyGroup;
+	}
+
 }
