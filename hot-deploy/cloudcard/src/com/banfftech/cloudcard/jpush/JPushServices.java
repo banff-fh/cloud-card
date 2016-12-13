@@ -175,7 +175,7 @@ public class JPushServices {
 		if(UtilValidate.isNotEmpty(content)){
 			payloadBuilder.setNotification(
 					Notification.newBuilder().addPlatformNotification(
-							IosNotification.newBuilder().setAlert(content).addExtras(extras).build())
+							IosNotification.newBuilder().setAlert(content).setBadge(0).addExtras(extras).build())
 					.addPlatformNotification(
 							AndroidNotification.newBuilder().setAlert(content).setTitle(title).addExtras(extras).build())
 					.build());
