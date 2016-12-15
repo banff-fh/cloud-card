@@ -122,7 +122,8 @@ public class CommonEvents {
 
 		if (Debug.infoOn()) {
 			String token = (String) attrMap.remove("token");
-			StringBuilder logsb = new StringBuilder(request.getPathInfo());
+			StringBuilder logsb = new StringBuilder(500);
+			logsb.append(request.getPathInfo());
 			logsb.append(System.getProperty("line.separator"));
 			logsb.append("output:");
 			logsb.append(System.getProperty("line.separator"));

@@ -64,8 +64,8 @@
     </filter>
     
     <filter-mapping><filter-name>ContextFilter</filter-name><url-pattern>/*</url-pattern></filter-mapping>
-    <filter-mapping><filter-name>CrossOriginFilter</filter-name><url-pattern>/*</url-pattern></filter-mapping>
-    <filter-mapping><filter-name>CloudCardLogFilter</filter-name><url-pattern>/*</url-pattern></filter-mapping>
+    <filter-mapping><filter-name>CrossOriginFilter</filter-name><url-pattern>/control/*</url-pattern></filter-mapping>
+    <filter-mapping><filter-name>CloudCardLogFilter</filter-name><url-pattern>/control/*</url-pattern></filter-mapping>
 
     <listener><listener-class>org.ofbiz.webapp.control.ControlEventListener</listener-class></listener>
     <listener><listener-class>org.ofbiz.webapp.control.LoginEventListener</listener-class></listener>

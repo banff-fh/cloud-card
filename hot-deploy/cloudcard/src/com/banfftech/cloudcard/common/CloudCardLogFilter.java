@@ -41,7 +41,8 @@ public class CloudCardLogFilter implements Filter {
         }
 
         if (Debug.infoOn()) {
-			StringBuilder logsb = new StringBuilder(httpRequest.getPathInfo());
+			StringBuilder logsb = new StringBuilder(500);
+			logsb.append(httpRequest.getPathInfo());
 			logsb.append(System.getProperty("line.separator"));
 			logsb.append("input:");
 			logsb.append(System.getProperty("line.separator"));
