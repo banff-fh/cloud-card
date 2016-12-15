@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
+import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
 
 import net.sf.json.JSON;
@@ -116,12 +117,26 @@ public class CommonEvents {
 		attrMap.put("code", code);
 		attrMap.put("msg", msg);
 
-        // create a JSON Object for return
-        JSONObject json = JSONObject.fromObject(attrMap);
-        writeJSONtoResponse(json, request.getMethod(), response);
+		// create a JSON Object for return
+		JSONObject json = JSONObject.fromObject(attrMap);
 
-        return "success";
-    }
+		if (Debug.infoOn()) {
+			String token = (String) attrMap.remove("token");
+			StringBuilder logsb = new StringBuilder(request.getPathInfo());
+			logsb.append(System.getProperty("line.separator"));
+			logsb.append("output:");
+			logsb.append(System.getProperty("line.separator"));
+			logsb.append(UtilMisc.printMap(attrMap));
+			if (UtilValidate.isNotEmpty(token)) {
+				logsb.append("For security reasons, a token field was removed when this log was logged.");
+				logsb.append(System.getProperty("line.separator"));
+			}
+			Debug.logInfo(logsb.toString(), "cloudcard");
+		}
+
+		writeJSONtoResponse(json, request.getMethod(), response);
+		return "success";
+	}
 
     private static void writeJSONtoResponse(JSON json, String httpMethod, HttpServletResponse response) {
         String jsonStr = json.toString();

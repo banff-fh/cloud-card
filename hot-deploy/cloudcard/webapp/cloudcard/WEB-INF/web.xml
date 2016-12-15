@@ -47,7 +47,7 @@
         <init-param><param-name>errorCode</param-name><param-value>403</param-value></init-param>
         <init-param><param-name>redirectPath</param-name><param-value>/control/main</param-value></init-param>
     </filter>
-     <filter>
+    <filter>
         <filter-name>CrossOriginFilter</filter-name>
         <display-name>CrossOriginFilter</display-name>
         <filter-class>com.banfftech.cloudcard.common.CrossOriginFilter</filter-class>
@@ -57,8 +57,15 @@
             <param-value>*</param-value>
         </init-param>
     </filter>
+     <filter>
+        <filter-name>CloudCardLogFilter</filter-name>
+        <display-name>CloudCardLogFilter</display-name>
+        <filter-class>com.banfftech.cloudcard.common.CloudCardLogFilter</filter-class>
+    </filter>
+    
     <filter-mapping><filter-name>ContextFilter</filter-name><url-pattern>/*</url-pattern></filter-mapping>
     <filter-mapping><filter-name>CrossOriginFilter</filter-name><url-pattern>/*</url-pattern></filter-mapping>
+    <filter-mapping><filter-name>CloudCardLogFilter</filter-name><url-pattern>/*</url-pattern></filter-mapping>
 
     <listener><listener-class>org.ofbiz.webapp.control.ControlEventListener</listener-class></listener>
     <listener><listener-class>org.ofbiz.webapp.control.LoginEventListener</listener-class></listener>

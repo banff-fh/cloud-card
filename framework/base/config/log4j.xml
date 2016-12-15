@@ -134,6 +134,15 @@
             <param name="ConversionPattern" value="%d (%t) [%24F:%-3L:%-5p]%x %m%n"/>
         </layout>
     </appender>
+    
+    <appender name="cloudcard-log" class="org.apache.log4j.RollingFileAppender">
+        <param name="maxFileSize" value="5000KB"/>
+        <param name="maxBackupIndex" value="10"/>
+        <param name="File" value="runtime/logs/cloudcard.log"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d (%t) %m%n"/>
+        </layout>
+    </appender>
 
     <category name="org.ofbiz.base.converter.Converters">
         <priority value="warn"/>
@@ -195,6 +204,11 @@
         <appender-ref ref="freemarker-log"/>
     </category>
 
+ 	<category name="cloudcard" additivity="false">
+        <priority value="info"/>
+        <appender-ref ref="cloudcard-log"/>
+    </category>
+    
     <!-- root logger -->
     <root>
         <priority value="all"></priority>
