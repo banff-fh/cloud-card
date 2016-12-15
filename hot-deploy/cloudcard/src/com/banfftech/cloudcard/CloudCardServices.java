@@ -689,10 +689,10 @@ public class CloudCardServices {
 	
 
 	public static Map<String, Object> customerWithdraw(DispatchContext dctx, Map<String, Object> context) {
-		LocalDispatcher dispatcher = dctx.getDispatcher();
-		Delegator delegator = dctx.getDelegator();
-		GenericValue userLogin = (GenericValue) context.get("userLogin");
-		Locale locale = (Locale) context.get("locale");
+//		LocalDispatcher dispatcher = dctx.getDispatcher();
+//		Delegator delegator = dctx.getDelegator();
+//		GenericValue userLogin = (GenericValue) context.get("userLogin");
+//		Locale locale = (Locale) context.get("locale");
 		
 		// TODO 
 		return ServiceUtil.returnSuccess();
