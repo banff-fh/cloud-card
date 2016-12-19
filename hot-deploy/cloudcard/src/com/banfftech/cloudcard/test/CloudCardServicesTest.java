@@ -1,14 +1,11 @@
 package com.banfftech.cloudcard.test;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.ofbiz.base.util.Debug;
-import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.service.GenericServiceException;
@@ -17,11 +14,11 @@ import org.ofbiz.service.testtools.OFBizTestCase;
 
 import com.banfftech.cloudcard.CloudCardHelper;
 
+import javolution.util.FastList;
 import javolution.util.FastMap;
 
 /**
- * @author subenkun
- *
+ * 注意，里面每个test打头的方法可算是一个 testCase，但是 这些case执行的顺序并不固定，所以各个test方法之间不应该有数据的依赖
  */
 public class CloudCardServicesTest extends OFBizTestCase {
 
@@ -35,80 +32,38 @@ public class CloudCardServicesTest extends OFBizTestCase {
 	 * @throws GenericEntityException
 	 */
 	public void testGenNewCloudCardCode() throws GenericServiceException, GenericEntityException{
-		GenericValue userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", "ccadmin"), false);
-		
-		// 生成15张新卡
-		Map<String, Object> ctx = FastMap.newInstance();
-		ctx.put("userLogin", userLogin);
-		ctx.put("quantity", "15");
-		ctx.put("currencyUomId", "CNY");
-		ctx.put("finAccountName", "测试商店一的卡15张");
-		ctx.put("organizationPartyId", "testStore1");
-		Map<String, Object> resp = dispatcher.runSync("genNewCloudCardCode", ctx);
-		
-		assertTrue("Service 'genNewCloudCardCode' for testStore1 SHOULD result success", ServiceUtil.isSuccess(resp));
-		
-		// 查询生成的卡条数，应该只有15张
-		Map<String, String> lookupMap = UtilMisc.toMap("organizationPartyId", "Company");
-		lookupMap.put("finAccountName", "测试商店一的卡15张");
-		lookupMap.put("finAccountTypeId", "GIFTCERT_ACCOUNT");
-		lookupMap.put("distributorPartyId", "testStore1");
-		lookupMap.put("statusId", "FNACT_CREATED");
-		List<GenericValue> cloudCardList = delegator.findByAnd("FinAccountAndPaymentMethodAndGiftCard", lookupMap);
 
-		assertEquals("this service call for testStore1 should generate 15 cards", 15, cloudCardList.size());
+		// 生成15张新卡
+		int count = 15;
+		Map<String, Object> resp = callGenNewCloudCardCode("testStore1", "测试商店一的卡15张", count);
+		assertTrue("Service 'genNewCloudCardCode' for testStore1 SHOULD result success", ServiceUtil.isSuccess(resp));
+
+		// 查询生成的卡条数，应该只有15张
+		List<GenericValue> cloudCardList = queryCardForStoreFromDB("testStore1", "测试商店一的卡15张", "FNACT_CREATED");
+		assertEquals("this service call for testStore1 should generate " + count + " cards", count, cloudCardList.size());
 		
 		// 为店家二生成100张新卡
-		ctx.clear();
-		ctx.put("userLogin", userLogin);
-		ctx.put("quantity", "100");
-		ctx.put("currencyUomId", "CNY");
-		ctx.put("finAccountName", "测试商店二的卡");
-		ctx.put("organizationPartyId", "testStore2");
-		resp = dispatcher.runSync("genNewCloudCardCode", ctx);
-		
+		count = 100;
+		resp = callGenNewCloudCardCode("testStore2", "测试商店二的卡", count);
 		assertTrue("Service 'genNewCloudCardCode' for testStore2 SHOULD result success", ServiceUtil.isSuccess(resp));
 		
 		// 查询生成的卡条数，应该有100张
-		lookupMap = UtilMisc.toMap("organizationPartyId", "Company");
-		lookupMap.put("finAccountName", "测试商店二的卡");
-		lookupMap.put("finAccountTypeId", "GIFTCERT_ACCOUNT");
-		lookupMap.put("distributorPartyId", "testStore2");
-		lookupMap.put("statusId", "FNACT_CREATED");
-		cloudCardList = delegator.findByAnd("FinAccountAndPaymentMethodAndGiftCard", lookupMap);
+		cloudCardList = queryCardForStoreFromDB("testStore2", "测试商店二的卡", "FNACT_CREATED");
+		assertEquals("this service call for testStore2 should generate " + count + " cards", count, cloudCardList.size());
 
-		assertEquals("this service call for testStore2 should generate 15 cards", 100, cloudCardList.size());
-		
 		// 不存在的店家服务应该调用失败
-/*		ctx.clear();
-		ctx.put("userLogin", userLogin);
-		ctx.put("quantity", "1");
-		ctx.put("currencyUomId", "CNY");
-		ctx.put("finAccountName", "不存在的店家不应该出现的卡");
-		ctx.put("organizationPartyId", "testStore_NA_");
-		resp = dispatcher.runSync("genNewCloudCardCode", ctx);
-		
-		assertFalse("Service 'genNewCloudCardCode' for testStore_NA_  SHOULD NOT result success", ServiceUtil.isSuccess(resp));
-		*/
-		// 再为商店二生成30张卡
-		ctx.clear();
-		ctx.put("userLogin", userLogin);
-		ctx.put("quantity", "30");
-		ctx.put("currencyUomId", "CNY");
-		ctx.put("finAccountName", "测试商店二的卡");
-		ctx.put("organizationPartyId", "testStore2");
-		resp = dispatcher.runSync("genNewCloudCardCode", ctx);
+		/*count = 1;
+		resp = callGenNewCloudCardCode("testStore_NA_", "不存在的店家不应该出现的卡", count);
+		assertFalse("Service 'genNewCloudCardCode' for testStore_NA_  SHOULD NOT result success", ServiceUtil.isSuccess(resp));	
+		 */
 
+		// 再为商店二生成30张卡
+		count = 30;
+		resp = callGenNewCloudCardCode("testStore2", "测试商店二的卡", count);
 		assertTrue("Service 'genNewCloudCardCode' for testStore2 SHOULD result success", ServiceUtil.isSuccess(resp));
 
 		// 查询生成的卡条数，应该有100张+30张 = 130张
-		lookupMap = UtilMisc.toMap("organizationPartyId", "Company");
-		lookupMap.put("finAccountName", "测试商店二的卡");
-		lookupMap.put("finAccountTypeId", "GIFTCERT_ACCOUNT");
-		lookupMap.put("distributorPartyId", "testStore2");
-		lookupMap.put("statusId", "FNACT_CREATED");
-		cloudCardList = delegator.findByAnd("FinAccountAndPaymentMethodAndGiftCard", lookupMap);
-
+		cloudCardList = queryCardForStoreFromDB("testStore2", "测试商店二的卡", "FNACT_CREATED");
 		assertEquals("testStore2 should has 130 cards now!", 130, cloudCardList.size());
 
 	}
@@ -155,11 +110,115 @@ public class CloudCardServicesTest extends OFBizTestCase {
 		ctx.put("userLogin", userLogin);
 		ctx.put("qrCode", "ccs-1d34a959-7b79-4162-8644-36a5e86068fc");
 		resp = dispatcher.runSync("getStoreInfoByQRcode", ctx);
-
 		assertFalse("this call of service 'getStoreInfoByQRcode' input invalid qrCode,  SHOULD NOT result success", ServiceUtil.isSuccess(resp));
 		
 	}
 	
+	/**
+	 * 测试开卡/充值
+	 * @throws GenericServiceException
+	 * @throws GenericEntityException
+	 */
+	public void testActivateCloudCardAndRecharge() throws GenericServiceException, GenericEntityException{
+		
+		// 生成2张新卡
+		Map<String, Object> resp = callGenNewCloudCardCode("testStore1", "测试充值用", 2);
+		assertTrue("Service 'genNewCloudCardCode' for testStore1 SHOULD result success", ServiceUtil.isSuccess(resp));
+
+		// 查询生成的卡条数，应该只有2张
+		List<GenericValue> cloudCardList = queryCardForStoreFromDB("testStore1", "测试充值用", "FNACT_CREATED");
+		assertEquals("should has 2 cards here", 2, cloudCardList.size());
+		
+		// 全部调整成可以激活的状态
+		List<GenericValue> toBeStore = FastList.newInstance();
+		for(GenericValue cc: cloudCardList){
+			GenericValue finAccount = delegator.findByPrimaryKey("FinAccount",UtilMisc.toMap("finAccountId", cc.get("finAccountId")));
+			finAccount.put("statusId", "FNACT_PUBLISHED");
+			toBeStore.add(finAccount);
+		}
+		delegator.storeAll(toBeStore);
+
+
+		String cardCode1_1 = cloudCardList.get(0).getString("finAccountCode");
+		String cardCode1_2 = cloudCardList.get(1).getString("finAccountCode");
+		String store1_userLoginId = "userTestSyy1";// 商家一的收银人员
+		String store2_userLoginId = "userTestSyy2";// 商家二的收银人员
+
+
+		// 测试1 激活新卡同时充值200
+		BigDecimal amount = new BigDecimal(200.00f);
+		resp = callActivateCloudCardAndRecharge(store1_userLoginId, cardCode1_1, amount, "13913913913");
+
+		//服务本身应当调用成功
+		assertTrue("Service 'activateCloudCardAndRecharge' SHOULD result success", ServiceUtil.isSuccess(resp));
+		
+		String cardId = (String) resp.get("cardId"); //服务返回 卡Id
+		String customerPartyId = (String) resp.get("customerPartyId"); //服务返回 客户Id
+
+		assertTrue("cardId SHOULD NOT EMPTY", UtilValidate.isNotEmpty(cardId)); 
+		assertTrue("customerPartyId SHOULD NOT EMPTY", UtilValidate.isNotEmpty(customerPartyId)); 
+		assertEquals("amount SHOULD Equals the amount of recharge", amount, resp.get("amount")); 
+
+		BigDecimal cardBalance = (BigDecimal) resp.get("cardBalance");
+		assertTrue("cardBalance SHOULD NOT EMPTY", UtilValidate.isNotEmpty(cardBalance)); 
+		assertEquals("cardBalance SHOULD Equals the amount of recharge", amount, cardBalance); 
+		
+		
+		// 测试2 同一张卡再次充值500
+		BigDecimal amount2 = new BigDecimal(500.00f);
+		resp = callActivateCloudCardAndRecharge(store1_userLoginId, cardCode1_1, amount2, null);
+		//服务本身应当调用成功
+		assertTrue("Service 'activateCloudCardAndRecharge' SHOULD result success", ServiceUtil.isSuccess(resp));
+
+		String cardId2 = (String) resp.get("cardId");
+		String customerPartyId2 = (String) resp.get("customerPartyId");
+
+		assertTrue("cardId SHOULD NOT EMPTY", UtilValidate.isNotEmpty(cardId2)); 
+		assertTrue("customerPartyId SHOULD NOT EMPTY", UtilValidate.isNotEmpty(customerPartyId2)); 
+		
+		// cardId 和 customerPartyId 应该和开卡的时候是相同的
+		assertEquals("cardId SHOULD Be the same cardId of last recharge", cardId, cardId2); 
+		assertEquals("customerPartyId SHOULD Be the same customerPartyId of last recharge", customerPartyId, customerPartyId2); 
+		
+		assertEquals("amount SHOULD Equals the amount of recharge", amount2, resp.get("amount")); 
+
+		BigDecimal newCardBalance = (BigDecimal) resp.get("cardBalance");
+		assertTrue("cardBalance SHOULD NOT EMPTY", UtilValidate.isNotEmpty(newCardBalance)); 
+
+		assertEquals("cardBalance SHOULD Equals the amount of recharge add the last cardBalance", 
+				amount2.add(cardBalance).setScale(CloudCardHelper.decimals, CloudCardHelper.rounding), 
+				newCardBalance); 
+		
+		// 测试3 激活卡时候不传入teleNumber 服务应当返回失败
+		resp = callActivateCloudCardAndRecharge(store1_userLoginId, cardCode1_2, new BigDecimal(500.00f), null);
+		assertFalse("Service 'activateCloudCardAndRecharge' activate a new card  SHOULD NOT result success when the teleNumber is Empty", ServiceUtil.isSuccess(resp));
+		
+		// 测试4 充值金额为0 服务应当返回失败
+		resp = callActivateCloudCardAndRecharge(store1_userLoginId, cardCode1_1,  CloudCardHelper.ZERO, null);
+		assertFalse("Service 'activateCloudCardAndRecharge' SHOULD NOT result success when the amount is zero", ServiceUtil.isSuccess(resp));
+		
+		// 测试5 充值金额为小于0 服务应当返回失败
+		resp = callActivateCloudCardAndRecharge(store1_userLoginId, cardCode1_1, new BigDecimal(-200.00f), null);
+		assertFalse("Service 'activateCloudCardAndRecharge' SHOULD NOT result success when the amount is LESS THAN zero", ServiceUtil.isSuccess(resp));
+		
+		// 测试6 错误的卡号 服务调用应该返回失败
+		resp = callActivateCloudCardAndRecharge(store1_userLoginId, "cardcode_NA_", new BigDecimal(300.00f), null);
+		assertFalse("Service 'activateCloudCardAndRecharge' SHOULD NOT result success when the cardCode is invalid", ServiceUtil.isSuccess(resp));
+		
+		// 测试7 错误商家充值(商家2 充值 商家1的卡) 服务调用应该返回失败
+		resp = callActivateCloudCardAndRecharge(store2_userLoginId, cardCode1_1, new BigDecimal(300.00f), null);
+		assertFalse("Service 'activateCloudCardAndRecharge' [recharge] SHOULD NOT result success when the store is not the distributor of card", ServiceUtil.isSuccess(resp));
+		
+		// 测试8 错误商家激活卡(商家2 激活 商家1的卡) 服务调用应该返回失败
+		resp = callActivateCloudCardAndRecharge(store2_userLoginId, cardCode1_2, new BigDecimal(300.00f), "13913913913");
+		assertFalse("Service 'activateCloudCardAndRecharge' [activate]  SHOULD NOT result success when the store is not the distributor of card", ServiceUtil.isSuccess(resp));
+
+		// 测试9 卖卡额度不够
+		resp =  callActivateCloudCardAndRecharge(store1_userLoginId, cardCode1_1, new BigDecimal(9999999999.00f), null);
+		//服务调用应该返回失败
+		assertFalse("Service 'activateCloudCardAndRecharge' SHOULD NOT result success when the amount of card is greate than the limit of store", ServiceUtil.isSuccess(resp));
+
+	}
 	
 	
 /*	public void testCloudCardServicesOperations() throws GenericServiceException, GenericEntityException{
@@ -227,4 +286,75 @@ public class CloudCardServicesTest extends OFBizTestCase {
         ctx.clear();
         
 	}*/
+	
+	
+	/**
+	 * 调用genNewCloudCardCode服务
+	 * @param organizationPartyId
+	 * @param finAccountName
+	 * @param quantity
+	 * @return
+	 * @throws GenericServiceException
+	 * @throws GenericEntityException
+	 */
+	private Map<String, Object> callGenNewCloudCardCode(String organizationPartyId, String finAccountName, int quantity) throws GenericServiceException, GenericEntityException{
+		GenericValue userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", "system"), false);
+		Map<String, Object> ctx = FastMap.newInstance();
+		ctx.put("userLogin", userLogin);
+		ctx.put("quantity", ""+quantity);
+		ctx.put("currencyUomId", "CNY");
+		ctx.put("finAccountName", finAccountName);
+		ctx.put("organizationPartyId", organizationPartyId);
+		return dispatcher.runSync("genNewCloudCardCode", ctx);
+	}
+
+	/**
+	 * 直接从数据库查询商家卡列表
+	 * @param organizationPartyId
+	 * @param finAccountName
+	 * @param statusId
+	 * @return
+	 * @throws GenericServiceException
+	 * @throws GenericEntityException
+	 */
+	private List<GenericValue> queryCardForStoreFromDB(String organizationPartyId, String finAccountName, String statusId) throws GenericServiceException, GenericEntityException {
+		Map<String, String> lookupMap = UtilMisc.toMap("organizationPartyId", "Company");
+
+		if(null != finAccountName){
+			lookupMap.put("finAccountName", finAccountName);
+		}
+
+		lookupMap.put("finAccountTypeId", "GIFTCERT_ACCOUNT");
+		lookupMap.put("distributorPartyId", organizationPartyId);
+
+		if(null != statusId){
+			lookupMap.put("statusId", statusId);
+		}
+		return delegator.findByAnd("FinAccountAndPaymentMethodAndGiftCard", lookupMap);
+	}
+	
+	/**
+	 * 调用充值开卡服务
+	 * @param userLoginId 店家userloginId
+	 * @param cardCode
+	 * @param amount
+	 * @param teleNumber
+	 * @return
+	 * @throws GenericServiceException
+	 * @throws GenericEntityException
+	 */
+	private Map<String, Object> callActivateCloudCardAndRecharge(String userLoginId, String cardCode, BigDecimal amount, String teleNumber)  throws GenericServiceException, GenericEntityException {
+		
+		GenericValue userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", userLoginId), false);
+		String organizationPartyId = CloudCardHelper.getOrganizationPartyId(delegator,  userLogin.getString("partyId")).get(0);
+
+		Map<String, Object> ctx = FastMap.newInstance();
+		ctx.put("userLogin", userLogin);
+		ctx.put("organizationPartyId", organizationPartyId);
+		ctx.put("teleNumber", teleNumber);
+		ctx.put("cardCode", cardCode);
+		ctx.put("amount", amount);
+		return dispatcher.runSync("activateCloudCardAndRecharge", ctx);
+	}
+	
 }

@@ -42,13 +42,17 @@ under the License.
     <Party partyId="testSyy1" partyTypeId="PERSON"/>
     <Person partyId="testSyy1" firstName="收银员" lastName="测试商家一"/>
     <PartyRole partyId="testSyy1" roleTypeId="MANAGER"/>
+    <UserLogin userLoginId="userTestSyy1" currentPassword="{no need password}" passwordHint="" partyId="testSyy1"/>
+    <!-- TODO, 安全组需要调整 -->
+    <UserLoginSecurityGroup userLoginId="userTestSyy1" groupId="BIZADMIN" fromDate="2016-01-01 00:00:00.000"/>
+    
     
     <ContactMech             contactMechId="CM_testSyy1"  contactMechTypeId="TELECOM_NUMBER"/>
     <TelecomNumber           contactMechId="CM_testSyy1"  countryCode="86" contactNumber="15615615615" />
     <PartyContactMech        contactMechId="CM_testSyy1"  partyId="testSyy1" fromDate="2016-01-01 00:00:00.000"/>
     <PartyContactMechPurpose contactMechId="CM_testSyy1"  partyId="testSyy1" fromDate="2016-01-01 00:00:00.000" contactMechPurposeTypeId="AS_USER_LOGIN_ID"/>
 
-	<PartyRelationship partyIdFrom="testStore1" partyIdTo="testSyy1" roleTypeIdFrom="INTERNAL_ORGANIZATIO" roleTypeIdTo="MANAGER" fromDate="2016-01-01 00:00:00.000" />
+	<PartyRelationship partyIdFrom="testStore1" partyIdTo="testSyy1" roleTypeIdFrom="INTERNAL_ORGANIZATIO" roleTypeIdTo="MANAGER"  partyRelationshipTypeId="EMPLOYMENT" fromDate="2016-01-01 00:00:00.000" />
 	
 	<!-- 商家二 -->
 	<Party partyId="testStore2" partyTypeId="PARTY_GROUP"/>
@@ -73,12 +77,15 @@ under the License.
 	<Party partyId="testSyy2" partyTypeId="PERSON"/>
     <Person partyId="testSyy2" firstName="收银员" lastName="测试商家二"/>
     <PartyRole partyId="testSyy2" roleTypeId="MANAGER"/>
+    <UserLogin userLoginId="userTestSyy2" currentPassword="{no need password}" passwordHint="" partyId="testSyy2"/>
+    <!-- TODO, 安全组需要调整 -->
+    <UserLoginSecurityGroup userLoginId="userTestSyy2" groupId="BIZADMIN" fromDate="2016-01-01 00:00:00.000"/>
 
     <ContactMech             contactMechId="CM_testSyy2"  contactMechTypeId="TELECOM_NUMBER"/>
     <TelecomNumber           contactMechId="CM_testSyy2"  countryCode="86" contactNumber="15715715715" />
     <PartyContactMech        contactMechId="CM_testSyy2"  partyId="testSyy2" fromDate="2016-01-01 00:00:00.000"/>
     <PartyContactMechPurpose contactMechId="CM_testSyy2"  partyId="testSyy2" fromDate="2016-01-01 00:00:00.000" contactMechPurposeTypeId="AS_USER_LOGIN_ID"/>
 
-	<PartyRelationship partyIdFrom="testStore2" partyIdTo="testSyy2" roleTypeIdFrom="INTERNAL_ORGANIZATIO" roleTypeIdTo="MANAGER" fromDate="2016-01-01 00:00:00.000" />
+	<PartyRelationship partyIdFrom="testStore2" partyIdTo="testSyy2" roleTypeIdFrom="INTERNAL_ORGANIZATIO" roleTypeIdTo="MANAGER" partyRelationshipTypeId="EMPLOYMENT" fromDate="2016-01-01 00:00:00.000" />
 
 </entity-engine-xml>
