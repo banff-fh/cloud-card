@@ -371,7 +371,6 @@ public class CloudCardHelper {
 	 * 获取商家用于平台对账结算的金融账户
 	 * @param delegator
 	 * @param organizationPartyId
-	 * @param useCache
 	 * @return
 	 */
 	public static GenericValue getSettlementAccount(Delegator delegator,  String organizationPartyId) {

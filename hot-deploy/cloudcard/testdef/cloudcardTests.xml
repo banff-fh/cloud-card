@@ -21,8 +21,46 @@
 <test-suite suite-name="cloudcardTests"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/test-suite.xsd">
-    
-    <test-case case-name="auto-cloudCardQueryServices-tests">
+
+<!-- 
+
+	单元测试的注意事项：
+	
+		1、单元测试结束前ofbiz会清理测试产生的数据，
+			但是这个清理过程似乎并没有按照数据产生的顺序进行逆序操作，
+			导致清理过程执行delete语句时候出现不能级联删除问题(要删除的这条数据被子表引用了)，不能达到清理本次测试产生的数据的目的
+
+		2、由于上述原因1，所以测试的时候，应当将entityengine.xml中
+
+			<delegator name="default"  .... />
+			<delegator name="default-no-eca"  .... />
+			<delegator name="test"  .... />
+			
+			每一个的 datasource-name 都设置为 derby数据源，比如： localderby localderbyolap localderbytenant
+
+		3、如果是第一次测试，还需要先 ant start 启动ofbiz，为derby数据库自动建表， 建表完成后 执行 ant load-seed 导入基础种子数据
+			
+			基础种子数据导入完成后，可以将
+				<delegator name="default"  .... />
+				<delegator name="default-no-eca"  .... />
+			
+			的 datasource-name 设置回自己的 mysql数据源 或 其它数据源，只保留test的继续使用derby，、
+			
+			但需要注意，如果后续开发过程中如果有新的seed数据，需要再次切好到 derby数据源，进行基础数据增量导入，以保证涉及到新增种子数据的测试可用
+
+		4、如果执行了 ant clean-data 或 ant clean-all 上述2、3过程需要重做， 因为这些命令会删除derby数据库
+
+	测试方法:
+		ant run-test-suite -Dtest.component=cloudcard -Dtest.suiteName=cloudcardTests
+
+ -->
+
+
+    <test-case case-name="cloudcard-tests-data-load">
+        <entity-xml action="load" entity-xml-url="component://cloudcard/testdef/data/CloudCardTestData.xml"/>
+    </test-case>
+
+    <test-case case-name="cloudcard-tests-services-test">
         <junit-test-suite class-name="com.banfftech.cloudcard.test.CloudCardServicesTest"/>
     </test-case>
     

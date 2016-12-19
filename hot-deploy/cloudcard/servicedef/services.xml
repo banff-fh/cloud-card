@@ -90,11 +90,11 @@
         <attribute name="customerPartyId" type="String" mode="OUT" optional="false"><description>客户partyId</description></attribute>
         <attribute name="cardBalance" type="BigDecimal" mode="OUT" optional="false"><description>可用余额</description></attribute>
     </service>
-	
+
     <service name="cloudCardWithdraw" engine="java"
             location="com.banfftech.cloudcard.CloudCardServices" invoke="cloudCardWithdraw" auth="true">
         <description>云卡商家扫卡二维码收款</description>
-        <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家partyId</description></attribute>
+        <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>商家partyId</description></attribute>
         <attribute name="cardCode" type="String" mode="IN" optional="false"><description>卡二维码、条码等唯一标识数据</description></attribute>
         <attribute name="amount" type="BigDecimal" mode="INOUT" optional="false"><description>支付金额</description></attribute>
         
@@ -106,13 +106,14 @@
 	<service name="customerWithdraw" engine="java"
             location="com.banfftech.cloudcard.CloudCardServices" invoke="customerWithdraw" auth="true">
         <description>客户付款，比如扫商家二维码进行付款</description>
-        <attribute name="storeId" type="String" mode="IN" optional="true"><description>店家partyId,与qrCode二者输入其一，若二者同时输入，则忽略qrCode</description></attribute>
-        <attribute name="qrCode" type="String" mode="IN" optional="true"><description>店家二维码</description></attribute>
+        <attribute name="storeId" type="String" mode="IN" optional="true"><description>商家partyId,与qrCode二者输入其一，若二者同时输入，则忽略qrCode</description></attribute>
+        <attribute name="qrCode" type="String" mode="IN" optional="true"><description>商家二维码</description></attribute>
 
         <attribute name="amount" type="BigDecimal" mode="INOUT" optional="false"><description>支付金额</description></attribute>
         <attribute name="cardId" type="String" mode="INOUT" optional="false"><description>卡Id</description></attribute>
 
-        <attribute name="storeId" type="String" mode="OUT" optional="false"><description>店家partyId,与qrCode二者输入其一，若二者同时输入，则忽略qrCode</description></attribute>
+        <attribute name="storeId" type="String" mode="OUT" optional="false"><description>商家partyId</description></attribute>
+        <attribute name="storeName" type="String" mode="OUT" optional="false"><description>商家名</description></attribute>
         <attribute name="cardBalance" type="BigDecimal" mode="OUT" optional="false"><description>可用余额</description></attribute>
     </service>
 	

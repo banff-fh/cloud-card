@@ -658,6 +658,11 @@ public class CloudCardQueryServices {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
+		
+		if(null == partyGroup){
+			Debug.logInfo("colud not find the PartyGroup by qrCode[" + qrCode + "]", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardStoreQRcodeInvalid", locale));
+		}
 
 		String storeName = partyGroup.getString("groupName");
 		String storeId = partyGroup.getString("partyId");
