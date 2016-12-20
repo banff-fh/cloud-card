@@ -144,10 +144,7 @@ public class CloudCardHelper {
 		
 		GenericValue customer;
 		try {
-			customer = EntityUtil.getFirst(delegator.findList("TelecomNumberAndUserLogin", 
-					EntityCondition.makeCondition(
-							EntityCondition.makeCondition(UtilMisc.toMap("contactNumber", teleNumber)), 
-							EntityUtil.getFilterByDateExpr()), null, UtilMisc.toList("partyId DESC"), null, false));
+			customer = getUserByTeleNumber(delegator, teleNumber);
 		} catch (GenericEntityException e) {
 			Debug.logError(e, module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
@@ -728,4 +725,18 @@ public class CloudCardHelper {
 		return partyGroup;
 	}
 
+	/**
+	 * 通过手机号码查询用户
+	 * @param delegator
+	 * @param teleNumber
+	 * @return 返回的是TelecomNumberAndUserLogin实体，其中包含 partyId 和 userLoginId
+	 * @throws GenericEntityException
+	 */
+	public static GenericValue getUserByTeleNumber(Delegator delegator, String teleNumber)
+			throws GenericEntityException {
+		return EntityUtil.getFirst(delegator.findList("TelecomNumberAndUserLogin", 
+				EntityCondition.makeCondition(
+						EntityCondition.makeCondition(UtilMisc.toMap("contactNumber", teleNumber)), 
+						EntityUtil.getFilterByDateExpr()), null, UtilMisc.toList("partyId DESC"), null, false));
+	}
 }

@@ -101,10 +101,7 @@ public class SmsServices {
 
 		GenericValue customer;
 		try {
-			customer = EntityUtil.getFirst(delegator.findList("TelecomNumberAndUserLogin", 
-					EntityCondition.makeCondition(
-							EntityCondition.makeCondition(UtilMisc.toMap("contactNumber", teleNumber)), 
-							EntityUtil.getFilterByDateExpr()), null, UtilMisc.toList("partyId DESC"), null, false));
+			customer = CloudCardHelper.getUserByTeleNumber(delegator, teleNumber);
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
@@ -222,10 +219,7 @@ public class SmsServices {
 
 		GenericValue customer;
 		try {
-			customer = EntityUtil.getFirst(delegator.findList("TelecomNumberAndUserLogin", 
-					EntityCondition.makeCondition(
-							EntityCondition.makeCondition(UtilMisc.toMap("contactNumber", teleNumber)), 
-							EntityUtil.getFilterByDateExpr()), null, UtilMisc.toList("partyId DESC"), null, false));
+			customer = CloudCardHelper.getUserByTeleNumber(delegator, teleNumber);
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
@@ -301,7 +295,5 @@ public class SmsServices {
 
 		return result;
 	}
-	
-	
 	
 }
