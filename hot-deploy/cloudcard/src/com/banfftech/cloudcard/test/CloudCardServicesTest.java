@@ -1,6 +1,7 @@
 package com.banfftech.cloudcard.test;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
@@ -71,8 +72,17 @@ public class CloudCardServicesTest extends OFBizTestCase {
 	/**
 	 *  一个不存在的商家id {@value}
 	 */
-	public static final String STORE_ID_NA_ = "testStore_NA_"; 
+	public static final String STORE_ID_NA_ = "testStore_NA_";
 
+	/**
+	 * 一个客户手机号 {@value}
+	 */
+	public static final String CUSTOMER_1_TEL = "13913913913";
+
+	/**
+	 * 另一个客户手机号 {@value}
+	 */
+	public static final String CUSTOMER_2_TEL = "13813813813";
 
 	public static int decimals = UtilNumber.getBigDecimalScale("finaccount.decimals");
     public static int rounding = UtilNumber.getBigDecimalRoundingMode("finaccount.rounding");
@@ -231,5 +241,53 @@ public class CloudCardServicesTest extends OFBizTestCase {
 		ctx.put("organizationPartyId", storeId);
 		ctx.put("cardCode", cardCode);
 		return dispatcher.runSync("getCardInfoByCode", ctx);
+	}
+	
+	/**
+	 * 调用卡授权服务
+	 * @param userTeleNumber 用户
+	 * @param cardId 要授权的卡id
+	 * @param amount 授权金额
+	 * @param fromDate 授权开始时间
+	 * @param thruDate 授权结束时间
+	 * @param days 授权几天
+	 * @param teleNumber 授权给谁
+	 * @return
+	 * @throws GenericServiceException
+	 * @throws GenericEntityException
+	 */
+	protected Map<String, Object> callCreateCardAuth(String userTeleNumber, String cardId, BigDecimal amount, Timestamp fromDate, Timestamp thruDate, int days, String teleNumber)  throws GenericServiceException, GenericEntityException {
+
+		GenericValue user = CloudCardHelper.getUserByTeleNumber(delegator, userTeleNumber);
+		GenericValue userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", user.getString("userLoginId")), false);
+
+		Map<String, Object> ctx = FastMap.newInstance();
+		ctx.put("userLogin", userLogin);
+		ctx.put("cardId", cardId);
+		ctx.put("amount", amount);
+		ctx.put("fromDate", fromDate);
+		ctx.put("thruDate", thruDate);
+		ctx.put("days", days);
+		ctx.put("teleNumber", teleNumber);
+		return dispatcher.runSync("createCardAuth", ctx);
+	}
+
+	/**
+	 *  调用 解除卡授权服务
+	 * @param userTeleNumber
+	 * @param cardId
+	 * @return
+	 * @throws GenericServiceException
+	 * @throws GenericEntityException
+	 */
+	protected Map<String, Object> callRevokeCardAuth(String userTeleNumber, String cardId)  throws GenericServiceException, GenericEntityException {
+		
+		GenericValue user = CloudCardHelper.getUserByTeleNumber(delegator, userTeleNumber);
+		GenericValue userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", user.getString("userLoginId")), false);
+		
+		Map<String, Object> ctx = FastMap.newInstance();
+		ctx.put("userLogin", userLogin);
+		ctx.put("cardId", cardId);
+		return dispatcher.runSync("revokeCardAuth", ctx);
 	}
 }

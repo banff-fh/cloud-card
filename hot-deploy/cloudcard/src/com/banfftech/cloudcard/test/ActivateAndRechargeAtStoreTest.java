@@ -60,7 +60,7 @@ public class ActivateAndRechargeAtStoreTest extends CloudCardServicesTest {
 
 		// 测试1 激活新卡同时充值200 服务应当调用成功
 		BigDecimal amount = new BigDecimal(200.00f);
-		Map<String, Object> resp = callActivateCloudCardAndRecharge(STORE_1_USER, cardCode1_1, amount, "13913913913");
+		Map<String, Object> resp = callActivateCloudCardAndRecharge(STORE_1_USER, cardCode1_1, amount, CUSTOMER_1_TEL);
 
 		assertTrue("Service 'activateCloudCardAndRecharge' SHOULD result success", ServiceUtil.isSuccess(resp));
 
@@ -122,7 +122,7 @@ public class ActivateAndRechargeAtStoreTest extends CloudCardServicesTest {
 		assertFalse("Service 'activateCloudCardAndRecharge' [recharge] SHOULD NOT result success when the store is not the distributor of card", ServiceUtil.isSuccess(resp));
 
 		// 测试8 不匹配的商家激活卡(商家2 激活 商家1的卡) 服务调用应该返回失败
-		resp = callActivateCloudCardAndRecharge(STORE_2_USER, cardCode1_2, new BigDecimal(300.00f), "13913913913");
+		resp = callActivateCloudCardAndRecharge(STORE_2_USER, cardCode1_2, new BigDecimal(300.00f), CUSTOMER_1_TEL);
 		assertFalse("Service 'activateCloudCardAndRecharge' [activate]  SHOULD NOT result success when the store is not the distributor of card", ServiceUtil.isSuccess(resp));
 
 		// 测试9 卖卡额度不够 服务调用应该返回失败

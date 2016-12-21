@@ -113,7 +113,7 @@ public class CloudCardQueryServicesTest extends CloudCardServicesTest {
 		List<GenericValue> cloudCardListB = queryCardForStoreFromDB(STORE_ID_2, null, "FNACT_CREATED");
 		assertTrue("should has " + countB + " more cards here", cloudCardListB.size()>= countB);
 		cloudCardListB = cloudCardListB.subList(0, countB);
-		
+
 		// 全部调整成待激活的状态
 		for(GenericValue cc: cloudCardListB){
 			GenericValue finAccount = delegator.findByPrimaryKey("FinAccount",UtilMisc.toMap("finAccountId", cc.get("finAccountId")));
@@ -130,10 +130,10 @@ public class CloudCardQueryServicesTest extends CloudCardServicesTest {
 
 		String cardCodeA_3 = cloudCardListA.get(2).getString("finAccountCode");
 		BigDecimal amountA_3 = new BigDecimal(155.12f).setScale(decimals, rounding);
-		
+
 		String cardCodeB_1 = cloudCardListB.get(0).getString("finAccountCode");
 		BigDecimal amountB_1 = new BigDecimal(444.44f).setScale(decimals, rounding);
-		
+
 		String cardCodeB_2 = cloudCardListB.get(1).getString("finAccountCode");
 		BigDecimal amountB_2 = new BigDecimal(600.01f).setScale(decimals, rounding);
 
