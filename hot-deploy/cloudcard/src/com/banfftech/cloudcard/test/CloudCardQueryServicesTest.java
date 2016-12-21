@@ -244,7 +244,7 @@ public class CloudCardQueryServicesTest extends CloudCardServicesTest {
 
 		String cardCodeA_3 = cloudCardListA.get(2).getString("finAccountCode");
 		BigDecimal amountA_3 = new BigDecimal(155.12f).setScale(decimals, rounding);
-		
+
 		String user1_tele_number = "aaaa11011011";
 		String user2_tele_number = "abbb22022022";
 
@@ -288,68 +288,127 @@ public class CloudCardQueryServicesTest extends CloudCardServicesTest {
 		assertEquals("The liabilities should be increased by the recharge amount:" + amountA_1.toPlainString(), 
 				liabilities.add(amountA_1).setScale(decimals, rounding), 
 				newLiabilities.setScale(decimals, rounding));
-	
-		// 测试2、 TODO
+		
+		
+
+		// 测试2、 再向另一个用户卖出一张卡 再查询
+		resp = callActivateCloudCardAndRecharge(STORE_1_USER, cardCodeA_2, amountA_2, user2_tele_number);
+		assertTrue("Service 'activateCloudCardAndRecharge' SHOULD result success", ServiceUtil.isSuccess(resp));
+		
+		resp = callGetLimitAndPresellInfo(STORE_1_USER, STORE_ID_1);
+		assertTrue("Service 'getLimitAndPresellInfo' SHOULD result success", ServiceUtil.isSuccess(resp));
+		
+		presellAmount = newPresellAmount;
+		limitAmount = newLimitAmount;
+		balance = newBalance;
+		liabilities = newLiabilities;
+		 
+		newPresellAmount = (BigDecimal) resp.get("presellAmount");
+		newLimitAmount = (BigDecimal) resp.get("limitAmount");
+		newBalance = (BigDecimal) resp.get("balance");
+		newLiabilities = (BigDecimal) resp.get("liabilities");
+		
+		assertEquals("presellAmount should be increased by the recharge amount:" + amountA_2.toPlainString(), 
+				presellAmount.add(amountA_2).setScale(decimals, rounding), 
+				newPresellAmount.setScale(decimals, rounding));
+
+		assertEquals("limitAmount should never be changed", 
+				limitAmount.setScale(decimals, rounding), 
+				newLimitAmount.setScale(decimals, rounding));
+
+		assertEquals("The balance should be reduced by the recharge amount:" + amountA_2.toPlainString(), 
+				balance.subtract(amountA_2).setScale(decimals, rounding), 
+				newBalance.setScale(decimals, rounding));
+
+		assertEquals("The liabilities should be increased by the recharge amount:" + amountA_2.toPlainString(), 
+				liabilities.add(amountA_2).setScale(decimals, rounding), 
+				newLiabilities.setScale(decimals, rounding));
+		
+		// 测试3、 TODO
+		
+	}
+
+	/**
+	 * 测试 根据二维码查询卡信息
+	 * @throws GenericEntityException
+	 * @throws GenericServiceException
+	 */
+	public void testGetCardInfoByCode() throws GenericEntityException, GenericServiceException{
+		/************************ 准备卡数据 开始 ****************************/
+		int count = 2;
+		List<GenericValue> cloudCardList = queryCardForStoreFromDB(STORE_ID_2, null, "FNACT_CREATED");
+		assertTrue("should has " + count + " more cards here",  cloudCardList.size() >= count);
+		cloudCardList = cloudCardList.subList(0, count);
+
+		// 全部调整成待激活的状态
+		List<GenericValue> toBeStore = FastList.newInstance();
+		for(GenericValue cc: cloudCardList){
+			GenericValue finAccount = delegator.findByPrimaryKey("FinAccount",UtilMisc.toMap("finAccountId", cc.get("finAccountId")));
+			finAccount.put("statusId", "FNACT_PUBLISHED");
+			toBeStore.add(finAccount);
+		}
+		delegator.storeAll(toBeStore);
+
+		String cardCode_1 = cloudCardList.get(0).getString("finAccountCode");
+		BigDecimal amount_1 = new BigDecimal(200.00f).setScale(decimals, rounding);
+
+		String cardCode_2 = cloudCardList.get(1).getString("finAccountCode");
+		BigDecimal amount_2 = new BigDecimal(123.00f).setScale(decimals, rounding);
+
+		String user_tele_number = "CCCC11011011";
+
+		/************************ 准备卡数据 结束 ****************************/
+
+		// 测试1、 还没卖出的卡，查询返回 isActivated = N
+		Map<String, Object> resp = callGetCardInfoByCode(STORE_2_USER, STORE_ID_2, cardCode_1);
+		assertTrue("Service 'getCardInfoByCode' SHOULD result success", ServiceUtil.isSuccess(resp));
+
+		String isActivated = (String) resp.get("isActivated");
+		assertEquals("The output param: isActivated should be 'N' ", "N", isActivated);
+
+		// 测试2、 卖出一张卡 再查询
+		resp = callActivateCloudCardAndRecharge(STORE_2_USER, cardCode_1, amount_1, user_tele_number);
+		assertTrue("Service 'activateCloudCardAndRecharge' SHOULD result success", ServiceUtil.isSuccess(resp));
+
+		String cardId = (String) resp.get("cardId");
+		BigDecimal cardBalance = (BigDecimal) resp.get("cardBalance");
+		String customerPartyId = (String) resp.get("customerPartyId");
+
+		resp = callGetCardInfoByCode(STORE_2_USER, STORE_ID_2, cardCode_1);
+		assertTrue("Service 'getCardInfoByCode' SHOULD result success", ServiceUtil.isSuccess(resp));
+
+		isActivated = (String) resp.get("isActivated");
+		assertEquals("The output param: isActivated should be 'Y' ", "Y", isActivated);
+		
+		assertEquals("The output param: cardId should be equal ", cardId, resp.get("cardId"));
+		assertEquals("The output param: cardBalance should be equal ", 
+				cardBalance.setScale(decimals, rounding), 
+				((BigDecimal)resp.get("cardBalance")).setScale(decimals, rounding));
+
+		assertEquals("The output param: customerPartyId should be equal ", customerPartyId, resp.get("customerPartyId"));
+
+		// 测试3、 再卖出另一张卡 再查询
+		resp = callActivateCloudCardAndRecharge(STORE_2_USER, cardCode_2, amount_2, user_tele_number);
+		assertTrue("Service 'activateCloudCardAndRecharge' SHOULD result success", ServiceUtil.isSuccess(resp));
+
+		cardId = (String) resp.get("cardId");
+		cardBalance = (BigDecimal) resp.get("cardBalance");
+		customerPartyId = (String) resp.get("customerPartyId");
+
+		resp = callGetCardInfoByCode(STORE_2_USER, STORE_ID_2, cardCode_2);
+		assertTrue("Service 'getCardInfoByCode' SHOULD result success", ServiceUtil.isSuccess(resp));
+
+		isActivated = (String) resp.get("isActivated");
+		assertEquals("The output param: isActivated should be 'Y' ", "Y", isActivated);
+
+		assertEquals("The output param: cardId should be equal ", cardId, resp.get("cardId"));
+		assertEquals("The output param: cardBalance should be equal ", 
+				cardBalance.setScale(decimals, rounding), 
+				((BigDecimal)resp.get("cardBalance")).setScale(decimals, rounding));
+
+		assertEquals("The output param: customerPartyId should be equal ", customerPartyId, resp.get("customerPartyId"));
 
 	}
-/*	public void testCloudCardQueryServicesOperations() throws GenericEntityException, GenericServiceException {
-		GenericValue userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", "subenkun"), false);
-        Map<String, Object> ctx = new HashMap<String, Object>();
-        ctx.put("viewIndex", 0);
-        ctx.put("viewSize", 20);
-        ctx.put("userLogin", userLogin);
-        //测试我的卡
-        Map<String, Object> resp = dispatcher.runSync("myCloudCards", ctx);
-        assertTrue("Service 'myCloudCards' result success", ServiceUtil.isSuccess(resp));
-        ctx.clear();
-        
-        //用户查询交易流水
-        ctx.put("viewIndex", 0);
-        ctx.put("viewSize", 20);
-        ctx.put("type", "1");
-        ctx.put("userLogin", userLogin);
-        resp = dispatcher.runSync("getUserPayment", ctx);
-        assertTrue("Service 'getUserPayment' result success", ServiceUtil.isSuccess(resp));
-        ctx.clear();
-
-        //查询信用额度
-        List<String> organizationPartyIds = CloudCardHelper.getOrganizationPartyId(delegator, userLogin.getString("partyId"));
-        ctx.put("userLogin", userLogin);
-        ctx.put("organizationPartyId", organizationPartyIds.get(0));
-        resp = dispatcher.runSync("getLimitAndPresellInfo", ctx);
-        assertTrue("Service 'getLimitAndPresellInfo' result success", ServiceUtil.isSuccess(resp));
-        BigDecimal presellAmount = (BigDecimal) resp.get("presellAmount");
-        BigDecimal limitAmount = (BigDecimal) resp.get("limitAmount");
-        BigDecimal balance = (BigDecimal) resp.get("balance");
-        assertEquals("1200.00", String.valueOf(presellAmount));
-        assertEquals("10000.00", String.valueOf(limitAmount));
-        assertEquals("8900.00",String.valueOf(balance));
-        ctx.clear();
-        
-        //根据二维码查询卡信息
-        ctx.put("userLogin", userLogin);
-        ctx.put("organizationPartyId", organizationPartyIds.get(0));
-        ctx.put("cardCode", "00812134736130161527");
-        
-        resp = dispatcher.runSync("getCardInfoByCode", ctx);
-        assertTrue("Service 'getCardInfoByCode' result success", ServiceUtil.isSuccess(resp));
-        String isActivated = (String) resp.get("isActivated");
-        String cardId = (String) resp.get("cardId");
-        String cardName = (String) resp.get("cardName");
-        String cardImg = (String) resp.get("cardImg");
-        BigDecimal cardBalance = (BigDecimal) resp.get("cardBalance");
-        String distributorPartyId = (String) resp.get("distributorPartyId");
-        String customerPartyId = (String)  resp.get("customerPartyId");
-        String ownerPartyId = (String) resp.get("ownerPartyId");
-        assertEquals("Y", isActivated);
-        assertEquals("10000", cardId);
-        assertEquals("咖啡店储值卡", cardName);
-        assertEquals("", cardImg);
-        assertEquals("1200.00", String.valueOf(cardBalance));
-        assertEquals("10000", distributorPartyId);
-        assertEquals("10010", customerPartyId);
-        assertEquals("10010", ownerPartyId);
-        ctx.clear();
-        
-    }*/
+	
+	// TODO 交易流水的查询
 }
