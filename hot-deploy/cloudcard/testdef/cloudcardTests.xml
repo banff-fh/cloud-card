@@ -55,13 +55,24 @@
 
  -->
 
-
+	<!-- 导入 测试用商家信息、各自商家收银人员信息-->
     <test-case case-name="cloudcard-tests-data-load">
         <entity-xml action="load" entity-xml-url="component://cloudcard/testdef/data/CloudCardTestData.xml"/>
     </test-case>
 
-    <test-case case-name="cloudcard-tests-services-test">
-        <junit-test-suite class-name="com.banfftech.cloudcard.test.CloudCardServicesTest"/>
+	<!-- 测试为商家创建卡-->
+    <test-case case-name="cloudcard-tests-create-card-test">
+        <junit-test-suite class-name="com.banfftech.cloudcard.test.CreateNewCardTest"/>
+    </test-case>
+
+	<!-- 测试 商家扫码激活卡 或(和) 充值-->
+    <test-case case-name="cloudcard-tests-activate-recharge-card-test">
+        <junit-test-suite class-name="com.banfftech.cloudcard.test.ActivateAndRechargeAtStoreTest"/>
+    </test-case>
+
+	<!-- 一些查询服务的测试-->
+    <test-case case-name="cloudcard-tests-queryServices-test">
+        <junit-test-suite class-name="com.banfftech.cloudcard.test.CloudCardQueryServicesTest"/>
     </test-case>
     
 </test-suite>
