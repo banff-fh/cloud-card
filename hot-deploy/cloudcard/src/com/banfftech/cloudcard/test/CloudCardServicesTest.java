@@ -290,4 +290,18 @@ public class CloudCardServicesTest extends OFBizTestCase {
 		ctx.put("cardId", cardId);
 		return dispatcher.runSync("revokeCardAuth", ctx);
 	}
+	
+	protected Map<String, Object> callCloudCardWithdraw(String storeTeleNumber, String storeId, String cardCode, BigDecimal amount)  throws GenericServiceException, GenericEntityException {
+
+		GenericValue user = CloudCardHelper.getUserByTeleNumber(delegator, storeTeleNumber);
+		GenericValue userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", user.getString("userLoginId")), false);
+
+		Map<String, Object> ctx = FastMap.newInstance();
+		ctx.put("userLogin", userLogin);
+		ctx.put("organizationPartyId", storeId);
+		ctx.put("cardCode", cardCode);
+		ctx.put("amount", amount);
+		return dispatcher.runSync("cloudCardWithdraw", ctx);
+	}
+
 }

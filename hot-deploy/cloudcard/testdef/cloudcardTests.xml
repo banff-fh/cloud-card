@@ -38,7 +38,7 @@
 			
 			每一个的 datasource-name 都设置为 derby数据源，比如： localderby localderbyolap localderbytenant
 
-		3、如果是第一次测试，还需要先 ant start 启动ofbiz，为derby数据库自动建表， 建表完成后 执行 ant load-seed 导入基础种子数据
+		3、如果是第一次测试，还需要先  执行 ant load-seed 导入基础种子数据
 			
 			基础种子数据导入完成后，可以将
 				<delegator name="default"  .... />
