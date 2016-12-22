@@ -301,7 +301,7 @@ public class CloudCardServicesTest extends OFBizTestCase {
 	 * @throws GenericServiceException
 	 * @throws GenericEntityException
 	 */
-	protected Map<String, Object> callCloudCardWithdraw(String storeTeleNumber, String storeId, String cardCode, BigDecimal amount)  throws GenericServiceException, GenericEntityException {
+	protected Map<String, Object> callReceiptByCardCode(String storeTeleNumber, String storeId, String cardCode, BigDecimal amount)  throws GenericServiceException, GenericEntityException {
 
 		GenericValue user = CloudCardHelper.getUserByTeleNumber(delegator, storeTeleNumber);
 		GenericValue userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", user.getString("userLoginId")), false);
@@ -311,7 +311,30 @@ public class CloudCardServicesTest extends OFBizTestCase {
 		ctx.put("organizationPartyId", storeId);
 		ctx.put("cardCode", cardCode);
 		ctx.put("amount", amount);
-		return dispatcher.runSync("cloudCardWithdraw", ctx);
+		return dispatcher.runSync("receiptByCardCode", ctx);
+	}
+
+	/**
+	 *  调用 客户端扫商家码进行付款 的服务
+	 * @param userTeleNumber 用户手机号
+	 * @param storeQrCode 店铺二维码
+	 * @param cardId 卡id
+	 * @param amount 金额
+	 * @return
+	 * @throws GenericServiceException
+	 * @throws GenericEntityException
+	 */
+	protected Map<String, Object> callCustomerWithdraw(String userTeleNumber, String storeQrCode, String cardId, BigDecimal amount)  throws GenericServiceException, GenericEntityException {
+		
+		GenericValue user = CloudCardHelper.getUserByTeleNumber(delegator, userTeleNumber);
+		GenericValue userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", user.getString("userLoginId")), false);
+		
+		Map<String, Object> ctx = FastMap.newInstance();
+		ctx.put("userLogin", userLogin);
+		ctx.put("qrCode", storeQrCode);
+		ctx.put("cardId", cardId);
+		ctx.put("amount", amount);
+		return dispatcher.runSync("customerWithdraw", ctx);
 	}
 
 }

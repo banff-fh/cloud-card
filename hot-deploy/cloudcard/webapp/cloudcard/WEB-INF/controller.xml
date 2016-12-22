@@ -51,11 +51,11 @@
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
-    
-     <!-- 扫码支付接口 -->
+
+     <!-- 商家扫卡收款 接口 -->
 	<request-map uri="cloudCardWithdraw">
 		<!--<security https="true" auth="false" />-->
-    	<event type="service" invoke="cloudCardWithdraw"/>
+    	<event type="service" invoke="receiptByCardCode"/><!-- 这里调用 receiptByCardCode 服务，服务内部会调用 cloudCardWithdraw -->
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
@@ -83,7 +83,8 @@
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
-    
+
+    <!-- 商家卖卡余额等信息查询 -->
     <request-map uri="getLimitAndPresellInfo">
     	<!--<security https="true" auth="false" />-->
     	<event type="service" invoke="getLimitAndPresellInfo"/>
@@ -152,6 +153,12 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 
+	<!-- 用户扫商家码付款 -->
+	<request-map uri="customerWithdraw">
+		<event type="service" invoke="customerWithdraw"  />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
 
 	<!-- 后台页面部分 Request Mappings -->
 

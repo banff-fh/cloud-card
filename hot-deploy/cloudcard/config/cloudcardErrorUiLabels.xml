@@ -121,4 +121,8 @@
         <value xml:lang="en">store qrCode is invalid!</value>
         <value xml:lang="zh">二维码非法！</value>
     </property>
+    <property key="CloudCardNotYourCard">
+        <value xml:lang="en">Not your card.</value>
+        <value xml:lang="zh">不是你自己的卡！</value>
+    </property>
 </resource>

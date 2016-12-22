@@ -563,10 +563,12 @@ public class CloudCardHelper {
 	
 	/**
 	 * 获取卡授权金额
+	 *   建议用 getCloudCardBalance 方法获取卡余额，包括授权卡与被授权的卡
 	 * @param finAccountId
 	 * @param delegator
 	 * @return
 	 * @throws GenericEntityException
+	 * @see {@link CloudCardHelper#getCloudCardBalance(GenericValue, boolean)}
 	 */
 	public static BigDecimal getCloudCardAuthBalance(String finAccountId, Delegator delegator){
 		// find sum of all authorizations which are not expired

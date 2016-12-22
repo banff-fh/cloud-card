@@ -70,14 +70,14 @@
         <junit-test-suite class-name="com.banfftech.cloudcard.test.ActivateAndRechargeAtStoreTest"/>
     </test-case>
 
-    <!-- 测试 云卡支付服务 （商家扫卡收款、客户扫商家码付款）-->
-    <test-case case-name="cloudcard-tests-activate-card-withdraw-test">
-        <junit-test-suite class-name="com.banfftech.cloudcard.test.CardWithdrawTest"/>
-    </test-case>
-
     <!-- 测试 卡授权 和 解除授权-->
     <test-case case-name="cloudcard-tests-create-card-auth-and-revoke-test">
         <junit-test-suite class-name="com.banfftech.cloudcard.test.CreateCardAuthTest"/>
+    </test-case>
+
+    <!-- 测试 云卡支付服务 （商家扫卡收款、客户扫商家码付款）-->
+    <test-case case-name="cloudcard-tests-activate-card-withdraw-test">
+        <junit-test-suite class-name="com.banfftech.cloudcard.test.CardWithdrawTest"/>
     </test-case>
 
 	<!-- 一些查询服务的测试-->
