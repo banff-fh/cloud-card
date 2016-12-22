@@ -133,37 +133,50 @@ public class JPushServices {
 			return ServiceUtil.returnSuccess();
 		}
 
-
-		// 查询registrationID
-		EntityCondition pConditions = EntityCondition.makeCondition("partyId", partyId);
-		List<EntityCondition> devTypeExprs = FastList.newInstance();
-		devTypeExprs.add(EntityCondition.makeCondition("partyIdentificationTypeId", ANDROID_APPTYPE_PIFT_MAP.get(appType)));
-		devTypeExprs.add(EntityCondition.makeCondition("partyIdentificationTypeId", IOS_APPTYPE_PIFT_MAP.get(appType)));
-		EntityCondition devCondition = EntityCondition.makeCondition(devTypeExprs, EntityOperator.OR);
-		pConditions = EntityCondition.makeCondition(pConditions, devCondition);
-
-		//查找regId
-		List<GenericValue> partyIdentifications = FastList.newInstance();
-		try {
-			partyIdentifications = delegator.findList("PartyIdentification", pConditions, UtilMisc.toSet("idValue"), null, null, false);
-		} catch (GenericEntityException e) {
-			Debug.logError(e.getMessage(), module);
-		}
-		
-		if(UtilValidate.isEmpty(partyIdentifications)){
-			Debug.logWarning("没有推送目标", module);
-			return ServiceUtil.returnSuccess();
-		}
-		
-		List<String> idValues = EntityUtil.getFieldListFromEntityList(partyIdentifications, "idValue", false);
+		// 发送特定人群
 		JPushClient jPushClient = getJPushClient(delegator, appType);
-
 		boolean setApnsProduction = "1".equals(EntityUtilProperties.getPropertyValue("cloudcard", "jpush.setApnsProduction", "0", delegator));
 
 		Builder payloadBuilder = PushPayload.newBuilder()
 				.setPlatform(Platform.all())
-				.setAudience(Audience.registrationId(idValues)) // FIXME 多个regId的情况下，一个id出错全错？
 				.setOptions(Options.newBuilder().setApnsProduction(setApnsProduction).build());
+
+		// 按照registrationID发送
+		if("one".equals(sendType)){
+			// 查询registrationID
+			EntityCondition pConditions = EntityCondition.makeCondition("partyId", partyId);
+			List<EntityCondition> devTypeExprs = FastList.newInstance();
+			devTypeExprs.add(EntityCondition.makeCondition("partyIdentificationTypeId", ANDROID_APPTYPE_PIFT_MAP.get(appType)));
+			devTypeExprs.add(EntityCondition.makeCondition("partyIdentificationTypeId", IOS_APPTYPE_PIFT_MAP.get(appType)));
+			EntityCondition devCondition = EntityCondition.makeCondition(devTypeExprs, EntityOperator.OR);
+			pConditions = EntityCondition.makeCondition(pConditions, devCondition);
+			
+			//查找regId
+			List<GenericValue> partyIdentifications = FastList.newInstance();
+			try {
+				partyIdentifications = delegator.findList("PartyIdentification", pConditions, UtilMisc.toSet("idValue"), null, null, false);
+			} catch (GenericEntityException e) {
+				Debug.logError(e.getMessage(), module);
+			}
+			
+			if(UtilValidate.isEmpty(partyIdentifications)){
+				Debug.logWarning("没有推送目标", module);
+				return ServiceUtil.returnSuccess();
+			}
+			List<String> idValues = EntityUtil.getFieldListFromEntityList(partyIdentifications, "idValue", true);
+			
+			payloadBuilder.setAudience(Audience.registrationId(idValues)); // FIXME 多个regId的情况下，一个id出错全错？
+		}
+
+		// 按标签发送
+		if("tag".equals(sendType)){
+			String tag = (String) context.get("tag");
+			if(UtilValidate.isEmpty(tag)){
+				Debug.logWarning("没有推送目标", module);
+				return ServiceUtil.returnSuccess();
+			}
+			payloadBuilder.setAudience(Audience.tag(tag));
+		}
 
 		// 发送透传消息
 		if(UtilValidate.isNotEmpty(message)){
