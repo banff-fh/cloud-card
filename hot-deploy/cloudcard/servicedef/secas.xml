@@ -44,7 +44,7 @@ under the License.
     <eca service="customerWithdraw" event="return">
         <set field-name="appType" value="biz"/>
         <set field-name="sendType" value="tag"/>
-        <set field-name="content" value="收到用户付款" />
+        <set field-name="content" value="收到用户付款: ${amount} 元" />
         <set field-name="tag" env-name="storeId" />
         <set field-name="message" value='{"type":"payment","cardId":"${cardId}","amount":"${amount}"}' />
         <action service="pushNotifOrMessage"  mode="async"/>
