@@ -291,6 +291,16 @@ public class CloudCardServicesTest extends OFBizTestCase {
 		return dispatcher.runSync("revokeCardAuth", ctx);
 	}
 	
+	/**
+	 * 调用 商家扫卡收款 服务
+	 * @param storeTeleNumber 店家收银人员
+	 * @param storeId 商家id
+	 * @param cardCode 卡二维码
+	 * @param amount 金额
+	 * @return
+	 * @throws GenericServiceException
+	 * @throws GenericEntityException
+	 */
 	protected Map<String, Object> callCloudCardWithdraw(String storeTeleNumber, String storeId, String cardCode, BigDecimal amount)  throws GenericServiceException, GenericEntityException {
 
 		GenericValue user = CloudCardHelper.getUserByTeleNumber(delegator, storeTeleNumber);

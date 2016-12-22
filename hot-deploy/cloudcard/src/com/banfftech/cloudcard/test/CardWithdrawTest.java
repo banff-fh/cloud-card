@@ -57,7 +57,7 @@ public class CardWithdrawTest extends CloudCardServicesTest {
 
 		String cardId = (String) oneCard.get("cardId");
 		String cardCode = (String) oneCard.get("cardCode");
-		String ownerPartyId = (String) oneCard.get("ownerPartyId");
+		//String ownerPartyId = (String) oneCard.get("ownerPartyId");
 		BigDecimal cardBalance = (BigDecimal) oneCard.get("cardBalance");
 		
 

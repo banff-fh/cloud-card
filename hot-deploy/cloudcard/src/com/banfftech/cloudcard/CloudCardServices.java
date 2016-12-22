@@ -739,7 +739,7 @@ public class CloudCardServices {
 		String receiptAccountId = receiptAccount.getString("finAccountId");
 		
 		
-		// 根据二维码获取用户用于支付的帐号
+		// 获取用户用于支付的帐号
 		GenericValue cloudCard = (GenericValue) checkParamOut.get("cloudCard");
 		// 没有激活的账户，不能用于付款
 		if(!"FNACT_ACTIVE".equals(cloudCard.getString("statusId"))){
@@ -1033,7 +1033,7 @@ public class CloudCardServices {
 	
 	
 	/**
-	 * 充值、支付的公共参数检查
+	 * 充值、支付的公共参数检查，并根据传入的 cardCode 或 cardId 来获取 用户的云卡对象
 	 * @param dctx
 	 * @param context
 	 * @return
@@ -1052,7 +1052,7 @@ public class CloudCardServices {
 		
 		// 金额必须为正数
 		if (UtilValidate.isNotEmpty(amount) && amount.compareTo(BigDecimal.ZERO) <= 0) {
-			Debug.logInfo("金额不合法，必须为正数", module);
+			Debug.logWarning("金额不合法，必须为正数", module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceAccountingError, "AccountingFinAccountMustBePositive", locale));
 		}
 		
@@ -1060,11 +1060,11 @@ public class CloudCardServices {
 		Timestamp fromDate =(Timestamp)context.get("fromDate");
 		Timestamp thruDate =(Timestamp)context.get("thruDate");
 		if(null!=fromDate && null!=thruDate && fromDate.after(thruDate)){
-			Debug.logInfo("起止日期不合法，开始日期必须小于结束日期", module);
+			Debug.logWarning("起止日期不合法，开始日期必须小于结束日期", module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardFromDateMustBeforeThruDate", locale));
 		}
 		if(null!=thruDate && thruDate.before(UtilDateTime.nowTimestamp())){
-			Debug.logInfo("结束日期必须大于当前日期", module);
+			Debug.logWarning("结束日期必须大于当前日期", module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardThruDateMustAfterNow", locale));
 		}
 		
@@ -1078,7 +1078,7 @@ public class CloudCardServices {
 				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 			}
 			if(null == partyGroup ){
-				Debug.logInfo("商户："+organizationPartyId + "不存在", module);
+				Debug.logWarning("商户："+organizationPartyId + "不存在", module);
 				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
 						"CloudCardOrganizationPartyNotFound", UtilMisc.toMap("organizationPartyId", organizationPartyId), locale));
 			}
@@ -1095,51 +1095,48 @@ public class CloudCardServices {
 				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 			}
 			if (null == finAccount) {
+				Debug.logWarning("金融账户："+finAccountId + "不存在", module);
 				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardAccountNotFound", UtilMisc.toMap("finAccountId", finAccountId), locale));
 			}
 			retMap.put("finAccount", finAccount);
 		}
-		
+
 		// 卡二维码
 		GenericValue cloudCard = null;
+		boolean needFindCard = false;
 		if(UtilValidate.isNotEmpty(cardCode)){
+			needFindCard = true;
 			try {
 				cloudCard = CloudCardHelper.getCloudCardAccountFromCode(cardCode, delegator);
 			} catch (GenericEntityException e2) {
 				Debug.logError(e2.getMessage(), module);
 				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale)); 
 			}
-			if(null == cloudCard){
-				Debug.logInfo("找不到云卡，cardCode[" + cardCode + "]", module);
-				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardNotFound", locale)); 
-			}
-			
-			if("FNACT_CANCELLED".equals(cloudCard.getString("statusId")) || "FNACT_MANFROZEN".equals(cloudCard.getString("statusId"))){
-				Debug.logInfo("此卡[" + cloudCard.get("finAccountId") + "]状态不可用，当前状态[" + cloudCard.get("statusId") +"]", module);
-				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardHasBeenDisabled", locale)); 
-			}
-			retMap.put("cloudCard", cloudCard);
 		}
-		
+
 		// 卡ID
 		if(null == cloudCard && UtilValidate.isNotEmpty(cardId)){
+			needFindCard = true;
 			try {
 				cloudCard = CloudCardHelper.getCloudCardAccountFromPaymentMethodId(cardId, delegator);
 			} catch (GenericEntityException e2) {
 				Debug.logError(e2.getMessage(), module);
 				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale)); 
 			}
-			if(null == cloudCard){
-				Debug.logInfo("找不到云卡，cardId[" + cardId + "]", module);
-				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardNotFound", locale)); 
-			}
+		}
 
-			String statusId = cloudCard.getString("statusId");
-			if("FNACT_CANCELLED".equals(statusId) || "FNACT_MANFROZEN".equals(statusId)){
-				Debug.logInfo("此卡[finAccountId = " + cloudCard.get("finAccountId") + "]状态不可用，当前状态[" + statusId +"]", module);
-				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardHasBeenDisabled", locale)); 
+		if(needFindCard){
+			if(null == cloudCard){// 如果找不到卡
+				Debug.logWarning("找不到云卡，cardCode[" + cardCode + "] or cardId[" + cardId + "]", module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardNotFound", locale)); 
+			}else{ // 如果找到卡，检查状态
+				String statusId = cloudCard.getString("statusId");
+				if("FNACT_CANCELLED".equals(statusId) || "FNACT_MANFROZEN".equals(statusId)){
+					Debug.logWarning("此卡[finAccountId = " + cloudCard.get("finAccountId") + "]状态不可用，当前状态[" + statusId +"]", module);
+					return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardHasBeenDisabled", locale)); 
+				}
+				retMap.put("cloudCard", cloudCard);
 			}
-			retMap.put("cloudCard", cloudCard);
 		}
 		return retMap;
 	}
@@ -1154,29 +1151,26 @@ public class CloudCardServices {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
-        GenericValue userLogin = (GenericValue) context.get("userLogin");
+		//GenericValue userLogin = (GenericValue) context.get("userLogin");
 		String quantity = (String) context.get("quantity");
 		String currencyUomId = (String)context.get("currencyUomId");
 		String finAccountName = (String) context.get("finAccountName");
 		String organizationPartyId = (String) context.get("organizationPartyId");
-		
-		
-		//TODO， 这个可以优化，不应该也不必在每次生成卡号前来“确保/创建”商家的DISTRIBUTOR角色，
-		// 应该在创建商家的时候就应该加上这个角色
-		Map<String, Object> ensurePartyRoleOutMap;
+
+		// 传入的organizationPartyId必须是一个存在的partyGroup
+		GenericValue partyGroup;
 		try {
-			ensurePartyRoleOutMap = dispatcher.runSync("ensurePartyRole", 
-					UtilMisc.toMap("userLogin", userLogin, "partyId", organizationPartyId, "roleTypeId", "DISTRIBUTOR"));
-		} catch (GenericServiceException e1) {
-			Debug.logError(e1, module);
+			partyGroup = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", organizationPartyId));
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
-		
-		if (ServiceUtil.isError(ensurePartyRoleOutMap)) {
-			return ensurePartyRoleOutMap;
+		if(null == partyGroup ){
+			Debug.logWarning("商户："+organizationPartyId + "不存在", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, 
+					"CloudCardOrganizationPartyNotFound", UtilMisc.toMap("organizationPartyId", organizationPartyId), locale));
 		}
-		
+
 		for(int i = 0;i < Integer.valueOf(quantity);i++){
 			try {
 				//生成的卡号

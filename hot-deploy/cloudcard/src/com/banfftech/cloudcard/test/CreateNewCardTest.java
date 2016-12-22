@@ -51,10 +51,10 @@ public class CreateNewCardTest extends CloudCardServicesTest {
 		assertEquals("this service call for testStore2 should generate " + count + " cards", count, cloudCardList.size());
 
 		// 不存在的店家服务应该调用失败
-		/*count = 1;
-		resp = callGenNewCloudCardCode("testStore_NA_", "不存在的店家不应该出现的卡", count);
+		count = 1;
+		resp = callGenNewCloudCardCode(STORE_ID_NA_, "不存在的店家不应该出现的卡", count);
 		assertFalse("Service 'genNewCloudCardCode' for testStore_NA_  SHOULD NOT result success", ServiceUtil.isSuccess(resp));	
-		 */
+
 
 		// 再为商店二生成30张卡
 		count = 30;
