@@ -269,4 +269,21 @@
 		<attribute name="storeName" type="String" mode="OUT" optional="true"><description>商家店名</description></attribute>
 		<attribute name="storeImgUrl" type="String" mode="OUT" optional="true"><description>商家图片(卡图片)</description></attribute>
 	</service>
+	
+	<service name="wxPrepayOrder" engine="java"
+		location="com.banfftech.cloudcard.pay.tenpay.WeiXinPayServices" invoke="prepayOrder" auth="false">
+		<description>微信预支付</description>
+		<attribute name="body" type="String" mode="IN" optional="true"><description>商品描述</description></attribute>
+		<attribute name="totalFee" type="String" mode="IN" optional="true"><description>交易金额</description></attribute>
+		<attribute name="tradeType" type="String" mode="IN" optional="true"><description>交易类型</description></attribute>
+
+		<attribute name="appid" type="String" mode="OUT" optional="true"><description>商户ID</description></attribute>
+		<attribute name="partnerid" type="String" mode="OUT" optional="true"><description>合作ID</description></attribute>
+		<attribute name="prepayid" type="String" mode="OUT" optional="true"><description>预付ID</description></attribute>
+		<attribute name="package" type="String" mode="OUT" optional="true"><description>报名</description></attribute>
+		<attribute name="noncestr" type="String" mode="OUT" optional="true"><description>随机数</description></attribute>
+		<attribute name="timestamp" type="String" mode="OUT" optional="true"><description>时间</description></attribute>
+		<attribute name="sign" type="String" mode="OUT" optional="true"><description>签名</description></attribute>
+	</service>
+	
 </services>

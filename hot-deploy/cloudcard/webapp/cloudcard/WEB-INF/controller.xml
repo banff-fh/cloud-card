@@ -159,6 +159,13 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
+	
+	<!-- 微信预支付订单 -->
+	<request-map uri="wxPrepayOrder">
+		<event type="service" invoke="wxPrepayOrder"  />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
 
 	<!-- 后台页面部分 Request Mappings -->
 

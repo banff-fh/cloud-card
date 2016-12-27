@@ -52,6 +52,12 @@
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="app.ios.biz.version" systemPropertyValue="1.0" description="商户app苹果版本号"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="app.ios.user.update" systemPropertyValue="0" description="用户app苹果版是否强制更新"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="app.ios.user.version" systemPropertyValue="1.0" description="用户app苹果版本号"/>
+    
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="weixin.key" systemPropertyValue="xxxxxx" description="商户平台和开发平台约定的API密钥，在商户平台设置"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="weixin.notifyUrl" systemPropertyValue="xxxxx" description="微信回调地址"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="weixin.wxAppID" systemPropertyValue="xxxxx" description="应用从官方网站申请到的合法appId"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="weixin.wxPartnerid" systemPropertyValue="1.0" description="商户号"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="weixin.wxURL" systemPropertyValue="XXXX" description="接口链接"/>
 	
 	<PartyIdentificationType partyIdentificationTypeId="JPUSH_ANDROID_BIZ" description="极光推送安卓商家" />
 	<PartyIdentificationType partyIdentificationTypeId="JPUSH_ANDROID_USER" description="极光推送安卓用户" />
