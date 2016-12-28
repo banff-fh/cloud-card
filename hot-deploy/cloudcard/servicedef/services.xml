@@ -298,9 +298,10 @@
         location="com.banfftech.cloudcard.CloudCardServices" invoke="modifyCardOwner" auth="true">
         <description>云卡转让</description>
         <attribute name="cardId" type="String" mode="IN" optional="true"><description>要转出的卡ID</description></attribute>
-        <attribute name="cloudCard" type="GenericValue" mode="IN" optional="true"><description>要转出的云卡实体</description></attribute>
+        <attribute name="cloudCard" type="GenericValue" mode="IN" optional="false"><description>要转出的云卡实体</description></attribute>
         <attribute name="teleNumber" type="String" mode="IN" optional="true"><description>转让到客户手机号码</description></attribute>
-        <attribute name="customerPartyId" type="String" mode="INOUT" optional="true"><description>转让到客户partyId</description></attribute>
+        <attribute name="customerPartyId" type="String" mode="INOUT" optional="false"><description>转让到客户partyId</description></attribute>
         <attribute name="newCardId" type="String" mode="OUT" optional="false"><description>转让后新产生的卡id</description></attribute>
+        <attribute name="cardBalance" type="BigDecimal" mode="OUT" optional="false"><description>卡内余额</description></attribute>
     </service>
 </services>

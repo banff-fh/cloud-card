@@ -25,7 +25,7 @@ under the License.
     <eca service="createCardAuth" event="return">
         <set field-name="appType" value="user"/>
         <set field-name="sendType" value="one"/>
-        <set field-name="content" value="你的好友授权了一张云卡给你" />
+        <set field-name="content" value="你的好友授权了一张库胖卡给你" />
         <set field-name="partyId" env-name="customerPartyId" />
         <action service="pushNotifOrMessage"  mode="async"/>
     </eca>
@@ -65,5 +65,14 @@ under the License.
     <eca service="modifyCardOwner" event="in-validate">
         <action service="modifyCardOwnerInputValidate"  mode="sync" ignore-error="false" ignore-failure="false"/>
     </eca>
-	
+	<!-- 转卡成功后通知用户 -->
+    <eca service="modifyCardOwner" event="return">
+        <set field-name="appType" value="user"/>
+        <set field-name="sendType" value="one"/>
+        <set field-name="content" value="你的好友转让了一张库胖卡给你，卡余额 ${cardBalance} 元"/>
+        <set field-name="message" value='{"type":"chowner","cardId":"${cardId}", "cardBalance":"${cardBalance}"}' />
+        <set field-name="cardId" env-name="newCardId" />
+        <set field-name="partyId" env-name="customerPartyId" />
+        <action service="pushNotifOrMessage"  mode="async"/>
+    </eca>
 </service-eca>

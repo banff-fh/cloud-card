@@ -105,6 +105,10 @@
         <value xml:lang="en">This card cannot be transferred to yourself</value>
         <value xml:lang="zh">云卡不能转让给自己</value>
     </property>
+    <property key="CloudCardNotYourCard">
+        <value xml:lang="en">It's NOT your card</value>
+        <value xml:lang="zh">不是你的卡，不能操作</value>
+    </property>
     <property key="CloudCardCanNotBeAuthorized">
         <value xml:lang="en">This card can not be Authorized</value>
         <value xml:lang="zh">此卡状态不符，不能授权</value>
