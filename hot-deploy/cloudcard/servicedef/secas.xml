@@ -60,5 +60,10 @@ under the License.
         <set field-name="message" value='{"type":"recharge","cardId":"${cardId}","amount":"${amount}","cardBalance":"${cardBalance}"}' />
         <action service="pushNotifOrMessage"  mode="async"/>
     </eca>
+
+    <!-- 云卡转让入参校验 -->
+    <eca service="modifyCardOwner" event="in-validate">
+        <action service="modifyCardOwnerInputValidate"  mode="sync" ignore-error="false" ignore-failure="false"/>
+    </eca>
 	
 </service-eca>

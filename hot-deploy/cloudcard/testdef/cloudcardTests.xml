@@ -80,6 +80,11 @@
         <junit-test-suite class-name="com.banfftech.cloudcard.test.CardWithdrawTest"/>
     </test-case>
 
+    <!-- 测试 卡转让服务 -->
+    <test-case case-name="cloudcard-tests-modify-card-owner-test">
+        <junit-test-suite class-name="com.banfftech.cloudcard.test.ModifyCardOwnerTest"/>
+    </test-case>
+
 	<!-- 一些查询服务的测试-->
     <test-case case-name="cloudcard-tests-queryServices-test">
         <junit-test-suite class-name="com.banfftech.cloudcard.test.CloudCardQueryServicesTest"/>
