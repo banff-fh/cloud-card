@@ -112,7 +112,7 @@ public class CloudCardServices {
 		boolean isAuthorized = (boolean) cardAuthorizeInfo.get("isAuthorized");
 		if(isAuthorized){
 			Debug.logError("This card has been authorized", module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardHasBeenAuthorized", locale));
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardHasBeenAuthorizedToOthers", locale));
 		}
 
 		if(!"FNACT_ACTIVE".equals(cloudCard.getString("statusId"))){
@@ -240,7 +240,7 @@ public class CloudCardServices {
 		Timestamp nowTimestamp = UtilDateTime.adjustTimestamp(UtilDateTime.nowTimestamp(), Calendar.SECOND, -2) ;
 
 		// 1、删除finAccountRole
-		// 删除以前的finAccountRole，而不是更新thruDate使之失效 因为 finAccountRole中 fromDate是主键，如果回收授权后再次授权，fromDate一样的情况下会逐渐冲突
+		// 删除以前的finAccountRole，而不是更新thruDate使之失效 因为 finAccountRole中 fromDate是主键，如果回收授权后再次授权，fromDate一样的情况下会主键冲突
 		Map<String, Object> updateFinAccountRoleOut;
 		try {
 			updateFinAccountRoleOut = dispatcher.runSync("deleteFinAccountRole", UtilMisc.toMap("userLogin", userLogin, "finAccountId", finAccountId, 
@@ -1554,5 +1554,167 @@ public class CloudCardServices {
 		Map<String, Object> retMap = ServiceUtil.returnSuccess();
 		return retMap;
 	}
-	
+
+	/**
+	 * 卡转让接口- 入参验证
+	 *  1、用户自己的、非他人授权给我的，并且当前也没有处于授权给他人使用的状态的卡才能转让
+	 *  2、根据传入手机号码查询customerPartyId，没有则创建一个person
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> modifyCardOwnerInputValidate(DispatchContext dctx, Map<String, Object> context){
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+		GenericValue userLogin = (GenericValue) context.get("userLogin");
+
+		Map<String, Object> checkParamOut = checkInputParam(dctx, context);
+		if(ServiceUtil.isError(checkParamOut)){
+			return checkParamOut;
+		}
+
+		GenericValue cloudCard = (GenericValue) checkParamOut.get("cloudCard");
+
+		// 检查是不是已经授权的卡
+		// 卡号的前缀是带有 auth: 字样，说明是别人授权给我的卡，不能转让
+		String cardCode = cloudCard.getString("cardNumber");
+		if(UtilValidate.isNotEmpty(cardCode)&& cardCode.startsWith(CloudCardHelper.AUTH_CARD_CODE_PREFIX)){
+			Debug.logError("This card has been authorized", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardHasBeenAuthorized", locale));
+		}
+		// 存在SHAREHOLDER 角色的，未过期的 finAccountRole，表示此卡已授权给他人，不能转让
+		Map<String, Object> cardAuthorizeInfo = CloudCardHelper.getCardAuthorizeInfo(cloudCard, delegator);
+		boolean isAuthorized = (boolean) cardAuthorizeInfo.get("isAuthorized");
+		if(isAuthorized){
+			Debug.logError("This card has been authorized", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardHasBeenAuthorizedToOthers", locale));
+		}
+
+		if(!"FNACT_ACTIVE".equals(cloudCard.getString("statusId"))){
+			Debug.logInfo("此卡[" + cardCode + "]状态为[" + cloudCard.getString("statusId") + "]不能进行转让", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardCanNotBeTransferred ", locale)); 
+		}
+
+		//判断用户是否存在， 不存在则创建用户
+		context.put("organizationPartyId", cloudCard.getString("distributorPartyId"));
+		context.put("ensureCustomerRelationship", true);
+		Map<String, Object> getOrCreateCustomerOut = CloudCardHelper.getOrCreateCustomer(dctx, context);
+		if (ServiceUtil.isError(getOrCreateCustomerOut)) {
+			return getOrCreateCustomerOut;
+		}
+		String customerPartyId = (String) getOrCreateCustomerOut.get("customerPartyId");
+
+		if(customerPartyId.equals(userLogin.getString("partyId"))){
+			Debug.logInfo("用户partyId:[" + customerPartyId + "]试图授权cardNumber:[" + cardCode + "]给自己", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardCanNotBeTransferredToYourself", locale));
+		}
+		
+		Map<String, Object> ret = ServiceUtil.returnSuccess();
+		ret.put("cloudCard", cloudCard);
+		ret.put("customerPartyId", customerPartyId);
+		if(Debug.infoOn()){
+			Debug.logInfo("modifyCardOwnerInputValidate return Success:" + ret, module);
+		}
+		return ret;
+	}
+
+	/**
+	 * 卡转让接口
+	 * <p>1、为原卡主创建一个FinAccountRole记录</p>
+	 * <p>2、修改FinAccount的ownerPartyId字段为新partyId, 变更finAccountCode字段，将关联的giftCard设置为过期，并新增一个giftCard，parthId为新的partyId</p>
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> modifyCardOwner(DispatchContext dctx, Map<String, Object> context){
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+//		GenericValue userLogin = (GenericValue) context.get("userLogin");
+
+		GenericValue cloudCard = (GenericValue) context.get("cloudCard");
+		String customerPartyId = (String) context.get("customerPartyId");
+		if(UtilValidate.isEmpty(cloudCard)){
+			Debug.logInfo("参数 cloudCard 未输入", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardMissingParameter", UtilMisc.toMap("param", "cloudCard"), locale));
+		}
+		if(UtilValidate.isEmpty(customerPartyId)){
+			Debug.logInfo("参数 customerPartyId 未输入", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardMissingParameter", UtilMisc.toMap("param", "customerPartyId"), locale));
+		}
+
+		GenericValue systemUser = (GenericValue) context.get("systemUser");
+		if(null == systemUser){
+			try {
+				systemUser = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+				context.put("systemUser", systemUser);
+			} catch (GenericEntityException e) {
+				Debug.logError(e.getMessage(), module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+			}
+		}
+
+		//1、为原卡主创建一个FinAccountRole记录
+		String oldOwner = cloudCard.getString("ownerPartyId");
+		String finAccountId = cloudCard.getString("finAccountId");
+
+		Map<String, Object> createFinAccountRoleOutMap;
+		try {
+			createFinAccountRoleOutMap = dispatcher.runSync("createFinAccountRole", UtilMisc.toMap("userLogin", systemUser, "locale", locale,
+					"finAccountId", finAccountId, "partyId", oldOwner, "roleTypeId", "OLD_CARD_OWNER"));
+		} catch (GenericServiceException e1) {
+			Debug.logError(e1, module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
+
+		if (ServiceUtil.isError(createFinAccountRoleOutMap)) {
+			return createFinAccountRoleOutMap;
+		}
+
+		String cardId = cloudCard.getString("paymentMethodId");
+		
+		// 2、修改FinAccount的ownerPartyId字段为新partyId, 变更finAccountCode字段，将关联的giftCard设置为过期，并新增一个giftCard，parthId为新的partyId
+
+		//创建giftCard
+		String finAccountName = cloudCard.getString("finAccountName");
+		String newCardCode;
+		try {
+			// 卡二维码需要变更下，否则转让卡后，原卡主还能用旧的二维码去消费
+			newCardCode = CloudCardHelper.generateCloudCardCode(delegator);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		Map<String, Object> giftCardInMap = FastMap.newInstance();
+		giftCardInMap.putAll(context);
+		giftCardInMap.put("finAccountId", finAccountId);
+		giftCardInMap.put("cardNumber", newCardCode);
+		giftCardInMap.put("description", finAccountName);
+		giftCardInMap.put("customerPartyId", customerPartyId);
+		Map<String, Object> giftCardOutMap = CloudCardHelper.createPaymentMethodAndGiftCard(dctx, giftCardInMap);
+		if (ServiceUtil.isError(giftCardOutMap)) {
+			return giftCardOutMap;
+		}		
+		
+		String newCardId = (String) giftCardOutMap.get("paymentMethodId");
+
+		try{// 更新 二维码 和 卡主信息
+			GenericValue finAccount = delegator.findByPrimaryKey("FinAccount", UtilMisc.toMap("finAccountId", finAccountId));
+			finAccount.setString("ownerPartyId", customerPartyId);
+			finAccount.setString("finAccountCode", newCardCode);
+			finAccount.store();
+			delegator.storeByCondition("PaymentMethod", UtilMisc.toMap("thruDate", UtilDateTime.nowTimestamp()), EntityCondition.makeCondition("paymentMethodId", cardId));
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
+
+		// 服务返回成功
+		Map<String, Object> retMap = ServiceUtil.returnSuccess();
+		retMap.put("newCardId", newCardId);
+		retMap.put("customerPartyId", customerPartyId);
+		return retMap;
+	}
 }

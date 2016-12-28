@@ -101,9 +101,17 @@
         <value xml:lang="en">This card cannot be authorized to yourself</value>
         <value xml:lang="zh">云卡不能授权给自己</value>
     </property>
+    <property key="CloudCardCanNotBeTransferredToYourself">
+        <value xml:lang="en">This card cannot be transferred to yourself</value>
+        <value xml:lang="zh">云卡不能转让给自己</value>
+    </property>
     <property key="CloudCardCanNotBeAuthorized">
         <value xml:lang="en">This card can not be Authorized</value>
         <value xml:lang="zh">此卡状态不符，不能授权</value>
+    </property>
+    <property key="CloudCardCanNotBeTransferred">
+        <value xml:lang="en">This card can not be transferred</value>
+        <value xml:lang="zh">此卡状态不符，不能转让</value>
     </property>
     <property key="CloudCardFromDateMustBeforeThruDate">
         <value xml:lang="en">fromDate Must Before thruDate!</value>
@@ -124,5 +132,9 @@
     <property key="CloudCardNotYourCard">
         <value xml:lang="en">Not your card.</value>
         <value xml:lang="zh">不是你自己的卡！</value>
+    </property>
+    <property key="CloudCardMissingParameter">
+        <value xml:lang="en">missing parameter:[${param}]</value>
+        <value xml:lang="zh">缺少参数:[${param}]</value>
     </property>
 </resource>

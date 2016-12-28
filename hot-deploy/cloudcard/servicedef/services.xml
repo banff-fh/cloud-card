@@ -269,7 +269,7 @@
 		<attribute name="storeName" type="String" mode="OUT" optional="true"><description>商家店名</description></attribute>
 		<attribute name="storeImgUrl" type="String" mode="OUT" optional="true"><description>商家图片(卡图片)</description></attribute>
 	</service>
-	
+
 	<service name="wxPrepayOrder" engine="java"
 		location="com.banfftech.cloudcard.pay.tenpay.WeiXinPayServices" invoke="prepayOrder" auth="false">
 		<description>微信预支付</description>
@@ -285,5 +285,22 @@
 		<attribute name="timestamp" type="String" mode="OUT" optional="true"><description>时间</description></attribute>
 		<attribute name="sign" type="String" mode="OUT" optional="true"><description>签名</description></attribute>
 	</service>
-	
+
+	<service name="modifyCardOwnerInputValidate" engine="java"
+        location="com.banfftech.cloudcard.CloudCardServices" invoke="modifyCardOwnerInputValidate" auth="true">
+        <description>云卡转让服务入参验证</description>
+        <attribute name="cardId" type="String" mode="IN" optional="false"><description>要转出的卡Id</description></attribute>
+        <attribute name="teleNumber" type="String" mode="IN" optional="false"><description>转让到手机号码</description></attribute>
+        <attribute name="cloudCard" type="GenericValue" mode="OUT" optional="false"><description>要转出的卡实体对象</description></attribute>
+        <attribute name="customerPartyId" type="String" mode="OUT" optional="false"><description>转让到客户partyId</description></attribute>
+    </service>
+    <service name="modifyCardOwner" engine="java"
+        location="com.banfftech.cloudcard.CloudCardServices" invoke="modifyCardOwner" auth="true">
+        <description>云卡转让</description>
+        <attribute name="cardId" type="String" mode="IN" optional="true"><description>要转出的卡ID</description></attribute>
+        <attribute name="cloudCard" type="GenericValue" mode="IN" optional="true"><description>要转出的云卡实体</description></attribute>
+        <attribute name="teleNumber" type="String" mode="IN" optional="true"><description>转让到客户手机号码</description></attribute>
+        <attribute name="customerPartyId" type="String" mode="INOUT" optional="true"><description>转让到客户partyId</description></attribute>
+        <attribute name="newCardId" type="String" mode="OUT" optional="false"><description>转让后新产生的卡id</description></attribute>
+    </service>
 </services>

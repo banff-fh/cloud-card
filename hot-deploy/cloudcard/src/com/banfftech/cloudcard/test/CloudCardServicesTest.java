@@ -337,4 +337,25 @@ public class CloudCardServicesTest extends OFBizTestCase {
 		return dispatcher.runSync("customerWithdraw", ctx);
 	}
 
+
+	/**
+	 * 调用卡转让服务
+	 * @param userTeleNumber 用户
+	 * @param cardId 要转让的卡id
+	 * @param teleNumber 转让给谁
+	 * @return
+	 * @throws GenericServiceException
+	 * @throws GenericEntityException
+	 */
+	protected Map<String, Object> callModifyCardOwner(String userTeleNumber, String cardId, String teleNumber)  throws GenericServiceException, GenericEntityException {
+
+		GenericValue user = CloudCardHelper.getUserByTeleNumber(delegator, userTeleNumber);
+		GenericValue userLogin = delegator.findOne("UserLogin", UtilMisc.toMap("userLoginId", user.getString("userLoginId")), false);
+
+		Map<String, Object> ctx = FastMap.newInstance();
+		ctx.put("userLogin", userLogin);
+		ctx.put("cardId", cardId);
+		ctx.put("teleNumber", teleNumber);
+		return dispatcher.runSync("modifyCardOwner", ctx);
+	}
 }

@@ -66,5 +66,6 @@
 	
 	<PartyIdentificationType partyIdentificationTypeId="STORE_QR_CODE" description="商家的二维码" /><!-- 主要用于客户扫码付款 -->
 
-	
+	<RoleType roleTypeId="OLD_CARD_OWNER" hasTable="N" description="以前的卡主"/><!-- 转让卡的时候，用finAccountRole来记录前一个卡主 -->
+
 </entity-engine-xml>

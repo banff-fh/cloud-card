@@ -129,6 +129,18 @@ public class CloudCardHelper {
 			ensureCustomerRelationship = Boolean.FALSE;
 		}
 		
+		GenericValue systemUser = (GenericValue) context.get("systemUser");
+		if(null == systemUser){
+			try {
+				systemUser = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+				context.put("systemUser", systemUser);
+			} catch (GenericEntityException e) {
+				Debug.logError(e.getMessage(), module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+			}
+		}
+		
+		
 		//TODO 密码随机生成？
 		String currentPassword = (String) context.get("currentPassword");
 		String defaultPwd = "123456";
@@ -170,15 +182,6 @@ public class CloudCardHelper {
 			customerPartyId = (String) personOutMap.get("partyId");
 			// UserLoginId通常是可以直接由用户输入的用户名，这里由系统生成，自定义个前缀CC  代表 Cloud Card，减少冲突
 			customerUserLoginId ="CC"+delegator.getNextSeqId("UserLogin");
-			GenericValue systemUser = (GenericValue) context.get("systemUser");
-			if(null == systemUser){
-				try {
-					systemUser = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system"));
-				} catch (GenericEntityException e1) {
-					Debug.logError(e1, module);
-					return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
-				}
-			}
 			
 			Map<String, Object> createUserLoginMap = UtilMisc.toMap("userLogin", systemUser);
 			createUserLoginMap.put("userLoginId", customerUserLoginId);
@@ -216,7 +219,7 @@ public class CloudCardHelper {
 		if(ensureCustomerRelationship){
 			// 若客户与本商家没有客户关系,则建立关系
 			Map<String,Object> partyRelationshipValues = UtilMisc.toMap(
-					"userLogin", userLogin,
+					"userLogin", systemUser,
 					"partyIdFrom", organizationPartyId,
 					"partyIdTo", customerPartyId,
 					"roleTypeIdFrom", "_NA_",
