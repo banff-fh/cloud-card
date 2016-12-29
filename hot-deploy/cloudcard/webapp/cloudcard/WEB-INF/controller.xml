@@ -174,7 +174,11 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 
-
+	<!-- 微信预支付订单 -->
+	<request-map uri="wxOrderNotify">
+		<event type="java" path="com.banfftech.cloudcard.pay.tenpay.WeiXinPayServices" invoke="wxOrderNotify"></event>
+		<response name="success" type="none"/>
+	</request-map>
 
 	<!-- 后台页面部分 Request Mappings -->
 

@@ -1,25 +1,20 @@
 package com.banfftech.cloudcard.pay.tenpay.util;
 
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
+import java.util.SortedMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.http.NameValuePair;
-import org.ofbiz.base.util.StringUtil;
 
 
 public class TenpayUtil {
 	
 	private static Object Server;
-	private static String QRfromGoogle;
 
 	/**
 	 * 把对象转换成字符串
@@ -185,22 +180,6 @@ public class TenpayUtil {
         return sb.toString();  
     } 
 	
-	// 获取包签名
-	public static String genPackageSign(Map<String, Object> context, List<NameValuePair> params) {
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < params.size(); i++) {
-			sb.append(params.get(i).getName());
-			sb.append('=');
-			sb.append(params.get(i).getValue());
-			sb.append('&');
-		}
-		sb.append("key=");
-		String key = (String) context.get("key");
-		sb.append(key);
-		String packageSign = MD5Util.getMessageDigest(sb.toString().getBytes()).toUpperCase();
-		System.out.println("包签名：=" + packageSign);
-		return packageSign;
-	}
 
 	/**
 	 * 获得app前面
@@ -209,30 +188,21 @@ public class TenpayUtil {
 	 *            参数
 	 * @return 签名以后的字符串
 	 */
-	public static String genAppSign(Map<String, Object> context, List<NameValuePair> params) {
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < params.size(); i++) {
-			sb.append(params.get(i).getName());
-			sb.append('=');
-			sb.append(params.get(i).getValue());
-			sb.append('&');
+	public static String createSign(String characterEncoding, SortedMap<String, Object> parameters,String app_key) {
+		StringBuffer sb = new StringBuffer();
+		Set es = parameters.entrySet();
+		Iterator it = es.iterator();
+		while (it.hasNext()) {
+			Map.Entry entry = (Map.Entry) it.next();
+			String k = (String) entry.getKey();
+			Object v = entry.getValue();
+			if (null != v && !"".equals(v) && !"sign".equals(k) && !"key".equals(k)) {
+				sb.append(k + "=" + v + "&");
+			}
 		}
-		sb.append("key=");
-		String key = (String) context.get("key");
-		sb.append(key);
-		String appSign = null;
-		try {
-			MessageDigest messagedigest = MessageDigest.getInstance("MD5");
-			messagedigest.update(sb.toString().getBytes("UTF-8"));
-			appSign = StringUtil.toHexString(messagedigest.digest());
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		 
-		return appSign;
+		sb.append("key=" + app_key);
+		String sign = MD5Util.MD5Encode(sb.toString(), characterEncoding).toUpperCase();
+		return sign;
 	}
 
 }

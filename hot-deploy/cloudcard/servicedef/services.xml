@@ -273,6 +273,7 @@
 	<service name="wxPrepayOrder" engine="java"
 		location="com.banfftech.cloudcard.pay.tenpay.WeiXinPayServices" invoke="prepayOrder" auth="false">
 		<description>微信预支付</description>
+		<attribute name="cardId" type="String" mode="IN" optional="true"><description>卡Id</description></attribute>
 		<attribute name="body" type="String" mode="IN" optional="true"><description>商品描述</description></attribute>
 		<attribute name="totalFee" type="String" mode="IN" optional="true"><description>交易金额</description></attribute>
 		<attribute name="tradeType" type="String" mode="IN" optional="true"><description>交易类型</description></attribute>

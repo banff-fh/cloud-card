@@ -1,14 +1,15 @@
 package com.banfftech.cloudcard.pay.tenpay.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.io.ByteArrayInputStream;
+import java.util.Set;
+import java.util.SortedMap;
 
-import org.apache.http.NameValuePair;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -31,35 +32,34 @@ public class XMLUtil {
 	public static Map doXMLParse(String strxml) throws JDOMException, IOException {
 		strxml = strxml.replaceFirst("encoding=\".*\"", "encoding=\"UTF-8\"");
 
-		if(null == strxml || "".equals(strxml)) {
+		if (null == strxml || "".equals(strxml)) {
 			return null;
 		}
-		
+
 		Map m = new HashMap();
-		
+
 		InputStream in = new ByteArrayInputStream(strxml.getBytes("UTF-8"));
 		SAXBuilder builder = new SAXBuilder();
 		Document doc = builder.build(in);
 		Element root = doc.getRootElement();
 		List list = root.getChildren();
 		Iterator it = list.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			Element e = (Element) it.next();
 			String k = e.getName();
 			String v = "";
 			List children = e.getChildren();
-			if(children.isEmpty()) {
+			if (children.isEmpty()) {
 				v = e.getTextNormalize();
 			} else {
 				v = XMLUtil.getChildrenText(children);
 			}
-			
 			m.put(k, v);
 		}
-		
-		//关闭流
+
+		// 关闭流
 		in.close();
-		
+
 		return m;
 	}
 	
@@ -111,16 +111,23 @@ public class XMLUtil {
 	 *            参数list
 	 * @return xml字符串
 	 */
-	public static String toXml(List<NameValuePair> params) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("<xml>");
-		for (int i = 0; i < params.size(); i++) {
-			sb.append("<" + params.get(i).getName() + ">");
-			sb.append(params.get(i).getValue());
-			sb.append("</" + params.get(i).getName() + ">");
-		}
-		sb.append("</xml>");
-		return sb.toString();
+	public static String toXml(SortedMap<String,Object> parameters) {
+		StringBuffer sb = new StringBuffer();  
+        sb.append("<xml>");  
+        Set es = parameters.entrySet();  
+        Iterator it = es.iterator();  
+        while(it.hasNext()) {  
+            Map.Entry entry = (Map.Entry)it.next();  
+            String key = (String)entry.getKey();  
+            String value = (String)entry.getValue();  
+            if ("attach".equalsIgnoreCase(key)||"body".equalsIgnoreCase(key)||"sign".equalsIgnoreCase(key)) {  
+                sb.append("<"+key+">"+"<![CDATA["+value+"]]></"+key+">");  
+            }else {  
+                sb.append("<"+key+">"+value+"</"+key+">");  
+            }  
+        }  
+        sb.append("</xml>");  
+        return sb.toString();
 	}
 	
 	
