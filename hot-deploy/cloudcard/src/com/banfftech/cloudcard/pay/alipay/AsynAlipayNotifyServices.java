@@ -27,7 +27,7 @@ public class AsynAlipayNotifyServices {
 		Map<String, String> camelCaseKeyMap = RequestUtils.convertKeyToCamelCase(underScoreKeyMap);
 
 		// 首先验证调用是否来自支付宝
-		boolean verifyResult = AlipayNotify.verify(underScoreKeyMap);
+		boolean verifyResult = AlipayNotify.verify(request,underScoreKeyMap);
 
 		try {
 

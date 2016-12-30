@@ -4,8 +4,6 @@ import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.httpclient.Header;
 
-import com.banfftech.cloudcard.pay.alipay.config.AlipayConfig;
-
 
 /* *
  *类名：HttpResponse
@@ -62,7 +60,7 @@ public class HttpResponse {
             return stringResult;
         }
         if (byteResult != null) {
-            return new String(byteResult, AlipayConfig.input_charset);
+            return new String(byteResult, "utf-8");
         }
         return null;
     }

@@ -116,7 +116,6 @@ public class WeiXinPayServices {
 		parameterMap.put("partnerid", wxPartnerid);
 		parameterMap.put("prepayid", prepayid);
 		parameterMap.put("timestamp", timestamp);
-		parameterMap.put("key", context.get("key"));
 		String sign = TenpayUtil.createSign("UTF-8", parameterMap , appKey);
 
 		Map<String, Object> results = ServiceUtil.returnSuccess();
