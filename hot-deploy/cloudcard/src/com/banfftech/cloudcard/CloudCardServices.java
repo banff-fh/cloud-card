@@ -1643,18 +1643,9 @@ public class CloudCardServices {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
-//		GenericValue userLogin = (GenericValue) context.get("userLogin");
 
 		GenericValue cloudCard = (GenericValue) context.get("cloudCard");
 		String customerPartyId = (String) context.get("customerPartyId");
-		/*if(UtilValidate.isEmpty(cloudCard)){
-			Debug.logInfo("参数 cloudCard 未输入", module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardMissingParameter", UtilMisc.toMap("param", "cloudCard"), locale));
-		}
-		if(UtilValidate.isEmpty(customerPartyId)){
-			Debug.logInfo("参数 customerPartyId 未输入", module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardMissingParameter", UtilMisc.toMap("param", "customerPartyId"), locale));
-		}*/
 
 		GenericValue systemUser = (GenericValue) context.get("systemUser");
 		if(null == systemUser){
@@ -1687,7 +1678,7 @@ public class CloudCardServices {
 
 		String cardId = cloudCard.getString("paymentMethodId");
 		
-		// 2、修改FinAccount的ownerPartyId字段为新partyId, 变更finAccountCode字段，将关联的giftCard设置为过期，并新增一个giftCard，parthId为新的partyId
+		// 2、修改FinAccount的ownerPartyId字段为新partyId, 变更finAccountCode字段，将关联的giftCard设置为过期，并新增一个giftCard，partyId为新的partyId
 
 		//创建giftCard
 		String finAccountName = cloudCard.getString("finAccountName");
