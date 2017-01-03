@@ -286,6 +286,13 @@
 		<attribute name="timestamp" type="String" mode="OUT" optional="true"><description>时间</description></attribute>
 		<attribute name="sign" type="String" mode="OUT" optional="true"><description>签名</description></attribute>
 	</service>
+	
+	<service name="aliPrepayOrder" engine="java"
+		location="com.banfftech.cloudcard.pay.alipay.AlipayServices" invoke="prepayOrder" auth="false">
+		<description>微信预支付</description>
+
+		<attribute name="payInfo" type="String" mode="OUT" optional="true"><description>商户ID</description></attribute>
+	</service>
 
 	<service name="modifyCardOwnerInputValidate" engine="java"
         location="com.banfftech.cloudcard.CloudCardServices" invoke="modifyCardOwnerInputValidate" auth="true">
