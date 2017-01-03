@@ -271,7 +271,7 @@
 	</service>
 
 	<service name="uniformOrder" engine="java"
-		location="com.banfftech.cloudcard.pay.PayServices" invoke="uniformOrder" auth="false">
+		location="com.banfftech.cloudcard.pay.PayServices" invoke="uniformOrder" auth="true">
 		<description>支付宝或微信统一下单</description>
 		<!-- 公共参数 -->
 		<attribute name="paymentType" type="String" mode="IN" optional="false"><description>卡Id</description></attribute>
