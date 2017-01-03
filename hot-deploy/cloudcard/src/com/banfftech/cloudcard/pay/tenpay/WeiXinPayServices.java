@@ -38,11 +38,11 @@ public class WeiXinPayServices {
 
 		// 获取随机数
 		String nonceStr = TenpayUtil.getNonceStr(32);
-		//拼接签名参数
+		// 拼接签名参数
 		StringBuffer xml = new StringBuffer();
 		xml.append("</xml>");
-		
-		SortedMap<String, Object> parameterMap = new TreeMap<String, Object>();  
+
+		SortedMap<String, Object> parameterMap = new TreeMap<String, Object>();
 		parameterMap.put("appid", wxAppID);
 		parameterMap.put("mch_id", wxPartnerid);
 		parameterMap.put("body", body);
@@ -53,7 +53,7 @@ public class WeiXinPayServices {
 		parameterMap.put("total_fee", Integer.valueOf(totalFee) * 100);
 		parameterMap.put("trade_type", tradeType);
 		parameterMap.put("total_fee", "1");
-		//签名参数
+		// 签名参数
 		String sign = TenpayUtil.createSign("UTF-8", parameterMap, context.get("appKey").toString());
 		parameterMap.put("sign", sign);
 		String xmlstring = XMLUtil.toXml(parameterMap);
@@ -99,9 +99,11 @@ public class WeiXinPayServices {
 		try {
 			prepayOrderMap = XMLUtil.doXMLParse(content);
 		} catch (JDOMException e) {
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+			return ServiceUtil
+					.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		} catch (IOException e) {
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+			return ServiceUtil
+					.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
 
 		// 返回app签名等信息
@@ -109,14 +111,14 @@ public class WeiXinPayServices {
 		String prepayid = prepayOrderMap.get("prepay_id").toString();
 		String timestamp = TenpayUtil.getCurrTime();
 
-		SortedMap<String, Object> parameterMap = new TreeMap<String, Object>();  
+		SortedMap<String, Object> parameterMap = new TreeMap<String, Object>();
 		parameterMap.put("appid", wxAppID);
 		parameterMap.put("noncestr", noncestr);
 		parameterMap.put("package", "Sign=WXPay");
 		parameterMap.put("partnerid", wxPartnerid);
 		parameterMap.put("prepayid", prepayid);
 		parameterMap.put("timestamp", timestamp);
-		String sign = TenpayUtil.createSign("UTF-8", parameterMap , appKey);
+		String sign = TenpayUtil.createSign("UTF-8", parameterMap, appKey);
 
 		Map<String, Object> results = ServiceUtil.returnSuccess();
 		results.put("appid", wxAppID);
@@ -129,41 +131,43 @@ public class WeiXinPayServices {
 
 		return results;
 	}
-	
-	public static void wxOrderNotify(HttpServletRequest request,HttpServletResponse response){
+
+	public static void wxPayNotify(HttpServletRequest request, HttpServletResponse response) {
 		LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
 		Delegator delegator = dispatcher.getDelegator();
 		InputStream inStream;
 		try {
 			inStream = request.getInputStream();
-			ByteArrayOutputStream outSteam = new ByteArrayOutputStream();  
-			byte[] buffer = new byte[1024];  
-			int len = 0;  
-			while ((len = inStream.read(buffer)) != -1) {  
-			    outSteam.write(buffer, 0, len);  
-			}  
-			outSteam.close();  
-			inStream.close();  
-			String result = new String(outSteam.toByteArray(), "utf-8");// 获取微信调用我们notify_url的返回信息  
+			ByteArrayOutputStream outSteam = new ByteArrayOutputStream();
+			byte[] buffer = new byte[1024];
+			int len = 0;
+			while ((len = inStream.read(buffer)) != -1) {
+				outSteam.write(buffer, 0, len);
+			}
+			outSteam.close();
+			inStream.close();
+			String result = new String(outSteam.toByteArray(), "utf-8");// 获取微信调用我们notify_url的返回信息
 			Map<Object, Object> map = XMLUtil.doXMLParse(result);
 			if (map.get("result_code").toString().equalsIgnoreCase("SUCCESS")) {
 				String appKey = EntityUtilProperties.getPropertyValue("cloudcard", "weixin.key", delegator);
-				boolean verifyWeixinNotifySign = verifyWeixinNotify(map,appKey);
-				if(verifyWeixinNotifySign){
-					//支付成功
-				}else{
-					//支付失败
+				boolean verifyWeixinNotifySign = verifyWeixinNotify(map, appKey);
+				if (verifyWeixinNotifySign) {
+					// 支付成功
+
+				} else {
+					// 支付失败
+
 				}
 			}
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (JDOMException e) {
 			e.printStackTrace();
-		}  
-		  
+		}
+
 	}
-	
+
 	/**
 	 * 验证微信支付返回结果
 	 * 

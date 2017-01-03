@@ -160,29 +160,28 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 	
-	<!-- 微信预支付订单 -->
-	<request-map uri="wxPrepayOrder">
-		<event type="service" invoke="wxPrepayOrder"  />
-		<response name="success" type="request" value="json" />
-		<response name="error" type="request" value="json" />
-	</request-map>
-	
 	<!-- 用户转让云卡 -->
 	<request-map uri="modifyCardOwner">
 		<event type="service" invoke="modifyCardOwner"  />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-
-	<!-- 微信预支付订单 -->
-	<request-map uri="wxOrderNotify">
-		<event type="java" path="com.banfftech.cloudcard.pay.tenpay.WeiXinPayServices" invoke="wxOrderNotify"></event>
-		<response name="success" type="none"/>
-	</request-map>
+	
+	<!-- 支付宝预支付订单 -->
+    <request-map uri="aliPayNotify">
+        <event type="java" path="com.banfftech.cloudcard.pay.PayServices" invoke="aliPayNotify"></event>
+        <response name="success" type="none"/>
+    </request-map>
 	
 	<!-- 微信预支付订单 -->
-	<request-map uri="aliPrepayOrder">
-		<event type="service" invoke="aliPrepayOrder"  />
+    <request-map uri="wxPayNotify">
+        <event type="java" path="com.banfftech.cloudcard.pay.PayServices" invoke="wxPayNotify"></event>
+        <response name="success" type="none"/>
+    </request-map>
+	
+	<!-- 支付宝或微信预支付订单 -->
+	<request-map uri="uniformOrder">
+		<event type="service" invoke="uniformOrder"  />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>

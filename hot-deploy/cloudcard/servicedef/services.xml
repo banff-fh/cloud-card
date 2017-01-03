@@ -270,14 +270,20 @@
 		<attribute name="storeImgUrl" type="String" mode="OUT" optional="true"><description>商家图片(卡图片)</description></attribute>
 	</service>
 
-	<service name="wxPrepayOrder" engine="java"
-		location="com.banfftech.cloudcard.pay.tenpay.WeiXinPayServices" invoke="prepayOrder" auth="false">
-		<description>微信预支付</description>
-		<attribute name="cardId" type="String" mode="IN" optional="true"><description>卡Id</description></attribute>
-		<attribute name="body" type="String" mode="IN" optional="true"><description>商品描述</description></attribute>
-		<attribute name="totalFee" type="String" mode="IN" optional="true"><description>交易金额</description></attribute>
+	<service name="uniformOrder" engine="java"
+		location="com.banfftech.cloudcard.pay.PayServices" invoke="uniformOrder" auth="false">
+		<description>支付宝或微信统一下单</description>
+		<!-- 公共参数 -->
+		<attribute name="paymentType" type="String" mode="IN" optional="false"><description>卡Id</description></attribute>
+		<attribute name="cardId" type="String" mode="IN" optional="false"><description>卡Id</description></attribute>
+		<attribute name="body" type="String" mode="IN" optional="false"><description>商品描述</description></attribute>
+		<attribute name="totalFee" type="String" mode="IN" optional="false"><description>交易金额</description></attribute>
+		<!-- 支付宝参数 -->
+		<attribute name="subject" type="String" mode="IN" optional="true"><description>主题</description></attribute>
+		<!--微信参数-->
 		<attribute name="tradeType" type="String" mode="IN" optional="true"><description>交易类型</description></attribute>
 
+		<!-- 微信返回结果 -->
 		<attribute name="appid" type="String" mode="OUT" optional="true"><description>商户ID</description></attribute>
 		<attribute name="partnerid" type="String" mode="OUT" optional="true"><description>合作ID</description></attribute>
 		<attribute name="prepayid" type="String" mode="OUT" optional="true"><description>预付ID</description></attribute>
@@ -285,14 +291,11 @@
 		<attribute name="noncestr" type="String" mode="OUT" optional="true"><description>随机数</description></attribute>
 		<attribute name="timestamp" type="String" mode="OUT" optional="true"><description>时间</description></attribute>
 		<attribute name="sign" type="String" mode="OUT" optional="true"><description>签名</description></attribute>
+		<!-- 支付宝返回结果 -->
+		<attribute name="payInfo" type="String" mode="OUT" optional="true"><description>签名</description></attribute>
+		
 	</service>
-	
-	<service name="aliPrepayOrder" engine="java"
-		location="com.banfftech.cloudcard.pay.alipay.AlipayServices" invoke="prepayOrder" auth="false">
-		<description>微信预支付</description>
 
-		<attribute name="payInfo" type="String" mode="OUT" optional="true"><description>商户ID</description></attribute>
-	</service>
 
 	<service name="modifyCardOwnerInputValidate" engine="java"
         location="com.banfftech.cloudcard.CloudCardServices" invoke="modifyCardOwnerInputValidate" auth="true">
