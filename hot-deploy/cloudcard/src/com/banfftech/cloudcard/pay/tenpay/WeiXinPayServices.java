@@ -3,7 +3,9 @@ package com.banfftech.cloudcard.pay.tenpay;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.SortedMap;
@@ -136,6 +138,7 @@ public class WeiXinPayServices {
 		LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
 		Delegator delegator = dispatcher.getDelegator();
 		InputStream inStream;
+		String wxReturn = null;
 		try {
 			inStream = request.getInputStream();
 			ByteArrayOutputStream outSteam = new ByteArrayOutputStream();
@@ -153,10 +156,18 @@ public class WeiXinPayServices {
 				boolean verifyWeixinNotifySign = verifyWeixinNotify(map, appKey);
 				if (verifyWeixinNotifySign) {
 					// 支付成功
-
+					
+					SortedMap<String,Object> sort=new TreeMap<String,Object>();
+					sort.put("return_code", "SUCCESS");
+					sort.put("return_msg", "OK");
+					wxReturn = XMLUtil.toXml(sort);
 				} else {
 					// 支付失败
-
+					
+					SortedMap<String,Object> sort=new TreeMap<String,Object>();
+					sort.put("return_code", "FAIL");
+					sort.put("return_msg", "签名失败");
+					wxReturn = XMLUtil.toXml(sort);
 				}
 			}
 
@@ -165,7 +176,16 @@ public class WeiXinPayServices {
 		} catch (JDOMException e) {
 			e.printStackTrace();
 		}
-
+		
+		//返回给微信
+		try {
+			response.setHeader("content-type", "text/xml;charset=UTF-8");
+			response.getWriter().write(wxReturn);
+			response.getWriter().flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/**

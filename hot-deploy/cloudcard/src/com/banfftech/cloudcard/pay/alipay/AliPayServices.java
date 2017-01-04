@@ -75,7 +75,6 @@ public class AliPayServices {
 
 		Map<String, String> underScoreKeyMap = RequestUtils.getStringParams(request);
 		Map<String, String> camelCaseKeyMap = RequestUtils.convertKeyToCamelCase(underScoreKeyMap);
-
 		// 首先验证调用是否来自支付宝
 		boolean verifyResult = AlipayNotify.verify(request, underScoreKeyMap);
 
@@ -90,7 +89,7 @@ public class AliPayServices {
 				printWriter = response.getWriter();
 				// do business
 				if (verifyResult) {
-
+					resultResponse = "success";
 				}
 				// fail due to verification error
 				else {

@@ -120,7 +120,7 @@ public class XMLUtil {
             Map.Entry entry = (Map.Entry)it.next();  
             String key = (String)entry.getKey();  
             String value = (String)entry.getValue();  
-            if ("attach".equalsIgnoreCase(key)||"body".equalsIgnoreCase(key)||"sign".equalsIgnoreCase(key)) {  
+            if ("attach".equalsIgnoreCase(key)||"body".equalsIgnoreCase(key)||"sign".equalsIgnoreCase(key) ||"return_code".equalsIgnoreCase(key) || "return_msg".equalsIgnoreCase(key)) {  
                 sb.append("<"+key+">"+"<![CDATA["+value+"]]></"+key+">");  
             }else {  
                 sb.append("<"+key+">"+value+"</"+key+">");  
