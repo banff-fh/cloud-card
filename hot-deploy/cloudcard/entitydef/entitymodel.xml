@@ -8,14 +8,21 @@
     <description>None</description>
     <copyright></copyright>
     <version></version>
-	<view-entity entity-name="FinAccountAndPaymentMethodAndGiftCard" package-name="org.ofbiz.accounting.finaccount" title="cloud card info">
-        <description>云卡视图（金融账户、金融账户角色、礼品卡关联）</description>
+	<view-entity entity-name="CloudCardInfo" package-name="org.ofbiz.accounting.finaccount" title="cloud card info">
+        <description>
+        云卡视图（金融账户、金融账户角色、礼品卡关联）
+        FinAccount And PaymentMethod And GiftCard
+        </description>
         <member-entity entity-alias="FA" entity-name="FinAccount"/>
         <member-entity entity-alias="FAR" entity-name="FinAccountRole"/>
         <member-entity entity-alias="PM" entity-name="PaymentMethod"/>
       	<member-entity entity-alias="GC" entity-name="GiftCard"/>
+      	<member-entity entity-alias="PG" entity-name="PartyGroup"/>
+      	<member-entity entity-alias="PER" entity-name="Person"/>
       	<alias entity-alias="FA" name="finAccountId" />
       	<alias entity-alias="FA" name="ownerPartyId" />
+      	<alias entity-alias="PER" name="lastName" />
+      	<alias entity-alias="PER" name="firstName" />
       	<alias entity-alias="FA" name="finAccountTypeId" />
       	<alias entity-alias="FA" name="statusId" />
       	<alias entity-alias="FA" name="finAccountName" />
@@ -24,6 +31,8 @@
       	<alias entity-alias="FA" name="actualBalance" />
       	<alias entity-alias="FA" name="availableBalance" />
       	<alias entity-alias="FAR" name="distributorPartyId" field="partyId" />
+      	<alias entity-alias="PG" name="distributorPartyName" field="groupName" />
+      	<alias entity-alias="PG" name="logoImageUrl"/>
 		<alias entity-alias="PM" name="paymentMethodId" />
 		<alias entity-alias="PM" name="paymentMethodTypeId" />
 		<alias entity-alias="PM" name="partyId" />
@@ -48,6 +57,16 @@
 		<view-link entity-alias="PM" rel-entity-alias="GC" rel-optional="true">
 			<key-map field-name="paymentMethodId" />
 		</view-link>
+		<view-link entity-alias="FAR" rel-entity-alias="PG">
+			<key-map field-name="partyId" />
+		</view-link>
+		<view-link entity-alias="FA" rel-entity-alias="PER">
+			<key-map field-name="ownerPartyId"  rel-field-name="partyId"/>
+		</view-link>
+
+		<relation type="one-nofk" rel-entity-name="Person">
+			<key-map field-name="ownerPartyId" rel-field-name="partyId" />
+		</relation>
 		<relation type="one-nofk" rel-entity-name="PaymentMethod">
 			<key-map field-name="paymentMethodId" />
 		</relation>

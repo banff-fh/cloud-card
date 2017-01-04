@@ -135,7 +135,7 @@ public class CloudCardServicesTest extends OFBizTestCase {
 		if(null != statusId){
 			lookupMap.put("statusId", statusId);
 		}
-		return delegator.findByAnd("FinAccountAndPaymentMethodAndGiftCard", lookupMap);
+		return delegator.findByAnd("CloudCardInfo", lookupMap);
 	}
 
 	/**
@@ -153,7 +153,7 @@ public class CloudCardServicesTest extends OFBizTestCase {
 		if(filterByDate){
 			cond = EntityCondition.makeCondition(cond, EntityUtil.getFilterByDateExpr());
 		}
-		return delegator.findList("FinAccountAndPaymentMethodAndGiftCard", cond,null,null,null,false);
+		return delegator.findList("CloudCardInfo", cond,null,null,null,false);
 	}
 
 	/**

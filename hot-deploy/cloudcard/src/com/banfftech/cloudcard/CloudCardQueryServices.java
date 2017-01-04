@@ -64,7 +64,7 @@ public class CloudCardQueryServices {
 
 		Map<String, Object> ctxMap = FastMap.newInstance();
 		ctxMap.put("inputFields", inputFieldMap);
-		ctxMap.put("entityName", "FinAccountAndPaymentMethodAndGiftCard");
+		ctxMap.put("entityName", "CloudCardInfo");
 		ctxMap.put("orderBy", "-fromDate");
 		ctxMap.put("viewIndex", viewIndex);
 		ctxMap.put("viewSize", viewSize);
@@ -531,7 +531,7 @@ public class CloudCardQueryServices {
 
 			ctxMap.put("inputFields", inputFieldMap);
 			ctxMap.put("userLogin", userLogin);
-			ctxMap.put("entityName", "FinAccountAndPaymentMethodAndGiftCard");
+			ctxMap.put("entityName", "CloudCardInfo");
 			
 
 			Map<String, Object> faResult = null;

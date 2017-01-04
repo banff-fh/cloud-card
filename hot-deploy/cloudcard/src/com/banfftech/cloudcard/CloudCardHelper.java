@@ -417,7 +417,7 @@ public class CloudCardHelper {
 	 * 根据二维码查询卡信息
 	 * @param cardCode 二维码信息
 	 * @param delegator
-	 * @return FinAccountAndPaymentMethodAndGiftCard
+	 * @return CloudCardInfo
 	 * @throws GenericEntityException
 	 */
 	 public static GenericValue getCloudCardAccountFromCode(String cardCode, Delegator delegator) throws GenericEntityException {
@@ -430,7 +430,7 @@ public class CloudCardHelper {
      * @param cardCode 二维码信息
      * @param filterByDate 传入true时，不查找已过期的卡
      * @param delegator
-     * @return FinAccountAndPaymentMethodAndGiftCard
+     * @return CloudCardInfo
      * @throws GenericEntityException
      */
     public static GenericValue getCloudCardAccountFromCode(String cardCode, boolean filterByDate, Delegator delegator) throws GenericEntityException {
@@ -445,7 +445,7 @@ public class CloudCardHelper {
         GenericValue encryptedGiftCard = delegator.makeValue("GiftCard", UtilMisc.toMap("cardNumber",cardCode));
         delegator.encryptFields(encryptedGiftCard);
         String encryptedCardNumber = encryptedGiftCard.getString("cardNumber");
-        List<GenericValue> giftCards = delegator.findByAnd("FinAccountAndPaymentMethodAndGiftCard", UtilMisc.toMap("cardNumber", encryptedCardNumber));
+        List<GenericValue> giftCards = delegator.findByAnd("CloudCardInfo", UtilMisc.toMap("cardNumber", encryptedCardNumber));
         if(filterByDate){
         	giftCards =  EntityUtil.filterByDate(giftCards);
         }
@@ -461,7 +461,7 @@ public class CloudCardHelper {
             }
             
             // 既然是物理卡，fromDate应该是最小的吧
-            List<GenericValue> accounts = delegator.findList("FinAccountAndPaymentMethodAndGiftCard", cond, null, UtilMisc.toList("fromDate"), null, false);
+            List<GenericValue> accounts = delegator.findList("CloudCardInfo", cond, null, UtilMisc.toList("fromDate"), null, false);
             return EntityUtil.getFirst(accounts);
         } else if (giftCards.size() > 1) {
             Debug.logError("一个二维码找到多张卡？", module);
@@ -474,14 +474,14 @@ public class CloudCardHelper {
      * 根据卡ID查询卡信息
      * @param cardCode 二维码信息
      * @param delegator
-     * @return FinAccountAndPaymentMethodAndGiftCard
+     * @return CloudCardInfo
      * @throws GenericEntityException
      */
     public static GenericValue getCloudCardAccountFromPaymentMethodId(String paymentMethodId, Delegator delegator) throws GenericEntityException {
     	if (UtilValidate.isEmpty(paymentMethodId)) {
     		return null;
     	}
-    	return EntityUtil.getFirst( EntityUtil.filterByDate(delegator.findByAnd("FinAccountAndPaymentMethodAndGiftCard", UtilMisc.toMap("paymentMethodId", paymentMethodId))));
+    	return EntityUtil.getFirst( EntityUtil.filterByDate(delegator.findByAnd("CloudCardInfo", UtilMisc.toMap("paymentMethodId", paymentMethodId))));
     }
     
     /**
