@@ -45,7 +45,7 @@ under the License.
     <form name="ListCard" list-name="listIt" target="" title="" type="list" list-entry-name="cloudcard" default-map-name="cloudcard" paginate-target="findCard"
         odd-row-style="alternate-row" default-table-style="basic-table hover-bar" header-row-style="header-row-2">
         <actions>
-            <set field="entityName" value="FinAccountAndPaymentMethodAndGiftCard"/>
+            <set field="entityName" value="CloudCardInfo"/>
             <script location="component://cloudcard/webapp/cloudcard/WEB-INF/actions/cloudcard/getFinAccountIdByCardCode.groovy"/>
             <set field="parameters.finAccountId" from-field="finAccountId"/>
             <set field="parameters.noConditionFind" from-field="noConditionFind" default-value="Y"/>
