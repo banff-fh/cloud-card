@@ -26,6 +26,8 @@ import com.banfftech.cloudcard.pay.tenpay.util.HttpUtil;
 import com.banfftech.cloudcard.pay.tenpay.util.TenpayUtil;
 import com.banfftech.cloudcard.pay.tenpay.util.XMLUtil;
 
+import javolution.util.FastMap;
+
 public class WeiXinPayServices {
 	public static final String resourceError = "cloudcardErrorUiLabels";
 
@@ -59,11 +61,11 @@ public class WeiXinPayServices {
 		String sign = TenpayUtil.createSign("UTF-8", parameterMap, context.get("appKey").toString());
 		parameterMap.put("sign", sign);
 		String xmlstring = XMLUtil.toXml(parameterMap);
-		try {
-			xmlstring = new String(xmlstring.toString().getBytes(), "ISO8859-1");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			xmlstring = new String(xmlstring.toString().getBytes(), "ISO8859-1");
+//		} catch (UnsupportedEncodingException e) {
+//			e.printStackTrace();
+//		}
 		return xmlstring;
 
 	}
@@ -133,7 +135,12 @@ public class WeiXinPayServices {
 
 		return results;
 	}
-
+	
+	/**
+	 * 微信支付回调接口
+	 * @param request
+	 * @param response
+	 */
 	public static void wxPayNotify(HttpServletRequest request, HttpServletResponse response) {
 		LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
 		Delegator delegator = dispatcher.getDelegator();
@@ -187,6 +194,56 @@ public class WeiXinPayServices {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * 微信订单查询接口
+	 * @param delegator
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> orderPayQuery(Delegator delegator, Map<String, Object> context) {
+		String wxAppID = EntityUtilProperties.getPropertyValue("cloudcard", "weixin.wxAppID", delegator);
+		String wxPartnerid = EntityUtilProperties.getPropertyValue("cloudcard", "weixin.wxPartnerid", delegator);
+		String appKey = EntityUtilProperties.getPropertyValue("cloudcard", "weixin.key", delegator);
+		SortedMap<String, Object> params = new TreeMap<String, Object>();
+		params.put("appid", wxAppID);
+		params.put("mch_id", wxPartnerid);
+		params.put("nonce_str", TenpayUtil.getNonceStr(32)); // 生成随机串
+		params.put("transaction_id", context.get("transactionId"));
+		params.put("out_trade_no", context.get("outTradeNo"));
+
+		// 附加签名
+		String sign = TenpayUtil.createSign("UTF-8", params, appKey);
+		params.put("sign", sign);
+		// 转换成XML字符串
+		String xmlString = XMLUtil.toXml(params);
+		String ret = HttpUtil.sendPostUrl("https://api.mch.weixin.qq.com/pay/orderquery", xmlString);
+		try {
+			ret = new String( ret.getBytes("GBK"), "UTF-8");
+		} catch (UnsupportedEncodingException e1) {
+			e1.printStackTrace();
+		}
+		Map<String, Object> orderMap = FastMap.newInstance();
+		try {
+			Map<String ,Object> orders = XMLUtil.doXMLParse(ret);
+			if("SUCCESS".equals(orders.get("result_code"))){
+				orderMap = ServiceUtil.returnSuccess();
+				orderMap.put("returnCode", orders.get("return_code"));
+				orderMap.put("returnMsg", orders.get("return_msg"));
+				orderMap.put("tradeType", orders.get("trade_type"));
+				orderMap.put("cashFee", Double.valueOf(orders.get("cash_fee").toString())/100);
+				orderMap.put("outTradeNo", orders.get("out_trade_no"));
+				orderMap.put("timeEnd", orders.get("time_end"));
+				orderMap.put("tradeState", orders.get("trade_state"));
+				orderMap.put("tradeStateDesc", orders.get("trade_state_desc"));
+			}
+		} catch (JDOMException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return orderMap;
+	}
 
 	/**
 	 * 验证微信支付返回结果
@@ -210,4 +267,5 @@ public class WeiXinPayServices {
 			return false;
 		}
 	}
+	
 }

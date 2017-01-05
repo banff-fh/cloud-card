@@ -5,7 +5,9 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.ofbiz.entity.Delegator;
 import org.ofbiz.service.DispatchContext;
+import org.ofbiz.service.ServiceUtil;
 
 import com.banfftech.cloudcard.pay.alipay.AliPayServices;
 import com.banfftech.cloudcard.pay.tenpay.WeiXinPayServices;
@@ -34,4 +36,21 @@ public class PayServices {
 	public static void wxPayNotify(HttpServletRequest request,HttpServletResponse response){
 		WeiXinPayServices.wxPayNotify(request, response);
 	}
+	
+	/**
+	 * 支付订单查询
+	 */
+	public static Map<String, Object> orderPayQuery(DispatchContext dctx, Map<String, Object> context) {
+		Delegator delegator = dctx.getDelegator();
+		String paymentType = (String) context.get("paymentType");
+		Map<String, Object> orderMap = FastMap.newInstance();
+		if ("aliPay".equals(paymentType)) {
+			//AliPayServices.orderPayQuery(delegator, context);
+		} else if ("wxPay".equals(paymentType)) {
+			orderMap = ServiceUtil.returnSuccess();
+			orderMap = WeiXinPayServices.orderPayQuery(delegator, context);
+		}
+		return orderMap;
+	}
+
 }
