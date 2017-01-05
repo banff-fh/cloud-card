@@ -1197,7 +1197,7 @@ public class CloudCardServices {
 		if(null == cloudCard && UtilValidate.isNotEmpty(cardCode)){
 			needFindCard = true;
 			try {
-				cloudCard = CloudCardHelper.getCloudCardAccountFromCode(cardCode, delegator);
+				cloudCard = CloudCardHelper.getCloudCardByCardCode(cardCode, delegator);
 			} catch (GenericEntityException e2) {
 				Debug.logError(e2.getMessage(), module);
 				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale)); 
@@ -1208,7 +1208,7 @@ public class CloudCardServices {
 		if(null == cloudCard && UtilValidate.isNotEmpty(cardId)){
 			needFindCard = true;
 			try {
-				cloudCard = CloudCardHelper.getCloudCardAccountFromPaymentMethodId(cardId, delegator);
+				cloudCard = CloudCardHelper.getCloudCardByCardId(cardId, delegator);
 			} catch (GenericEntityException e2) {
 				Debug.logError(e2.getMessage(), module);
 				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale)); 

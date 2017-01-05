@@ -420,8 +420,8 @@ public class CloudCardHelper {
 	 * @return CloudCardInfo
 	 * @throws GenericEntityException
 	 */
-	 public static GenericValue getCloudCardAccountFromCode(String cardCode, Delegator delegator) throws GenericEntityException {
-		 return getCloudCardAccountFromCode(cardCode, true, delegator);
+	 public static GenericValue getCloudCardByCardCode(String cardCode, Delegator delegator) throws GenericEntityException {
+		 return getCloudCardByCardCode(cardCode, true, delegator);
 	 }
 	
 	
@@ -433,7 +433,7 @@ public class CloudCardHelper {
      * @return CloudCardInfo
      * @throws GenericEntityException
      */
-    public static GenericValue getCloudCardAccountFromCode(String cardCode, boolean filterByDate, Delegator delegator) throws GenericEntityException {
+    public static GenericValue getCloudCardByCardCode(String cardCode, boolean filterByDate, Delegator delegator) throws GenericEntityException {
         if (UtilValidate.isEmpty(cardCode)) {
             return null;
         }
@@ -472,16 +472,16 @@ public class CloudCardHelper {
     }
     /**
      * 根据卡ID查询卡信息
-     * @param cardCode 二维码信息
+     * @param cardId 云卡的卡id （paymentMethodId）
      * @param delegator
      * @return CloudCardInfo
      * @throws GenericEntityException
      */
-    public static GenericValue getCloudCardAccountFromPaymentMethodId(String paymentMethodId, Delegator delegator) throws GenericEntityException {
-    	if (UtilValidate.isEmpty(paymentMethodId)) {
+    public static GenericValue getCloudCardByCardId(String cardId, Delegator delegator) throws GenericEntityException {
+    	if (UtilValidate.isEmpty(cardId)) {
     		return null;
     	}
-    	return EntityUtil.getFirst( EntityUtil.filterByDate(delegator.findByAnd("CloudCardInfo", UtilMisc.toMap("paymentMethodId", paymentMethodId))));
+    	return EntityUtil.getFirst( EntityUtil.filterByDate(delegator.findByAnd("CloudCardInfo", UtilMisc.toMap("paymentMethodId", cardId))));
     }
     
     /**

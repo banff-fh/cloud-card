@@ -22,7 +22,7 @@ import com.banfftech.cloudcard.CloudCardHelper;
 
 
 if(parameters.cardCode){
-	cloudCard = CloudCardHelper.getCloudCardAccountFromCode(parameters.cardCode, false, delegator);
+	cloudCard = CloudCardHelper.getCloudCardByCardCode(parameters.cardCode, false, delegator);
 	if(cloudCard){
 		context.finAccountId=cloudCard?.finAccountId;
 	}else{

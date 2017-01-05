@@ -421,7 +421,7 @@ public class CloudCardQueryServices {
 		
 		GenericValue cloudCard;
 		try {
-			cloudCard = CloudCardHelper.getCloudCardAccountFromCode(cardCode, delegator);
+			cloudCard = CloudCardHelper.getCloudCardByCardCode(cardCode, delegator);
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale)); 
@@ -497,7 +497,7 @@ public class CloudCardQueryServices {
 			Map<String, Object> inputFieldMap = FastMap.newInstance();
 			// 有可能是“null” 这样的字符串。。。
 			if(UtilValidate.isNotEmpty(cardCode) && !"null".equals(cardCode)){
-				GenericValue cloudCard = CloudCardHelper.getCloudCardAccountFromCode(cardCode, false, delegator);
+				GenericValue cloudCard = CloudCardHelper.getCloudCardByCardCode(cardCode, false, delegator);
 				if(null!=cloudCard){
 					inputFieldMap.put("finAccountId", cloudCard.getString("finAccountId"));
 				}else{
