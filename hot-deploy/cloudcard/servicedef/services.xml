@@ -5,54 +5,6 @@
     <vendor></vendor>
     <version>1.0</version>
     
-    <service name="myCloudCards" engine="java"
-            location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="myCloudCards" auth="true">
-        <description>查询用户卡列表</description>
-        <attribute name="viewIndex" type="Integer" mode="IN" optional="true" default-value="0"/>
-        <attribute name="viewSize" type="Integer" mode="IN" optional="true" default-value="20"/>
-        <attribute name="cloudCardList" type="List" mode="OUT" optional="false"/>
-        <attribute name="listSize" type="Integer" mode="OUT" optional="false"/>
-    </service>
-    
-    <service name="getBizPayment" engine="java"
-            location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="getBizPayment" auth="true">
-        <description>查询商户交易流水</description>
-        <attribute name="organizationPartyId" type="String" mode="IN" optional="false"/>
-        <attribute name="viewIndex" type="Integer" mode="IN" optional="true" default-value="0"/>
-        <attribute name="viewSize" type="Integer" mode="IN" optional="true" default-value="20"/>
-        <attribute name="type" type="String" mode="IN" optional="true"/>
-        <attribute name="paymentList" type="List" mode="OUT" optional="false"/>
-        <attribute name="totalPage" type="Integer" mode="OUT" optional="false"/>
-    </service>
-    
-    <service name="getUserPayment" engine="java"
-            location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="getUserPayment" auth="true">
-        <description>查询客户交易流水</description>
-       	<attribute name="viewIndex" type="Integer" mode="IN" optional="true" default-value="0"/>
-        <attribute name="viewSize" type="Integer" mode="IN" optional="true" default-value="20"/>
-        <attribute name="cardId" type="String" mode="IN" optional="true"/>
-        <attribute name="type" type="String" mode="IN" optional="true"/>
-        <attribute name="paymentList" type="List" mode="OUT" optional="false"/>
-        <attribute name="totalPage" type="Integer" mode="OUT" optional="false"/>
-    </service>
-    
-    <service name="createCardAuth" engine="java"
-    	location="com.banfftech.cloudcard.CloudCardServices" invoke="createCardAuth" auth="true">
-    	<description>云卡授权</description>
-    	<attribute name="teleNumber" type="String" mode="IN" optional="false"><description>客户手机号码</description></attribute>
-        <attribute name="cardId" type="String" mode="IN" optional="false"><description>卡Id</description></attribute>
-        <attribute name="amount" type="BigDecimal" mode="IN" optional="true"><description>授权金额</description></attribute>
-        <attribute name="fromDate" type="Timestamp" mode="IN" optional="true"><description>授权开始时间，默认当天开始</description></attribute>
-        <attribute name="thruDate" type="Timestamp" mode="IN" optional="true"><description>授权结束时间</description></attribute>
-        <attribute name="days" type="Integer" mode="IN" optional="true"><description>授权几天</description></attribute>
-        <attribute name="customerPartyId" type="String" mode="OUT" optional="false"><description>客户partyId</description></attribute>
-    </service>
-    <service name="revokeCardAuth" engine="java"
-    	location="com.banfftech.cloudcard.CloudCardServices" invoke="revokeCardAuth" auth="true">
-    	<description>撤销云卡授权</description>
-        <attribute name="cardId" type="String" mode="IN" optional="false"><description>要解除授权的卡Id</description></attribute>
-    </service>
-
 
     <service name="activateCloudCard" engine="java"
             location="com.banfftech.cloudcard.CloudCardServices" invoke="activateCloudCard" auth="true">
@@ -75,21 +27,6 @@
         <attribute name="customerPartyId" type="String" mode="OUT" optional="false"><description>客户partyId</description></attribute>
         <attribute name="actualBalance" type="BigDecimal" mode="OUT" optional="false"><description>可用余额</description></attribute>
 	</service>
-	
-	<service name="activateCloudCardAndRecharge" engine="java"
-            location="com.banfftech.cloudcard.CloudCardServices" invoke="activateCloudCardAndRecharge" auth="true">
-        <description>
-        	开卡(激活)充值统一接口， 根据cardCode查询卡信息，如果已经激活直接充值，没激活先激活再充值，激活需要teleNumber
-        </description>
-        <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家partyId</description></attribute>
-        <attribute name="teleNumber" type="String" mode="IN" optional="true"><description>客户手机号码</description></attribute>
-        <attribute name="cardCode" type="String" mode="IN" optional="false"><description>卡二维码、条码等唯一标识数据</description></attribute>
-        <attribute name="amount" type="BigDecimal" mode="INOUT" optional="false"><description>充值金额</description></attribute>
-
-        <attribute name="cardId" type="String" mode="OUT" optional="false"><description>卡Id</description></attribute>
-        <attribute name="customerPartyId" type="String" mode="OUT" optional="false"><description>客户partyId</description></attribute>
-        <attribute name="cardBalance" type="BigDecimal" mode="OUT" optional="false"><description>可用余额</description></attribute>
-    </service>
 
     <service name="cloudCardWithdraw" engine="java"
             location="com.banfftech.cloudcard.CloudCardServices" invoke="cloudCardWithdraw" auth="true">
@@ -105,59 +42,6 @@
         <attribute name="customerPartyId" type="String" mode="OUT" optional="false"><description>客户partyId</description></attribute>
     </service>
 
-    <service name="receiptByCardCode" engine="java"
-            location="com.banfftech.cloudcard.CloudCardServices" invoke="receiptByCardCode" auth="true">
-        <description>云卡商家扫卡二维码收款</description>
-        <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>商家partyId</description></attribute>
-        <attribute name="cardCode" type="String" mode="IN" optional="false"><description>卡二维码、条码等唯一标识数据</description></attribute>
-        <attribute name="amount" type="BigDecimal" mode="INOUT" optional="false"><description>支付金额</description></attribute>
-
-        <attribute name="cardId" type="String" mode="OUT" optional="true"><description>卡Id</description></attribute>
-        <attribute name="cardBalance" type="BigDecimal" mode="OUT" optional="false"><description>可用余额</description></attribute>
-        <attribute name="customerPartyId" type="String" mode="OUT" optional="false"><description>客户partyId</description></attribute>
-    </service>
-
-	<service name="customerWithdraw" engine="java"
-            location="com.banfftech.cloudcard.CloudCardServices" invoke="customerWithdraw" auth="true">
-        <description>客户付款，比如扫商家二维码进行付款</description>
-        <attribute name="qrCode" type="String" mode="IN" optional="true"><description>商家二维码</description></attribute>
-        <attribute name="amount" type="BigDecimal" mode="INOUT" optional="false"><description>支付金额</description></attribute>
-        <attribute name="cardId" type="String" mode="INOUT" optional="false"><description>卡Id</description></attribute>
-
-        <attribute name="storeId" type="String" mode="OUT" optional="false"><description>商家partyId</description></attribute>
-        <attribute name="storeName" type="String" mode="OUT" optional="false"><description>商家名</description></attribute>
-        <attribute name="cardBalance" type="BigDecimal" mode="OUT" optional="false"><description>可用余额</description></attribute>
-    </service>
-	
-    <service name="getCardInfoByCode" engine="java"
-            location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="getCardInfoByCode" auth="true">
-        <description>根据二维码查询卡信息</description>
-        <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家partyId</description></attribute>
-        <attribute name="cardCode" type="String" mode="INOUT" optional="false"><description>卡二维码、条码等唯一标识数据</description></attribute>
-
-        <attribute name="isActivated" type="String" mode="OUT" optional="false"><description>此卡是否已开通（激活）</description></attribute>
-        <attribute name="cardId" type="String" mode="OUT" optional="true"><description>卡Id</description></attribute>
-        <attribute name="cardName" type="String" mode="OUT" optional="true"><description>卡名</description></attribute>
-        <attribute name="cardImg" type="String" mode="OUT" optional="true"><description>卡图片地址</description></attribute>
-        <attribute name="cardBalance" type="BigDecimal" mode="OUT" optional="true"><description>可用余额</description></attribute>
-        <attribute name="distributorPartyId" type="String" mode="OUT" optional="true"><description>发卡商家partyId</description></attribute>
-        <attribute name="customerPartyId" type="String" mode="OUT" optional="true"><description>客户partyId</description></attribute>
-        <attribute name="ownerPartyId" type="String" mode="OUT" optional="true"><description>原卡主partyId</description></attribute>
-	</service>
-	
-	<service name="getLimitAndPresellInfo" engine="java"
-		location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="getLimitAndPresellInfo" auth="true">
-		<description>查询开卡额度和已卖卡金额信息</description>
-        <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家partyId</description></attribute>
-        <attribute name="presellAmount" type="BigDecimal" mode="OUT" optional="false"><description>已卖卡总额</description></attribute>
-        <attribute name="limitAmount" type="BigDecimal" mode="OUT" optional="false"><description>卖卡额度</description></attribute>
-        <attribute name="balance" type="BigDecimal" mode="OUT" optional="false"><description>卖卡余额</description></attribute>
-        <attribute name="liabilities" type="BigDecimal" mode="OUT" optional="false"><description>负债，所有客户手中卡内总金额</description></attribute>
-        <attribute name="settlementAmount" type="BigDecimal" mode="OUT" optional="false">
-        	<description>待结算金额，负数表示需要付给平台，正数表示平台需要付给商家</description>
-        </attribute>
-	</service>
-	
 	<service name="createPaymentAndFinAccountTransForCloudCard" engine="simple"
             location="component://cloudcard/script/com/banfftech/cloudcard/CloudCardServices.xml" invoke="createPaymentAndFinAccountTransForCloudCard" auth="true">
         <description> create new payment and associate with respective financial account in FinAccountTrans Entity,
@@ -177,25 +61,7 @@
 		<description>获取登录验证码</description>
         <attribute name="teleNumber" type="String" mode="IN" optional="false"/>
 	</service>
-    
-    <service name="bizAppLogin" engine="java"
-		location="com.banfftech.cloudcard.sms.SmsServices" invoke="bizAppLogin" auth="false">
-		<description>商家手机登录</description>
-        <attribute name="teleNumber" type="String" mode="IN" optional="false"/>
-        <attribute name="captcha" type="String" mode="IN" optional="false"/>
-        <attribute name="token" type="String" mode="OUT" optional="true"/>
-        <attribute name="organizationPartyId" type="String" mode="OUT" optional="true"/>
-	</service>
-    
-    <service name="userAppLogin" engine="java"
-		location="com.banfftech.cloudcard.sms.SmsServices" invoke="userAppLogin" auth="false">
-		<description>用户手机登录</description>
-        <attribute name="teleNumber" type="String" mode="IN" optional="false"/>
-        <attribute name="captcha" type="String" mode="IN" optional="false"/>
-        <attribute name="token" type="String" mode="OUT" optional="true"/>
-        <attribute name="organizationPartyId" type="String" mode="OUT" optional="true"/>
-	</service>
-	
+
 	<service name="genNewCloudCardCode" engine="java"
 		location="com.banfftech.cloudcard.CloudCardServices" invoke="genNewCloudCardCode" auth="true">
 		<description>生成云卡卡号</description>
@@ -259,16 +125,6 @@
 		<attribute name="amount" type="BigDecimal" mode="IN" optional="true"><description>金额</description></attribute>
 		<attribute name="cardBalance" type="BigDecimal" mode="IN" optional="true"><description>余额</description></attribute>
 	</service>
-	
-	<service name="getStoreInfoByQRcode" engine="java"
-		location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="getStoreInfoByQRcode" auth="true">
-		<description>通过二维码查询商家信息</description>
-		<attribute name="qrCode" type="String" mode="IN" optional="false"><description>商家二维码</description></attribute>
-
-		<attribute name="storeId" type="String" mode="OUT" optional="true"><description>商家Id</description></attribute>
-		<attribute name="storeName" type="String" mode="OUT" optional="true"><description>商家店名</description></attribute>
-		<attribute name="storeImgUrl" type="String" mode="OUT" optional="true"><description>商家图片(卡图片)</description></attribute>
-	</service>
 
 	<service name="uniformOrder" engine="java"
 		location="com.banfftech.cloudcard.pay.PayServices" invoke="uniformOrder" auth="true">
@@ -296,29 +152,9 @@
 		
 	</service>
 
-
-	<service name="modifyCardOwnerInputValidate" engine="java"
-        location="com.banfftech.cloudcard.CloudCardServices" invoke="modifyCardOwnerInputValidate" auth="true">
-        <description>云卡转让服务入参验证</description>
-        <attribute name="cardId" type="String" mode="IN" optional="false"><description>要转出的卡Id</description></attribute>
-        <attribute name="teleNumber" type="String" mode="IN" optional="false"><description>转让到手机号码</description></attribute>
-        <attribute name="cloudCard" type="GenericValue" mode="OUT" optional="false"><description>要转出的卡实体对象</description></attribute>
-        <attribute name="customerPartyId" type="String" mode="OUT" optional="false"><description>转让到客户partyId</description></attribute>
-    </service>
-    <service name="modifyCardOwner" engine="java"
-        location="com.banfftech.cloudcard.CloudCardServices" invoke="modifyCardOwner" auth="true">
-        <description>云卡转让</description>
-        <attribute name="cardId" type="String" mode="IN" optional="true"><description>要转出的卡ID</description></attribute>
-        <attribute name="cloudCard" type="GenericValue" mode="IN" optional="false"><description>要转出的云卡实体</description></attribute>
-        <attribute name="teleNumber" type="String" mode="IN" optional="true"><description>转让到客户手机号码</description></attribute>
-        <attribute name="customerPartyId" type="String" mode="INOUT" optional="false"><description>转让到客户partyId</description></attribute>
-        <attribute name="newCardId" type="String" mode="OUT" optional="false"><description>转让后新产生的卡id</description></attribute>
-        <attribute name="cardBalance" type="BigDecimal" mode="OUT" optional="false"><description>卡内余额</description></attribute>
-    </service>
-    
     <service name="orderPayQuery" engine="java"
 		location="com.banfftech.cloudcard.pay.PayServices" invoke="orderPayQuery" auth="true">
-		<description>支付宝或微信统一下单</description>
+		<description>支付宝或微信查询服务</description>
 		<!-- 公共参数 -->
 		<attribute name="paymentType" type="String" mode="IN" optional="false"><description>支付类型</description></attribute>
 		<attribute name="transactionId" type="String" mode="IN" optional="false"><description>第三方交易流水ID</description></attribute>
@@ -338,5 +174,5 @@
 		<attribute name="payInfo" type="String" mode="OUT" optional="true"><description>签名</description></attribute>
 		
 	</service>
-    
+
 </services>
