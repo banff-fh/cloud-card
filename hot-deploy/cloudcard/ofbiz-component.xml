@@ -36,7 +36,6 @@
     -->
 
     <test-suite loader="main" location="testdef/cloudcardLoginTests.xml"/>
-    <test-suite loader="main" location="testdef/cloudcardQueryTests.xml"/>
     <test-suite loader="main" location="testdef/cloudcardTests.xml"/>
 
     <!-- web applications; will be mounted when using the embedded container -->
