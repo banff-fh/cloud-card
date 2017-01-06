@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.jdom.JDOMException;
 import org.ofbiz.base.util.UtilProperties;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
@@ -205,12 +206,20 @@ public class WeiXinPayServices {
 		String wxAppID = EntityUtilProperties.getPropertyValue("cloudcard", "weixin.wxAppID", delegator);
 		String wxPartnerid = EntityUtilProperties.getPropertyValue("cloudcard", "weixin.wxPartnerid", delegator);
 		String appKey = EntityUtilProperties.getPropertyValue("cloudcard", "weixin.key", delegator);
+		String outTradeNo = (String) context.get("outTradeNo");
+		String tradeNo = (String) context.get("transactionId");
 		SortedMap<String, Object> params = new TreeMap<String, Object>();
 		params.put("appid", wxAppID);
 		params.put("mch_id", wxPartnerid);
 		params.put("nonce_str", TenpayUtil.getNonceStr(32)); // 生成随机串
-		params.put("transaction_id", context.get("transactionId"));
-		params.put("out_trade_no", context.get("outTradeNo"));
+		
+		if(UtilValidate.isNotEmpty(outTradeNo)){
+			params.put("out_trade_no", outTradeNo);
+		}
+		
+		if(UtilValidate.isNotEmpty(tradeNo)){
+			params.put("transaction_id", tradeNo);
+		}
 
 		// 附加签名
 		String sign = TenpayUtil.createSign("UTF-8", params, appKey);
@@ -223,26 +232,32 @@ public class WeiXinPayServices {
 		} catch (UnsupportedEncodingException e1) {
 			e1.printStackTrace();
 		}
-		Map<String, Object> orderMap = FastMap.newInstance();
+		Map<String, Object> orderPayMap = FastMap.newInstance();
 		try {
 			Map<String ,Object> orders = XMLUtil.doXMLParse(ret);
 			if("SUCCESS".equals(orders.get("result_code"))){
-				orderMap = ServiceUtil.returnSuccess();
-				orderMap.put("returnCode", orders.get("return_code"));
-				orderMap.put("returnMsg", orders.get("return_msg"));
-				orderMap.put("tradeType", orders.get("trade_type"));
-				orderMap.put("cashFee", Double.valueOf(orders.get("cash_fee").toString())/100);
-				orderMap.put("outTradeNo", orders.get("out_trade_no"));
-				orderMap.put("timeEnd", orders.get("time_end"));
-				orderMap.put("tradeState", orders.get("trade_state"));
-				orderMap.put("tradeStateDesc", orders.get("trade_state_desc"));
+				orderPayMap = ServiceUtil.returnSuccess();
+				orderPayMap.put("returnCode", orders.get("return_code"));
+				orderPayMap.put("returnMsg", orders.get("return_msg"));
+				orderPayMap.put("tradeType", orders.get("trade_type"));
+				orderPayMap.put("cashFee", Double.valueOf(orders.get("cash_fee").toString())/100);
+				orderPayMap.put("tradeNo", orders.get("out_trade_no"));
+				orderPayMap.put("timeEnd", orders.get("time_end"));
+				orderPayMap.put("tradeState", orders.get("trade_state"));
+			}
+			
+			if("FAIL".equals(orders.get("result_code"))){
+				orderPayMap = ServiceUtil.returnSuccess();
+				if("ORDERNOTEXIST".equals(orders.get("err_code"))){
+					orderPayMap.put("tradeState", "订单不存在");
+				}
 			}
 		} catch (JDOMException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return orderMap;
+		return orderPayMap;
 	}
 
 	/**

@@ -12,6 +12,9 @@ import java.util.Random;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.ofbiz.base.util.UtilHttp;
+import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
@@ -19,10 +22,20 @@ import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
 import com.alibaba.fastjson.JSON;
+import com.alipay.api.AlipayApiException;
+import com.alipay.api.AlipayClient;
+import com.alipay.api.DefaultAlipayClient;
+import com.alipay.api.request.AlipayTradeQueryRequest;
+import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.banfftech.cloudcard.pay.alipay.bean.AlipayNotification;
 import com.banfftech.cloudcard.pay.alipay.util.AlipayNotify;
 import com.banfftech.cloudcard.pay.alipay.util.RequestUtils;
 import com.banfftech.cloudcard.pay.alipay.util.StringUtils;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import javolution.util.FastMap;
+import net.sf.json.JSONObject;
 
 public class AliPayServices {
 
@@ -109,7 +122,56 @@ public class AliPayServices {
 			e1.printStackTrace();
 		}
 	}
-
+	
+	public static Map<String, Object> orderPayQuery(Delegator delegator, Map<String, Object> context) {
+		String outTradeNo = (String) context.get("outTradeNo");
+		String tradeNo = (String) context.get("transactionId");
+		String qRsa_private = EntityUtilProperties.getPropertyValue("cloudcard.properties", "aliPay.qRsa_private",delegator);
+		String qRsa_public= EntityUtilProperties.getPropertyValue("cloudcard.properties", "aliPay.qRsa_public",delegator);
+		String qRsa_AppId = EntityUtilProperties.getPropertyValue("cloudcard.properties", "aliPay.qRsa_appId",delegator);
+		
+		AlipayClient alipayClient = new DefaultAlipayClient("https://openapi.alipay.com/gateway.do", qRsa_AppId, qRsa_private, "json", "GBK", qRsa_public, "RSA");
+		AlipayTradeQueryRequest request = new AlipayTradeQueryRequest();
+		
+		//request.setBizContent("{" + "\"out_trade_no\":\""+outTradeNo.trim()+"\"}");
+		
+		// 判断商家交易流水是否为空，为空给空空字符串
+		if (UtilValidate.isEmpty(outTradeNo)) {
+			outTradeNo = "";
+		}
+		//判断第三方流水是否为空，为空给空空字符串
+		if(UtilValidate.isEmpty(tradeNo)){
+			tradeNo="";
+		}
+		//根据商户订单流水和支付宝流水查询
+		request.setBizContent("{" + "\"out_trade_no\":\""+outTradeNo+"\"," + "\"trade_no\":\""+tradeNo+"\"" + "  }");
+		AlipayTradeQueryResponse response = null;
+		try {
+			response = alipayClient.execute(request);
+		} catch (AlipayApiException e) {
+			e.printStackTrace();
+		}
+		Map<String, Object> orderPayMap = FastMap.newInstance();
+		if (response.isSuccess()) {
+			orderPayMap = ServiceUtil.returnSuccess();
+			JSONObject jsonObject = JSONObject.fromObject(response.getBody()).getJSONObject("alipay_trade_query_response");
+			orderPayMap.put("cashFee", Double.parseDouble(jsonObject.get("total_amount").toString()));
+			orderPayMap.put("returnCode", jsonObject.get("code"));
+			orderPayMap.put("returnMsg", jsonObject.get("msg"));
+			orderPayMap.put("outTradeNo", jsonObject.get("out_trade_no"));
+			orderPayMap.put("tradeNo", jsonObject.get("trade_no"));
+			orderPayMap.put("timeEnd", jsonObject.get("send_pay_date"));
+			orderPayMap.put("tradeState", jsonObject.get("trade_status"));
+		} else {
+			orderPayMap = ServiceUtil.returnSuccess();
+			JSONObject jsonObject = JSONObject.fromObject(response.getBody()).getJSONObject("alipay_trade_query_response");
+			orderPayMap.put("tradeState", response.getSubMsg());
+		}
+		
+		return orderPayMap;
+	}
+	
+	
 	/**
 	 * get the out_trade_no for an order. 获取外部订单号
 	 * 

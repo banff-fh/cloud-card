@@ -157,22 +157,17 @@
 		<description>支付宝或微信查询服务</description>
 		<!-- 公共参数 -->
 		<attribute name="paymentType" type="String" mode="IN" optional="false"><description>支付类型</description></attribute>
-		<attribute name="transactionId" type="String" mode="IN" optional="false"><description>第三方交易流水ID</description></attribute>
-		<attribute name="outTradeNo" type="String" mode="IN" optional="true"><description>商家交易流水ID</description></attribute>
-
-		<!-- 微信返回结果 -->
-		<attribute name="cashFee" type="Double" mode="OUT" optional="true"><description>现金支付金额</description></attribute>
+		<attribute name="transactionId" type="String" mode="IN" optional="true"><description>第三方交易流水ID</description></attribute>
+		<attribute name="outTradeNo" type="String" mode="IN" optional="false"><description>商家交易流水ID</description></attribute>
+	
+		<attribute name="cashFee" type="Double" mode="OUT" optional="true"><description>支付金额</description></attribute>
 		<attribute name="returnCode" type="String" mode="OUT" optional="true"><description>返回状态码</description></attribute>
 		<attribute name="returnMsg" type="String" mode="OUT" optional="true"><description>返回信息</description></attribute>
 		<attribute name="tradeType" type="String" mode="OUT" optional="true"><description>交易类型</description></attribute>
 		<attribute name="outTradeNo" type="String" mode="OUT" optional="true"><description>商户订单号</description></attribute>
+		<attribute name="tradeNo" type="String" mode="OUT" optional="true"><description>第三方订单号</description></attribute>
 		<attribute name="timeEnd" type="String" mode="OUT" optional="true"><description>支付完成时间</description></attribute>
 		<attribute name="tradeState" type="String" mode="OUT" optional="true"><description>交易状态</description></attribute>
-		<attribute name="tradeStateDesc" type="String" mode="OUT" optional="true"><description>交易状态描述</description></attribute>
-				
-		<!-- 支付宝返回结果 -->
-		<attribute name="payInfo" type="String" mode="OUT" optional="true"><description>签名</description></attribute>
-		
 	</service>
 
 </services>
