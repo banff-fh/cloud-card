@@ -28,6 +28,8 @@ import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
+import com.banfftech.cloudcard.constant.CloudCardConstant;
+
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
@@ -38,32 +40,10 @@ public class CloudCardHelper {
 	
 	public static final String module = CloudCardHelper.class.getName();
 
-	/**
-	 * 默认币种 {@value}
-	 */
-	public static final String DEFAULT_CURRENCY_UOM_ID = "CNY"; 
+	public static int decimals = UtilNumber.getBigDecimalScale("finaccount.decimals");
+	public static int rounding = UtilNumber.getBigDecimalRoundingMode("finaccount.rounding");
+	public static final BigDecimal ZERO = BigDecimal.ZERO.setScale(decimals, rounding);
 
-	public static final String resourceError = "cloudcardErrorUiLabels";
-
-	/**
-	 * 平台partyId {@value}
-	 */
-	public static final String PLATFORM_PARTY_ID="Company";
-
-	/**
-	 * 授权给别人的云卡卡号前缀 {@value}
-	 */
-	public static final String AUTH_CARD_CODE_PREFIX="auth:";
-	
-	/**
-	 * 商家二维码前缀 {@value}
-	 */
-	public static final String STORE_QR_CODE_PREFIX="ccs-";
-	
-	 public static int decimals = UtilNumber.getBigDecimalScale("finaccount.decimals");
-     public static int rounding = UtilNumber.getBigDecimalRoundingMode("finaccount.rounding");
-     public static final BigDecimal ZERO = BigDecimal.ZERO.setScale(decimals, rounding);
-	
 	/**
 	 * 判断当前partyId是否为organizationPartyId的管理人员
 	 * @param delegator
@@ -136,7 +116,7 @@ public class CloudCardHelper {
 				context.put("systemUser", systemUser);
 			} catch (GenericEntityException e) {
 				Debug.logError(e.getMessage(), module);
-				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 			}
 		}
 		
@@ -159,7 +139,7 @@ public class CloudCardHelper {
 			customer = getUserByTeleNumber(delegator, teleNumber);
 		} catch (GenericEntityException e) {
 			Debug.logError(e, module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 		if(customer != null){
 			customerPartyId = (String) customer.get("partyId");
@@ -168,13 +148,13 @@ public class CloudCardHelper {
 			// 由于createPersonAndUserLogin 会自动新启一个事务，后面若失败，不能回滚，
 			// 所以分步调用 createPerson 和 createUserLogin
 			Map<String, Object> createPersonMap = UtilMisc.toMap("userLogin", userLogin, "firstName", teleNumber, "lastName", "86");
-			createPersonMap.put("preferredCurrencyUomId", DEFAULT_CURRENCY_UOM_ID);
+			createPersonMap.put("preferredCurrencyUomId", CloudCardConstant.DEFAULT_CURRENCY_UOM_ID);
 			Map<String, Object> personOutMap;
 			try {
 				personOutMap = dispatcher.runSync("createPerson", createPersonMap);
 			} catch (GenericServiceException e) {
 				Debug.logError(e, module);
-				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 			}
 			if (ServiceUtil.isError(personOutMap)) {
 				return personOutMap;
@@ -195,7 +175,7 @@ public class CloudCardHelper {
 				userLoginOutMap = dispatcher.runSync("createUserLogin", createUserLoginMap);
 			} catch (GenericServiceException e) {
 				Debug.logError(e, module);
-				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 			}
 			if (ServiceUtil.isError(userLoginOutMap)) {
 				return userLoginOutMap;
@@ -208,7 +188,7 @@ public class CloudCardHelper {
 								"contactNumber", teleNumber));
 			} catch (GenericServiceException e) {
 				Debug.logError(e, module);
-				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 			}
 			if (ServiceUtil.isError(partyTelecomOutMap)) {
 				return partyTelecomOutMap;
@@ -241,7 +221,7 @@ public class CloudCardHelper {
 					}
 				} catch (GenericServiceException e) {
 					Debug.logError(e, module);
-					return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+					return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 				}
 				
 			}
@@ -284,7 +264,7 @@ public class CloudCardHelper {
 				systemUser = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system"));
 			} catch (GenericEntityException e) {
 				Debug.logError(e.getMessage(), module);
-				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 			}
 		}
 		
@@ -302,7 +282,7 @@ public class CloudCardHelper {
 			giftCardOutMap = dispatcher.runSync("createGiftCard", giftCardMap);
 		} catch (GenericServiceException e) {
 			Debug.logError(e.getMessage(), module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 		if (ServiceUtil.isError(giftCardOutMap)) {
 			return giftCardOutMap;
@@ -316,7 +296,7 @@ public class CloudCardHelper {
 			paymentMethod.store();
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 		
 		Map<String, Object> retMap = ServiceUtil.returnSuccess();
@@ -399,7 +379,7 @@ public class CloudCardHelper {
 	private static GenericValue getPartyGroupFinAccount(Delegator delegator, String organizationPartyId, String finAccountTypeId,
 			boolean useCache) {
 		EntityCondition dateCond = EntityUtil.getFilterByDateExpr();
-		EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toMap("organizationPartyId", PLATFORM_PARTY_ID,
+		EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toMap("organizationPartyId", CloudCardConstant.PLATFORM_PARTY_ID,
 				"ownerPartyId", organizationPartyId, "finAccountTypeId", finAccountTypeId, "statusId", "FNACT_ACTIVE"));
 		GenericValue partyGroupFinAccount = null;
 		try {
@@ -622,8 +602,8 @@ public class CloudCardHelper {
 		
 		String cardCode = cloudCard.getString("cardNumber");
 		if(null == cardCode) cardCode = cloudCard.getString("finAccountCode");
-		boolean isAuthToMe = null!=cardCode && cardCode.startsWith(CloudCardHelper.AUTH_CARD_CODE_PREFIX);
-		
+		boolean isAuthToMe = null!=cardCode && cardCode.startsWith(CloudCardConstant.AUTH_CARD_CODE_PREFIX);
+
 		if(isAuthToMe){
 			// 如果是别人授权给我的卡，获取授权余额
 			//cardBalance = CloudCardHelper.getCloudCardAuthBalance(cloudCard.getString("finAccountId"), delegator); 
@@ -670,7 +650,7 @@ public class CloudCardHelper {
 		lookupFields.put("partyIdentificationTypeId", "STORE_QR_CODE");
 		GenericValue partyIdentification = delegator.findByPrimaryKey("PartyIdentification", lookupFields);
 		if(UtilValidate.isEmpty(partyIdentification)){
-			qrCodeStr = STORE_QR_CODE_PREFIX + UUID.randomUUID().toString();
+			qrCodeStr = CloudCardConstant.STORE_QR_CODE_PREFIX + UUID.randomUUID().toString();
 			lookupFields.put("idValue", qrCodeStr);
 			delegator.makeValue("PartyIdentification", lookupFields).create();
 		}else{
@@ -744,4 +724,98 @@ public class CloudCardHelper {
 						EntityCondition.makeCondition(UtilMisc.toMap("contactNumber", teleNumber)), 
 						EntityUtil.getFilterByDateExpr()), null, UtilMisc.toList("partyId DESC"), null, false));
 	}
+	
+
+	/**
+	 *  根据店铺id获取圈子与店铺的关系（partyRelationship）实体
+	 * @param delegator 实体引擎代理对象
+	 * @param storeId 店id
+	 * @param useCache 是否使用缓存
+	 * @return GenericValue 圈子与店铺的关系
+	 * @throws GenericEntityException
+	 */
+	public static GenericValue getGroupRelationShipByStoreId(Delegator delegator, String storeId, boolean useCache)
+			throws GenericEntityException {
+
+		// 查找圈子
+		List<EntityCondition> condList = FastList.newInstance();
+		condList.add(EntityCondition.makeCondition("partyIdTo", storeId));
+		condList.add(EntityCondition.makeCondition("roleTypeIdFrom", CloudCardConstant.STORE_GROUP_ROLE_TYPE_ID));
+		condList.add(EntityCondition.makeCondition("partyRelationshipTypeId",  CloudCardConstant.STORE_GROUP_PARTY_RELATION_SHIP_TYPE_ID));
+		condList.add(EntityUtil.getFilterByDateExpr());
+		return EntityUtil.getFirst(delegator.findList("PartyRelationship", EntityCondition.makeCondition(condList), null, null, null, useCache));
+	}
+
+	
+	
+	/**
+	 *  根据店铺id获取圈子id， （不使用缓存）
+	 * @param delegator 实体引擎代理对象
+	 * @param storeId 店id
+	 * @return groupId 圈子Id
+	 * @throws GenericEntityException
+	 */
+	public static String getGroupIdByStoreId(Delegator delegator, String storeId)
+			throws GenericEntityException {
+		return getGroupIdByStoreId(delegator, storeId, false);
+	}
+	
+	
+	/**
+	 *  根据店铺id获取圈子id
+	 * @param delegator 实体引擎代理对象
+	 * @param storeId 店id
+	 * @param useCache 是否使用缓存
+	 * @return groupId 圈子Id
+	 * @throws GenericEntityException
+	 */
+	public static String getGroupIdByStoreId(Delegator delegator, String storeId, boolean useCache)
+			throws GenericEntityException {
+
+		GenericValue partyRelationship = getGroupRelationShipByStoreId(delegator, storeId, useCache);
+
+		if (UtilValidate.isNotEmpty(partyRelationship)) {
+			return partyRelationship.getString("partyIdFrom");
+		}
+
+		return null;
+	}
+
+	
+	/**
+	 * 根据店铺id获取圈子对应的的PartyGroup实体，（不使用缓存）
+	 * @param delegator 实体引擎代理对象
+	 * @param storeId 店id
+	 * @return 圈子实体（partyGroup）
+	 * @throws GenericEntityException
+	 */
+	public static GenericValue getStoreGroupByStoreId(Delegator delegator, String storeId) throws GenericEntityException{
+		return getStoreGroupByStoreId(delegator, storeId, false);
+	}
+
+
+	/** 
+	 * 根据店铺id获取圈子对应的的PartyGroup实体
+	 * @param delegator 实体引擎代理对象
+	 * @param storeId 店id
+	 * @param useCache 是否使用缓存
+	 * @return 圈子实体（partyGroup）
+	 * @throws GenericEntityException
+	 */
+	public static GenericValue getStoreGroupByStoreId(Delegator delegator, String storeId , boolean useCache)
+			throws GenericEntityException {
+
+		String groupId = getGroupIdByStoreId(delegator, storeId, useCache);
+
+		if (UtilValidate.isNotEmpty(groupId)) {
+			if(useCache){
+				return  delegator.findByPrimaryKeyCache("PartyGroup", UtilMisc.toMap("partyId", groupId));
+			}
+			return delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", groupId));
+		}
+		return null;
+	}
+	
+	
+	
 }

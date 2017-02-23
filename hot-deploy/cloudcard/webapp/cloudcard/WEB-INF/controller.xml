@@ -186,6 +186,14 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 	
+	
+	<!-- 商户开店申请接口 -->
+	<request-map uri="bizCreateApply">
+		<!--<security https="true" auth="false" />-->
+		<event type="service" invoke="bizCreateApply" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
 
 	<!-- 后台页面部分 Request Mappings -->
 

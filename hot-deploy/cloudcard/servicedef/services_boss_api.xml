@@ -82,4 +82,55 @@
 		</attribute>
 	</service>
 
+
+
+	<service name="bizCreateApply" engine="java"
+		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizCreateApply" auth="false">
+		<description>商家开通申请</description>
+		<attribute name="storeName" type="String" mode="IN" optional="false"><description>店名</description></attribute>
+		<attribute name="storeAddress" type="String" mode="IN" optional="false"><description>商铺详细地址</description></attribute>
+		<attribute name="teleNumber" type="String" mode="IN" optional="false"><description>店主电话</description></attribute>
+		<attribute name="personName" type="String" mode="IN" optional="true"><description>店主姓名</description></attribute>
+		<attribute name="description" type="String" mode="IN" optional="true"><description>店铺描述</description></attribute>
+		<attribute name="longitude" type="String" mode="IN" optional="true"><description>经度</description></attribute>
+		<attribute name="latitude" type="String" mode="IN" optional="true"><description>纬度</description></attribute>
+
+		<attribute name="responseId" type="String" mode="OUT" optional="true"><description>受理id，可用于后台查询</description></attribute>
+
+	</service>
+
+	<service name="bizCreateGroup" engine="java"
+		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizCreateGroup" auth="true">
+		<description>商家创建圈子</description>
+		<attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家partyId</description></attribute>
+		<attribute name="groupName" type="String" mode="IN" optional="true"><description>要创建的圈子名</description></attribute>
+
+		<attribute name="groupId" type="String" mode="OUT" optional="false"><description>圈子id</description></attribute>
+	</service>
+
+	<service name="bizSentGroupInvitation" engine="java"
+		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizSentGroupInvitation" auth="true">
+		<description>邀请商家加入圈子,单个邀请</description>
+		<attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家Id（自己的商家id）</description></attribute>
+		<attribute name="teleNumber" type="String" mode="IN" optional="false"><description>要邀请加入圈子的店主teleNumber</description></attribute>
+		<attribute name="groupId" type="String" mode="INOUT" optional="false"><description>圈子id</description></attribute>
+	</service>
+	
+	<service name="bizMyGroup" engine="java"
+		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizMyGroup" auth="true">
+		<description>我的圈子</description>
+		<attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家partyId</description></attribute>
+		<attribute name="viewIndex" type="Integer" mode="IN" optional="true" default-value="0"><description>圈友列表页码</description></attribute>
+		<attribute name="viewSize" type="Integer" mode="IN" optional="true" default-value="20"><description>圈友列表页大小</description></attribute>
+
+		<attribute name="isJoinGroup" type="String" mode="OUT" optional="false"><description>是否已加入圈子 Y/N</description></attribute>
+		<attribute name="isGroupOwner" type="String" mode="OUT" optional="true"  default-value="N"><description>是否为圈主 Y/N</description></attribute>
+		<attribute name="groupId" type="String" mode="OUT" optional="true"><description>圈子id</description></attribute><!-- 需要输出吗？App拿这个来干什么呢？ -->
+		<attribute name="groupName" type="String" mode="OUT" optional="true"><description>圈子名称</description></attribute>
+
+		<!-- [ { storeName: xxx, storeId: xxx, isGroupOwner: Y/N, storeImg :xxx } ] -->
+		<attribute name="partners" type="List" mode="OUT" optional="true"><description>圈友列表</description></attribute>
+		<attribute name="listSize" type="Integer" mode="OUT" optional="true" default-value="0"><description>圈友列表大小</description></attribute>
+
+	</service>
 </services>

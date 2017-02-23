@@ -74,4 +74,39 @@
 
 	<RoleType roleTypeId="OLD_CARD_OWNER" hasTable="N" description="以前的卡主"/><!-- 转让卡的时候，用finAccountRole来记录前一个卡主 -->
 
+
+	<!-- 申请开店需要收集的信息 -->
+	<SurveyQuestionCategory surveyQuestionCategoryId="SQC_CC_STORE_INFO" description="库胖商家信息收集问题分类"/>
+	<StatusType statusTypeId="SURV_RESP_STATUS" hasTable="N" description="调查回答的状态"/>
+	<StatusItem description="已创建" sequenceId="01" statusCode="CREATED" statusId="SRS_CREATED" statusTypeId="SURV_RESP_STATUS"/>
+	<StatusItem description="已接受" sequenceId="02" statusCode="ACCEPTED" statusId="SRS_ACCEPTED" statusTypeId="SURV_RESP_STATUS"/>
+	<StatusItem description="已拒绝" sequenceId="03" statusCode="REJECTED" statusId="SRS_REJECTED" statusTypeId="SURV_RESP_STATUS"/>
+	<StatusItem description="已取消" sequenceId="04" statusCode="CANCELED" statusId="SRS_CANCELED" statusTypeId="SURV_RESP_STATUS"/>
+
+	<StatusValidChange statusId="SRS_CREATED" statusIdTo="SRS_ACCEPTED" transitionName="通过"/>
+	<StatusValidChange statusId="SRS_CREATED" statusIdTo="SRS_REJECTED" transitionName="拒绝"/>
+	<StatusValidChange statusId="SRS_CREATED" statusIdTo="SRS_CANCELED" transitionName="取消"/>
+
+	<Survey surveyId="SURV_CC_STORE_INFO" surveyName="库胖商家信息收集" description="商家线上申请开店时收集信息用" submitCaption="申请开通" isAnonymous="Y" allowMultiple="Y" allowUpdate="N" />
+	
+	<SurveyQuestion surveyQuestionId="SQ_CC_STORE_NAME" surveyQuestionCategoryId="SQC_CC_STORE_INFO" surveyQuestionTypeId="TEXT_SHORT" description="店名" question="店名"/>
+	<SurveyQuestion surveyQuestionId="SQ_CC_STORE_ADDR" surveyQuestionCategoryId="SQC_CC_STORE_INFO" surveyQuestionTypeId="TEXT_LONG" description="商铺地址" question="商铺地址"/>
+	<SurveyQuestion surveyQuestionId="SQ_CC_S_OWNER_TEL" surveyQuestionCategoryId="SQC_CC_STORE_INFO" surveyQuestionTypeId="TEXT_SHORT" description="店主手机号" question="店主手机号"/>
+	<SurveyQuestion surveyQuestionId="SQ_CC_S_OWNER_NAME" surveyQuestionCategoryId="SQC_CC_STORE_INFO" surveyQuestionTypeId="TEXT_SHORT" description="店主姓名" question="店主姓名"/>
+	<SurveyQuestion surveyQuestionId="SQ_CC_STORE_DESC" surveyQuestionCategoryId="SQC_CC_STORE_INFO" surveyQuestionTypeId="TEXTAREA" description="商铺简介" question="商铺简介"/>
+	<SurveyQuestion surveyQuestionId="SQ_CC_S_LONGITUDE" surveyQuestionCategoryId="SQC_CC_STORE_INFO" surveyQuestionTypeId="TEXT_SHORT" description="店铺位置经度" question="店铺位置经度"/>
+	<SurveyQuestion surveyQuestionId="SQ_CC_S_LATITUDE" surveyQuestionCategoryId="SQC_CC_STORE_INFO" surveyQuestionTypeId="TEXT_SHORT" description="店铺位置纬度" question="店铺位置纬度"/>
+	
+	<SurveyQuestionAppl surveyId="SURV_CC_STORE_INFO" surveyQuestionId="SQ_CC_STORE_NAME" fromDate="2016-02-14 13:14:00" requiredField="Y" sequenceNum="1"/>
+	<SurveyQuestionAppl surveyId="SURV_CC_STORE_INFO" surveyQuestionId="SQ_CC_STORE_ADDR" fromDate="2016-02-14 13:14:00" requiredField="Y" sequenceNum="2"/>
+	<SurveyQuestionAppl surveyId="SURV_CC_STORE_INFO" surveyQuestionId="SQ_CC_S_OWNER_TEL" fromDate="2016-02-14 13:14:00" requiredField="Y" sequenceNum="3"/>
+	<SurveyQuestionAppl surveyId="SURV_CC_STORE_INFO" surveyQuestionId="SQ_CC_S_OWNER_NAME" fromDate="2016-02-14 13:14:00" requiredField="N" sequenceNum="4"/>
+	<SurveyQuestionAppl surveyId="SURV_CC_STORE_INFO" surveyQuestionId="SQ_CC_STORE_DESC" fromDate="2016-02-14 13:14:00" requiredField="N" sequenceNum="5"/>
+	<SurveyQuestionAppl surveyId="SURV_CC_STORE_INFO" surveyQuestionId="SQ_CC_S_LONGITUDE" fromDate="2016-02-14 13:14:00" requiredField="N" sequenceNum="6"/>
+	<SurveyQuestionAppl surveyId="SURV_CC_STORE_INFO" surveyQuestionId="SQ_CC_S_LATITUDE" fromDate="2016-02-14 13:14:00" requiredField="N" sequenceNum="7"/>
+
+	<!-- 圈子相关 -->
+	<RoleType roleTypeId="CC_STORE_GROUP" parentTypeId="INTERNAL_ORGANIZATIO" hasTable="N" description="库胖商家圈子"/>
+	
+
 </entity-engine-xml>

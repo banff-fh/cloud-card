@@ -141,4 +141,12 @@
         <value xml:lang="en">missing parameter:[${param}]</value>
         <value xml:lang="zh">缺少参数:[${param}]</value>
     </property>
+    <property key="CloudCardRepeatedApplyForCreateStore">
+        <value xml:lang="en">The teleNumber has been used to apply for a shop, Please wait for us to contact you</value>
+        <value xml:lang="zh">此电话已发起过开店申请，请您耐心等待平台工作人员的线下联系。</value>
+    </property>
+    <property key="CloudCardIsInGroupCanNotCreateAnother">
+        <value xml:lang="en">The Store is already in a Group, Can Not create another one.</value>
+        <value xml:lang="zh">此店已经在圈子里，不能创建新的圈子。</value>
+    </property>
 </resource>
