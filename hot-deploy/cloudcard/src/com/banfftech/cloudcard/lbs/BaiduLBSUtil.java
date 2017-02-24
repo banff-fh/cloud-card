@@ -233,18 +233,18 @@ public class BaiduLBSUtil {
 	@SuppressWarnings("unchecked")
 	public String nearby(Map params){
 		String url = "http://api.map.baidu.com/geosearch/v3/nearby";
-		return HttpRequestProxy.doPost(url,params,getRecEncoding());
+		return HttpRequestProxy.doGet(url,params,getRecEncoding());
 	}
 	
 	/**
-	 * poi周边检索
+	 * poi本地检索
 	 * @param params
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public String poi本地检索(Map params){
+	public String local(Map params){
 		String url = "http://api.map.baidu.com/geosearch/v3/local";
-		return HttpRequestProxy.doPost(url,params,getRecEncoding());
+		return HttpRequestProxy.doGet(url,params,getRecEncoding());
 	}
 	
 	/**
@@ -255,7 +255,7 @@ public class BaiduLBSUtil {
 	@SuppressWarnings("unchecked")
 	public String bound(Map params){
 		String url = "http://api.map.baidu.com/geosearch/v3/bound";
-		return HttpRequestProxy.doPost(url,params,getRecEncoding());
+		return HttpRequestProxy.doGet(url,params,getRecEncoding());
 	}
 	
 	/**
