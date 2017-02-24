@@ -93,5 +93,14 @@
 		<attribute name="newCardId" type="String" mode="OUT" optional="false"><description>转让后新产生的卡id</description></attribute>
 		<attribute name="cardBalance" type="BigDecimal" mode="OUT" optional="false"><description>卡内余额</description></attribute>
 	</service>
+	
+	<service name="userStoreListLBS" engine="java"
+		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="userStoreListLBS" auth="false">
+		<description>查找圈子</description>
+		<attribute name="longitude" type="String" mode="IN" optional="true"><description>经度</description></attribute>
+		<attribute name="latitude" type="String" mode="IN" optional="false"><description>纬度</description></attribute>
+		<attribute name="listSize" type="String" mode="OUT" optional="true"><description>店铺列表大小</description></attribute>
+		<attribute name="storeList" type="List" mode="OUT" optional="true"><description>店铺列表</description></attribute>
+	</service>
 
 </services>

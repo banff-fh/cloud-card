@@ -231,7 +231,7 @@ public class BaiduLBSUtil {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public String nearby(Map params){
+	public static String nearby(Map params){
 		String url = "http://api.map.baidu.com/geosearch/v3/nearby";
 		return HttpRequestProxy.doGet(url,params,getRecEncoding());
 	}
