@@ -220,6 +220,14 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
+
+	<!-- 商户 接收/拒绝圈子邀请接口 -->
+	<request-map uri="bizAcceptGroupInvitation">
+		<security https="false" auth="false"/>
+		<event type="service" invoke="bizAcceptGroupInvitation" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
 	
 	<!-- 店铺信息 -->
 	<request-map uri="userGetStoreInfo">

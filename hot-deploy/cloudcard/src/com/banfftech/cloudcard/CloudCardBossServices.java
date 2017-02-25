@@ -302,7 +302,7 @@ public class CloudCardBossServices {
             otherStoreGroup = CloudCardHelper.getStoreGroupByStoreId(delegator, storeId, true);
             if (null != otherStoreGroup) {
                 // 已经加入某个圈子了
-                Debug.logWarning("This user [" + teleNumber + "] is not the manager, can not be invited", module);
+                Debug.logWarning("This store[" + storeId + "] is already in a Group, Can Not join another one.", module);
                 return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardIsInGroupCanNotJoinAnother", locale));
             }
 
@@ -345,7 +345,6 @@ public class CloudCardBossServices {
             // 创建 createPartyInvitationGroupAssoc 和
             // createPartyInvitationRoleAssoc 这样对方在通过 acceptPartyInvitation服务
             // 接收邀请的时候就会自动创建 partyRelationship 和 partyRole了
-            // TODO 是否需要？
             Map<String, Object> createPartyInvitationGroupAssocOutMap = dispatcher.runSync("createPartyInvitationGroupAssoc",
                     UtilMisc.toMap("locale", locale, "userLogin", userLogin, "partyInvitationId", partyInvitationId, "partyIdTo", groupId));
             if (!ServiceUtil.isSuccess(createPartyInvitationGroupAssocOutMap)) {
@@ -371,6 +370,123 @@ public class CloudCardBossServices {
     }
 
     /**
+     * B端 接收或拒绝 加入圈子的邀请
+     * 
+     * @param dctx
+     * @param context
+     * @return
+     */
+    public static Map<String, Object> bizAcceptGroupInvitation(DispatchContext dctx, Map<String, Object> context) {
+        LocalDispatcher dispatcher = dctx.getDispatcher();
+        Delegator delegator = dispatcher.getDelegator();
+        Locale locale = (Locale) context.get("locale");
+        // GenericValue userLogin = (GenericValue) context.get("userLogin");
+
+        String organizationPartyId = (String) context.get("organizationPartyId"); // 店家partyId
+        String partyInvitationId = (String) context.get("partyInvitationId"); // 邀请id
+        String isAcceptYN = (String) context.get("isAccept");
+        boolean isAccept = !CloudCardConstant.IS_N.equalsIgnoreCase(isAcceptYN);
+
+        Map<String, Object> checkInputParamRet = checkInputParam(dctx, context);
+        if (ServiceUtil.isError(checkInputParamRet) || ServiceUtil.isFailure(checkInputParamRet)) {
+            return checkInputParamRet;
+        }
+
+        GenericValue oldStoreGroup = null;
+        GenericValue partyInvitation = null;
+
+        try {
+            // 检查partyInvitationId是否存在
+            partyInvitation = delegator.findByPrimaryKey("PartyInvitation", UtilMisc.toMap("partyInvitationId", partyInvitationId));
+            if (null == partyInvitation) {
+                Debug.logWarning("This PartyInvitation[" + organizationPartyId + "] is NOT EXIST!", module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardCanNotFindInvitation", locale));
+            }
+
+            // 检查partyInvitationId是否针对本店的
+            if (!organizationPartyId.equals(partyInvitation.getString("partyId"))) {
+                Debug.logWarning("Illegal data access PartyInvitation[" + organizationPartyId + "] is NOT related to Store[" + organizationPartyId + "]",
+                        module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardWasNotInvited", locale));
+            }
+
+            // 检查partyInvitation的状态是否为PARTYINV_SENT
+            String statusId = partyInvitation.getString("statusId");
+            if (!"PARTYINV_SENT".equals(statusId)) {
+                Debug.logWarning("partyInvitation statusId is error, expected PARTYINV_SENT， But it is " + statusId, module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInvitationStatusUnexpected", locale));
+            }
+
+            // 检查自己店是否已经加入了别的圈子
+            oldStoreGroup = CloudCardHelper.getStoreGroupByStoreId(delegator, organizationPartyId, true);
+            if (null != oldStoreGroup) {
+                // 已经加入某个圈子了,不能再接受本次邀请了
+                // 此情况下：是否应当要将 partyInvitation 状态改为 PARTYINV_CANCELLED？
+                partyInvitation.set("statusId", "partyInvitation");
+                partyInvitation.store();
+
+                Debug.logWarning("This store [" + organizationPartyId + "] is already in a Group, Can Not join another one.", module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardIsInGroupCanNotJoinAnother", locale));
+            }
+
+            // system用户
+            GenericValue systemUser = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+            if (!isAccept) {
+                // 拒绝邀请
+                partyInvitation.set("statusId", "PARTYINV_DECLINED");
+                partyInvitation.store();
+
+            } else { // 接收邀请
+
+                // 普通圈友的角色， * 正常情况list应该只有一条数据
+                List<GenericValue> partyInvitationRoleAssocList = delegator.findByAnd("PartyInvitationRoleAssoc",
+                        UtilMisc.toMap("partyInvitationId", partyInvitationId));
+                if (UtilValidate.isNotEmpty(partyInvitationRoleAssocList)) {
+                    Map<String, Object> tmpCtx = UtilMisc.toMap("locale", locale, "userLogin", systemUser, "partyId", organizationPartyId);
+                    for (GenericValue gv : partyInvitationRoleAssocList) {
+                        tmpCtx.put("roleTypeId", gv.getString("roleTypeId"));
+                        Map<String, Object> ensurePartyRoleOut = dispatcher.runSync("ensurePartyRole", tmpCtx);
+                        if (!ServiceUtil.isSuccess(ensurePartyRoleOut)) {
+                            return ensurePartyRoleOut;
+                        }
+                    }
+                }
+
+                // 获取需要关联到的圈子id * 正常情况list应该只有一条数据
+                List<GenericValue> partyInvitationGroupAssocList = delegator.findByAnd("PartyInvitationGroupAssoc",
+                        UtilMisc.toMap("partyInvitationId", partyInvitationId));
+                if (UtilValidate.isNotEmpty(partyInvitationGroupAssocList)) {
+                    Map<String, Object> tmpCtx = UtilMisc.toMap("locale", locale, "userLogin", systemUser, "partyIdTo", organizationPartyId, "roleTypeIdTo",
+                            CloudCardConstant.STORE_GROUP_PARTNER_ROLE_TYPE_ID, "partyRelationshipTypeId",
+                            CloudCardConstant.STORE_GROUP_PARTY_RELATION_SHIP_TYPE_ID, "roleTypeIdFrom", CloudCardConstant.STORE_GROUP_ROLE_TYPE_ID);
+                    for (GenericValue gv : partyInvitationGroupAssocList) {
+                        tmpCtx.put("partyIdFrom", gv.getString("partyIdTo"));
+                        Map<String, Object> createPartyRelationshipOut = dispatcher.runSync("createPartyRelationship", tmpCtx);
+                        if (!ServiceUtil.isSuccess(createPartyRelationshipOut)) {
+                            return createPartyRelationshipOut;
+                        }
+                    }
+                }
+
+                // 修改状态
+                partyInvitation.set("statusId", "PARTYINV_ACCEPTED");
+                partyInvitation.store();
+            }
+
+        } catch (GenericEntityException | GenericServiceException e) {
+            Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+        }
+
+        // 返回结果
+        Map<String, Object> result = ServiceUtil.returnSuccess();
+
+        result.put("partyInvitationId", partyInvitationId);
+        result.put("isAccept", isAccept ? CloudCardConstant.IS_Y : CloudCardConstant.IS_N);
+        return result;
+    }
+
+    /**
      * 我的圈子
      * 
      * @param dctx
@@ -381,7 +497,7 @@ public class CloudCardBossServices {
         LocalDispatcher dispatcher = dctx.getDispatcher();
         Delegator delegator = dispatcher.getDelegator();
         Locale locale = (Locale) context.get("locale");
-        GenericValue userLogin = (GenericValue) context.get("userLogin");
+        // GenericValue userLogin = (GenericValue) context.get("userLogin");
 
         String organizationPartyId = (String) context.get("organizationPartyId"); // 店家partyId
         Integer viewIndex = (Integer) context.get("viewIndex");

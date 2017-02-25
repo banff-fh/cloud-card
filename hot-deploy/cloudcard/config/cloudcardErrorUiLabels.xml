@@ -177,4 +177,16 @@
         <value xml:lang="en">Invitation already exists</value>
         <value xml:lang="zh">已经发起过邀请，不能再次邀请。</value>
     </property>
+    <property key="CloudCardCanNotFindInvitation">
+        <value xml:lang="en">Can not find the Invitation</value>
+        <value xml:lang="zh">找不到邀请信息</value>
+    </property>
+    <property key="CloudCardWasNotInvited">
+        <value xml:lang="en">This store was not invited</value>
+        <value xml:lang="zh">不是被邀请的店铺</value>
+    </property>
+    <property key="CloudCardInvitationStatusUnexpected">
+        <value xml:lang="en">The value of the statusId field of invitation is not expected</value>
+        <value xml:lang="zh">非预期的状态</value>
+    </property>
 </resource>

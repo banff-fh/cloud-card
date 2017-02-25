@@ -117,6 +117,15 @@
 		<attribute name="groupId" type="String" mode="OUT" optional="false"><description>圈子id</description></attribute>
 		<attribute name="partyInvitationId" type="String" mode="OUT" optional="true"><description>邀请id</description></attribute>
 	</service>
+
+	<service name="bizAcceptGroupInvitation" engine="java"
+		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizAcceptGroupInvitation" auth="true">
+		<description>邀请商家加入圈子,单个邀请</description>
+		<attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家Id（自己的商家id）</description></attribute>
+		<attribute name="partyInvitationId" type="String" mode="INOUT" optional="false"><description>要邀接收的邀请id</description></attribute>
+		<attribute name="isAccept" type="String" mode="INOUT" optional="true" default-value="Y"><description>是否接收 Y/N  Y 接受邀请，N 拒绝邀请</description></attribute>
+
+	</service>
 	
 	<service name="bizMyGroup" engine="java"
 		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizMyGroup" auth="true">
