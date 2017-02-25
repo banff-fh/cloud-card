@@ -811,7 +811,26 @@ public class CloudCardHelper {
 		}
 		return null;
 	}
-	
+
+    /**
+     * 通过 圈子id 查询圈子与商家的 partyRelationship 列表
+     * 
+     * @param delegator
+     * @param groupId
+     * @param useCache
+     * @return
+     * @throws GenericEntityException
+     */
+    public static List<GenericValue> getStoreGroupRelationshipByGroupId(Delegator delegator, String groupId, boolean useCache) throws GenericEntityException {
+        // 查找圈子
+        List<EntityCondition> condList = FastList.newInstance();
+        condList.add(EntityCondition.makeCondition("partyIdFrom", groupId));
+        condList.add(EntityCondition.makeCondition("roleTypeIdFrom", CloudCardConstant.STORE_GROUP_ROLE_TYPE_ID));
+        condList.add(EntityCondition.makeCondition("partyRelationshipTypeId", CloudCardConstant.STORE_GROUP_PARTY_RELATION_SHIP_TYPE_ID));
+        condList.add(EntityUtil.getFilterByDateExpr());
+        return delegator.findList("PartyRelationship", EntityCondition.makeCondition(condList), null, null, null, useCache);
+    }
+
     /**
      * 通过 圈子id 查询圈子的成员id列表（列表中包含 圈主id 圈友id）
      * 
@@ -822,13 +841,7 @@ public class CloudCardHelper {
      * @throws GenericEntityException
      */
     public static List<String> getStoreGroupPartnerIdListByGroupId(Delegator delegator, String groupId, boolean useCache) throws GenericEntityException {
-        // 查找圈子
-        List<EntityCondition> condList = FastList.newInstance();
-        condList.add(EntityCondition.makeCondition("partyIdFrom", groupId));
-        condList.add(EntityCondition.makeCondition("roleTypeIdFrom", CloudCardConstant.STORE_GROUP_ROLE_TYPE_ID));
-        condList.add(EntityCondition.makeCondition("partyRelationshipTypeId", CloudCardConstant.STORE_GROUP_PARTY_RELATION_SHIP_TYPE_ID));
-        condList.add(EntityUtil.getFilterByDateExpr());
-        List<GenericValue> partyRelationships = delegator.findList("PartyRelationship", EntityCondition.makeCondition(condList), null, null, null, useCache);
+        List<GenericValue> partyRelationships = getStoreGroupRelationshipByGroupId(delegator, groupId, useCache);
         return EntityUtil.getFieldListFromEntityList(partyRelationships, "partyIdTo", true);
     }
 
