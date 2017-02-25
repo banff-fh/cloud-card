@@ -244,6 +244,14 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
+	
+	<!-- 获取卡接口 -->
+	<request-map uri="getPaymentCard">
+		<security https="false" auth="false"/>
+		<event type="service" invoke="getPaymentCard" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
 
 
 
