@@ -97,6 +97,7 @@ public class SmsServices {
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
 		String teleNumber = (String) context.get("teleNumber");
+		String userType = (String) context.get("userType");
 		java.sql.Timestamp nowTimestamp  = UtilDateTime.nowTimestamp();
 
 		GenericValue customer;
@@ -107,7 +108,7 @@ public class SmsServices {
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
 		
-		if(UtilValidate.isEmpty(customer)){
+		if(UtilValidate.isEmpty(customer) && userType =="biz" ){
 			Debug.logInfo("The user tel:[" + teleNumber + "] does not exist, can not get verfiy code", module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardUserNotExistError", locale));
 		}
@@ -224,72 +225,84 @@ public class SmsServices {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
-		if(UtilValidate.isEmpty(customer)){
+		Map<String,Object> customerMap = FastMap.newInstance();
+		if(UtilValidate.isEmpty(customer) && "biz".equals(appType)){
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardUserNotExistError", locale));
+		}else if(UtilValidate.isEmpty(customer) && "user".equals(appType)){
+			context.put("organizationPartyId", "Company");
+			context.put("ensureCustomerRelationship", true);
+			customerMap = CloudCardHelper.getOrCreateCustomer(dctx, context);
+		}
+		//返回机构Id
+		List<String> organizationList = FastList.newInstance();
+		if(null != customer){
+			organizationList = CloudCardHelper.getOrganizationPartyId(delegator, customer.get("partyId").toString());
 		}else{
-			//返回机构Id
-			List<String> organizationList = CloudCardHelper.getOrganizationPartyId(delegator, customer.get("partyId").toString());
-			
-			if(UtilValidate.isNotEmpty(organizationList)){
-				result.put("organizationPartyId", organizationList.get(0));
+			organizationList = CloudCardHelper.getOrganizationPartyId(delegator, customerMap.get("customerPartyId").toString());
+		}
+		
+		if(UtilValidate.isNotEmpty(organizationList)){
+			result.put("organizationPartyId", organizationList.get(0));
+		}
+		
+		//判断商户app登录权限
+		if("biz".equals(appType)){
+			if(null == result.get("organizationPartyId")){
+				Debug.logError(teleNumber+"不是商户管理人员，不能登录 商户app", module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardBizLoginIsNotManager", locale));
 			}
+		}
+		
+		//查找用户验证码是否存在
+		EntityConditionList<EntityCondition> captchaConditions = EntityCondition
+				.makeCondition(EntityCondition.makeCondition("teleNumber", EntityOperator.EQUALS, teleNumber),EntityUtil.getFilterByDateExpr(),EntityCondition.makeCondition("isValid", EntityOperator.EQUALS, "N"));
+		List<GenericValue> smsList = FastList.newInstance();
+		try {
+			smsList = delegator.findList("SmsValidateCode", captchaConditions, null,
+					UtilMisc.toList("-" + ModelEntity.CREATE_STAMP_FIELD), null, false);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		if(UtilValidate.isEmpty(smsList)){
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardCaptchaNotExistError", locale));
+		}else{
+			GenericValue sms = smsList.get(0);
 			
-			//判断商户app登录权限
-			if("biz".equals(appType)){
-				if(null == result.get("organizationPartyId")){
-					Debug.logError(teleNumber+"不是商户管理人员，不能登录 商户app", module);
-					return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardBizLoginIsNotManager", locale));
-				}
-			}
-			
-			//查找用户验证码是否存在
-			EntityConditionList<EntityCondition> captchaConditions = EntityCondition
-					.makeCondition(EntityCondition.makeCondition("teleNumber", EntityOperator.EQUALS, teleNumber),EntityUtil.getFilterByDateExpr(),EntityCondition.makeCondition("isValid", EntityOperator.EQUALS, "N"));
-			List<GenericValue> smsList = FastList.newInstance();
-			try {
-				smsList = delegator.findList("SmsValidateCode", captchaConditions, null,
-						UtilMisc.toList("-" + ModelEntity.CREATE_STAMP_FIELD), null, false);
-			} catch (GenericEntityException e) {
-				Debug.logError(e.getMessage(), module);
-				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
-			}
-			
-			if(UtilValidate.isEmpty(smsList)){
-				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardCaptchaNotExistError", locale));
-			}else{
-				GenericValue sms = smsList.get(0);
-				
-				if(sms.get("captcha").equals(captcha)){
-					//有效时间
-					long expirationTime = Long.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","token.expirationTime","172800L",delegator));
-					String iss = EntityUtilProperties.getPropertyValue("cloudcard","token.issuer",delegator);
-					String tokenSecret = EntityUtilProperties.getPropertyValue("cloudcard","token.secret",delegator);
-					//开始时间
-					final long iat = System.currentTimeMillis() / 1000L; // issued at claim 
-					//Token到期时间
-					final long exp = iat + expirationTime; 
-					//生成Token
-					final JWTSigner signer = new JWTSigner(tokenSecret);
-					final HashMap<String, Object> claims = new HashMap<String, Object>();
-					claims.put("iss", iss);
+			if(sms.get("captcha").equals(captcha)){
+				//有效时间
+				long expirationTime = Long.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","token.expirationTime","172800L",delegator));
+				String iss = EntityUtilProperties.getPropertyValue("cloudcard","token.issuer",delegator);
+				String tokenSecret = EntityUtilProperties.getPropertyValue("cloudcard","token.secret",delegator);
+				//开始时间
+				final long iat = System.currentTimeMillis() / 1000L; // issued at claim 
+				//Token到期时间
+				final long exp = iat + expirationTime; 
+				//生成Token
+				final JWTSigner signer = new JWTSigner(tokenSecret);
+				final HashMap<String, Object> claims = new HashMap<String, Object>();
+				claims.put("iss", iss);
+				if(null != customer){
 					claims.put("user", customer.get("userLoginId"));
-					claims.put("delegatorName", delegator.getDelegatorName());
-					claims.put("exp", exp);
-					claims.put("iat", iat);
-					token = signer.sign(claims);
-					//修改验证码状态
-					sms.set("isValid", "Y");
-					try {
-						sms.store();
-					} catch (GenericEntityException e) {
-						Debug.logError(e.getMessage(), module);
-						return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
-					}
-					result.put("token", token);
 				}else{
-					return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardCaptchaCheckFailedError", locale));
+					claims.put("user", customerMap.get("userLoginId"));
 				}
+				claims.put("delegatorName", delegator.getDelegatorName());
+				claims.put("exp", exp);
+				claims.put("iat", iat);
+				token = signer.sign(claims);
+				//修改验证码状态
+				sms.set("isValid", "Y");
+				try {
+					sms.store();
+				} catch (GenericEntityException e) {
+					Debug.logError(e.getMessage(), module);
+					return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+				}
+				result.put("token", token);
+			}else{
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardCaptchaCheckFailedError", locale));
 			}
 		}
 

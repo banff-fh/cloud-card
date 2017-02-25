@@ -70,4 +70,39 @@ public class CloudCardCustServices {
 		result.put("storeList", storeList);
 		return result;
 	}
+	
+	/**
+	 * 查看店铺简要信息
+	 * 
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> userGetStoreInfo(DispatchContext dctx, Map<String, Object> context) {
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+		
+		String storeId = (String) context.get("storeId");
+		String storeName = null;
+		String storeImg = null;
+		String storeAddress = null;
+		String storeTeleNumber = null;
+		String longitude = null;
+		String latitude = null;
+		
+		
+		
+		// 返回结果
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("storeId", storeId);
+		result.put("storeName", storeName);
+		result.put("storeImg", storeImg);
+		result.put("storeAddress", storeAddress);
+		result.put("storeTeleNumber", storeTeleNumber);
+		result.put("longitude", longitude);
+		result.put("latitude", latitude);
+
+		return result;
+	}
 }
