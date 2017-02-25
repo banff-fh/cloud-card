@@ -746,20 +746,23 @@ public class CloudCardHelper {
 		return EntityUtil.getFirst(delegator.findList("PartyRelationship", EntityCondition.makeCondition(condList), null, null, null, useCache));
 	}
 
-	
-	
-	/**
-	 *  根据店铺id获取圈子id， （不使用缓存）
-	 * @param delegator 实体引擎代理对象
-	 * @param storeId 店id
-	 * @return groupId 圈子Id
-	 * @throws GenericEntityException
-	 */
-	public static String getGroupIdByStoreId(Delegator delegator, String storeId)
-			throws GenericEntityException {
-		return getGroupIdByStoreId(delegator, storeId, false);
-	}
-	
+    /**
+     * 判断店铺是否为圈子的圈主
+     * 
+     * @param delegator
+     * @param storeId
+     * @param useCache
+     * @return
+     * @throws GenericEntityException
+     */
+    public static boolean isStoreGroupOwner(Delegator delegator, String storeId, boolean useCache) throws GenericEntityException {
+
+        GenericValue partyRelationship = getGroupRelationShipByStoreId(delegator, storeId, useCache);
+        if (UtilValidate.isNotEmpty(partyRelationship)) {
+            return CloudCardConstant.STORE_GROUP_OWNER_ROLE_TYPE_ID.equals(partyRelationship.getString("roleTypeIdTo"));
+        }
+        return false;
+    }
 	
 	/**
 	 *  根据店铺id获取圈子id
@@ -780,19 +783,6 @@ public class CloudCardHelper {
 
 		return null;
 	}
-
-	
-	/**
-	 * 根据店铺id获取圈子对应的的PartyGroup实体，（不使用缓存）
-	 * @param delegator 实体引擎代理对象
-	 * @param storeId 店id
-	 * @return 圈子实体（partyGroup）
-	 * @throws GenericEntityException
-	 */
-	public static GenericValue getStoreGroupByStoreId(Delegator delegator, String storeId) throws GenericEntityException{
-		return getStoreGroupByStoreId(delegator, storeId, false);
-	}
-
 
 	/** 
 	 * 根据店铺id获取圈子对应的的PartyGroup实体
