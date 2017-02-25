@@ -15,10 +15,11 @@
 	</service>
 
 	<service name="myCloudCards" engine="java"
-		location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="myCloudCards" auth="true">
+		location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="myCloudCards" auth="false">
 		<description>查询用户卡列表</description>
 		<attribute name="viewIndex" type="Integer" mode="IN" optional="true" default-value="0"/>
 		<attribute name="viewSize" type="Integer" mode="IN" optional="true" default-value="20"/>
+		<attribute name="storedId" type="String" mode="IN" optional="true"/>
 		<attribute name="cloudCardList" type="List" mode="OUT" optional="false"/>
 		<attribute name="listSize" type="Integer" mode="OUT" optional="false"/>
 	</service>

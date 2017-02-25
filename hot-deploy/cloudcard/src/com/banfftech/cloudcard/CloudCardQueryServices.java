@@ -56,11 +56,13 @@ public class CloudCardQueryServices {
 		Locale locale = (Locale) context.get("locale");
 		GenericValue userLogin = (GenericValue) context.get("userLogin");
 		String partyId = (String) userLogin.get("partyId");
+		String ownerPartyId = (String) context.get("storeId");
 		Integer viewIndex = (Integer) context.get("viewIndex");
 		Integer viewSize = (Integer) context.get("viewSize");
 
 		Map<String, Object> inputFieldMap = FastMap.newInstance();
 		inputFieldMap.put("partyId", partyId);
+		inputFieldMap.put("ownerPartyId", ownerPartyId);
 		inputFieldMap.put("statusId", "FNACT_ACTIVE");
 
 		Map<String, Object> ctxMap = FastMap.newInstance();
