@@ -4,7 +4,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.LocalDispatcher;
@@ -90,8 +94,52 @@ public class CloudCardCustServices {
 		String storeTeleNumber = null;
 		String longitude = null;
 		String latitude = null;
+		GenericValue partyGroup = null;
+		try {
+			partyGroup = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", storeId));
+		} catch (GenericEntityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		if (null != partyGroup) {
+			storeName = (String) partyGroup.get("groupName");
+		}
+		
+		storeImg = EntityUtilProperties.getPropertyValue("cloudcard","cardImg." + storeId,delegator);
+
+
+		List<GenericValue> PartyAndContactMechs = FastList.newInstance();
+		try {
+			PartyAndContactMechs = delegator.findList("PartyAndContactMech", EntityCondition.makeCondition("partyId", storeId), null, null, null, true);
+		} catch (GenericEntityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		if (null != PartyAndContactMechs) {
+			for (GenericValue partyAndContactMech : PartyAndContactMechs) {
+				if(partyAndContactMech.get("contactMechTypeId").toString().equals("POSTAL_ADDRESS")){
+					storeAddress = (String) partyAndContactMech.get("paAddress1");
+				}else if(partyAndContactMech.get("contactMechTypeId").toString().equals("TELECOM_NUMBER")){
+					storeTeleNumber = (String) partyAndContactMech.get("tnContactNumber");
+				}
+			}
+		}
 		
 		
+		List<GenericValue> partyAndGeoPoints = FastList.newInstance();
+		try {
+			partyAndGeoPoints = delegator.findList("PartyAndGeoPoint", EntityCondition.makeCondition("partyId", storeId), null, null, null, true);
+		} catch (GenericEntityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		if(null != partyAndGeoPoints){
+			longitude = partyAndGeoPoints.get(0).getString("longitude");
+			latitude = partyAndGeoPoints.get(0).getString("latitude");
+		}
 		
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();

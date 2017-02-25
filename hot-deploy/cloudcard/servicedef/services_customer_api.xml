@@ -106,12 +106,12 @@
 	<service name="userGetStoreInfo" engine="java"
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="userGetStoreInfo" auth="true">
 		<description>查看店铺简要信息</description>
-		<attribute name="storeId" type="String" mode="INOUT" optional="true"><description>商家partyId</description></attribute>
-		<attribute name="storeName" type="String" mode="IN" optional="false"><description>店名</description></attribute>
+		<attribute name="storeId" type="String" mode="INOUT" optional="false"><description>商家partyId</description></attribute>
+		<attribute name="storeName" type="String" mode="OUT" optional="true"><description>店名</description></attribute>
 		<attribute name="storeImg" type="String" mode="OUT" optional="true"><description>店铺图片地址</description></attribute>
-		<attribute name="storeAddress" type="List" mode="OUT" optional="true"><description>店铺地址</description></attribute>
-		<attribute name="storeTeleNumber" type="List" mode="OUT" optional="true"><description>店铺联系电话（店主电话）</description></attribute>
-		<attribute name="longitude" type="List" mode="OUT" optional="true"><description>经度</description></attribute>
-		<attribute name="latitude" type="List" mode="OUT" optional="true"><description>纬度</description></attribute>
+		<attribute name="storeAddress" type="String" mode="OUT" optional="true"><description>店铺地址</description></attribute>
+		<attribute name="storeTeleNumber" type="String" mode="OUT" optional="true"><description>店铺联系电话（店主电话）</description></attribute>
+		<attribute name="longitude" type="String" mode="OUT" optional="true"><description>经度</description></attribute>
+		<attribute name="latitude" type="String" mode="OUT" optional="true"><description>纬度</description></attribute>
 	</service>
 </services>

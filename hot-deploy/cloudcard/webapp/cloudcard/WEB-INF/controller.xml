@@ -220,6 +220,14 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
+	
+	<!-- 店铺信息 -->
+	<request-map uri="userGetStoreInfo">
+		<security https="false" auth="false"/>
+		<event type="service" invoke="userGetStoreInfo" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
 
 
 
