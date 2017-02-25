@@ -117,7 +117,7 @@
 	</service>
 	
 	<service name="userGetGroupInfo" engine="java"
-		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="userGetGroupInfo" auth="true">
+		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="userGetGroupInfo" auth="false">
 		<description>查看店铺简要信息</description>
 		<attribute name="storeId" type="String" mode="INOUT" optional="false"><description>商家partyId</description></attribute>
 		<attribute name="groupName" type="String" mode="OUT" optional="true"><description>店名</description></attribute>

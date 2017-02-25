@@ -167,9 +167,127 @@ public class CloudCardCustServices {
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
 		
+		String storeId = (String) context.get("storeId");
+		//获取圈子Id
+		String partyGroupId = null;
+		try {
+			partyGroupId = CloudCardHelper.getGroupIdByStoreId(delegator,storeId,false);
+		} catch (GenericEntityException e1) {
+			e1.printStackTrace();
+		}
+		
+		//获取圈名
+		String groupName = null;
+		GenericValue pg = null;
+		try {
+			pg = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", partyGroupId));
+		} catch (GenericEntityException e1) {
+			e1.printStackTrace();
+		}
+		
+		if(UtilValidate.isNotEmpty(pg)){
+			groupName = pg.getString("groupName");
+		}
+		
+		
+		List<String> storeIdList = FastList.newInstance();
+		try {
+			storeIdList = CloudCardHelper.getStoreGroupPartnerListByStoreId(delegator,storeId,true);
+		} catch (GenericEntityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		List<Map<String,Object>> storeList = FastList.newInstance();
+		if(UtilValidate.isNotEmpty(storeIdList)){
+			for(String storeRs: storeIdList){
+				String storeName = null;
+				String storeImg = null;
+				String storeAddress = null;
+				String storeTeleNumber = null;
+				String longitude = null;
+				String latitude = null;
+				String isGroupOwner = null;
+				
+				Boolean isStoreGroupOwner = null;
+				try {
+					isStoreGroupOwner = CloudCardHelper.isStoreGroupOwner(delegator,storeRs,false);
+				} catch (GenericEntityException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				if(isStoreGroupOwner){
+					isGroupOwner = "Y";
+				}else{
+					isGroupOwner = "N";
+				}
+				
+				GenericValue partyGroup = null;
+				try {
+					partyGroup = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", storeRs));
+				} catch (GenericEntityException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+				if (UtilValidate.isNotEmpty( partyGroup)) {
+					storeName = (String) partyGroup.get("groupName");
+				}
+				
+				storeImg = EntityUtilProperties.getPropertyValue("cloudcard","cardImg." + storeRs,delegator);
+
+
+				List<GenericValue> PartyAndContactMechs = FastList.newInstance();
+				try {
+					PartyAndContactMechs = delegator.findList("PartyAndContactMech", EntityCondition.makeCondition("partyId", storeRs), null, null, null, true);
+				} catch (GenericEntityException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+				if (UtilValidate.isNotEmpty(PartyAndContactMechs)) {
+					for (GenericValue partyAndContactMech : PartyAndContactMechs) {
+						if(partyAndContactMech.get("contactMechTypeId").toString().equals("POSTAL_ADDRESS")){
+							storeAddress = (String) partyAndContactMech.get("paAddress1");
+						}else if(partyAndContactMech.get("contactMechTypeId").toString().equals("TELECOM_NUMBER")){
+							storeTeleNumber = (String) partyAndContactMech.get("tnContactNumber");
+						}
+					}
+				}
+				
+				
+				List<GenericValue> partyAndGeoPoints = FastList.newInstance();
+				try {
+					partyAndGeoPoints = delegator.findList("PartyAndGeoPoint", EntityCondition.makeCondition("partyId", storeRs), null, null, null, true);
+				} catch (GenericEntityException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				if(UtilValidate.isNotEmpty(partyAndGeoPoints)){
+					longitude = partyAndGeoPoints.get(0).getString("longitude");
+					latitude = partyAndGeoPoints.get(0).getString("latitude");
+				}
+				
+				Map<String,Object> storeMap = FastMap.newInstance();
+				storeMap.put("storeId", storeId);
+				storeMap.put("storeName", storeName);
+				storeMap.put("storeImg", storeImg);
+				storeMap.put("storeAddress", storeAddress);
+				storeMap.put("storeTeleNumber", storeTeleNumber);
+				storeMap.put("isGroupOwner", isGroupOwner);
+				storeMap.put("longitude", longitude);
+				storeMap.put("latitude", latitude);
+				storeList.add(storeMap);
+			}
+		}
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("storeId", storeId);
+		result.put("groupName", groupName);
+		result.put("storeList", storeList);
 		return result;
+		
 	}
 	
 	
