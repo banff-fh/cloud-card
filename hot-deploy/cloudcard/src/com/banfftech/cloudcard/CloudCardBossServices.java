@@ -5,6 +5,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
@@ -23,6 +24,7 @@ import org.ofbiz.service.ServiceUtil;
 import com.banfftech.cloudcard.constant.CloudCardConstant;
 
 import javolution.util.FastList;
+import javolution.util.FastMap;
 
 /**
  * 库胖卡商家相关的服务
@@ -382,8 +384,8 @@ public class CloudCardBossServices {
         GenericValue userLogin = (GenericValue) context.get("userLogin");
 
         String organizationPartyId = (String) context.get("organizationPartyId"); // 店家partyId
-        // Integer viewIndex = (Integer) context.get("viewIndex");
-        // Integer viewSize = (Integer) context.get("viewSize");
+        Integer viewIndex = (Integer) context.get("viewIndex");
+        Integer viewSize = (Integer) context.get("viewSize");
 
         // 返回结果
         Map<String, Object> result = ServiceUtil.returnSuccess();
@@ -459,6 +461,48 @@ public class CloudCardBossServices {
 
         // 有圈子的情况
         // TODO 返回圈友列表
+        // 查询 PartyRelationshipAndDetail
+        Map<String, Object> lookupMap = FastMap.newInstance();
+        Map<String, Object> inputFieldMap = FastMap.newInstance();
+        inputFieldMap.put("partyIdFrom", groupId);
+        inputFieldMap.put("roleTypeIdFrom", CloudCardConstant.STORE_GROUP_ROLE_TYPE_ID);
+        inputFieldMap.put("partyRelationshipTypeId", CloudCardConstant.STORE_GROUP_PARTY_RELATION_SHIP_TYPE_ID);
+        lookupMap.put("inputFields", inputFieldMap);
+        lookupMap.put("entityName", "PartyRelationship");
+        lookupMap.put("orderBy", "fromDate");// 圈主一定是最先创建的记录
+        lookupMap.put("viewIndex", viewIndex);
+        lookupMap.put("viewSize", viewSize);
+        lookupMap.put("filterByDate", "Y");
+
+        Map<String, Object> performFindListOut = null;
+        try {
+            performFindListOut = dispatcher.runSync("performFindList", lookupMap);
+            if (!ServiceUtil.isSuccess(performFindListOut)) {
+                return performFindListOut;
+            }
+
+            List<GenericValue> groupMemberRelationsList = UtilGenerics.checkList(performFindListOut.get("list"));
+            if (UtilValidate.isNotEmpty(groupMemberRelationsList)) {
+                List<Map<String, String>> partners = FastList.newInstance();
+                for (GenericValue gv : groupMemberRelationsList) {
+                    String storeId = gv.getString("partyIdTo");
+                    GenericValue store = delegator.findByPrimaryKeyCache("PartyGroup", UtilMisc.toMap("partyId", storeId));
+                    boolean tmpIsOwner = CloudCardHelper.isStoreGroupOwnerRelationship(gv);
+                    Map<String, String> tmpMap = UtilMisc.toMap("storeId", storeId, "storeName", store.getString("groupName"));
+                    tmpMap.put("storeImg", store.getString("logoImageUrl"));
+                    tmpMap.put("isGroupOwner", tmpIsOwner ? CloudCardConstant.IS_Y : CloudCardConstant.IS_N);
+                    if (tmpIsOwner) {
+                        partners.add(0, tmpMap);
+                    } else {
+                        partners.add(tmpMap);
+                    }
+                }
+                result.put("partners", partners);
+            }
+        } catch (GenericServiceException | GenericEntityException e) {
+            Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+        }
 
         result.put("isJoinGroup", CloudCardConstant.IS_Y);
         result.put("isGroupOwner", isGroupOwner ? CloudCardConstant.IS_Y : CloudCardConstant.IS_N);
