@@ -404,7 +404,7 @@ public class CloudCardBossServices {
                 // 在圈子里，
                 groupId = partyRelationship.getString("partyIdFrom");
                 storeGroup = delegator.findByPrimaryKeyCache("PartyGroup", UtilMisc.toMap("partyId", groupId));
-                isGroupOwner = CloudCardHelper.isStoreGroupOwnerRelationShip(partyRelationship);
+                isGroupOwner = CloudCardHelper.isStoreGroupOwnerRelationship(partyRelationship);
             }
         } catch (GenericEntityException e) {
             Debug.logError(e.getMessage(), module);
@@ -432,7 +432,7 @@ public class CloudCardBossServices {
                         if (UtilValidate.isEmpty(partyInvitationId) || UtilValidate.isEmpty(partyIdFrom)) {
                             continue;
                         }
-                        // 应当验证是否为 加入圈子的邀请，
+                        // 验证是否为 邀请加入圈子，
                         GenericValue partyInvitationRoleAssoc = delegator.findByPrimaryKeyCache("PartyInvitationRoleAssoc",
                                 UtilMisc.toMap("partyInvitationId", partyInvitationId, "roleTypeId", CloudCardConstant.STORE_GROUP_PARTNER_ROLE_TYPE_ID));
                         if (null == partyInvitationRoleAssoc) {

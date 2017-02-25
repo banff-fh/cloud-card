@@ -757,7 +757,7 @@ public class CloudCardHelper {
      */
     public static boolean isStoreGroupOwner(Delegator delegator, String storeId, boolean useCache) throws GenericEntityException {
         GenericValue partyRelationship = getGroupRelationShipByStoreId(delegator, storeId, useCache);
-        return isStoreGroupOwnerRelationShip(partyRelationship);
+        return isStoreGroupOwnerRelationship(partyRelationship);
     }
 
     /**
@@ -766,7 +766,7 @@ public class CloudCardHelper {
      * @param partyRelationship
      * @return
      */
-    public static boolean isStoreGroupOwnerRelationShip(GenericValue partyRelationship) {
+    public static boolean isStoreGroupOwnerRelationship(GenericValue partyRelationship) {
         return partyRelationship != null && CloudCardConstant.STORE_GROUP_OWNER_ROLE_TYPE_ID.equals(partyRelationship.getString("roleTypeIdTo"));
     }
 
@@ -812,6 +812,38 @@ public class CloudCardHelper {
 		return null;
 	}
 	
-	
-	
+    /**
+     * 通过 圈子id 查询圈子的成员id列表（列表中包含 圈主id 圈友id）
+     * 
+     * @param delegator
+     * @param groupId
+     * @param useCache
+     * @return
+     * @throws GenericEntityException
+     */
+    public static List<String> getStoreGroupPartnerIdListByGroupId(Delegator delegator, String groupId, boolean useCache) throws GenericEntityException {
+        // 查找圈子
+        List<EntityCondition> condList = FastList.newInstance();
+        condList.add(EntityCondition.makeCondition("partyIdFrom", groupId));
+        condList.add(EntityCondition.makeCondition("roleTypeIdFrom", CloudCardConstant.STORE_GROUP_ROLE_TYPE_ID));
+        condList.add(EntityCondition.makeCondition("partyRelationshipTypeId", CloudCardConstant.STORE_GROUP_PARTY_RELATION_SHIP_TYPE_ID));
+        condList.add(EntityUtil.getFilterByDateExpr());
+        List<GenericValue> partyRelationships = delegator.findList("PartyRelationship", EntityCondition.makeCondition(condList), null, null, null, useCache);
+        return EntityUtil.getFieldListFromEntityList(partyRelationships, "partyIdTo", true);
+    }
+
+    /**
+     * 通过 店铺id 查询其所在圈子的圈友 id列表
+     * 
+     * @param delegator
+     * @param storeId
+     * @param useCache
+     * @return
+     * @throws GenericEntityException
+     */
+    public static List<String> getStoreGroupPartnerListByStoreId(Delegator delegator, String storeId, boolean useCache) throws GenericEntityException {
+        String groupId = getGroupIdByStoreId(delegator, storeId, useCache);
+        return getStoreGroupPartnerIdListByGroupId(delegator, groupId, useCache);
+    }
+
 }
