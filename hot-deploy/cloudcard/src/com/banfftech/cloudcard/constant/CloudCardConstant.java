@@ -43,12 +43,12 @@ public class CloudCardConstant {
     /**
      * 圈主的角色类型 {@value}
      */
-    public static final String STORE_GROUP_OWNER_ROLE_TYPE_ID = "OWNER";
+    public static final String STORE_GROUP_OWNER_ROLE_TYPE_ID = "CC_SG_OWNER";
 
     /**
      * 圈子普通成员的角色类型 {@value}
      */
-    public static final String STORE_GROUP_PARTNER_ROLE_TYPE_ID = "PARTNER";
+    public static final String STORE_GROUP_PARTNER_ROLE_TYPE_ID = "CC_SG_PARTNER";
 
     /**
      * 圈子成员与圈子的关系类型 {@value}

@@ -197,7 +197,7 @@
 	</request-map>
 	
 	
-	<!-- 商户开店申请接口 -->
+	<!-- 商户 开店申请接口 -->
 	<request-map uri="bizCreateApply">
 		<security https="false" auth="false" />
 		<event type="service" invoke="bizCreateApply" />
@@ -205,7 +205,7 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 
-	<!-- 商户创建圈子接口 -->
+	<!-- 商户 创建圈子接口 -->
 	<request-map uri="bizCreateGroup">
 		<security https="false" auth="false"/>
 		<event type="service" invoke="bizCreateGroup" />
@@ -213,10 +213,18 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 
-	<!-- 商户创建圈子接口 -->
+	<!-- 商户 邀请店家加入圈子接口 -->
 	<request-map uri="bizSentGroupInvitation">
 		<security https="false" auth="false"/>
 		<event type="service" invoke="bizSentGroupInvitation" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+
+	<!-- 商户 我的圈子 接口 -->
+	<request-map uri="bizMyGroup">
+		<security https="false" auth="false"/>
+		<event type="service" invoke="bizMyGroup" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
