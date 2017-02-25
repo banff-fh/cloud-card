@@ -120,7 +120,7 @@
 	
 	<service name="bizMyGroup" engine="java"
 		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizMyGroup" auth="true">
-		<description>我的圈子 TODO</description>
+		<description>我的圈子</description>
 		<attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家partyId</description></attribute>
 		<attribute name="viewIndex" type="Integer" mode="IN" optional="true" default-value="0"><description>圈友列表页码</description></attribute>
 		<attribute name="viewSize" type="Integer" mode="IN" optional="true" default-value="20"><description>圈友列表页大小</description></attribute>
@@ -129,6 +129,13 @@
 		<attribute name="isGroupOwner" type="String" mode="OUT" optional="true"  default-value="N"><description>是否为圈主 Y/N</description></attribute>
 		<attribute name="groupId" type="String" mode="OUT" optional="true"><description>圈子id</description></attribute><!-- 需要输出吗？App拿这个来干什么呢？ -->
 		<attribute name="groupName" type="String" mode="OUT" optional="true"><description>圈子名称</description></attribute>
+
+		<attribute name="crossStoreAmount" type="BigDecimal" mode="OUT" optional="true"><description>圈主特有字段：跨店消费额，圈主卡 到 圈友店 消费总额，</description></attribute>
+		<attribute name="presellAmount" type="BigDecimal" mode="OUT" optional="true"><description>圈主特有字段：已卖卡总额，圈主卖出的卡总金额，</description></attribute>
+		<attribute name="totalConsumptionAmount" type="BigDecimal" mode="OUT" optional="true"><description>圈主特有字段：已消费总额，圈主本店消费 + 到圈友店里跨店消费，</description></attribute>
+		<attribute name="balance" type="BigDecimal" mode="OUT" optional="true"><description>圈主特有字段：剩余额度，剩余卖卡额度，</description></attribute>
+		<attribute name="income" type="BigDecimal" mode="OUT" optional="true"><description>圈主特有字段：收益总额，因为跨店消费的圈主给圈友的打折而产生的收益总额，</description></attribute>
+		<!-- [ { partyIdFrom: xxx, fromName: xxx, partyInvitationId: xxx } ] -->
 		<attribute name="invitations" type="List" mode="OUT" optional="true"><description>邀请加入圈子的列表，isJoinGroup为N的前提下，如果某个店家邀请本店加入圈子，则返回此列表</description></attribute>
 
 		<!-- [ { storeName: xxx, storeId: xxx, isGroupOwner: Y/N, storeImg :xxx } ] -->

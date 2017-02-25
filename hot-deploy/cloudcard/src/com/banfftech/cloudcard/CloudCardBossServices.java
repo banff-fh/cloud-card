@@ -460,8 +460,7 @@ public class CloudCardBossServices {
         }
 
         // 有圈子的情况
-        // TODO 返回圈友列表
-        // 查询 PartyRelationshipAndDetail
+        // 获取圈友列表
         Map<String, Object> lookupMap = FastMap.newInstance();
         Map<String, Object> inputFieldMap = FastMap.newInstance();
         inputFieldMap.put("partyIdFrom", groupId);
@@ -502,6 +501,18 @@ public class CloudCardBossServices {
         } catch (GenericServiceException | GenericEntityException e) {
             Debug.logError(e.getMessage(), module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+        }
+
+        // TODO 圈主 需要查询一些 圈子相关的金额信息
+        if (isGroupOwner) {
+            result.put("crossStoreAmount", CloudCardHelper.ZERO); // 跨店消费额，圈主卡 到
+                                                                  // 圈友店 消费总额，
+            result.put("presellAmount", CloudCardHelper.ZERO); // 已卖卡总额，圈主卖出的卡总金额，
+            result.put("totalConsumptionAmount", CloudCardHelper.ZERO); // 已消费总额，圈主本店消费
+                                                                        // +
+                                                                        // 到圈友店里跨店消费，
+            result.put("balance", CloudCardHelper.ZERO); // 剩余额度，剩余卖卡额度
+            result.put("income", CloudCardHelper.ZERO); // 收益总额，因为跨店消费的圈主给圈友的打折而产生的收益总额，
         }
 
         result.put("isJoinGroup", CloudCardConstant.IS_Y);
