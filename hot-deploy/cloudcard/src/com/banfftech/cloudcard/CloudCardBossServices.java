@@ -1,6 +1,5 @@
 package com.banfftech.cloudcard;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -322,7 +321,7 @@ public class CloudCardBossServices {
         }
         if (null != oldPartyInvitation) {
             String oldPartyInvitationStatus = oldPartyInvitation.getString("statusId");
-            if (!"".equals(oldPartyInvitationStatus) && !"PARTYINV_DECLINED".equals(oldPartyInvitationStatus)) {
+            if (!"PARTYINV_DECLINED".equals(oldPartyInvitationStatus)) {
                 Debug.logWarning("There has been an effective invitation[" + oldPartyInvitation.getString("partyInvitationId") + "]", module);
                 return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInvitationAlreadyExists", locale));
             }
@@ -339,9 +338,10 @@ public class CloudCardBossServices {
             }
             partyInvitationId = (String) createPartyInvitationOutMap.get("partyInvitationId");
 
-            // TODO 是否要创建 createPartyInvitationGroupAssoc 和
+            // 创建 createPartyInvitationGroupAssoc 和
             // createPartyInvitationRoleAssoc 这样对方在通过 acceptPartyInvitation服务
             // 接收邀请的时候就会自动创建 partyRelationship 和 partyRole了
+            // TODO 是否需要？
             Map<String, Object> createPartyInvitationGroupAssocOutMap = dispatcher.runSync("createPartyInvitationGroupAssoc",
                     UtilMisc.toMap("locale", locale, "userLogin", userLogin, "partyInvitationId", partyInvitationId, "partyIdTo", groupId));
             if (!ServiceUtil.isSuccess(createPartyInvitationGroupAssocOutMap)) {
