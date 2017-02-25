@@ -115,4 +115,12 @@
 		<attribute name="longitude" type="String" mode="OUT" optional="true"><description>经度</description></attribute>
 		<attribute name="latitude" type="String" mode="OUT" optional="true"><description>纬度</description></attribute>
 	</service>
+	
+	<service name="userGetGroupInfo" engine="java"
+		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="userGetGroupInfo" auth="true">
+		<description>查看店铺简要信息</description>
+		<attribute name="storeId" type="String" mode="INOUT" optional="false"><description>商家partyId</description></attribute>
+		<attribute name="groupName" type="String" mode="OUT" optional="true"><description>店名</description></attribute>
+		<attribute name="storeList" type="List" mode="OUT" optional="true"><description>店铺详细信息</description></attribute>
+	</service>
 </services>

@@ -5,6 +5,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
@@ -102,7 +103,7 @@ public class CloudCardCustServices {
 			e.printStackTrace();
 		}
 
-		if (null != partyGroup) {
+		if (UtilValidate.isNotEmpty( partyGroup)) {
 			storeName = (String) partyGroup.get("groupName");
 		}
 		
@@ -117,7 +118,7 @@ public class CloudCardCustServices {
 			e.printStackTrace();
 		}
 
-		if (null != PartyAndContactMechs) {
+		if (UtilValidate.isNotEmpty(PartyAndContactMechs)) {
 			for (GenericValue partyAndContactMech : PartyAndContactMechs) {
 				if(partyAndContactMech.get("contactMechTypeId").toString().equals("POSTAL_ADDRESS")){
 					storeAddress = (String) partyAndContactMech.get("paAddress1");
@@ -136,7 +137,7 @@ public class CloudCardCustServices {
 			e.printStackTrace();
 		}
 		
-		if(null != partyAndGeoPoints){
+		if(UtilValidate.isNotEmpty(partyAndGeoPoints)){
 			longitude = partyAndGeoPoints.get(0).getString("longitude");
 			latitude = partyAndGeoPoints.get(0).getString("latitude");
 		}
@@ -151,6 +152,41 @@ public class CloudCardCustServices {
 		result.put("longitude", longitude);
 		result.put("latitude", latitude);
 
+		return result;
+	}
+	
+	/**
+	 * 查看查看圈子信息
+	 * 
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> userGetGroupInfo(DispatchContext dctx, Map<String, Object> context) {
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+		
+		// 返回结果
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		return result;
+	}
+	
+	
+	/**
+	 * 获取支付的卡信息
+	 * 
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> getPaymentCard(DispatchContext dctx, Map<String, Object> context) {
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+		
+		// 返回结果
+		Map<String, Object> result = ServiceUtil.returnSuccess();
 		return result;
 	}
 }
