@@ -23,22 +23,24 @@
     </request-map>
     
     <!-- APP接口 -->
+    <!--
+    	 所有的接口请求中都配置 <security https="false" auth="false"/>
+    	https 交给 前置的 nginx 等 代理/负载均衡 去进行处理
+    	auth 如果为true，没登录情况下，ofbiz控制器会跳转到登录页面，所以这里api都置为 false，鉴权机制采用后面的 event 调用服务时，服务定义auth = true
+     -->
+    
 
     <!-- 开卡充值统一接口 -->
 	<request-map uri="activateCloudCardAndRecharge">
-		<!-- 
-			auth设置为false，否则ofbiz会直接跳转的是登录页面的html，而不是返回json，
-			后面事件里面的服务在定义时应当设置为需要登录 
-		-->
-		<!--<security https="true" auth="false" />-->
-    	<event type="service" invoke="activateCloudCardAndRecharge"/>
+        <security https="false" auth="false" />
+        <event type="service" invoke="activateCloudCardAndRecharge"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
     
     <!-- 卡授权接口 -->
 	<request-map uri="createCardAuth">
-		<!--<security https="true" auth="false" />-->
+		<security https="false" auth="false" />
     	<event type="service" invoke="createCardAuth"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
@@ -46,7 +48,7 @@
     
     <!-- 解除卡授权接口 -->
 	<request-map uri="revokeCardAuth">
-		<!--<security https="true" auth="false" />-->
+		<security https="false" auth="false" />
     	<event type="service" invoke="revokeCardAuth"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
@@ -54,7 +56,7 @@
 
      <!-- 商家扫卡收款 接口 -->
 	<request-map uri="cloudCardWithdraw">
-		<!--<security https="true" auth="false" />-->
+		<security https="false" auth="false" />
     	<event type="service" invoke="receiptByCardCode"/><!-- 这里调用 receiptByCardCode 服务，服务内部会调用 cloudCardWithdraw -->
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
@@ -62,7 +64,7 @@
     
      <!-- 用户卡列表接口 -->
     <request-map uri="myCloudCards">
-    	<!--<security https="true" auth="false" />-->
+    	<security https="false" auth="false" />
     	<event type="service" invoke="myCloudCards"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
@@ -70,7 +72,7 @@
     
     <!-- 查询商家交易记录 -->
     <request-map uri="getBizPayment">
-<!--     	<security https="true" auth="false" /> -->
+		<security https="false" auth="false" />
     	<event type="service" invoke="getBizPayment"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
@@ -78,7 +80,7 @@
     
     <!-- 查询用户交易记录 -->
     <request-map uri="getUserPayment">
-<!--     	<security https="true" auth="false" /> -->
+		<security https="false" auth="false" />
     	<event type="service" invoke="getUserPayment"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
@@ -86,7 +88,7 @@
 
     <!-- 商家卖卡余额等信息查询 -->
     <request-map uri="getLimitAndPresellInfo">
-    	<!--<security https="true" auth="false" />-->
+		<security https="false" auth="false" />
     	<event type="service" invoke="getLimitAndPresellInfo"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
@@ -94,7 +96,7 @@
 
 	<!-- 扫二维码获取卡信息 -->
     <request-map uri="getCardInfoByCode">
-    	<!--<security https="true" auth="false" />-->
+		<security https="false" auth="false" />
     	<event type="service" invoke="getCardInfoByCode"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
@@ -102,7 +104,7 @@
     
     <!-- 验证码发送申请 -->
     <request-map uri="getLoginCaptcha">
-    	<!--<security https="true" auth="false" />-->
+		<security https="false" auth="false" />
     	<event type="service" invoke="getLoginCaptcha"/>
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
@@ -110,7 +112,7 @@
 
 	<!-- 商户app登录接口 -->
 	<request-map uri="bizAppLogin">
-		<!--<security https="true" auth="false" />-->
+		<security https="false" auth="false" />
 		<event type="service" invoke="bizAppLogin" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
@@ -118,7 +120,7 @@
 
 	<!-- 用户app登录接口 -->
 	<request-map uri="userAppLogin">
-		<!--<security https="true" auth="false" />-->
+		<security https="false" auth="false" />
 		<event type="service" invoke="userAppLogin" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
@@ -126,7 +128,7 @@
 	
 	<!-- 检查app版本 -->
 	<request-map uri="checkAppVersion">
-		<!--<security https="true" auth="false" />-->
+		<security https="false" auth="false" />
 		<event type="service" invoke="checkAppVersion" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
@@ -134,6 +136,7 @@
 	
 	<!-- 注册设备regId -->
 	<request-map uri="regJpushRegId">
+		<security https="false" auth="false" />
 		<event type="service" invoke="regJpushRegId"  />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
@@ -141,6 +144,7 @@
 	
 	<!-- 退出登录删除regId -->
 	<request-map uri="removeJpushRegId">
+		<security https="false" auth="false" />
 		<event type="service" invoke="removeJpushRegId"  />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
@@ -148,6 +152,7 @@
 
 	<!-- 根据二维码获取商家信息，用户可扫商家码后付款 -->
 	<request-map uri="getStoreInfoByQRcode">
+		<security https="false" auth="false" />
 		<event type="service" invoke="getStoreInfoByQRcode"  />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
@@ -155,6 +160,7 @@
 
 	<!-- 用户扫商家码付款 -->
 	<request-map uri="customerWithdraw">
+		<security https="false" auth="false" />
 		<event type="service" invoke="customerWithdraw"  />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
@@ -162,6 +168,7 @@
 	
 	<!-- 用户转让云卡 -->
 	<request-map uri="modifyCardOwner">
+		<security https="false" auth="false" />
 		<event type="service" invoke="modifyCardOwner"  />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
@@ -169,18 +176,21 @@
 	
 	<!-- 支付宝预支付订单 -->
     <request-map uri="aliPayNotify">
+    	<security https="false" auth="false" />
         <event type="java" path="com.banfftech.cloudcard.pay.PayServices" invoke="aliPayNotify"></event>
         <response name="success" type="none"/>
     </request-map>
 	
 	<!-- 微信预支付订单 -->
     <request-map uri="wxPayNotify">
+        <security https="false" auth="false" />
         <event type="java" path="com.banfftech.cloudcard.pay.PayServices" invoke="wxPayNotify"></event>
         <response name="success" type="none"/>
     </request-map>
 	
 	<!-- 支付宝或微信预支付订单 -->
 	<request-map uri="uniformOrder">
+		<security https="false" auth="false" />
 		<event type="service" invoke="uniformOrder"  />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
@@ -189,11 +199,30 @@
 	
 	<!-- 商户开店申请接口 -->
 	<request-map uri="bizCreateApply">
-		<!--<security https="true" auth="false" />-->
+		<security https="false" auth="false" />
 		<event type="service" invoke="bizCreateApply" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
+
+	<!-- 商户创建圈子接口 -->
+	<request-map uri="bizCreateGroup">
+		<security https="false" auth="false"/>
+		<event type="service" invoke="bizCreateGroup" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+
+	<!-- 商户创建圈子接口 -->
+	<request-map uri="bizSentGroupInvitation">
+		<security https="false" auth="false"/>
+		<event type="service" invoke="bizSentGroupInvitation" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+
+
+
 
 	<!-- 后台页面部分 Request Mappings -->
 

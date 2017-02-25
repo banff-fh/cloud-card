@@ -141,12 +141,40 @@
         <value xml:lang="en">missing parameter:[${param}]</value>
         <value xml:lang="zh">缺少参数:[${param}]</value>
     </property>
+    <property key="CloudCardTelHasBeenAssociatedWithAstoreOwner">
+        <value xml:lang="en">This phone number has been associated with a store owner</value>
+        <value xml:lang="zh">此号码已经关联了一个店主，不能再次申请开店</value>
+    </property>
+     <property key="CloudCardTelIsNotAssociatedWithAstoreOwner">
+        <value xml:lang="en">This phone number is not associated with a store owner, can not be invited to join the group</value>
+        <value xml:lang="zh">此号码不是一个店主，不能邀请其加入圈子</value>
+    </property>
     <property key="CloudCardRepeatedApplyForCreateStore">
-        <value xml:lang="en">The teleNumber has been used to apply for a shop, Please wait for us to contact you</value>
-        <value xml:lang="zh">此电话已发起过开店申请，请您耐心等待平台工作人员的线下联系。</value>
+        <value xml:lang="en">You have applied for a shop, Please wait for us to contact you</value>
+        <value xml:lang="zh">您已经申请过开店了，请耐心等待平台工作人员的线下联系。</value>
     </property>
     <property key="CloudCardIsInGroupCanNotCreateAnother">
-        <value xml:lang="en">The Store is already in a Group, Can Not create another one.</value>
+        <value xml:lang="en">That Store is already in a Group, Can Not create another one.</value>
         <value xml:lang="zh">此店已经在圈子里，不能创建新的圈子。</value>
+    </property>
+    <property key="CloudCardIsInGroupCanNotJoinAnother">
+        <value xml:lang="en">The Store is already in a Group, Can Not join another one.</value>
+        <value xml:lang="zh">此店已经在圈子里，不能加入另一个圈子。</value>
+    </property>
+    <property key="CloudCardIsNotInAgroup">
+        <value xml:lang="en">The Store is NOT in a Group, Can Not invite another one.</value>
+        <value xml:lang="zh">本店还没有创建圈子，不能邀请其他人加入</value>
+    </property>
+     <property key="CloudCardIsNotAstoreGroupOwner">
+        <value xml:lang="en">The Store is NOT a store-group owner, Can Not invite another one.</value>
+        <value xml:lang="zh">你不是一个圈主，不能邀请其加入圈子</value>
+    </property>
+     <property key="CloudCardUserIsInTheSameStore">
+        <value xml:lang="en">This user and you in the same store, can not be invited</value>
+        <value xml:lang="zh">此用户与您是同一家店的管理员，不能邀请。</value>
+    </property>
+    <property key="CloudCardInvitationAlreadyExists">
+        <value xml:lang="en">Invitation already exists</value>
+        <value xml:lang="zh">已经发起过邀请，不能再次邀请。</value>
     </property>
 </resource>
