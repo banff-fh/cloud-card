@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
@@ -12,11 +14,13 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
+import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.banfftech.cloudcard.constant.CloudCardConstant;
 import com.banfftech.cloudcard.lbs.BaiduLBSUtil;
 
 import javolution.util.FastList;
@@ -303,8 +307,65 @@ public class CloudCardCustServices {
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
 		
+		GenericValue userLogin = (GenericValue) context.get("userLogin");
+		String partyId = (String) userLogin.get("partyId");
+		String storeId = (String) context.get("storeId");
+		
+		//查找用户在本店购买的卡
+		Map<String,Object> cardMap = FastMap.newInstance();
+		cardMap.put("userLogin", userLogin);
+		Map<String,Object> cloudCardMap = FastMap.newInstance();
+		List<Object> cloudCardList = FastList.newInstance();
+		try {
+			cloudCardMap = dispatcher.runSync("myCloudCards", cardMap);
+		} catch (GenericServiceException e) {
+			 Debug.logError(e.getMessage(), module);
+	         return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		if(UtilValidate.isNotEmpty(cloudCardMap)){
+			cloudCardList.add(cloudCardMap.get("cloudCardList"));
+		}
+		
+		//查找用户在圈主购买的卡
+		String groupId = null;
+		try {
+			groupId = CloudCardHelper.getGroupIdByStoreId(delegator,storeId,false);
+		} catch (GenericEntityException e1) {
+			 Debug.logError(e1.getMessage(), module);
+	         return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		List<GenericValue> partyRelationshipList = FastList.newInstance();
+		try {
+			partyRelationshipList = delegator.findByAnd("PartyRelationship", UtilMisc.toMap("partyIdFrom", groupId, "roleTypeIdTo",  CloudCardConstant.STORE_GROUP_OWNER_ROLE_TYPE_ID));
+		} catch (GenericEntityException e1) {
+		     Debug.logError(e1.getMessage(), module);
+	         return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		//如果自己是圈主，忽略此部
+		if(!storeId.equals(partyRelationshipList.get(0).get("partyIdTo"))){
+			if(UtilValidate.isNotEmpty(partyRelationshipList)){
+				cardMap.put("storeId", partyRelationshipList.get(0).get("partyIdTo"));
+			}
+			try {
+				cloudCardMap = dispatcher.runSync("myCloudCards", cardMap);
+			} catch (GenericServiceException e) {
+				 Debug.logError(e.getMessage(), module);
+		         return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+			}
+			
+			if(UtilValidate.isNotEmpty(cloudCardMap)){
+				cloudCardList.add(cloudCardMap.get("cloudCardList"));
+			}
+		}
+		
+		
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("storeId", storeId);
+		result.put("cloudCardList", cloudCardList);
 		return result;
 	}
 }
