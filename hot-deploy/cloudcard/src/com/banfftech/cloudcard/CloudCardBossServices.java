@@ -13,6 +13,7 @@ import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityOperator;
+import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
@@ -295,7 +296,8 @@ public class CloudCardBossServices {
                 return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserIsInTheSameStore", locale));
             }
 
-            otherStoreGroup = CloudCardHelper.getStoreGroupByStoreId(delegator, storeIdList.get(0), true);
+            storeId = storeIdList.get(0);
+            otherStoreGroup = CloudCardHelper.getStoreGroupByStoreId(delegator, storeId, true);
             if (null != otherStoreGroup) {
                 // 已经加入某个圈子了
                 Debug.logWarning("This user [" + teleNumber + "] is not the manager, can not be invited", module);
@@ -332,7 +334,7 @@ public class CloudCardBossServices {
         Map<String, Object> createPartyInvitationOutMap;
         try {
             createPartyInvitationOutMap = dispatcher.runSync("createPartyInvitation", UtilMisc.toMap("locale", locale, "userLogin", userLogin, "partyId",
-                    storeId, "partyIdFrom", organizationPartyId, "statusId", "PARTYINV_SENT", "toName", "邀请加入圈子"));
+                    storeId, "partyIdFrom", organizationPartyId, "statusId", "PARTYINV_SENT"));
             if (!ServiceUtil.isSuccess(createPartyInvitationOutMap)) {
                 return createPartyInvitationOutMap;
             }
@@ -386,10 +388,9 @@ public class CloudCardBossServices {
         // 返回结果
         Map<String, Object> result = ServiceUtil.returnSuccess();
 
-        // 数据权限检查
-        if (!CloudCardHelper.isManager(delegator, userLogin.getString("partyId"), organizationPartyId)) {
-            Debug.logError("partyId: " + userLogin.getString("partyId") + " 不是商户：" + organizationPartyId + "的管理人员，不能查看圈子信息", module);
-            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
+        Map<String, Object> checkInputParamRet = checkInputParam(dctx, context);
+        if (ServiceUtil.isError(checkInputParamRet) || ServiceUtil.isFailure(checkInputParamRet)) {
+            return checkInputParamRet;
         }
 
         // 查找圈子
@@ -403,21 +404,62 @@ public class CloudCardBossServices {
                 // 在圈子里，
                 groupId = partyRelationship.getString("partyIdFrom");
                 storeGroup = delegator.findByPrimaryKeyCache("PartyGroup", UtilMisc.toMap("partyId", groupId));
-                isGroupOwner = CloudCardConstant.STORE_GROUP_OWNER_ROLE_TYPE_ID.equals(partyRelationship.getString("roleTypeIdTo"));
+                isGroupOwner = CloudCardHelper.isStoreGroupOwnerRelationShip(partyRelationship);
             }
         } catch (GenericEntityException e) {
-            Debug.logError(e.getMessage(), "Problem finding PartyRelationships. ", module);
+            Debug.logError(e.getMessage(), module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
         }
 
+        // 没有圈子的情况，
         if (null == partyRelationship || null == storeGroup) {
-            // 没有圈子，
             result.put("isJoinGroup", CloudCardConstant.IS_N);
             result.put("isGroupOwner", CloudCardConstant.IS_N);
+
+            // 查询邀请列表
+            List<GenericValue> existPartyInvitations = null;
+            try {
+                existPartyInvitations = delegator.findList("PartyInvitation",
+                        EntityCondition.makeCondition(UtilMisc.toMap("partyId", organizationPartyId, "statusId", "PARTYINV_SENT")), null,
+                        UtilMisc.toList("-" + ModelEntity.CREATE_STAMP_FIELD), null, false);
+                if (UtilValidate.isNotEmpty(existPartyInvitations)) {
+                    List<Map<String, String>> invitations = FastList.newInstance();
+                    for (GenericValue gv : existPartyInvitations) {
+
+                        String partyInvitationId = gv.getString("partyInvitationId");
+                        String partyIdFrom = gv.getString("partyIdFrom");
+
+                        if (UtilValidate.isEmpty(partyInvitationId) || UtilValidate.isEmpty(partyIdFrom)) {
+                            continue;
+                        }
+                        // 应当验证是否为 加入圈子的邀请，
+                        GenericValue partyInvitationRoleAssoc = delegator.findByPrimaryKeyCache("PartyInvitationRoleAssoc",
+                                UtilMisc.toMap("partyInvitationId", partyInvitationId, "roleTypeId", CloudCardConstant.STORE_GROUP_PARTNER_ROLE_TYPE_ID));
+                        if (null == partyInvitationRoleAssoc) {
+                            continue;
+                        }
+
+                        GenericValue partyFrom = delegator.findByPrimaryKeyCache("PartyGroup", UtilMisc.toMap("partyId", partyIdFrom));
+                        if (null == partyFrom) {
+                            continue;
+                        }
+                        Map<String, String> itemMap = UtilMisc.toMap("partyInvitationId", partyInvitationId);
+                        itemMap.put("partyIdFrom", partyIdFrom);
+                        itemMap.put("fromName", partyFrom.getString("groupName"));
+                        invitations.add(itemMap);
+                    }
+                    result.put("invitations", invitations);// 把已有的邀请列表返回
+                }
+            } catch (GenericEntityException e) {
+                Debug.logError(e.getMessage(), "Problem finding PartyInvitation. ", module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+            }
             return result;
         }
 
+        // 有圈子的情况
         // TODO 返回圈友列表
+
         result.put("isJoinGroup", CloudCardConstant.IS_Y);
         result.put("isGroupOwner", isGroupOwner ? CloudCardConstant.IS_Y : CloudCardConstant.IS_N);
         result.put("groupId", groupId);

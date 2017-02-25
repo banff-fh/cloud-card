@@ -107,7 +107,9 @@
 
 	<!-- 圈子相关 -->
 	<RoleType roleTypeId="CC_STORE_GROUP" parentTypeId="INTERNAL_ORGANIZATIO" hasTable="N" description="库胖商家圈子"/>
-	
+	<RoleType roleTypeId="CC_SG_OWNER" parentTypeId="INTERNAL_ORGANIZATIO" hasTable="N" description="库胖圈圈主"/>
+	<RoleType roleTypeId="CC_SG_PARTNER" parentTypeId="INTERNAL_ORGANIZATIO" hasTable="N" description="库胖圈圈友"/>
+
 	<!-- 百度地图 -->
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="baiduMap.ak" systemPropertyValue="xxxxxx" description="百度地图AK"/>
 	<SystemProperty systemResourceId="cloudcard" systemPropertyId="baiduMap.getTableId" systemPropertyValue="xxxxxx" description="百度地图LBS表Id"/>

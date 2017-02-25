@@ -756,14 +756,20 @@ public class CloudCardHelper {
      * @throws GenericEntityException
      */
     public static boolean isStoreGroupOwner(Delegator delegator, String storeId, boolean useCache) throws GenericEntityException {
-
         GenericValue partyRelationship = getGroupRelationShipByStoreId(delegator, storeId, useCache);
-        if (UtilValidate.isNotEmpty(partyRelationship)) {
-            return CloudCardConstant.STORE_GROUP_OWNER_ROLE_TYPE_ID.equals(partyRelationship.getString("roleTypeIdTo"));
-        }
-        return false;
+        return isStoreGroupOwnerRelationShip(partyRelationship);
     }
-	
+
+    /**
+     * 判断传入的 partyRelationship 是否为 圈子-->圈主 关系
+     * 
+     * @param partyRelationship
+     * @return
+     */
+    public static boolean isStoreGroupOwnerRelationShip(GenericValue partyRelationship) {
+        return partyRelationship != null && CloudCardConstant.STORE_GROUP_OWNER_ROLE_TYPE_ID.equals(partyRelationship.getString("roleTypeIdTo"));
+    }
+
 	/**
 	 *  根据店铺id获取圈子id
 	 * @param delegator 实体引擎代理对象
