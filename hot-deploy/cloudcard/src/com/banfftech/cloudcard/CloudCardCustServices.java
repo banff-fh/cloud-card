@@ -1,9 +1,13 @@
 package com.banfftech.cloudcard;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
+import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
+import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
 import com.alibaba.fastjson.JSONArray;
@@ -24,17 +28,26 @@ public class CloudCardCustServices {
 	 * @return
 	 */
 	public static Map<String, Object> userStoreListLBS(DispatchContext dctx, Map<String, Object> context) {
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+
 		String longitude = (String) context.get("longitude");
 		String latitude = (String) context.get("latitude");
-		String radius = (String) context.get("radius");
-		
+
+		String ak = EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.ak", delegator);
+		String getTableId = EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.getTableId", delegator);
+		String radius = EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.radius", delegator);
+		String CoordType = EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.CoordType", delegator);
+		String q = EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.q", delegator);
+
 		Map<String, Object> params = FastMap.newInstance();
-		params.put("ak", "lfDGGxskR8B9SvTlM768WrI5");
-		params.put("geotable_id", "161504");
-		params.put("q", "");
-		params.put("Coord_type", "3");
-		params.put("location", longitude+","+latitude);
-		params.put("radius", "1000");
+		params.put("ak", ak);
+		params.put("geotable_id", getTableId);
+		params.put("q", q);
+		params.put("Coord_type", CoordType);
+		params.put("location", longitude + "," + latitude);
+		params.put("radius", radius);
 		
 		List<Map<String,Object>> storeList = FastList.newInstance();
 		JSONObject lbsResult = JSONObject.parseObject(BaiduLBSUtil.nearby(params));
@@ -46,6 +59,7 @@ public class CloudCardCustServices {
 				storeMap.put("storeId",jsonArray.getJSONObject(i).getObject("storeId",String.class) );
 				storeMap.put("isGroupOwner",jsonArray.getJSONObject(i).getObject("isGroupOwner",String.class) );
 				storeMap.put("distance",jsonArray.getJSONObject(i).getObject("distance",String.class) );
+				storeMap.put("location",jsonArray.getJSONObject(i).getObject("location",String.class) );
 				storeList.add(storeMap);
 			}
 		}

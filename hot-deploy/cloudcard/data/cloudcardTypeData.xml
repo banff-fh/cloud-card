@@ -108,5 +108,12 @@
 	<!-- 圈子相关 -->
 	<RoleType roleTypeId="CC_STORE_GROUP" parentTypeId="INTERNAL_ORGANIZATIO" hasTable="N" description="库胖商家圈子"/>
 	
+	<!-- 百度地图 -->
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="baiduMap.ak" systemPropertyValue="xxxxxx" description="百度地图AK"/>
+	<SystemProperty systemResourceId="cloudcard" systemPropertyId="baiduMap.getTableId" systemPropertyValue="xxxxxx" description="百度地图LBS表Id"/>
+	<SystemProperty systemResourceId="cloudcard" systemPropertyId="baiduMap.radius" systemPropertyValue="2000" description="百度地图检索半径"/>
+	<SystemProperty systemResourceId="cloudcard" systemPropertyId="baiduMap.CoordType" systemPropertyValue="3" description="百度地图坐标系"/>
+	<SystemProperty systemResourceId="cloudcard" systemPropertyId="baiduMap.q" systemPropertyValue="" description="百度地图检索关键字"/>
+	
 
 </entity-engine-xml>
