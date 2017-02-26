@@ -326,7 +326,7 @@ public class CloudCardBossServices {
         }
         if (null != oldPartyInvitation) {
             String oldPartyInvitationStatus = oldPartyInvitation.getString("statusId");
-            if (!"PARTYINV_DECLINED".equals(oldPartyInvitationStatus)) {
+            if ("PARTYINV_SENT".equals(oldPartyInvitationStatus)|| "".equals(oldPartyInvitationStatus)) {
                 Debug.logWarning("There has been an effective invitation[" + oldPartyInvitation.getString("partyInvitationId") + "]", module);
                 return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInvitationAlreadyExists", locale));
             }
