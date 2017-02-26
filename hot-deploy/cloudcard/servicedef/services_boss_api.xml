@@ -160,6 +160,14 @@
 		<attribute name="storeId" type="String" mode="IN" optional="true"><description>传入此字段时：表示圈友要踢出storeId这个圈友</description></attribute>
 
 	</service>
+
+	<service name="bizFreezeGroupPartner" engine="java"
+		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizFreezeGroupPartner" auth="true">
+		<description>圈主冻结/解冻圈友</description>
+		<attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家Id（自己的商家id）</description></attribute>
+		<attribute name="storeId" type="String" mode="INOUT" optional="false"><description>要冻结/解冻的圈友id</description></attribute>
+		<attribute name="isFrozen" type="String" mode="OUT" optional="true"><description>是否冻结 Y/N</description></attribute>
+	</service>
 	
 	
 	

@@ -326,7 +326,7 @@ public class CloudCardBossServices {
         }
         if (null != oldPartyInvitation) {
             String oldPartyInvitationStatus = oldPartyInvitation.getString("statusId");
-            if ("PARTYINV_SENT".equals(oldPartyInvitationStatus)|| "".equals(oldPartyInvitationStatus)) {
+            if ("PARTYINV_SENT".equals(oldPartyInvitationStatus) || "".equals(oldPartyInvitationStatus)) {
                 Debug.logWarning("There has been an effective invitation[" + oldPartyInvitation.getString("partyInvitationId") + "]", module);
                 return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInvitationAlreadyExists", locale));
             }
@@ -459,7 +459,8 @@ public class CloudCardBossServices {
                 if (UtilValidate.isNotEmpty(partyInvitationGroupAssocList)) {
                     Map<String, Object> tmpCtx = UtilMisc.toMap("locale", locale, "userLogin", systemUser, "partyIdTo", organizationPartyId, "roleTypeIdTo",
                             CloudCardConstant.STORE_GROUP_PARTNER_ROLE_TYPE_ID, "partyRelationshipTypeId",
-                            CloudCardConstant.STORE_GROUP_PARTY_RELATION_SHIP_TYPE_ID, "roleTypeIdFrom", CloudCardConstant.STORE_GROUP_ROLE_TYPE_ID);
+                            CloudCardConstant.STORE_GROUP_PARTY_RELATION_SHIP_TYPE_ID, "roleTypeIdFrom", CloudCardConstant.STORE_GROUP_ROLE_TYPE_ID, "statusId",
+                            CloudCardConstant.SG_REL_STATUS_ACTIVE);
                     for (GenericValue gv : partyInvitationGroupAssocList) {
                         tmpCtx.put("partyIdFrom", gv.getString("partyIdTo"));
                         Map<String, Object> createPartyRelationshipOut = dispatcher.runSync("createPartyRelationship", tmpCtx);
@@ -565,13 +566,13 @@ public class CloudCardBossServices {
 
                 // 对面也是圈主，不能踢出 * 业务上应该不存在这样的情况
                 if (CloudCardHelper.isStoreGroupOwnerRelationship(groupStoreRelationship)) {
-                    Debug.logWarning(" This store[" + storeId + "] is also the owner of group[" + myGroupId + "], can't kick it out", module);
+                    Debug.logWarning("This store[" + storeId + "] is also the owner of group[" + myGroupId + "], can't kick it out", module);
                     return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardCanNotKickOutGroupOwner", locale));
                 }
 
                 // 只能踢出 冻结状态 的圈友
                 String relStatusId = groupStoreRelationship.getString("statusId");
-                if (!"PREL_FROZEN".equalsIgnoreCase(relStatusId)) {
+                if (!CloudCardConstant.SG_REL_STATUS_FROZEN.equalsIgnoreCase(relStatusId)) {
                     Debug.logWarning("Must first freeze this store[" + storeId + "] of the group[" + myGroupId + "], to kick out " + relStatusId, module);
                     return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardMustFirstFreezeToKickOut", locale));
                 }
@@ -602,6 +603,87 @@ public class CloudCardBossServices {
         }
         // 返回成功
         Map<String, Object> result = ServiceUtil.returnSuccess();
+        return result;
+    }
+
+    /**
+     * B端 圈主冻结/解冻圈友 接口
+     * 
+     * @param dctx
+     * @param context
+     * @return
+     */
+    public static Map<String, Object> bizFreezeGroupPartner(DispatchContext dctx, Map<String, Object> context) {
+        LocalDispatcher dispatcher = dctx.getDispatcher();
+        Delegator delegator = dispatcher.getDelegator();
+        Locale locale = (Locale) context.get("locale");
+        // GenericValue userLogin = (GenericValue) context.get("userLogin");
+
+        String organizationPartyId = (String) context.get("organizationPartyId"); // 店家partyId
+        String storeId = (String) context.get("storeId");
+
+        Map<String, Object> checkInputParamRet = checkInputParam(dctx, context);
+        if (!ServiceUtil.isSuccess(checkInputParamRet)) {
+            return checkInputParamRet;
+        }
+
+        boolean isGroupOwner = false;
+        boolean isFrozen = true;
+        try {
+            GenericValue myGroupRelationship = CloudCardHelper.getGroupRelationShipByStoreId(delegator, organizationPartyId, true);
+            if (null != myGroupRelationship) {
+                isGroupOwner = CloudCardHelper.isStoreGroupOwnerRelationship(myGroupRelationship);
+            }
+
+            if (!isGroupOwner) {
+                // 不是圈主，没权冻结别人，直接返回失败
+                Debug.logWarning("This store[" + organizationPartyId + "] is not the owner of group, can not freeze/unfreeze the partner", module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardNotGroupOwnerCanNotFreezeOthers", locale));
+            }
+
+            // 获取要冻结的店的 圈子关系
+            GenericValue storeGroupRelationship = CloudCardHelper.getGroupRelationShipByStoreId(delegator, storeId, false);
+            if (null == storeGroupRelationship) {
+                // 店铺不在圈子里，不能冻结、解冻
+                Debug.logWarning("Store[" + storeId + "] is not in the group, can't freeze/unfreeze it", module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardStoreNotInAGroup", locale));
+            }
+
+            String myGroupId = CloudCardHelper.getGroupIdByRelationship(myGroupRelationship);
+            String storeGroupId = CloudCardHelper.getGroupIdByRelationship(storeGroupRelationship);
+            if (!UtilValidate.areEqual(myGroupId, storeGroupId)) {
+                // 要冻结的店铺与自己店铺不在同一个圈子中
+                Debug.logWarning("Store[" + storeId + "] is not in the same group with my store[" + organizationPartyId + "], can't freeze/unfreeze it",
+                        module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardNotInTheSameGroup", locale));
+            }
+
+            if (CloudCardHelper.isStoreGroupOwnerRelationship(storeGroupRelationship)) {
+                // 被冻结或解冻的店铺也是一个圈主，返回失败
+                Debug.logWarning("This store[" + storeId + "] is also the owner of group, can't freeze/unfreeze it", module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardCanNotFreezeGroupOwner", locale));
+            }
+
+            String statusId = storeGroupRelationship.getString("statusId");
+            if (CloudCardConstant.SG_REL_STATUS_FROZEN.equals(statusId)) {
+                statusId = CloudCardConstant.SG_REL_STATUS_ACTIVE;
+                isFrozen = false;
+            } else {
+                statusId = CloudCardConstant.SG_REL_STATUS_FROZEN;
+                isFrozen = true;
+            }
+            storeGroupRelationship.put("statusId", statusId);
+            storeGroupRelationship.store();
+
+        } catch (GenericEntityException e) {
+            Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+        }
+
+        // 返回成功
+        Map<String, Object> result = ServiceUtil.returnSuccess();
+        result.put("storeId", storeId);
+        result.put("isFrozen", isFrozen ? CloudCardConstant.IS_Y : CloudCardConstant.IS_N);
         return result;
     }
 

@@ -65,4 +65,14 @@ public class CloudCardConstant {
      */
     public static final String IS_N = "N";
 
+    /**
+     * 圈友关系状态： 活跃状态 {@value}
+     */
+    public static final String SG_REL_STATUS_ACTIVE = "PREL_ACTIVE";
+
+    /**
+     * 圈友关系状态： 冻结状态 {@value}
+     */
+    public static final String SG_REL_STATUS_FROZEN = "PREL_FROZEN";
+
 }
