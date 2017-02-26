@@ -5,6 +5,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
@@ -483,6 +484,124 @@ public class CloudCardBossServices {
 
         result.put("partyInvitationId", partyInvitationId);
         result.put("isAccept", isAccept ? CloudCardConstant.IS_Y : CloudCardConstant.IS_N);
+        return result;
+    }
+
+    /**
+     * B端 退出圈子/ 圈主踢出圈友 接口
+     * 
+     * <pre>
+     *      场景1：圈友主动发起退出圈子请求
+     *      场景2：圈主发起踢出圈友的请求
+     * </pre>
+     * 
+     * <pre>
+     *      如果是圈主踢出圈友的场景，此圈友必须是冻结状态 且 没有未结算的金额。 
+     *          即 圈主踢出圈友时， 必须先对该圈友进行冻结（接口 圈主冻结/解冻 圈友）， 然后结清未结算金额，否则调用此接口会直接提示错误。
+     * 
+     *      如果圈友主动发起退出操作的场景， 若有未结算金额时，也会给出错误提示。
+     * </pre>
+     * 
+     * @param dctx
+     * @param context
+     * @return
+     */
+    public static Map<String, Object> bizExitGroup(DispatchContext dctx, Map<String, Object> context) {
+        LocalDispatcher dispatcher = dctx.getDispatcher();
+        Delegator delegator = dispatcher.getDelegator();
+        Locale locale = (Locale) context.get("locale");
+        // GenericValue userLogin = (GenericValue) context.get("userLogin");
+
+        String organizationPartyId = (String) context.get("organizationPartyId"); // 店家partyId
+        String storeId = (String) context.get("storeId");
+        if (UtilValidate.isWhitespace(storeId)) {
+            // 未传入storeId，默认为 organizationPartyId
+            storeId = organizationPartyId;
+        }
+
+        Map<String, Object> checkInputParamRet = checkInputParam(dctx, context);
+        if (ServiceUtil.isError(checkInputParamRet) || ServiceUtil.isFailure(checkInputParamRet)) {
+            return checkInputParamRet;
+        }
+
+        try {
+            String myGroupId = null;
+            GenericValue myPartyRelationship = CloudCardHelper.getGroupRelationShipByStoreId(delegator, organizationPartyId, false);
+            if (UtilValidate.isNotEmpty(myPartyRelationship)) {
+                myGroupId = myPartyRelationship.getString("partyIdFrom");
+            }
+            if (UtilValidate.isEmpty(myGroupId)) {
+                // 用户自己 没有有效的圈子关系了，忽略本次调用，直接返回成功，
+                Debug.logWarning("This store[" + organizationPartyId + "] is not in a group now! this operation will be ignored", module);
+                return ServiceUtil.returnSuccess();
+            }
+
+            // 自己是否为圈主
+            boolean isGroupOwner = CloudCardHelper.isStoreGroupOwnerRelationship(myPartyRelationship);
+
+            // 传入id不一样时，表示圈主要踢出圈友
+            if (!UtilValidate.areEqual(storeId, organizationPartyId)) {
+
+                if (!isGroupOwner) {
+                    // 如果不是圈主，则不能踢人
+                    Debug.logWarning("The store[" + organizationPartyId + "] is not the owner of the group[" + myGroupId + "], can't kick out this store["
+                            + storeId + "]", module);
+                    return ServiceUtil
+                            .returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardNotGroupOwnerCanNotKickOthers", locale));
+                }
+
+                GenericValue groupStoreRelationship = CloudCardHelper.getGroupRelationShipByStoreId(delegator, storeId, false);
+                if (UtilValidate.isEmpty(groupStoreRelationship)) {
+                    // 要踢出的店已经不在圈子里面了，忽略本次调用，直接返回成功
+                    Debug.logWarning("This store[" + storeId + "] is not in a group now! this operation will be ignored", module);
+                    return ServiceUtil.returnSuccess();
+                }
+
+                if (!myGroupId.equals(groupStoreRelationship.getString("partyIdFrom"))) {
+                    // 要踢出的店铺不属于同一个圈子，忽略操作，直接返回成功
+                    Debug.logWarning("This store[" + storeId + "] is not in my group[" + myGroupId + "! this operation will be ignored", module);
+                    return ServiceUtil.returnSuccess();
+                }
+
+                // 对面也是圈主，不能踢出 * 业务上应该不存在这样的情况
+                if (CloudCardHelper.isStoreGroupOwnerRelationship(groupStoreRelationship)) {
+                    Debug.logWarning(" This store[" + storeId + "] is also the owner of group[" + myGroupId + "], can't kick it out", module);
+                    return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardCanNotKickOutGroupOwner", locale));
+                }
+
+                // 只能踢出 冻结状态 的圈友
+                String relStatusId = groupStoreRelationship.getString("statusId");
+                if (!"PREL_FROZEN".equalsIgnoreCase(relStatusId)) {
+                    Debug.logWarning("Must first freeze this store[" + storeId + "] of the group[" + myGroupId + "], to kick out " + relStatusId, module);
+                    return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardMustFirstFreezeToKickOut", locale));
+                }
+
+                // TODO再判断是否结清跨店交易产生的 未结算金额 才能踢出
+
+                // 将圈友关系设置为过期
+                groupStoreRelationship.set("thruDate", UtilDateTime.nowTimestamp());
+                groupStoreRelationship.store();
+            } else {
+                if (isGroupOwner) {
+                    // 如果自己是圈主，需要查看还有多少圈友，还有圈友，不能自己退出圈子吧
+                    List<String> partnerIdList = CloudCardHelper.getStoreGroupPartnerIdListByGroupId(delegator, myGroupId, true);
+                    if (null != partnerIdList && partnerIdList.size() > 1) {
+                        Debug.logWarning("There are other partners in the Group[" + myGroupId + "], the owner[" + organizationPartyId + "] can not quit group",
+                                module);
+                        return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardPartnerExistsCanNotExit", locale));
+                    }
+                }
+                // TODO 判断是否结清跨店交易产生的 未结算金额
+
+                myPartyRelationship.set("thruDate", UtilDateTime.nowTimestamp());
+                myPartyRelationship.store();
+            }
+        } catch (GenericEntityException e) {
+            Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+        }
+        // 返回成功
+        Map<String, Object> result = ServiceUtil.returnSuccess();
         return result;
     }
 

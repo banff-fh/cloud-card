@@ -153,6 +153,15 @@
 
 	</service>
 	
+	<service name="bizExitGroup" engine="java"
+		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizExitGroup" auth="true">
+		<description>圈友退出圈子、圈主踢出圈友</description>
+		<attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家Id（自己的商家id）</description></attribute>
+		<attribute name="storeId" type="String" mode="IN" optional="true"><description>传入此字段时：表示圈友要踢出storeId这个圈友</description></attribute>
+
+	</service>
+	
+	
 	
 	
 </services>
