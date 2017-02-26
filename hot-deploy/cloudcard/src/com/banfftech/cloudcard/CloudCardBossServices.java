@@ -873,9 +873,9 @@ public class CloudCardBossServices {
             for (GenericValue partyAndContactMech : PartyAndContactMechs) {
                 String cmType = partyAndContactMech.getString("contactMechTypeId");
                 if ("POSTAL_ADDRESS".equals(cmType)) {
-                    storeAddress = (String) partyAndContactMech.get("paAddress1");
+                    storeAddress = partyAndContactMech.getString("paAddress1");
                 } else if (("TELECOM_NUMBER".equals(cmType))) {
-                    storeTeleNumber = (String) partyAndContactMech.get("tnContactNumber");
+                    storeTeleNumber = partyAndContactMech.getString("tnContactNumber");
                 }
             }
         }
