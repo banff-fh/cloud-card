@@ -110,6 +110,10 @@
 	<RoleType roleTypeId="CC_SG_OWNER" parentTypeId="INTERNAL_ORGANIZATIO" hasTable="N" description="库胖圈圈主"/>
 	<RoleType roleTypeId="CC_SG_PARTNER" parentTypeId="INTERNAL_ORGANIZATIO" hasTable="N" description="库胖圈圈友"/>
 
+	<StatusItem description="活跃状态" sequenceId="01" statusCode="ACTIVE" statusId="PREL_ACTIVE" statusTypeId="PARTY_REL_STATUS"/>
+	<StatusItem description="冻结状态" sequenceId="02" statusCode="FROZEN" statusId="PREL_FROZEN" statusTypeId="PARTY_REL_STATUS"/>
+	<StatusValidChange statusId="PREL_ACTIVE" statusIdTo="PREL_FROZEN" transitionName="冻结关系"/>
+
 	<!-- 百度地图 -->
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="baiduMap.ak" systemPropertyValue="xxxxxx" description="百度地图AK"/>
 	<SystemProperty systemResourceId="cloudcard" systemPropertyId="baiduMap.getTableId" systemPropertyValue="xxxxxx" description="百度地图LBS表Id"/>

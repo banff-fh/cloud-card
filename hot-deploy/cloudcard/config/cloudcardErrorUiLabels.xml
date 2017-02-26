@@ -187,6 +187,22 @@
     </property>
     <property key="CloudCardInvitationStatusUnexpected">
         <value xml:lang="en">The value of the statusId field of invitation is not expected</value>
-        <value xml:lang="zh">非预期的状态</value>
+        <value xml:lang="zh">非预期的邀请状态</value>
+    </property>
+    <property key="CloudCardMustFirstFreezeToKickOut">
+        <value xml:lang="en">Must first freeze this store of the group, to kick out</value>
+        <value xml:lang="zh">踢出该圈友之前必须先进行冻结操作</value>
+    </property>
+    <property key="CloudCardNotGroupOwnerCanNotKickOthers">
+        <value xml:lang="en">You're not the owner of the group, can't kick out this store</value>
+        <value xml:lang="zh">你不是圈主，不能踢出这个圈友</value>
+    </property>
+    <property key="CloudCardCanNotKickOutGroupOwner">
+        <value xml:lang="en">This store is also the owner of group, can't kick it out </value>
+        <value xml:lang="zh">对方也是一个圈主，不能踢出</value>
+    </property>
+    <property key="CloudCardPartnerExistsCanNotExit">
+        <value xml:lang="en">partner exists, Can NOT exit </value>
+        <value xml:lang="zh">存在其他圈友，圈主不能退出圈子</value>
     </property>
 </resource>
