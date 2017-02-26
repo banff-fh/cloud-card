@@ -423,7 +423,7 @@ public class CloudCardBossServices {
             if (null != oldStoreGroup) {
                 // 已经加入某个圈子了,不能再接受本次邀请了
                 // 此情况下：是否应当要将 partyInvitation 状态改为 PARTYINV_CANCELLED？
-                partyInvitation.set("statusId", "partyInvitation");
+                partyInvitation.set("statusId", "PARTYINV_CANCELLED");
                 partyInvitation.store();
 
                 Debug.logWarning("This store [" + organizationPartyId + "] is already in a Group, Can Not join another one.", module);
