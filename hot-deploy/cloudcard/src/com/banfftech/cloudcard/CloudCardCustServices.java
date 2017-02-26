@@ -126,9 +126,10 @@ public class CloudCardCustServices {
 
 		if (UtilValidate.isNotEmpty(PartyAndContactMechs)) {
 			for (GenericValue partyAndContactMech : PartyAndContactMechs) {
-				if(partyAndContactMech.get("contactMechTypeId").toString().equals("POSTAL_ADDRESS")){
+			     String cmType=partyAndContactMech.getString("contactMechTypeId");
+				if("POSTAL_ADDRESS".equals(cmType)){
 					storeAddress = (String) partyAndContactMech.get("paAddress1");
-				}else if(partyAndContactMech.get("contactMechTypeId").toString().equals("TELECOM_NUMBER")){
+				}else if(("TELECOM_NUMBER".equals(cmType))){
 					storeTeleNumber = (String) partyAndContactMech.get("tnContactNumber");
 				}
 			}

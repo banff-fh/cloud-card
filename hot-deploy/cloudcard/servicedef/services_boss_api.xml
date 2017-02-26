@@ -169,7 +169,19 @@
 		<attribute name="isFrozen" type="String" mode="OUT" optional="true"><description>是否冻结 Y/N</description></attribute>
 	</service>
 	
-	
+	<service name="bizGetStoreInfo" engine="java"
+		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizGetStoreInfo" auth="true">
+		<description>B端 查看店铺简要信息接口</description>
+		<attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家Id（自己的商家id）</description></attribute>
+
+		<attribute name="storeId" type="String" mode="INOUT" optional="false"><description>要冻结/解冻的圈友id</description></attribute>
+
+		<attribute name="storeName" type="String" mode="OUT" optional="true"><description>店名</description></attribute>
+		<attribute name="storeImg" type="String" mode="OUT" optional="true"><description>店铺logo图片</description></attribute>
+		<attribute name="storeAddress" type="String" mode="OUT" optional="true"><description>店铺地址</description></attribute>
+		<attribute name="storeTeleNumber" type="String" mode="OUT" optional="true"><description>店铺联系电话</description></attribute>
+		<attribute name="settlementAmount" type="BigDecimal" mode="OUT" optional="true" default-value="0"><description>待结算金额</description></attribute>
+	</service>
 	
 	
 </services>

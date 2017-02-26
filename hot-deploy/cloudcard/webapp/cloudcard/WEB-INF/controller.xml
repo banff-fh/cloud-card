@@ -245,6 +245,22 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 
+	<!-- 商户 我的圈子 接口 -->
+	<request-map uri="bizMyGroup">
+		<security https="false" auth="false"/>
+		<event type="service" invoke="bizMyGroup" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+
+	<!-- 商户 店铺简要信息 接口 -->
+	<request-map uri="bizGetStoreInfo">
+		<security https="false" auth="false"/>
+		<event type="service" invoke="bizGetStoreInfo" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+
 	<!-- 店铺信息 -->
 	<request-map uri="userGetStoreInfo">
 		<security https="false" auth="false"/>
@@ -261,14 +277,6 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 
-	<!-- 商户 我的圈子 接口 -->
-	<request-map uri="bizMyGroup">
-		<security https="false" auth="false"/>
-		<event type="service" invoke="bizMyGroup" />
-		<response name="success" type="request" value="json" />
-		<response name="error" type="request" value="json" />
-	</request-map>
-	
 	<!-- 获取卡接口 -->
 	<request-map uri="getPaymentCard">
 		<security https="false" auth="false"/>

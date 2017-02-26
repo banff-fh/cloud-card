@@ -17,6 +17,7 @@ import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.util.EntityUtil;
+import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
@@ -149,7 +150,7 @@ public class CloudCardBossServices {
         if (!ServiceUtil.isSuccess(checkInputParamRet)) {
             return checkInputParamRet;
         }
-        GenericValue ccStore = (GenericValue) checkInputParamRet.get("ccStore");
+        GenericValue ccStore = (GenericValue) checkInputParamRet.get("store");
 
         // 如果没有传入“圈子名：groupName”这个参数， 则使用 "商家名" + "的圈子" 作为名称
         if (UtilValidate.isEmpty(groupName)) {
@@ -839,6 +840,59 @@ public class CloudCardBossServices {
         return result;
     }
 
+    public static Map<String, Object> bizGetStoreInfo(DispatchContext dctx, Map<String, Object> context) {
+        LocalDispatcher dispatcher = dctx.getDispatcher();
+        Delegator delegator = dispatcher.getDelegator();
+        Locale locale = (Locale) context.get("locale");
+        // GenericValue userLogin = (GenericValue) context.get("userLogin");
+
+        String storeId = (String) context.get("storeId"); // 要查询的店家partyId
+
+        Map<String, Object> checkInputParamRet = checkInputParam(dctx, context);
+        if (ServiceUtil.isError(checkInputParamRet) || ServiceUtil.isFailure(checkInputParamRet)) {
+            return checkInputParamRet;
+        }
+
+        GenericValue store = (GenericValue) checkInputParamRet.get("store");
+
+        // TODO storeImg 暂时使用老的 “从系统配置中获取”的方式，以后直接从partyGroup实体中获取 logoImageUrl
+        // 字段
+        String storeImg = EntityUtilProperties.getPropertyValue("cloudcard", "cardImg." + storeId, delegator);
+        String storeAddress = "";
+        String storeTeleNumber = "";
+
+        List<GenericValue> PartyAndContactMechs = FastList.newInstance();
+        try {
+            PartyAndContactMechs = delegator.findList("PartyAndContactMech", EntityCondition.makeCondition("partyId", storeId), null, null, null, true);
+        } catch (GenericEntityException e) {
+            Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+        }
+
+        if (UtilValidate.isNotEmpty(PartyAndContactMechs)) {
+            for (GenericValue partyAndContactMech : PartyAndContactMechs) {
+                String cmType = partyAndContactMech.getString("contactMechTypeId");
+                if ("POSTAL_ADDRESS".equals(cmType)) {
+                    storeAddress = (String) partyAndContactMech.get("paAddress1");
+                } else if (("TELECOM_NUMBER".equals(cmType))) {
+                    storeTeleNumber = (String) partyAndContactMech.get("tnContactNumber");
+                }
+            }
+        }
+
+        // TODO 待结算金额settlementAmount的计算
+
+        // 返回结果
+        Map<String, Object> result = ServiceUtil.returnSuccess();
+        result.put("storeId", storeId);
+        result.put("storeName", store.getString("groupName"));
+        result.put("storeImg", storeImg);
+        result.put("storeAddress", storeAddress);
+        result.put("storeTeleNumber", storeTeleNumber);
+        result.put("settlementAmount", CloudCardHelper.ZERO);
+        return result;
+    }
+
     /**
      * 参数检查
      * 
@@ -857,26 +911,44 @@ public class CloudCardBossServices {
         String organizationPartyId = (String) context.get("organizationPartyId");
         if (UtilValidate.isNotEmpty(organizationPartyId)) {
             // organizationPartyId 合法性
-            GenericValue ccStore = null;
+            GenericValue organization = null;
             try {
-                ccStore = delegator.findByPrimaryKeyCache("PartyGroup", UtilMisc.toMap("partyId", organizationPartyId));
+                organization = delegator.findByPrimaryKeyCache("PartyGroup", UtilMisc.toMap("partyId", organizationPartyId));
             } catch (GenericEntityException e) {
                 Debug.logError(e.getMessage(), "Problem finding PartyGroup. ", module);
                 return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 
             }
-            if (null == ccStore) {
+            if (null == organization) {
                 Debug.logWarning("商户：" + organizationPartyId + "不存在", module);
                 return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardOrganizationPartyNotFound",
                         UtilMisc.toMap("organizationPartyId", organizationPartyId), locale));
             }
-            result.put("ccStore", ccStore);
+            result.put("organization", organization);
 
             // 数据权限检查: 登录用户是否是本店的管理员
             if (!CloudCardHelper.isManager(delegator, userLogin.getString("partyId"), organizationPartyId)) {
-                Debug.logError("partyId: " + userLogin.getString("partyId") + " 不是商户：" + organizationPartyId + "的管理人员，不能查看圈子信息", module);
+                Debug.logError("partyId: " + userLogin.getString("partyId") + " 不是商户：" + organizationPartyId + "的管理人员，不能操作", module);
                 return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
             }
+        }
+        String storeId = (String) context.get("storeId");
+        if (UtilValidate.isNotEmpty(storeId)) {
+            // storeId 合法性
+            GenericValue store = null;
+            try {
+                store = delegator.findByPrimaryKeyCache("PartyGroup", UtilMisc.toMap("partyId", storeId));
+            } catch (GenericEntityException e) {
+                Debug.logError(e.getMessage(), "Problem finding PartyGroup. ", module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+
+            }
+            if (null == store) {
+                Debug.logWarning("商户：" + storeId + "不存在", module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardOrganizationPartyNotFound",
+                        UtilMisc.toMap("organizationPartyId", storeId), locale));
+            }
+            result.put("store", store);
         }
 
         // 返回结果
