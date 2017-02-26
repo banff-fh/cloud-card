@@ -169,5 +169,14 @@
 		<attribute name="timeEnd" type="String" mode="OUT" optional="true"><description>支付完成时间</description></attribute>
 		<attribute name="tradeState" type="String" mode="OUT" optional="true"><description>交易状态</description></attribute>
 	</service>
+	
+	<service name="editGeoLocation" engine="simple"
+		location="component://party/script/org/ofbiz/party/party/PartySimpleEvents.xml" invoke="editGeoLocation" auth="true">
+		<description>支付宝或微信查询服务</description>
+		<!-- 公共参数 -->
+		<attribute name="lat" type="String" mode="IN" optional="false"><description>纬度</description></attribute>
+		<attribute name="lng" type="String" mode="IN" optional="false"><description>经度</description></attribute>
+		<attribute name="partyId" type="String" mode="IN" optional="false"><description>商家交易流水ID</description></attribute>
+	</service>
 
 </services>

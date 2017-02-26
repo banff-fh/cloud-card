@@ -65,6 +65,8 @@ public class CloudCardCustServices {
 			for(int i = 0 ;i<jsonArray.size();i++){
 				Map<String, Object> storeMap = FastMap.newInstance();
 				storeMap.put("storeName",jsonArray.getJSONObject(i).getObject("storeName",String.class));
+				storeMap.put("address",jsonArray.getJSONObject(i).getObject("address",String.class));
+				storeMap.put("telNum",jsonArray.getJSONObject(i).getObject("telNum",String.class));
 				storeMap.put("storeId",jsonArray.getJSONObject(i).getObject("storeId",String.class) );
 				storeMap.put("isGroupOwner",jsonArray.getJSONObject(i).getObject("isGroupOwner",String.class) );
 				storeMap.put("distance",jsonArray.getJSONObject(i).getObject("distance",String.class) );
