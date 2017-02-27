@@ -147,7 +147,7 @@
 		<!-- [ { partyIdFrom: xxx, fromName: xxx, partyInvitationId: xxx } ] -->
 		<attribute name="invitations" type="List" mode="OUT" optional="true"><description>邀请加入圈子的列表，isJoinGroup为N的前提下，如果某个店家邀请本店加入圈子，则返回此列表</description></attribute>
 
-		<!-- [ { storeName: xxx, storeId: xxx, isGroupOwner: Y/N, storeImg :xxx } ] -->
+		<!-- [ { storeName: xxx, storeId: xxx, isGroupOwner: Y/N, storeImg :xxx, isFrozen: Y/N } ] -->
 		<attribute name="partners" type="List" mode="OUT" optional="true"><description>圈友列表</description></attribute>
 		<attribute name="listSize" type="Integer" mode="OUT" optional="true" default-value="0"><description>圈友列表大小</description></attribute>
 
@@ -181,6 +181,9 @@
 		<attribute name="storeAddress" type="String" mode="OUT" optional="true"><description>店铺地址</description></attribute>
 		<attribute name="storeTeleNumber" type="String" mode="OUT" optional="true"><description>店铺联系电话</description></attribute>
 		<attribute name="settlementAmount" type="BigDecimal" mode="OUT" optional="true" default-value="0"><description>待结算金额</description></attribute>
+		<attribute name="isJoinGroup" type="String" mode="OUT" optional="true"><description>是否已加入圈子</description></attribute>
+		<attribute name="isGroupOwner" type="String" mode="OUT" optional="true"><description>是否为圈主</description></attribute>
+		<attribute name="isFrozen" type="String" mode="OUT" optional="true"><description>是否已冻结的圈友</description></attribute>
 	</service>
 	
 	
