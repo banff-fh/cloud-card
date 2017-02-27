@@ -143,7 +143,7 @@
 		<description>C端扫码消费</description>
 		<attribute name="qrCode" type="String" mode="INOUT" optional="false"><description>商家二维码</description></attribute>
 		<attribute name="storeId" type="String" mode="OUT" optional="false"/>
-		<attribute name="groupName" type="String" mode="OUT" optional="false"/>
+		<attribute name="storeName" type="String" mode="OUT" optional="false"/>
 		<attribute name="cloudCardList" type="List" mode="OUT" optional="false"/>
 	</service>
 </services>

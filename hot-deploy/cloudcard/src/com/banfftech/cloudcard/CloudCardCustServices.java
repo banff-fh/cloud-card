@@ -416,7 +416,7 @@ public class CloudCardCustServices {
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("qrCode", qrCode);
 		result.put("storeId", storeId);
-		result.put("groupName", groupName);
+		result.put("storeName", groupName);
 		result.put("cloudCardList", cloudCardMap.get("cloudCardList"));
 		return result;
 	}
