@@ -399,7 +399,8 @@ public class CloudCardCustServices {
 		}
 
 		String storeId = (String) partyGroup.getString("partyId");
-		
+		String groupName = (String) partyGroup.getString("groupName");
+
 		Map<String,Object> cardMap = FastMap.newInstance();
 		cardMap.put("userLogin", userLogin);
 		cardMap.put("storeId", storeId);
@@ -414,6 +415,8 @@ public class CloudCardCustServices {
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("qrCode", qrCode);
+		result.put("storeId", storeId);
+		result.put("groupName", groupName);
 		result.put("cloudCardList", cloudCardMap.get("cloudCardList"));
 		return result;
 	}
