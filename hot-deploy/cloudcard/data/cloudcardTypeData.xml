@@ -121,5 +121,9 @@
 	<SystemProperty systemResourceId="cloudcard" systemPropertyId="baiduMap.CoordType" systemPropertyValue="3" description="百度地图坐标系"/>
 	<SystemProperty systemResourceId="cloudcard" systemPropertyId="baiduMap.q" systemPropertyValue="" description="百度地图检索关键字"/>
 	
-
+	<!-- 店家地址和联系方式 -->
+	<ContactMechPurposeType contactMechPurposeTypeId="STORE_ADDRESS" description="商家联系地址"/>
+    <ContactMechPurposeType contactMechPurposeTypeId="STORE_TELNUM" description="商家联系电话"/>
+    <ContactMechTypePurpose contactMechPurposeTypeId="STORE_ADDRESS" contactMechTypeId="POSTAL_ADDRESS"/>
+    <ContactMechTypePurpose contactMechPurposeTypeId="STORE_TELNUM" contactMechTypeId="TELECOM_NUMBER"/> 
 </entity-engine-xml>
