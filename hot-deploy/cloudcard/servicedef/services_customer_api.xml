@@ -128,22 +128,22 @@
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="getPaymentCard" auth="true">
 		<description>获取卡接口</description>
 		<attribute name="storeId" type="String" mode="INOUT" optional="false"><description>商家partyId</description></attribute>
-		<attribute name="cloudCardList" type="List" mode="OUT" optional="false"/>
+		<attribute name="cloudCardList" type="List" mode="OUT" optional="false"><description>卡列表</description></attribute>
 	</service>
 	
 	<service name="purchaseCard" engine="java"
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="purchaseCard" auth="true">
 		<description>购买卡</description>
 		<attribute name="storeId" type="String" mode="INOUT" optional="false"><description>商家partyId</description></attribute>
-		<attribute name="cloudCardList" type="List" mode="OUT" optional="false"/>
+		<attribute name="cloudCardList" type="List" mode="OUT" optional="false"><description>卡列表</description></attribute>
 	</service>
 	
 	<service name="userScanCodeConsumption" engine="java"
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="userScanCodeConsumption" auth="true">
 		<description>C端扫码消费</description>
 		<attribute name="qrCode" type="String" mode="INOUT" optional="false"><description>商家二维码</description></attribute>
-		<attribute name="storeId" type="String" mode="OUT" optional="false"/>
-		<attribute name="storeName" type="String" mode="OUT" optional="false"/>
-		<attribute name="cloudCardList" type="List" mode="OUT" optional="false"/>
+		<attribute name="storeId" type="String" mode="OUT" optional="false"><description>商家ID</description></attribute>
+		<attribute name="storeName" type="String" mode="OUT" optional="false"><description>商家名称</description></attribute>
+		<attribute name="cloudCardList" type="List" mode="OUT" optional="false"><description>卡列表</description></attribute>
 	</service>
 </services>
