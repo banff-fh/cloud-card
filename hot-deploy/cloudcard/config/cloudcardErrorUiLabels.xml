@@ -205,9 +205,9 @@
         <value xml:lang="en">partner exists, Can NOT exit </value>
         <value xml:lang="zh">存在其他圈友，圈主不能退出圈子</value>
     </property>
-        <property key="CloudCardNotGroupOwnerCanNotFreezeOthers">
+    <property key="CloudCardNotGroupOwnerCanNotFreezeOthers">
         <value xml:lang="en">You're not the owner of the group, can't freeze/unfreeze this store</value>
-        <value xml:lang="zh">你不是圈主，不能 冻结 或 解冻 这个圈友</value>
+        <value xml:lang="zh">你不是圈主，不能冻结或解冻这个圈友</value>
     </property>
      <property key="CloudCardCanNotFreezeGroupOwner">
         <value xml:lang="en">This store is also the owner of group, can't freeze/unfreeze it </value>
@@ -220,5 +220,13 @@
     <property key="CloudCardNotInTheSameGroup">
         <value xml:lang="en">This store is not in the same group with you store</value>
         <value xml:lang="zh">此店与您的店不在同一个圈子中</value>
+    </property>
+    <property key="CloudCardNotGroupOwnerCanNotDissolveGroup">
+        <value xml:lang="en">You're not the owner of the group, can't dissolve the group</value>
+        <value xml:lang="zh">你不是圈主,不能解散这个圈子</value>
+    </property>
+    <property key="CloudCardMustFreezeAllToDissolve">
+        <value xml:lang="en">Must all partner store in the group is frozen , to dissolve the group</value>
+        <value xml:lang="zh">解散圈子前，必须先冻结所有圈友</value>
     </property>
 </resource>

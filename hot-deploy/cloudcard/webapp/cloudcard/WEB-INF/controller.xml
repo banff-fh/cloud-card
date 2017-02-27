@@ -244,6 +244,14 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
+	
+	<!-- 商户 圈主解散圈子 接口 -->
+	<request-map uri="bizDissolveGroup">
+		<security https="false" auth="false"/>
+		<event type="service" invoke="bizDissolveGroup" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
 
 	<!-- 商户 我的圈子 接口 -->
 	<request-map uri="bizMyGroup">

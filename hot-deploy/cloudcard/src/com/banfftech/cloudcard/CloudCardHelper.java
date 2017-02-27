@@ -765,12 +765,15 @@ public class CloudCardHelper {
      *            店id
      * @param useCache
      *            是否使用缓存
-     * @return GenericValue 圈子与店铺的关系
+     * @return GenericValue 圈子与店铺的关系, 找不到时返回null
      * @throws GenericEntityException
      */
     public static GenericValue getGroupRelationShipByStoreId(Delegator delegator, String storeId, boolean useCache) throws GenericEntityException {
 
         // 查找圈子
+        if (null == storeId) {
+            return null;
+        }
         List<EntityCondition> condList = FastList.newInstance();
         condList.add(EntityCondition.makeCondition("partyIdTo", storeId));
         condList.add(EntityCondition.makeCondition("roleTypeIdFrom", CloudCardConstant.STORE_GROUP_ROLE_TYPE_ID));
@@ -868,7 +871,7 @@ public class CloudCardHelper {
     }
 
     /**
-     * 通过 圈子id 查询圈子与商家的 partyRelationship 列表
+     * 通过 圈子id 查询圈子与商家的 partyRelationship 列表(包括圈主关系)
      * 
      * @param delegator
      * @param groupId
@@ -878,12 +881,26 @@ public class CloudCardHelper {
      */
     public static List<GenericValue> getStoreGroupRelationshipByGroupId(Delegator delegator, String groupId, boolean useCache) throws GenericEntityException {
         // 查找圈子
+        if (null == groupId) {
+            return null;
+        }
         List<EntityCondition> condList = FastList.newInstance();
         condList.add(EntityCondition.makeCondition("partyIdFrom", groupId));
         condList.add(EntityCondition.makeCondition("roleTypeIdFrom", CloudCardConstant.STORE_GROUP_ROLE_TYPE_ID));
         condList.add(EntityCondition.makeCondition("partyRelationshipTypeId", CloudCardConstant.STORE_GROUP_PARTY_RELATION_SHIP_TYPE_ID));
         condList.add(EntityUtil.getFilterByDateExpr());
         return delegator.findList("PartyRelationship", EntityCondition.makeCondition(condList), null, null, null, useCache);
+    }
+    
+    
+    /**
+     * 从 圈子与商家的 partyRelationship 列表 中 筛选出 普通圈友
+     * 
+     * @param allStoreGroupRelationships
+     * @return
+     */
+    public static List<GenericValue> getStoreGroupPartnerRelationships(List<GenericValue> allStoreGroupRelationships) {
+        return EntityUtil.filterByAnd(allStoreGroupRelationships, UtilMisc.toMap("roleTypeIdTo", CloudCardConstant.STORE_GROUP_PARTNER_ROLE_TYPE_ID));
     }
 
     /**
@@ -912,6 +929,54 @@ public class CloudCardHelper {
     public static List<String> getStoreGroupPartnerListByStoreId(Delegator delegator, String storeId, boolean useCache) throws GenericEntityException {
         String groupId = getGroupIdByStoreId(delegator, storeId, useCache);
         return getStoreGroupPartnerIdListByGroupId(delegator, groupId, useCache);
+    }
+
+    /**
+     * 通过圈内任意店id 获取 圈主店 的圈子关系实体
+     * 
+     * @param delegator
+     * @param storeId
+     * @param useCache
+     * @return 圈子关系实体，若没有加入圈子，或没找到圈主的关系，返回null
+     * @throws GenericEntityException
+     */
+    public static GenericValue getGroupOwnerRelByStoreId(Delegator delegator, String storeId, boolean useCache) throws GenericEntityException {
+        GenericValue groupRel = getGroupRelationShipByStoreId(delegator, storeId, useCache);
+        if (isStoreGroupOwnerRelationship(groupRel)) {
+            // 如果自己就是圈主关系，直接返回
+            return groupRel;
+        }
+        String groupId = getGroupIdByRelationship(groupRel);
+        List<GenericValue> storeRelList = getStoreGroupRelationshipByGroupId(delegator, groupId, useCache);
+        if (UtilValidate.isEmpty(storeRelList)) {
+            // 没有加入圈子
+            return null;
+        }
+
+        for (GenericValue gv : storeRelList) {
+            if (isStoreGroupOwnerRelationship(gv)) {
+                return gv;
+            }
+        }
+        return null;
+
+    }
+
+    /**
+     * 通过圈内任意店id 获取 圈主店 的id
+     * 
+     * @param delegator
+     * @param storeId
+     * @param useCache
+     * @return 若没有圈子关系，返回null
+     * @throws GenericEntityException
+     */
+    public static String getGroupOwneIdByStoreId(Delegator delegator, String storeId, boolean useCache) throws GenericEntityException {
+        GenericValue groupOwnerRel = getGroupOwnerRelByStoreId(delegator, storeId, useCache);
+        if (null == groupOwnerRel) {
+            return null;
+        }
+        return groupOwnerRel.getString("partyIdTo");
     }
 
 }

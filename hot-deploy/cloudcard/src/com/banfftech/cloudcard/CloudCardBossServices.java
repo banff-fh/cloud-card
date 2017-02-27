@@ -689,6 +689,79 @@ public class CloudCardBossServices {
     }
 
     /**
+     * B端 圈主解散圈子 接口
+     * 
+     * @param dctx
+     * @param context
+     * @return
+     */
+    public static Map<String, Object> bizDissolveGroup(DispatchContext dctx, Map<String, Object> context) {
+        LocalDispatcher dispatcher = dctx.getDispatcher();
+        Delegator delegator = dispatcher.getDelegator();
+        Locale locale = (Locale) context.get("locale");
+        // GenericValue userLogin = (GenericValue) context.get("userLogin");
+
+        String organizationPartyId = (String) context.get("organizationPartyId"); // 店家partyId
+
+        Map<String, Object> checkInputParamRet = checkInputParam(dctx, context);
+        if (!ServiceUtil.isSuccess(checkInputParamRet)) {
+            return checkInputParamRet;
+        }
+
+        boolean isGroupOwner = false;
+        try {
+            GenericValue myGroupRelationship = CloudCardHelper.getGroupRelationShipByStoreId(delegator, organizationPartyId, true);
+            if (null == myGroupRelationship) {
+                // 如果不存在圈子，直接返回成功
+                Debug.logWarning("This store[" + organizationPartyId + "] is not in a group now! just return success.", module);
+                return ServiceUtil.returnSuccess();
+            }
+            isGroupOwner = CloudCardHelper.isStoreGroupOwnerRelationship(myGroupRelationship);
+
+            if (!isGroupOwner) {
+                // 不是圈主，没权解散圈子，返回失败
+                Debug.logWarning("This store[" + organizationPartyId + "] is not the owner of group, can not dissolve the group", module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardNotGroupOwnerCanNotDissolveGroup", locale));
+            }
+
+            String myGroupId = CloudCardHelper.getGroupIdByRelationship(myGroupRelationship);
+            List<GenericValue> storeRelList = CloudCardHelper.getStoreGroupRelationshipByGroupId(delegator, myGroupId, false);
+            List<GenericValue> onlyPartnerRelList = CloudCardHelper.getStoreGroupPartnerRelationships(storeRelList);
+
+            if (UtilValidate.isEmpty(onlyPartnerRelList)) {
+                // 找不到列表 直接返回成功
+                Debug.logWarning("This store[" + organizationPartyId + "] is not in a group now! just return success.", module);
+                return ServiceUtil.returnSuccess();
+            }
+
+            // 查找圈友中是否存在未冻结
+            for (GenericValue gv : onlyPartnerRelList) {
+                if (!CloudCardHelper.isFrozenGroupRelationship(gv)) {
+                    // 有没有冻结的，不能解散
+                    Debug.logWarning("Store[" + gv.getString("partyIdTo") + "] is Not frozen store in a group,can not dissolve the group! ", module);
+                    return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardMustFreezeAllToDissolve", locale));
+                }
+            }
+
+            // TODO 检查是否有未结算的， 有则不能解散
+
+            // 正式进行解散操作(让关系过期)
+            for (GenericValue gv : storeRelList) {
+                gv.set("thruDate", UtilDateTime.nowTimestamp());
+            }
+            delegator.storeAll(storeRelList);
+
+        } catch (GenericEntityException e) {
+            Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+        }
+
+        // 返回成功
+        Map<String, Object> result = ServiceUtil.returnSuccess();
+        return result;
+    }
+
+    /**
      * 我的圈子
      * 
      * @param dctx
