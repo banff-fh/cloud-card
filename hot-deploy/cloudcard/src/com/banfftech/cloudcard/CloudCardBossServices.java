@@ -186,7 +186,7 @@ public class CloudCardBossServices {
             GenericValue systemUser = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
             // 创建 “圈子”
             createPartyGroupOutMap = dispatcher.runSync("createPartyGroup", UtilMisc.toMap("locale", locale, "userLogin", systemUser, "groupName", groupName));
-            if (ServiceUtil.isError(createPartyGroupOutMap) || ServiceUtil.isFailure(createPartyGroupOutMap)) {
+            if (!ServiceUtil.isSuccess(createPartyGroupOutMap)) {
                 return createPartyGroupOutMap;
             }
 
@@ -254,7 +254,7 @@ public class CloudCardBossServices {
         String teleNumber = (String) context.get("teleNumber"); // 需要邀请的店主电话
 
         Map<String, Object> checkInputParamRet = checkInputParam(dctx, context);
-        if (ServiceUtil.isError(checkInputParamRet) || ServiceUtil.isFailure(checkInputParamRet)) {
+        if (!ServiceUtil.isSuccess(checkInputParamRet)) {
             return checkInputParamRet;
         }
 
@@ -390,7 +390,7 @@ public class CloudCardBossServices {
         boolean isAccept = !CloudCardConstant.IS_N.equalsIgnoreCase(isAcceptYN);
 
         Map<String, Object> checkInputParamRet = checkInputParam(dctx, context);
-        if (ServiceUtil.isError(checkInputParamRet) || ServiceUtil.isFailure(checkInputParamRet)) {
+        if (!ServiceUtil.isSuccess(checkInputParamRet)) {
             return checkInputParamRet;
         }
 
@@ -522,7 +522,7 @@ public class CloudCardBossServices {
         }
 
         Map<String, Object> checkInputParamRet = checkInputParam(dctx, context);
-        if (ServiceUtil.isError(checkInputParamRet) || ServiceUtil.isFailure(checkInputParamRet)) {
+        if (!ServiceUtil.isSuccess(checkInputParamRet)) {
             return checkInputParamRet;
         }
 
@@ -709,7 +709,7 @@ public class CloudCardBossServices {
         Map<String, Object> result = ServiceUtil.returnSuccess();
 
         Map<String, Object> checkInputParamRet = checkInputParam(dctx, context);
-        if (ServiceUtil.isError(checkInputParamRet) || ServiceUtil.isFailure(checkInputParamRet)) {
+        if (!ServiceUtil.isSuccess(checkInputParamRet)) {
             return checkInputParamRet;
         }
 
@@ -849,7 +849,7 @@ public class CloudCardBossServices {
         String storeId = (String) context.get("storeId"); // 要查询的店家partyId
 
         Map<String, Object> checkInputParamRet = checkInputParam(dctx, context);
-        if (ServiceUtil.isError(checkInputParamRet) || ServiceUtil.isFailure(checkInputParamRet)) {
+        if (!ServiceUtil.isSuccess(checkInputParamRet)) {
             return checkInputParamRet;
         }
 
