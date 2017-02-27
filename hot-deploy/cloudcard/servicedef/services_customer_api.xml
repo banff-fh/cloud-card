@@ -19,7 +19,7 @@
 		<description>查询用户卡列表</description>
 		<attribute name="viewIndex" type="Integer" mode="IN" optional="true" default-value="0"/>
 		<attribute name="viewSize" type="Integer" mode="IN" optional="true" default-value="20"/>
-		<attribute name="storedId" type="String" mode="IN" optional="true"/>
+		<attribute name="storeId" type="String" mode="IN" optional="true"/>
 		<attribute name="cloudCardList" type="List" mode="OUT" optional="false"/>
 		<attribute name="listSize" type="Integer" mode="OUT" optional="false"/>
 	</service>
@@ -118,7 +118,7 @@
 	
 	<service name="userGetGroupInfo" engine="java"
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="userGetGroupInfo" auth="true">
-		<description>查看店铺简要信息</description>
+		<description>查看圈子简要信息</description>
 		<attribute name="storeId" type="String" mode="INOUT" optional="false"><description>商家partyId</description></attribute>
 		<attribute name="groupName" type="String" mode="OUT" optional="true"><description>店名</description></attribute>
 		<attribute name="storeList" type="List" mode="OUT" optional="true"><description>店铺详细信息</description></attribute>
@@ -128,6 +128,20 @@
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="getPaymentCard" auth="true">
 		<description>获取卡接口</description>
 		<attribute name="storeId" type="String" mode="INOUT" optional="false"><description>商家partyId</description></attribute>
+		<attribute name="cloudCardList" type="List" mode="OUT" optional="false"/>
+	</service>
+	
+	<service name="purchaseCard" engine="java"
+		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="purchaseCard" auth="true">
+		<description>购买卡</description>
+		<attribute name="storeId" type="String" mode="INOUT" optional="false"><description>商家partyId</description></attribute>
+		<attribute name="cloudCardList" type="List" mode="OUT" optional="false"/>
+	</service>
+	
+	<service name="userScanCodeConsumption" engine="java"
+		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="userScanCodeConsumption" auth="true">
+		<description>C端扫码消费</description>
+		<attribute name="qrCode" type="String" mode="INOUT" optional="false"><description>商家二维码</description></attribute>
 		<attribute name="cloudCardList" type="List" mode="OUT" optional="false"/>
 	</service>
 </services>

@@ -371,4 +371,51 @@ public class CloudCardCustServices {
 		result.put("cloudCardList", cloudCardList);
 		return result;
 	}
+	
+	/**
+	 * C端扫码消费
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> userScanCodeConsumption(DispatchContext dctx, Map<String, Object> context) {
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dctx.getDelegator();
+		GenericValue userLogin = (GenericValue) context.get("userLogin");
+		Locale locale = (Locale) context.get("locale");
+		//获取店铺二维码
+		String qrCode = (String) context.get("qrCode");
+		GenericValue partyGroup = null;
+		try {
+			partyGroup = CloudCardHelper.getPartyGroupByQRcode(qrCode, delegator);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+
+		if(null == partyGroup){
+			Debug.logWarning("商户qrCode:" + qrCode + "不存在", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardOrganizationPartyNotFound", locale));
+		}
+
+		String storeId = (String) partyGroup.getString("partyId");
+		
+		Map<String,Object> cardMap = FastMap.newInstance();
+		cardMap.put("userLogin", userLogin);
+		cardMap.put("storeId", storeId);
+		Map<String,Object> cloudCardMap = FastMap.newInstance();
+		try {
+			cloudCardMap = dispatcher.runSync("getPaymentCard", cardMap);
+		} catch (GenericServiceException e) {
+			 Debug.logError(e.getMessage(), module);
+	         return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		// 返回结果
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("qrCode", qrCode);
+		result.put("cloudCardList", cloudCardMap.get("cloudCardList"));
+		return result;
+	}
+	
 }

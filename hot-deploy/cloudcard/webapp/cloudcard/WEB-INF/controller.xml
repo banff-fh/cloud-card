@@ -380,6 +380,15 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
+	
+	<!-- 用户扫码消费 -->
+	<request-map uri="userScanCodeConsumption">
+		<!--<security https="true" auth="false" />-->
+		<event type="service" invoke="userScanCodeConsumption" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
 
 	<!-- View Mappings -->
 	<view-map name="main" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#main" />
