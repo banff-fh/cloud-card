@@ -269,6 +269,41 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 
+	<!-- 商户 圈主发起结算 接口 -->
+	<request-map uri="bizDoSettlement">
+		<security https="false" auth="false"/>
+		<event type="service" invoke="bizDoSettlement" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+
+	<!-- 商户 圈友确认结算 接口 -->
+	<request-map uri="bizSettlementConfirm">
+		<security https="false" auth="false"/>
+		<event type="service" invoke="bizSettlementConfirm" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+
+	<!-- 商户 获取待确认结算信息 接口 -->
+	<request-map uri="bizGetUnconfirmedSettlementInfo">
+		<security https="false" auth="false"/>
+		<event type="service" invoke="bizGetUnconfirmedSettlementInfo" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+
+	<!-- 商户 催款，提醒圈主进行结算 接口 -->
+	<request-map uri="bizSettlementRequest">
+		<security https="false" auth="false"/>
+		<event type="service" invoke="bizSettlementRequest" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+
+
+
+
 	<!-- 店铺信息 -->
 	<request-map uri="userGetStoreInfo">
 		<security https="false" auth="false"/>

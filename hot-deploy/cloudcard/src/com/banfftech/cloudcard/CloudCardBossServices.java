@@ -996,6 +996,160 @@ public class CloudCardBossServices {
         return result;
     }
 
+
+    /**
+     * TODO
+     * <pre>
+         <service name="bizDoSettlement" engine="java"
+            location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizDoSettlement" auth="true">
+            <description>B端 圈主发起结算接口，需要等待圈友确认结算后，才会真正结算</description>
+            <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家Id（自己的商家id）</description></attribute>
+            <attribute name="storeId" type="String" mode="IN" optional="false"><description>要结算的圈友id</description></attribute>
+            <attribute name="settlementAmount" type="BigDecimal" mode="INOUT" optional="true" default-value="0"><description>待结算金额</description></attribute>
+            <attribute name="actualSettlementAmount" type="BigDecimal" mode="INOUT" optional="true" default-value="0"><description>实际结算金额，本次结算店家线下实际支付的结算金额</description></attribute>
+
+            <attribute name="settlementId" type="String" mode="OUT" optional="true"><description>结算id</description></attribute>
+        </service>
+     * </pre>
+     * 
+     * @param dctx
+     * @param context
+     * @return
+     */
+    public static Map<String, Object> bizDoSettlement(DispatchContext dctx, Map<String, Object> context) {
+        LocalDispatcher dispatcher = dctx.getDispatcher();
+        Delegator delegator = dispatcher.getDelegator();
+        Locale locale = (Locale) context.get("locale");
+        // GenericValue userLogin = (GenericValue) context.get("userLogin");
+
+        String storeId = (String) context.get("storeId"); // 要查询的店家partyId
+
+        Map<String, Object> checkInputParamRet = checkInputParam(dctx, context);
+        if (!ServiceUtil.isSuccess(checkInputParamRet)) {
+            return checkInputParamRet;
+        }
+
+        // 返回结果
+        Map<String, Object> result = ServiceUtil.returnSuccess();
+        result.put("settlementId", "xxxxxx");
+        return result;
+    }
+    
+    
+    
+    /**
+     * TODO
+     * <pre>
+          <service name="bizSettlementConfirm" engine="java"
+                location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizSettlementConfirm" auth="true">
+                <description>B端 圈友确认/拒绝结算</description>
+                <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家Id（自己的商家id）</description></attribute>
+                <attribute name="settlementId" type="String" mode="INOUT" optional="false"><description>圈主发起的结算id</description></attribute>
+                <attribute name="isConfirm" type="String" mode="INOUT" optional="true" default-value="Y"><description>是否确认 Y/N</description></attribute>
+                <attribute name="settlementAmount" type="BigDecimal" mode="OUT" optional="true" default-value="0"><description>待结算金额</description></attribute>
+                <attribute name="actualSettlementAmount" type="BigDecimal" mode="OUT" optional="true" default-value="0"><description>实际结算金额，本次结算店家线下实际支付的结算金额</description></attribute>
+         </service>
+     * </pre>
+     * 
+     * 
+     * @param dctx
+     * @param context
+     * @return
+     */
+    public static Map<String, Object> bizSettlementConfirm(DispatchContext dctx, Map<String, Object> context) {
+        LocalDispatcher dispatcher = dctx.getDispatcher();
+        Delegator delegator = dispatcher.getDelegator();
+        Locale locale = (Locale) context.get("locale");
+        // GenericValue userLogin = (GenericValue) context.get("userLogin");
+
+        String settlementId = (String) context.get("settlementId");
+        String isConfirm = (String) context.get("isConfirm");
+
+        Map<String, Object> checkInputParamRet = checkInputParam(dctx, context);
+        if (!ServiceUtil.isSuccess(checkInputParamRet)) {
+            return checkInputParamRet;
+        }
+
+        // 返回结果
+        Map<String, Object> result = ServiceUtil.returnSuccess();
+        result.put("settlementId", settlementId);
+        result.put("isConfirm", isConfirm);
+        result.put("settlementAmount", CloudCardHelper.ZERO);
+        result.put("actualSettlementAmount", CloudCardHelper.ZERO);
+        return result;
+    }
+    
+    /**
+     * TODO
+     * <pre>
+        <service name="bizGetUnconfirmedSettlementInfo" engine="java"
+            location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizSettlementConfirm" auth="true">
+            <description>B端 获取待确认结算信息</description>
+            <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家Id（自己的商家id）</description></attribute>
+            <attribute name="storeId" type="String" mode="IN" optional="true"><description>结算的圈友partyId，圈主发起查询时，需要传入</description></attribute>
+            
+            <attribute name="settlementId" type="String" mode="OUT" optional="true"><description>还未确认的结算id</description></attribute>
+            <attribute name="settlementAmount" type="BigDecimal" mode="OUT" optional="true" default-value="0"><description>待结算金额</description></attribute>
+            <attribute name="actualSettlementAmount" type="BigDecimal" mode="OUT" optional="true" default-value="0"><description>实际结算金额，本次结算店家线下实际支付的结算金额</description></attribute>
+        </service>
+     * </pre>
+     * @param dctx
+     * @param context
+     * @return
+     */
+    public static Map<String, Object> bizGetUnconfirmedSettlementInfo(DispatchContext dctx, Map<String, Object> context) {
+        LocalDispatcher dispatcher = dctx.getDispatcher();
+        Delegator delegator = dispatcher.getDelegator();
+        Locale locale = (Locale) context.get("locale");
+        // GenericValue userLogin = (GenericValue) context.get("userLogin");
+
+        String settlementId = (String) context.get("settlementId");
+
+        Map<String, Object> checkInputParamRet = checkInputParam(dctx, context);
+        if (!ServiceUtil.isSuccess(checkInputParamRet)) {
+            return checkInputParamRet;
+        }
+
+        // 返回结果
+        Map<String, Object> result = ServiceUtil.returnSuccess();
+        result.put("settlementId", settlementId);
+        result.put("settlementAmount", CloudCardHelper.ZERO);
+        result.put("actualSettlementAmount", CloudCardHelper.ZERO);
+        return result;
+    }
+    
+    
+    /**
+     * TODO
+     * <pre>
+          <service name="bizSettlementRequest" engine="java"
+            location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizSettlementRequest" auth="true">
+            <description>B端 催款，提醒圈主进行结算</description>
+            <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家Id（自己的商家id）</description></attribute>
+          </service>
+     * </pre>
+     * @param dctx
+     * @param context
+     * @return
+     */
+    public static Map<String, Object> bizSettlementRequest(DispatchContext dctx, Map<String, Object> context) {
+        LocalDispatcher dispatcher = dctx.getDispatcher();
+        Delegator delegator = dispatcher.getDelegator();
+        Locale locale = (Locale) context.get("locale");
+        // GenericValue userLogin = (GenericValue) context.get("userLogin");
+
+        Map<String, Object> checkInputParamRet = checkInputParam(dctx, context);
+        if (!ServiceUtil.isSuccess(checkInputParamRet)) {
+            return checkInputParamRet;
+        }
+
+        // 返回结果
+        Map<String, Object> result = ServiceUtil.returnSuccess();
+        return result;
+    }
+    
+    
+    
     /**
      * 参数检查
      * 
