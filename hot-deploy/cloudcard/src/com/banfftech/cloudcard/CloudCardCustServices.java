@@ -318,7 +318,7 @@ public class CloudCardCustServices {
 		Map<String,Object> cardMap = FastMap.newInstance();
 		cardMap.put("userLogin", userLogin);
 		Map<String,Object> cloudCardMap = FastMap.newInstance();
-		List<Object> cloudCardList = FastList.newInstance();
+		List<Object> cloudCardList = null;
 		try {
 			cloudCardMap = dispatcher.runSync("myCloudCards", cardMap);
 		} catch (GenericServiceException e) {
@@ -327,7 +327,11 @@ public class CloudCardCustServices {
 		}
 		
 		if(UtilValidate.isNotEmpty(cloudCardMap)){
-			cloudCardList.add(cloudCardMap.get("cloudCardList"));
+			if(UtilValidate.isNotEmpty(cloudCardList)){
+				cloudCardList.add(cloudCardMap.get("cloudCardList").toString());
+			}else{
+				cloudCardList = (List<Object>) cloudCardMap.get("cloudCardList");
+			}
 		}
 		
 		//查找用户在圈主购买的卡
@@ -360,7 +364,11 @@ public class CloudCardCustServices {
 			}
 			
 			if(UtilValidate.isNotEmpty(cloudCardMap)){
-				cloudCardList.add(cloudCardMap.get("cloudCardList"));
+				if(UtilValidate.isNotEmpty(cloudCardList)){
+					cloudCardList.add(cloudCardMap.get("cloudCardList").toString());
+				}else{
+					cloudCardList = (List<Object>) cloudCardMap.get("cloudCardList");
+				}
 			}
 		}
 		
@@ -421,4 +429,16 @@ public class CloudCardCustServices {
 		return result;
 	}
 	
+	/**
+	 * C端购卡
+	 * 
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> purchaseCard(DispatchContext dctx, Map<String, Object> context) {
+		// 返回结果
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		return result;
+	}
 }
