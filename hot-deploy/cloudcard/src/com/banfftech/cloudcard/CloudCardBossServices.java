@@ -82,7 +82,7 @@ public class CloudCardBossServices {
             // TODO 目前一个B端用户只关联一家店铺，故需要检查 申请用的号码 是否已经是一个店长了。
             GenericValue userByTeleNumber = CloudCardHelper.getUserByTeleNumber(delegator, teleNumber);
             if (null != userByTeleNumber) {
-                List<String> organizationPartyIds = CloudCardHelper.getOrganizationPartyId(delegator, (String) userByTeleNumber.get("partyId"));
+                List<String> organizationPartyIds = CloudCardHelper.getOrganizationPartyId(delegator, userByTeleNumber.getString("partyId"));
                 if (UtilValidate.isNotEmpty(organizationPartyIds)) {
                     Debug.logWarning("teleNumber[" + teleNumber + "] has been associated with a store owner", module);
                     return ServiceUtil
@@ -666,7 +666,7 @@ public class CloudCardBossServices {
             }
 
             String statusId = storeGroupRelationship.getString("statusId");
-            if (CloudCardConstant.SG_REL_STATUS_FROZEN.equals(statusId)) {
+            if (CloudCardHelper.isFrozenGroupRelationship(storeGroupRelationship)) {
                 statusId = CloudCardConstant.SG_REL_STATUS_ACTIVE;
                 isFrozen = false;
             } else {
@@ -800,6 +800,7 @@ public class CloudCardBossServices {
 
             List<GenericValue> groupMemberRelationsList = UtilGenerics.checkList(performFindListOut.get("list"));
             if (UtilValidate.isNotEmpty(groupMemberRelationsList)) {
+
                 List<Map<String, String>> partners = FastList.newInstance();
                 for (GenericValue gv : groupMemberRelationsList) {
                     String storeId = gv.getString("partyIdTo");
@@ -808,12 +809,14 @@ public class CloudCardBossServices {
                     Map<String, String> tmpMap = UtilMisc.toMap("storeId", storeId, "storeName", store.getString("groupName"));
                     tmpMap.put("storeImg", store.getString("logoImageUrl"));
                     tmpMap.put("isGroupOwner", tmpIsOwner ? CloudCardConstant.IS_Y : CloudCardConstant.IS_N);
+                    tmpMap.put("isFrozen", CloudCardHelper.isFrozenGroupRelationship(gv) ? CloudCardConstant.IS_Y : CloudCardConstant.IS_N);
                     if (tmpIsOwner) {
                         partners.add(0, tmpMap);
                     } else {
                         partners.add(tmpMap);
                     }
                 }
+
                 result.put("partners", partners);
             }
         } catch (GenericServiceException | GenericEntityException e) {
@@ -823,12 +826,12 @@ public class CloudCardBossServices {
 
         // TODO 圈主 需要查询一些 圈子相关的金额信息
         if (isGroupOwner) {
-            result.put("crossStoreAmount", CloudCardHelper.ZERO); // 跨店消费额，圈主卡 到
-                                                                  // 圈友店 消费总额，
-            result.put("presellAmount", CloudCardHelper.ZERO); // 已卖卡总额，圈主卖出的卡总金额，
-            result.put("totalConsumptionAmount", CloudCardHelper.ZERO); // 已消费总额，圈主本店消费
-                                                                        // +
-                                                                        // 到圈友店里跨店消费，
+            // 跨店消费额，圈主卡 到 圈友店 消费总额，
+            result.put("crossStoreAmount", CloudCardHelper.ZERO);
+            // 已卖卡总额，圈主卖出的卡总金额，
+            result.put("presellAmount", CloudCardHelper.ZERO);
+            // 已消费总额，圈主本店消费 + 到圈友店里跨店消费，
+            result.put("totalConsumptionAmount", CloudCardHelper.ZERO);
             result.put("balance", CloudCardHelper.ZERO); // 剩余额度，剩余卖卡额度
             result.put("income", CloudCardHelper.ZERO); // 收益总额，因为跨店消费的圈主给圈友的打折而产生的收益总额，
         }
@@ -840,6 +843,13 @@ public class CloudCardBossServices {
         return result;
     }
 
+    /**
+     * B端 查看店铺简要信息 接口
+     * 
+     * @param dctx
+     * @param context
+     * @return
+     */
     public static Map<String, Object> bizGetStoreInfo(DispatchContext dctx, Map<String, Object> context) {
         LocalDispatcher dispatcher = dctx.getDispatcher();
         Delegator delegator = dispatcher.getDelegator();
@@ -855,8 +865,8 @@ public class CloudCardBossServices {
 
         GenericValue store = (GenericValue) checkInputParamRet.get("store");
 
-        // TODO storeImg 暂时使用老的 “从系统配置中获取”的方式，以后直接从partyGroup实体中获取 logoImageUrl
-        // 字段
+        // TODO storeImg 暂时使用老的 “从系统配置中获取”的方式，
+        // 以后直接从partyGroup实体中获取 logoImageUrl 字段
         String storeImg = EntityUtilProperties.getPropertyValue("cloudcard", "cardImg." + storeId, delegator);
         String storeAddress = "";
         String storeTeleNumber = "";
@@ -880,6 +890,23 @@ public class CloudCardBossServices {
             }
         }
 
+        // 圈子相关
+        String isJoinGroup = CloudCardConstant.IS_N;
+        String isGroupOwner = CloudCardConstant.IS_N;
+        String isFrozen = CloudCardConstant.IS_N;
+        try {
+            GenericValue partyRelationship = CloudCardHelper.getGroupRelationShipByStoreId(delegator, storeId, false);
+            if (null != partyRelationship) {
+                isJoinGroup = CloudCardConstant.IS_Y;
+                isGroupOwner = CloudCardHelper.isStoreGroupOwnerRelationship(partyRelationship) ? CloudCardConstant.IS_Y : CloudCardConstant.IS_N;
+                isFrozen = CloudCardHelper.isFrozenGroupRelationship(partyRelationship) ? CloudCardConstant.IS_Y : CloudCardConstant.IS_N;
+            }
+        } catch (GenericEntityException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        ;
         // TODO 待结算金额settlementAmount的计算
 
         // 返回结果
@@ -890,6 +917,9 @@ public class CloudCardBossServices {
         result.put("storeAddress", storeAddress);
         result.put("storeTeleNumber", storeTeleNumber);
         result.put("settlementAmount", CloudCardHelper.ZERO);
+        result.put("isJoinGroup", isJoinGroup);
+        result.put("isGroupOwner", isGroupOwner);
+        result.put("isFrozen", isFrozen);
         return result;
     }
 

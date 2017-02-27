@@ -804,6 +804,16 @@ public class CloudCardHelper {
     }
 
     /**
+     * 判断传入的 圈子关系 partyRelationship 是否为冻结状态
+     * 
+     * @param partyRelationship
+     * @return
+     */
+    public static boolean isFrozenGroupRelationship(GenericValue partyRelationship) {
+        return partyRelationship != null && CloudCardConstant.SG_REL_STATUS_FROZEN.equals(partyRelationship.getString("statusId"));
+    }
+
+    /**
      * 从传入的 partyRelationship 实体获取 圈子的groupId
      * 
      * @param partyRelationship
