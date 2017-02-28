@@ -46,6 +46,10 @@ public class CloudCardLogFilter implements Filter {
             // This was removed for security reason
         	token = (String) inputMap.remove("token");
         }
+        if(inputMap.containsKey("PASSWORD")){
+            // This was removed for security reason
+            token = (String) inputMap.remove("PASSWORD");
+        }
 
         if (Debug.infoOn()) {
 			StringBuilder logsb = new StringBuilder(500);
