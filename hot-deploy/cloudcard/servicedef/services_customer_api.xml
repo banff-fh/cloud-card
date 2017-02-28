@@ -129,8 +129,18 @@
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="purchaseCard" auth="true">
 		<description>购买卡</description>
 		<attribute name="storeId" type="String" mode="INOUT" optional="false"><description>商家partyId</description></attribute>
-		<attribute name="cloudCardList" type="List" mode="OUT" optional="false"><description>卡列表</description></attribute>
-	</service>
+		<attribute name="paymentType" type="String" mode="IN" optional="false"><description>支付类型</description></attribute>
+		<attribute name="totalFee" type="String" mode="IN" optional="false"><description>金额</description></attribute>
+		<!-- 微信返回结果 -->
+		<attribute name="appid" type="String" mode="OUT" optional="true"><description>商户ID</description></attribute>
+		<attribute name="partnerid" type="String" mode="OUT" optional="true"><description>合作ID</description></attribute>
+		<attribute name="prepayid" type="String" mode="OUT" optional="true"><description>预付ID</description></attribute>
+		<attribute name="package" type="String" mode="OUT" optional="true"><description>报名</description></attribute>
+		<attribute name="noncestr" type="String" mode="OUT" optional="true"><description>随机数</description></attribute>
+		<attribute name="timestamp" type="String" mode="OUT" optional="true"><description>时间</description></attribute>
+		<attribute name="sign" type="String" mode="OUT" optional="true"><description>签名</description></attribute>
+		<!-- 支付宝返回结果 -->
+		<attribute name="payInfo" type="String" mode="OUT" optional="true"><description>签名</description></attribute>	</service>
 	
 	<service name="userScanCodeGetCardAndStoreInfo" engine="java"
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="userScanCodeGetCardAndStoreInfo" auth="true">

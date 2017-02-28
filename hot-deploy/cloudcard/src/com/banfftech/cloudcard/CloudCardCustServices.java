@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
@@ -395,8 +396,91 @@ public class CloudCardCustServices {
 	 * @return
 	 */
 	public static Map<String, Object> purchaseCard(DispatchContext dctx, Map<String, Object> context) {
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+		
+		GenericValue userLogin = (GenericValue) context.get("userLogin");
+		String paymentType = (String) context.get("paymentType");
+		String storeId = (String) context.get("storeId");
+		String totalFee = (String) context.get("totalFee");
+
+		
+		// 传入的organizationPartyId必须是一个存在的partyGroup
+		GenericValue partyGroup;
+		try {
+			partyGroup = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", storeId));
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		if(null == partyGroup ){
+			Debug.logWarning("商户："+storeId + "不存在", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, 
+					"CloudCardOrganizationPartyNotFound", UtilMisc.toMap("organizationPartyId", storeId), locale));
+		}
+		
+		//生成的卡号
+		String newCardCode = null;
+		try {
+			newCardCode = CloudCardHelper.generateCloudCardCode(delegator);
+			String finAccountId = delegator.getNextSeqId("FinAccount");
+			Map<String, Object> finAccountMap = FastMap.newInstance();
+			finAccountMap.put("finAccountId", finAccountId);
+			finAccountMap.put("finAccountTypeId", "GIFTCERT_ACCOUNT");
+			finAccountMap.put("statusId", "FNACT_PUBLISHED");
+			finAccountMap.put("finAccountName", partyGroup.getString("groupName")+"库胖卡");
+			finAccountMap.put("finAccountCode", newCardCode);
+			finAccountMap.put("organizationPartyId", "Company");
+			finAccountMap.put("ownerPartyId", "_NA_");
+			finAccountMap.put("currencyUomId", "CNY");
+			finAccountMap.put("postToGlAccountId", "213200");
+			finAccountMap.put("isRefundable", "Y");
+			
+			//保存finaccount数据
+			GenericValue finAccount = delegator.makeValue("FinAccount", finAccountMap);
+			finAccount.create();
+			
+			//保存finaccountRole数据
+			GenericValue finAccountRole = delegator.makeValue("FinAccountRole", UtilMisc.toMap( "finAccountId", finAccountId, "partyId", storeId, "roleTypeId", "DISTRIBUTOR","fromDate", UtilDateTime.nowTimestamp()));
+			finAccountRole.create();
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardGenCardNumberError", locale));
+		}
+		
+		//预下单
+		Map<String,Object> uniformOrderMap = null;
+		try {
+			Map<String,Object> initMap = FastMap.newInstance();
+			initMap.put("userLogin", userLogin);
+			initMap.put("cardId", newCardCode);
+			initMap.put("paymentType", paymentType);
+			initMap.put("body", "买卡");
+			initMap.put("totalFee", totalFee);
+			if("aliPay".equals(paymentType)){
+				initMap.put("subject", totalFee);
+			}else if("wxPay".equals(paymentType)){
+				initMap.put("tradeType", totalFee);
+			}
+			uniformOrderMap = dispatcher.runSync("uniformOrder", initMap);
+		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
+		if("aliPay".equals(paymentType)){
+			result.put("payInfo", uniformOrderMap.get("payInfo"));
+		}else if("wxPay".equals(paymentType)){
+			result.put("appid", uniformOrderMap.get("wxAppID"));
+			result.put("noncestr", uniformOrderMap.get("noncestr"));
+			result.put("partnerid", uniformOrderMap.get("wxPartnerid"));
+			result.put("package", "Sign=WXPay");
+			result.put("prepayid", uniformOrderMap.get("prepayid"));
+			result.put("timestamp", uniformOrderMap.get("timestamp"));
+			result.put("sign",uniformOrderMap.get("sign"));
+		}
 		return result;
 	}
 	
