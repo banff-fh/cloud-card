@@ -381,12 +381,12 @@ public class CloudCardCustServices {
 	}
 	
 	/**
-	 * C端扫码消费
+	 * C端扫码获取商户信息和卡列表
 	 * @param dctx
 	 * @param context
 	 * @return
 	 */
-	public static Map<String, Object> userScanCodeConsumption(DispatchContext dctx, Map<String, Object> context) {
+	public static Map<String, Object> userScanCodeGetCardAndStoreInfo(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dctx.getDelegator();
 		GenericValue userLogin = (GenericValue) context.get("userLogin");
@@ -426,6 +426,51 @@ public class CloudCardCustServices {
 		result.put("storeId", storeId);
 		result.put("storeName", groupName);
 		result.put("cloudCardList", cloudCardMap.get("cloudCardList"));
+		return result;
+	}
+	
+	/**
+	 * C端选卡获取商户信息
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> getStoreInfoBycardCode(DispatchContext dctx, Map<String, Object> context) {
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dctx.getDelegator();
+		GenericValue userLogin = (GenericValue) context.get("userLogin");
+		Locale locale = (Locale) context.get("locale");
+		
+		String cardCode = (String) context.get("cardCode");
+		String storeId = null;
+		String groupName = null;
+		
+		GenericValue encryptedGiftCard = delegator.makeValue("FinAccount", UtilMisc.toMap("finAccountCode", cardCode));
+		try {
+			delegator.encryptFields(encryptedGiftCard);
+		} catch (GenericEntityException e1) {
+			Debug.logError(e1.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,
+					"CloudCardInternalServiceError", locale));
+		}
+		
+		List<GenericValue> cloudCardInfos = null;
+		try {
+			cloudCardInfos = delegator.findList("CloudCardInfo", EntityCondition.makeCondition("finAccountCode", encryptedGiftCard.getString("finAccountCode")), null, null, null, false);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+	        return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		if(UtilValidate.isNotEmpty(cloudCardInfos)){
+			storeId = cloudCardInfos.get(0).getString("distributorPartyId");
+			groupName =  cloudCardInfos.get(0).getString("distributorPartyName");
+		}
+		// 返回结果
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("cardCode", cardCode);
+		result.put("storeId", storeId);
+		result.put("storeName", groupName);
 		return result;
 	}
 	
