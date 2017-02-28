@@ -18,7 +18,6 @@ import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilFormatOut;
-import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
@@ -28,6 +27,7 @@ import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityOperator;
+import org.ofbiz.entity.util.EntityFindOptions;
 import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.entity.util.EntityUtilProperties;
@@ -54,43 +54,59 @@ public class CloudCardQueryServices {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
+		
 		GenericValue userLogin = (GenericValue) context.get("userLogin");
 		String partyId = (String) userLogin.get("partyId");
-		String ownerPartyId = (String) context.get("storeId");
+		String storeId = (String) context.get("storeId");
+		
 		Integer viewIndex = (Integer) context.get("viewIndex");
 		Integer viewSize = (Integer) context.get("viewSize");
+        viewIndex = (viewIndex == null || viewIndex < 0) ? 0 : viewIndex;
+        viewSize = (viewSize == null || viewSize == 0) ? 20 : viewSize;
 
-		Map<String, Object> inputFieldMap = FastMap.newInstance();
-		inputFieldMap.put("partyId", partyId);
-		inputFieldMap.put("ownerPartyId", ownerPartyId);
-		inputFieldMap.put("statusId", "FNACT_ACTIVE");
+       int start = viewIndex.intValue() * viewSize.intValue();
+       int maxRows = viewSize.intValue() * (viewIndex.intValue() + 1);
+       int listSize = 0;
 
-		Map<String, Object> ctxMap = FastMap.newInstance();
-		ctxMap.put("inputFields", inputFieldMap);
-		ctxMap.put("entityName", "CloudCardInfo");
-		ctxMap.put("orderBy", "-fromDate");
-		ctxMap.put("viewIndex", viewIndex);
-		ctxMap.put("viewSize", viewSize);
-		ctxMap.put("filterByDate", "Y");
+        List<GenericValue> retList = FastList.newInstance();
 
-		Map<String, Object> faResult = null;
-		try {
-			faResult = dispatcher.runSync("performFindList", ctxMap);
-		} catch (GenericServiceException e) {
-			Debug.logError(e.getMessage(), module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-		}
-		
-		if(ServiceUtil.isError(faResult)){
-			return faResult;
-		}
+        EntityListIterator listIt = null;
 
-		List<GenericValue> retList = UtilGenerics.checkList(faResult.get("list"));
+        try {
+            EntityCondition lookupConditions = EntityCondition.makeCondition(UtilMisc.toMap("partyId", partyId, "statusId", "FNACT_ACTIVE"));
+            if (UtilValidate.isNotEmpty(storeId)) {
+                EntityCondition storeCond = EntityCondition.makeCondition("distributorPartyId", storeId);
+                String groupOwnerId = CloudCardHelper.getGroupOwneIdByStoreId(delegator, storeId, true);
+                if (null != groupOwnerId && !partyId.equals(groupOwnerId)) {
+                    // 存在圈主，且不是自己的情况，
+                    storeCond = EntityCondition.makeCondition(EntityOperator.OR, storeCond, EntityCondition.makeCondition("distributorPartyId", groupOwnerId));
+                }
+                lookupConditions = EntityCondition.makeCondition(lookupConditions, storeCond);
+            }
+            lookupConditions = EntityCondition.makeCondition(lookupConditions, EntityUtil.getFilterByDateExpr());
+
+            listIt = delegator.find("CloudCardInfo", lookupConditions, null, null, UtilMisc.toList("-fromDate"),
+                    new EntityFindOptions(true, EntityFindOptions.TYPE_SCROLL_INSENSITIVE, EntityFindOptions.CONCUR_READ_ONLY, -1, maxRows, false));
+            listSize = listIt.getResultsSizeAfterPartialList();
+            retList = listIt.getPartialList(start + 1, viewSize);
+
+        } catch (GenericEntityException e) {
+            Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+        } finally {
+            if (null != listIt) {
+                try {
+                    listIt.close();
+                } catch (GenericEntityException e) {
+                    Debug.logError(e.getMessage().toString(), module);
+                }
+            }
+        }
+
 		List<Object> cloudCardList = FastList.newInstance();
-		
+
 		for(GenericValue cloudCard : retList){
 			Map<String, Object> cloudCardMap = FastMap.newInstance();
-//			cloudCardMap.putAll(cloudCard);
 			String organizationPartyId = cloudCard.get("distributorPartyId").toString();
 			if(organizationPartyId != null){
 				//图片地址
@@ -144,7 +160,7 @@ public class CloudCardQueryServices {
 		
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("cloudCardList", cloudCardList);
-		result.put("listSize", faResult.get("listSize"));
+		result.put("listSize", listSize);
 		return result;
 	}
 
