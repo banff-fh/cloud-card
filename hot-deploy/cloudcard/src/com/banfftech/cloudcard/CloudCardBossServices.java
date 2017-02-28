@@ -317,19 +317,21 @@ public class CloudCardBossServices {
         List<EntityCondition> condList = FastList.newInstance();
         condList.add(EntityCondition.makeCondition("partyIdFrom", organizationPartyId));
         condList.add(EntityCondition.makeCondition("partyId", storeId));
-        GenericValue oldPartyInvitation = null;
+        List<GenericValue> oldPartyInvitations = null;
         try {
-            oldPartyInvitation = EntityUtil.getFirst(delegator.findList("PartyInvitation",
-                    EntityCondition.makeCondition(UtilMisc.toMap("partyIdFrom", organizationPartyId, "partyId", storeId)), null, null, null, false));
+            oldPartyInvitations = delegator.findList("PartyInvitation",
+                    EntityCondition.makeCondition(UtilMisc.toMap("partyIdFrom", organizationPartyId, "partyId", storeId)), null, null, null, false);
         } catch (GenericEntityException e) {
             Debug.logError(e.getMessage(), "Problem finding PartyInvitation. ", module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
         }
-        if (null != oldPartyInvitation) {
-            String oldPartyInvitationStatus = oldPartyInvitation.getString("statusId");
-            if ("PARTYINV_SENT".equals(oldPartyInvitationStatus) || "".equals(oldPartyInvitationStatus)) {
-                Debug.logWarning("There has been an effective invitation[" + oldPartyInvitation.getString("partyInvitationId") + "]", module);
-                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInvitationAlreadyExists", locale));
+        if (UtilValidate.isNotEmpty(oldPartyInvitations)) {
+            for (GenericValue gv : oldPartyInvitations) {
+                String oldPartyInvitationStatus = gv.getString("statusId");
+                if ("PARTYINV_SENT".equals(oldPartyInvitationStatus) || "".equals(oldPartyInvitationStatus)) {
+                    Debug.logWarning("There has been an effective invitation[" + gv.getString("partyInvitationId") + "]", module);
+                    return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInvitationAlreadyExists", locale));
+                }
             }
         }
 
