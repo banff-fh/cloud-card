@@ -693,21 +693,31 @@ public class CloudCardServices {
 		GenericValue userLogin = (GenericValue) context.get("userLogin");
 		Locale locale = (Locale) context.get("locale");
 
-		String qrCode = (String) context.get("qrCode");
+        String qrCode = (String) context.get("qrCode");
+        String storeId = (String) context.get("storeId");
+        if (UtilValidate.isEmpty(storeId) && UtilValidate.isEmpty(qrCode)) {
+            Debug.logWarning("缺少参数： storeId  和 qrCode 不能同时为空", module);
+            return ServiceUtil.returnError(
+                    UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardMissingParameter", UtilMisc.toMap("param", "storeId"), locale));
+        }
+		
 		GenericValue partyGroup = null;
 		try {
-			partyGroup = CloudCardHelper.getPartyGroupByQRcode(qrCode, delegator);
+            partyGroup = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", storeId));
+            if (null == partyGroup) {
+                partyGroup = CloudCardHelper.getPartyGroupByQRcode(qrCode, delegator);
+            }
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 
 		if(null == partyGroup){
-			Debug.logWarning("商户qrCode:" + qrCode + "不存在", module);
+            Debug.logWarning("商户 storeId[" + storeId + "] qrCode[" + qrCode + "]不存在", module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardOrganizationPartyNotFound", locale));
 		}
 
-		String storeId = (String) partyGroup.getString("partyId");
+		storeId = (String) partyGroup.getString("partyId");
 
 		context.put("partyGroup", partyGroup);
 		Map<String, Object> checkParamOut = checkInputParam(dctx, context);
