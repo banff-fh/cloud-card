@@ -124,13 +124,6 @@
 		<attribute name="storeList" type="List" mode="OUT" optional="true"><description>店铺详细信息</description></attribute>
 	</service>
 	
-	<service name="getPaymentCard" engine="java"
-		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="getPaymentCard" auth="true">
-		<description>获取卡接口</description>
-		<attribute name="storeId" type="String" mode="INOUT" optional="false"><description>商家partyId</description></attribute>
-		<attribute name="cloudCardList" type="List" mode="OUT" optional="false"><description>卡列表</description></attribute>
-	</service>
-	
 	<service name="purchaseCard" engine="java"
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="purchaseCard" auth="true">
 		<description>购买卡</description>
