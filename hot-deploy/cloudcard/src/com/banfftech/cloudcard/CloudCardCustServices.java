@@ -366,26 +366,17 @@ public class CloudCardCustServices {
 		String storeId = null;
 		String groupName = null;
 		
-		GenericValue encryptedGiftCard = delegator.makeValue("FinAccount", UtilMisc.toMap("finAccountCode", cardId));
+		GenericValue partyGroup = null;
 		try {
-			delegator.encryptFields(encryptedGiftCard);
-		} catch (GenericEntityException e1) {
-			Debug.logError(e1.getMessage(), module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,
-					"CloudCardInternalServiceError", locale));
-		}
-		
-		List<GenericValue> cloudCardInfos = null;
-		try {
-			cloudCardInfos = delegator.findList("CloudCardInfo", EntityCondition.makeCondition("finAccountCode", encryptedGiftCard.getString("finAccountCode")), null, null, null, false);
+			partyGroup = CloudCardHelper.getPartyGroupByQRcode(qrCode, delegator);
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
-	        return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 		
-		if(UtilValidate.isNotEmpty(cloudCardInfos)){
-			storeId = cloudCardInfos.get(0).getString("distributorPartyId");
-			groupName =  cloudCardInfos.get(0).getString("distributorPartyName");
+		if(UtilValidate.isNotEmpty(partyGroup)){
+			storeId = partyGroup.getString("partyId");
+			groupName = partyGroup.getString("groupName");
 		}
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
@@ -445,5 +436,6 @@ public class CloudCardCustServices {
 		result.put("qrCode", qrCode);
 		return result;
 	}
+	
 	
 }
