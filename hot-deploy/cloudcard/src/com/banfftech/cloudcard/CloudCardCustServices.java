@@ -297,89 +297,6 @@ public class CloudCardCustServices {
 		
 	}
 	
-	
-	/**
-	 * 获取支付的卡信息
-	 * 
-	 * @param dctx
-	 * @param context
-	 * @return
-	 */
-	public static Map<String, Object> getPaymentCard(DispatchContext dctx, Map<String, Object> context) {
-		LocalDispatcher dispatcher = dctx.getDispatcher();
-		Delegator delegator = dispatcher.getDelegator();
-		Locale locale = (Locale) context.get("locale");
-		
-		GenericValue userLogin = (GenericValue) context.get("userLogin");
-		String partyId = (String) userLogin.get("partyId");
-		String storeId = (String) context.get("storeId");
-		
-		//查找用户在本店购买的卡
-		Map<String,Object> cardMap = FastMap.newInstance();
-		cardMap.put("userLogin", userLogin);
-		Map<String,Object> cloudCardMap = FastMap.newInstance();
-		List<Object> cloudCardList = null;
-		try {
-			cloudCardMap = dispatcher.runSync("myCloudCards", cardMap);
-		} catch (GenericServiceException e) {
-			 Debug.logError(e.getMessage(), module);
-	         return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-		}
-		
-		if(UtilValidate.isNotEmpty(cloudCardMap)){
-			if(UtilValidate.isNotEmpty(cloudCardList)){
-				cloudCardList.add(cloudCardMap.get("cloudCardList").toString());
-			}else{
-				cloudCardList = (List<Object>) cloudCardMap.get("cloudCardList");
-			}
-		}
-		
-		//查找用户在圈主购买的卡
-		String groupId = null;
-		try {
-			groupId = CloudCardHelper.getGroupIdByStoreId(delegator,storeId,false);
-		} catch (GenericEntityException e1) {
-			 Debug.logError(e1.getMessage(), module);
-	         return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-		}
-		
-		List<GenericValue> partyRelationshipList = FastList.newInstance();
-		try {
-			partyRelationshipList = delegator.findByAnd("PartyRelationship", UtilMisc.toMap("partyIdFrom", groupId, "roleTypeIdTo",  CloudCardConstant.STORE_GROUP_OWNER_ROLE_TYPE_ID));
-		} catch (GenericEntityException e1) {
-		     Debug.logError(e1.getMessage(), module);
-	         return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-		}
-		
-		//如果自己是圈主，忽略此部
-		if(!storeId.equals(partyRelationshipList.get(0).get("partyIdTo"))){
-			if(UtilValidate.isNotEmpty(partyRelationshipList)){
-				cardMap.put("storeId", partyRelationshipList.get(0).get("partyIdTo"));
-			}
-			try {
-				cloudCardMap = dispatcher.runSync("myCloudCards", cardMap);
-			} catch (GenericServiceException e) {
-				 Debug.logError(e.getMessage(), module);
-		         return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-			}
-			
-			if(UtilValidate.isNotEmpty(cloudCardMap)){
-				if(UtilValidate.isNotEmpty(cloudCardList)){
-					cloudCardList.add(cloudCardMap.get("cloudCardList").toString());
-				}else{
-					cloudCardList = (List<Object>) cloudCardMap.get("cloudCardList");
-				}
-			}
-		}
-		
-		
-		// 返回结果
-		Map<String, Object> result = ServiceUtil.returnSuccess();
-		result.put("storeId", storeId);
-		result.put("cloudCardList", cloudCardList);
-		return result;
-	}
-	
 	/**
 	 * C端扫码获取商户信息和卡列表
 	 * @param dctx
@@ -406,15 +323,15 @@ public class CloudCardCustServices {
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardOrganizationPartyNotFound", locale));
 		}
 
-		String storeId = (String) partyGroup.getString("partyId");
-		String groupName = (String) partyGroup.getString("groupName");
+		String storeId = partyGroup.getString("partyId");
+		String groupName = partyGroup.getString("groupName");
 
 		Map<String,Object> cardMap = FastMap.newInstance();
 		cardMap.put("userLogin", userLogin);
 		cardMap.put("storeId", storeId);
 		Map<String,Object> cloudCardMap = FastMap.newInstance();
 		try {
-			cloudCardMap = dispatcher.runSync("getPaymentCard", cardMap);
+			cloudCardMap = dispatcher.runSync("myCloudCards", cardMap);
 		} catch (GenericServiceException e) {
 			 Debug.logError(e.getMessage(), module);
 	         return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
