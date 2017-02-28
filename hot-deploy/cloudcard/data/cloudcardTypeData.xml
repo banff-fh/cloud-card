@@ -126,4 +126,10 @@
     <ContactMechPurposeType contactMechPurposeTypeId="STORE_TELNUM" description="商家联系电话"/>
     <ContactMechTypePurpose contactMechPurposeTypeId="STORE_ADDRESS" contactMechTypeId="POSTAL_ADDRESS"/>
     <ContactMechTypePurpose contactMechPurposeTypeId="STORE_TELNUM" contactMechTypeId="TELECOM_NUMBER"/> 
+    
+    <!-- 二维码 -->
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="qrCode.expirationTime" systemPropertyValue="120" description="qrCode的有效时间"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="qrCode.issuer" systemPropertyValue="cloudcard" description="qrCode的issuer"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="qrCode.secret" systemPropertyValue="{{secret used for signing}}" description="qrCode的secret"/>
+ 
 </entity-engine-xml>

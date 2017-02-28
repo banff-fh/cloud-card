@@ -1,5 +1,6 @@
 package com.banfftech.cloudcard;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -20,6 +21,7 @@ import org.ofbiz.service.ServiceUtil;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.auth0.jwt.JWTSigner;
 import com.banfftech.cloudcard.constant.CloudCardConstant;
 import com.banfftech.cloudcard.lbs.BaiduLBSUtil;
 
@@ -352,17 +354,19 @@ public class CloudCardCustServices {
 	 * @param context
 	 * @return
 	 */
-	public static Map<String, Object> getStoreInfoBycardCode(DispatchContext dctx, Map<String, Object> context) {
+	public static Map<String, Object> getStoreInfoByCardId(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dctx.getDelegator();
 		GenericValue userLogin = (GenericValue) context.get("userLogin");
 		Locale locale = (Locale) context.get("locale");
 		
-		String cardCode = (String) context.get("cardCode");
+		String cardId = (String) context.get("cardId");
+		String qrCode = (String) context.get("qrCode");
+
 		String storeId = null;
 		String groupName = null;
 		
-		GenericValue encryptedGiftCard = delegator.makeValue("FinAccount", UtilMisc.toMap("finAccountCode", cardCode));
+		GenericValue encryptedGiftCard = delegator.makeValue("FinAccount", UtilMisc.toMap("finAccountCode", cardId));
 		try {
 			delegator.encryptFields(encryptedGiftCard);
 		} catch (GenericEntityException e1) {
@@ -385,7 +389,8 @@ public class CloudCardCustServices {
 		}
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
-		result.put("cardCode", cardCode);
+		result.put("cardId", cardId);
+		result.put("qrCode", qrCode);
 		result.put("storeId", storeId);
 		result.put("storeName", groupName);
 		return result;
@@ -403,4 +408,42 @@ public class CloudCardCustServices {
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		return result;
 	}
+	
+	/**
+	 * 获取付款二维码
+	 * 
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> getPaymentQRCode(DispatchContext dctx, Map<String, Object> context) {
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		
+		GenericValue userLogin = (GenericValue) context.get("userLogin");
+		String qrCode = null;
+		
+		long expirationTime = Long.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","qrCode.expirationTime","172800L",delegator));
+		String iss = EntityUtilProperties.getPropertyValue("cloudcard","qrCode.issuer",delegator);
+		String tokenSecret = EntityUtilProperties.getPropertyValue("cloudcard","qrCode.secret",delegator);
+		//开始时间
+		final long iat = System.currentTimeMillis() / 1000L; // issued at claim 
+		//Token到期时间
+		final long exp = iat + expirationTime; 
+		//生成Token
+		final JWTSigner signer = new JWTSigner(tokenSecret);
+		final HashMap<String, Object> claims = new HashMap<String, Object>();
+		claims.put("iss", iss);
+		claims.put("user", userLogin.get("partyId"));
+		claims.put("delegatorName", delegator.getDelegatorName());
+		claims.put("exp", exp);
+		claims.put("iat", iat);
+		qrCode = signer.sign(claims);
+		
+		// 返回结果
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("qrCode", qrCode);
+		return result;
+	}
+	
 }
