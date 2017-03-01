@@ -229,4 +229,12 @@
         <value xml:lang="en">Must all partner store in the group is frozen , to dissolve the group</value>
         <value xml:lang="zh">解散圈子前，必须先冻结所有圈友</value>
     </property>
+    <property key="CloudCardNotGroupOwnerCard">
+        <value xml:lang="en">The card issuer is not our group owner, can not to pay</value>
+        <value xml:lang="zh">不是本圈子的圈主卡，不能消费</value>
+    </property>
+    <property key="CloudCardGroupRelationshipIsFrozen">
+        <value xml:lang="en">The group relationship is frozen, can not to pay</value>
+        <value xml:lang="zh">圈友关系已被冻结，不再接受圈主卡</value>
+    </property>
 </resource>

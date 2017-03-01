@@ -850,10 +850,36 @@ public class CloudCardServices {
 		String customerPartyId = cloudCard.getString("ownerPartyId");// ownerPartyId 是原卡主， partyId 是持卡人，交易记录记录在卡主上
 		String cardId = cloudCard.getString("paymentMethodId");
 		String distributorPartyId = cloudCard.getString("distributorPartyId");
-		boolean isSameStore = false; //是否 店内消费（本店卖出去的卡在本店消费）
-		if(distributorPartyId.equals(organizationPartyId)){
-			 isSameStore = true;
-		}
+		boolean isSameStore = distributorPartyId.equals(organizationPartyId); //是否 店内消费（本店卖出去的卡在本店消费）
+        if (!isSameStore) {
+            // 如果是跨店，检查是否加入圈子，是否圈友关系被冻结，是否是圈主的卡(即distributorPartyId是否为圈主) 等条件
+            try {
+                GenericValue groupRel = CloudCardHelper.getGroupRelationShipByStoreId(delegator, organizationPartyId, false);
+                if (null == groupRel) {
+                    // 未加入圈子，不能跨店
+                    Debug.logWarning("本店[" + organizationPartyId + "]没有加入圈子，不能使用其他店[" + distributorPartyId + "]的卡", module);
+                    return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardStoreNotInAGroup", locale));
+                }
+
+                if (CloudCardHelper.isFrozenGroupRelationship(groupRel)) {
+                    // 圈子关系已被冻结
+                    Debug.logWarning("本店[" + organizationPartyId + "]在圈子中被冻结，不再接收跨店交易", module);
+                    return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardGroupRelationshipIsFrozen", locale));
+                }
+
+                // 获取本店所在圈子的 圈主
+                String groupOwnerId = CloudCardHelper.getGroupOwneIdByStoreId(delegator, organizationPartyId, false);
+                if (!distributorPartyId.equals(groupOwnerId)) {
+                    // 发卡商家 不是本店所在圈子的的圈主
+                    Debug.logWarning("此卡[" + cardId + "]的发卡商家[" + distributorPartyId + "]不是本店[" + organizationPartyId + "]所在圈子的圈主[" + groupOwnerId + "]，不能支付",
+                            module);
+                    return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardNotGroupOwnerCard", locale));
+                }
+            } catch (GenericEntityException e) {
+                Debug.logError(e.getMessage(), module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+            }
+        }
 
 		// 1、扣除用户余额
 		// 检查余额是否够用
