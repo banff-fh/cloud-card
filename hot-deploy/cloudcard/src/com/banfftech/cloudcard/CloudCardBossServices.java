@@ -1105,7 +1105,7 @@ public class CloudCardBossServices {
         Locale locale = (Locale) context.get("locale");
         // GenericValue userLogin = (GenericValue) context.get("userLogin");
 
-        String settlementId = (String) context.get("settlementId");
+        String settlementId = "xxx";
 
         Map<String, Object> checkInputParamRet = checkInputParam(dctx, context);
         if (!ServiceUtil.isSuccess(checkInputParamRet)) {
