@@ -40,6 +40,8 @@ public class WeiXinPayServices {
 		String wxAppID = (String) context.get("wxAppID");
 		String wxPartnerid = (String) context.get("wxPartnerid");
 		String notifyUrl = (String) context.get("notifyUrl");
+		String paymentService = (String) context.get("paymentService");
+		String cardCode= (String) context.get("cardId");
 
 		// 获取随机数
 		String nonceStr = TenpayUtil.getNonceStr(32);
@@ -57,7 +59,8 @@ public class WeiXinPayServices {
 		parameterMap.put("spbill_create_ip", "127.0.0.1");
 		parameterMap.put("total_fee", Integer.valueOf(totalFee) * 100);
 		parameterMap.put("trade_type", tradeType);
-		parameterMap.put("total_fee", "1");
+		parameterMap.put("attach", paymentService + "," + cardCode);
+
 		// 签名参数
 		String sign = TenpayUtil.createSign("UTF-8", parameterMap, context.get("appKey").toString());
 		parameterMap.put("sign", sign);
@@ -88,7 +91,7 @@ public class WeiXinPayServices {
 		String wxURL = EntityUtilProperties.getPropertyValue("cloudcard", "weixin.wxURL", delegator);
 		String appKey = EntityUtilProperties.getPropertyValue("cloudcard", "weixin.key", delegator);
 		String notifyUrl = EntityUtilProperties.getPropertyValue("cloudcard", "weixin.notifyUrl", delegator);
-
+		
 		context.put("wxAppID", wxAppID);
 		context.put("wxPartnerid", wxPartnerid);
 		context.put("wxURL", wxURL);
@@ -115,7 +118,7 @@ public class WeiXinPayServices {
 		String noncestr = TenpayUtil.getNonceStr(32);
 		String prepayid = prepayOrderMap.get("prepay_id").toString();
 		String timestamp = TenpayUtil.getCurrTime();
-
+		
 		SortedMap<String, Object> parameterMap = new TreeMap<String, Object>();
 		parameterMap.put("appid", wxAppID);
 		parameterMap.put("noncestr", noncestr);

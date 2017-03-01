@@ -131,6 +131,7 @@
 		<attribute name="storeId" type="String" mode="INOUT" optional="false"><description>商家partyId</description></attribute>
 		<attribute name="paymentType" type="String" mode="IN" optional="false"><description>支付类型</description></attribute>
 		<attribute name="totalFee" type="String" mode="IN" optional="false"><description>金额</description></attribute>
+		<attribute name="paymentService" type="String" mode="IN" optional="false"><description>付款业务</description></attribute>
 		<!-- 微信返回结果 -->
 		<attribute name="appid" type="String" mode="OUT" optional="true"><description>商户ID</description></attribute>
 		<attribute name="partnerid" type="String" mode="OUT" optional="true"><description>合作ID</description></attribute>
@@ -140,7 +141,8 @@
 		<attribute name="timestamp" type="String" mode="OUT" optional="true"><description>时间</description></attribute>
 		<attribute name="sign" type="String" mode="OUT" optional="true"><description>签名</description></attribute>
 		<!-- 支付宝返回结果 -->
-		<attribute name="payInfo" type="String" mode="OUT" optional="true"><description>签名</description></attribute>	</service>
+		<attribute name="payInfo" type="String" mode="OUT" optional="true"><description>签名</description></attribute>	
+	</service>
 	
 	<service name="userScanCodeGetCardAndStoreInfo" engine="java"
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="userScanCodeGetCardAndStoreInfo" auth="true">

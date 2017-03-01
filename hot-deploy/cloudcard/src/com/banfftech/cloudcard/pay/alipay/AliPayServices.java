@@ -58,8 +58,10 @@ public class AliPayServices {
 		String rsaPrivate = EntityUtilProperties.getPropertyValue("cloudcard.properties", "aliPay.rsa_private",delegator);
 		String notifyUrl = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.notifyUrl", delegator);
 		String signType = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.signType", delegator);
-
-		String orderInfo = getOrderInfo(partner, seller, subject, body, totalFee, getOutTradeNo(), notifyUrl);
+		String paymentService = (String) context.get("paymentService");
+		String cardCode = (String) context.get("cardId");
+		
+		String orderInfo = getOrderInfo(partner, seller, subject, body, totalFee, getOutTradeNo(), notifyUrl,paymentService,cardCode);
 		String sign = StringUtils.sign(orderInfo, rsaPrivate, signType);
 
 		try {
@@ -199,7 +201,7 @@ public class AliPayServices {
 	 * create the order info. 创建订单信息 由服务器生成
 	 */
 	private static String getOrderInfo(String partner, String seller, String subject, String body, String price,
-			String out_trade_no, String notifyUrl) {
+			String out_trade_no, String notifyUrl,String paymentService,String cardCode) {
 
 		// 签约合作者身份ID
 		String orderInfo = "partner=" + "\"" + partner + "\"";
@@ -243,6 +245,9 @@ public class AliPayServices {
 
 		// 支付宝处理完请求后，当前页面跳转到商户指定页面的路径，可空
 		orderInfo += "&return_url=\"m.alipay.com\"";
+		
+		//回调返回
+		orderInfo += "&passback_params=" + "\"" + paymentService+","+cardCode + "\"";
 
 		// 调用银行卡支付，需配置此参数，参与签名， 固定值 （需要签约《无线银行卡快捷支付》才能使用）
 		// orderInfo += "&paymethod=\"expressGateway\"";

@@ -130,10 +130,12 @@
 		location="com.banfftech.cloudcard.pay.PayServices" invoke="uniformOrder" auth="true">
 		<description>支付宝或微信统一下单</description>
 		<!-- 公共参数 -->
-		<attribute name="paymentType" type="String" mode="IN" optional="false"><description>卡Id</description></attribute>
+		<attribute name="paymentType" type="String" mode="IN" optional="false"><description>支付方式</description></attribute>
 		<attribute name="cardId" type="String" mode="IN" optional="false"><description>卡Id</description></attribute>
 		<attribute name="body" type="String" mode="IN" optional="false"><description>商品描述</description></attribute>
 		<attribute name="totalFee" type="String" mode="IN" optional="false"><description>交易金额</description></attribute>
+		<attribute name="paymentService" type="String" mode="IN" optional="false"><description>付款业务</description></attribute>
+		
 		<!-- 支付宝参数 -->
 		<attribute name="subject" type="String" mode="IN" optional="true"><description>主题</description></attribute>
 		<!--微信参数-->

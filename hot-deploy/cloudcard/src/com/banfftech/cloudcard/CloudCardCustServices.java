@@ -404,6 +404,7 @@ public class CloudCardCustServices {
 		String paymentType = (String) context.get("paymentType");
 		String storeId = (String) context.get("storeId");
 		String totalFee = (String) context.get("totalFee");
+		String paymentService = (String) context.get("paymentService");
 
 		
 		// 传入的organizationPartyId必须是一个存在的partyGroup
@@ -458,6 +459,8 @@ public class CloudCardCustServices {
 			initMap.put("paymentType", paymentType);
 			initMap.put("body", "买卡");
 			initMap.put("totalFee", totalFee);
+			initMap.put("paymentService", paymentService);
+
 			if("aliPay".equals(paymentType)){
 				initMap.put("subject", totalFee);
 			}else if("wxPay".equals(paymentType)){
@@ -470,6 +473,7 @@ public class CloudCardCustServices {
 		}
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("storeId", storeId);
 		if("aliPay".equals(paymentType)){
 			result.put("payInfo", uniformOrderMap.get("payInfo"));
 		}else if("wxPay".equals(paymentType)){
