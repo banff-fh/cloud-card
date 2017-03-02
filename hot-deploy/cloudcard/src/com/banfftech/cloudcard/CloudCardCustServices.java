@@ -477,9 +477,9 @@ public class CloudCardCustServices {
 		if("aliPay".equals(paymentType)){
 			result.put("payInfo", uniformOrderMap.get("payInfo"));
 		}else if("wxPay".equals(paymentType)){
-			result.put("appid", uniformOrderMap.get("wxAppID"));
+			result.put("appid", uniformOrderMap.get("appid"));
 			result.put("noncestr", uniformOrderMap.get("noncestr"));
-			result.put("partnerid", uniformOrderMap.get("wxPartnerid"));
+			result.put("partnerid", uniformOrderMap.get("partnerid"));
 			result.put("package", "Sign=WXPay");
 			result.put("prepayid", uniformOrderMap.get("prepayid"));
 			result.put("timestamp", uniformOrderMap.get("timestamp"));
