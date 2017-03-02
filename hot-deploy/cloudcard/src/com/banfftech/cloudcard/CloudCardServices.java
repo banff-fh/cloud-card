@@ -989,7 +989,7 @@ public class CloudCardServices {
 		
 		// 3、创建 PaymentApplication 应用 发票 与  付款payment，  并修改发票状态为INVOICE_APPROVED
 		try {
-			//TODO, NOTE 将商家开的invoice和客户付款的payment进行应用，
+			//注： 将商家开的invoice和客户付款的payment进行应用，
 			// 虽然后面修改发票状态为INVOICE_APPROVED会触发ECA去自动去找payment与invoice进行应用
 			// 但是，既然这里能拿到paymentId和invoiceId，就直接创建好PaymentApplication，
 			// 免得 setInvoiceStatus的后续的ECA去搜索payment，
@@ -1032,55 +1032,55 @@ public class CloudCardServices {
 		if (ServiceUtil.isError(finAccountDepositOutMap)) {
 			return finAccountDepositOutMap;
 		}
-		
-		// 5、如果同店消费，直接回冲卖卡限额
-		if(isSameStore){
-			GenericValue creditLimitAccount = CloudCardHelper.getCreditLimitAccount(delegator, organizationPartyId);
-	        if (UtilValidate.isEmpty(creditLimitAccount)) {
-	        	Debug.logError("商家[" + organizationPartyId + "]未配置卖卡额度账户", module);
-	        	return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardConfigError", UtilMisc.toMap("organizationPartyId", organizationPartyId), locale));
-	        }
 
-			String creditLimitAccountId = (String) creditLimitAccount.get("finAccountId");
-			
-			// 卖卡限额回冲
-			Map<String, Object> createFinAccountAuthOutMap;
-			try {
-				createFinAccountAuthOutMap = dispatcher.runSync("createFinAccountAuth",
-						UtilMisc.toMap("userLogin", systemUserLogin, "locale",locale, 
-								"currencyUomId", CloudCardConstant.DEFAULT_CURRENCY_UOM_ID,  
-								"finAccountId", creditLimitAccountId,
-								"amount", amount.negate(),
-								//FIXME 奇怪的BUG，如果fromDate直接用当前时间戳，
-								// 会导致FinAccountAuth相关的ECA（updateFinAccountBalancesFromAuth）
-								// 服务中，用当前时间进行 起止 时间筛选FinAccountAuth时漏掉了本次刚创建的这条记录，导致金额计算不正确
-								// 所以，这里人为地把fromDate时间提前2秒，让后面的ECA服务能找到本次创建的记录，以正确计算金额。
-								"fromDate", UtilDateTime.adjustTimestamp(UtilDateTime.nowTimestamp(), Calendar.SECOND, -2)));
-			} catch (GenericServiceException e1) {
-				Debug.logError(e1, module);
-				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-			}
-			if (ServiceUtil.isError(createFinAccountAuthOutMap)) {
-				return createFinAccountAuthOutMap;
-			}
-			delegator.clearCacheLine(creditLimitAccount);
-			
-			// 设置Payment状态为PMNT_CONFIRMED
-			Map<String, Object> setPaymentStatusOutMap;
-			try {
-				setPaymentStatusOutMap = dispatcher.runSync("setPaymentStatus",
-						UtilMisc.toMap("userLogin", systemUserLogin, "locale",locale, 
-								"paymentId", withdrawalPaymentId,  
-								"statusId", "PMNT_CONFIRMED"
-								));
-			} catch (GenericServiceException e1) {
-				Debug.logError(e1, module);
-				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-			}
-			if (ServiceUtil.isError(setPaymentStatusOutMap)) {
-				return setPaymentStatusOutMap;
-			}
-		}else{
+		// 5、回冲卖卡限额  2017-3-2 无论跨店还是同店消费都直接回冲限额 并修改支付状态为 PMNT_CONFIRMED
+		GenericValue creditLimitAccount = CloudCardHelper.getCreditLimitAccount(delegator, organizationPartyId);
+        if (UtilValidate.isEmpty(creditLimitAccount)) {
+        	Debug.logError("商家[" + organizationPartyId + "]未配置卖卡额度账户", module);
+        	return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardConfigError", UtilMisc.toMap("organizationPartyId", organizationPartyId), locale));
+        }
+
+		String creditLimitAccountId = (String) creditLimitAccount.get("finAccountId");
+		
+		// 卖卡限额回冲
+		Map<String, Object> createFinAccountAuthOutMap;
+		try {
+			createFinAccountAuthOutMap = dispatcher.runSync("createFinAccountAuth",
+					UtilMisc.toMap("userLogin", systemUserLogin, "locale",locale, 
+							"currencyUomId", CloudCardConstant.DEFAULT_CURRENCY_UOM_ID,  
+							"finAccountId", creditLimitAccountId,
+							"amount", amount.negate(),
+							//FIXME 奇怪的BUG，如果fromDate直接用当前时间戳，
+							// 会导致FinAccountAuth相关的ECA（updateFinAccountBalancesFromAuth）
+							// 服务中，用当前时间进行 起止 时间筛选FinAccountAuth时漏掉了本次刚创建的这条记录，导致金额计算不正确
+							// 所以，这里人为地把fromDate时间提前2秒，让后面的ECA服务能找到本次创建的记录，以正确计算金额。
+							"fromDate", UtilDateTime.adjustTimestamp(UtilDateTime.nowTimestamp(), Calendar.SECOND, -2)));
+		} catch (GenericServiceException e1) {
+			Debug.logError(e1, module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		if (ServiceUtil.isError(createFinAccountAuthOutMap)) {
+			return createFinAccountAuthOutMap;
+		}
+		delegator.clearCacheLine(creditLimitAccount);
+		
+		// 设置Payment状态为PMNT_CONFIRMED
+		Map<String, Object> setPaymentStatusOutMap;
+		try {
+			setPaymentStatusOutMap = dispatcher.runSync("setPaymentStatus",
+					UtilMisc.toMap("userLogin", systemUserLogin, "locale",locale, 
+							"paymentId", withdrawalPaymentId,  
+							"statusId", "PMNT_CONFIRMED"
+							));
+		} catch (GenericServiceException e1) {
+			Debug.logError(e1, module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		if (ServiceUtil.isError(setPaymentStatusOutMap)) {
+			return setPaymentStatusOutMap;
+		}
+
+		if(!isSameStore){
 			// 如果是跨店消费，
 			// 在双方（发卡的店 和 交易发生店 ）的 对账账户里面记账（发卡方记正数 表示应付、交易放生方记负数，表示应收）
 			
