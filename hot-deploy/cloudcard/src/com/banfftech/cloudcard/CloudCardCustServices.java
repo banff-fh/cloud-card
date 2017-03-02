@@ -462,9 +462,9 @@ public class CloudCardCustServices {
 			initMap.put("paymentService", paymentService);
 
 			if("aliPay".equals(paymentType)){
-				initMap.put("subject", totalFee);
+				initMap.put("subject", "购买库胖卡");
 			}else if("wxPay".equals(paymentType)){
-				initMap.put("tradeType", totalFee);
+				initMap.put("tradeType", "APP");
 			}
 			uniformOrderMap = dispatcher.runSync("uniformOrder", initMap);
 		} catch (GenericServiceException e) {
