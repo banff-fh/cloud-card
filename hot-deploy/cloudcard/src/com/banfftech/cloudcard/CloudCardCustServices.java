@@ -44,8 +44,20 @@ public class CloudCardCustServices {
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
 
-		String longitude = (String) context.get("longitude");
-		String latitude = (String) context.get("latitude");
+		double longitude = Double.parseDouble(context.get("longitude").toString());
+		double latitude = Double.parseDouble(context.get("latitude").toString());
+		
+		 //经度最大是180° 最小是0°  
+	    if (0.0 < longitude || 180.0 > longitude)  
+	    {  
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardAbnormalPositioning", locale));
+	    }  
+	      
+	    //纬度最大是90° 最小是0°  
+	    if (0.0 < latitude || 90.0 > latitude)  
+	    {  
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardAbnormalPositioning", locale));
+	    }  
 
 		String ak = EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.ak", delegator);
 		String getTableId = EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.getTableId", delegator);
