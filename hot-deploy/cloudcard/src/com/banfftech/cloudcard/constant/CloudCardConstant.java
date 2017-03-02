@@ -75,4 +75,29 @@ public class CloudCardConstant {
      */
     public static final String SG_REL_STATUS_FROZEN = "PREL_FROZEN";
 
+    /**
+     * 支付方式类型（paymentMethodType）： 现金 {@value}
+     */
+    public static final String PMT_CASH = "CASH";
+
+    /**
+     * 支付方式类型（paymentMethodType）： 支付宝 {@value}
+     */
+    public static final String PMT_ALIPAY = "EXT_ALIPAY";
+
+    /**
+     * 支付方式类型（paymentMethodType）： 微信支付 {@value}
+     */
+    public static final String PMT_WXPAY = "EXT_WXPAY";
+
+    /**
+     * 付款渠道： 微信 {@value}
+     */
+    public static final String PAY_CHANNEL_WXPAY = "wxPay";
+
+    /**
+     * 付款渠道： 支付宝 {@value}
+     */
+    public static final String PAY_CHANNEL_ALIPAY = "aliPay";
+
 }

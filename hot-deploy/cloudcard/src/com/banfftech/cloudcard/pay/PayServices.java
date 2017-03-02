@@ -7,8 +7,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.service.DispatchContext;
-import org.ofbiz.service.ServiceUtil;
 
+import com.banfftech.cloudcard.constant.CloudCardConstant;
 import com.banfftech.cloudcard.pay.alipay.AliPayServices;
 import com.banfftech.cloudcard.pay.tenpay.WeiXinPayServices;
 
@@ -19,9 +19,9 @@ public class PayServices {
 	public static Map<String, Object> uniformOrder(DispatchContext dctx, Map<String, Object> context) {
 		String paymentType = (String) context.get("paymentType");
 		Map<String, Object> result = FastMap.newInstance();
-		if("wxPay".equals(paymentType)){
+		if(CloudCardConstant.PAY_CHANNEL_WXPAY.equals(paymentType)){
 			result = WeiXinPayServices.prepayOrder(dctx, context);
-		}else if("aliPay".equals(paymentType)){
+		}else if(CloudCardConstant.PAY_CHANNEL_ALIPAY.equals(paymentType)){
 			result = AliPayServices.prepayOrder(dctx, context);
 		}
 		return result;

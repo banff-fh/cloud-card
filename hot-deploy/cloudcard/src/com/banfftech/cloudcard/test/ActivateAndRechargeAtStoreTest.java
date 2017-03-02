@@ -59,7 +59,7 @@ public class ActivateAndRechargeAtStoreTest extends CloudCardServicesTest {
 		String cardCode1_2 = cloudCardList.get(1).getString("finAccountCode");
 
 		// 测试1 激活新卡同时充值200 服务应当调用成功
-		BigDecimal amount = new BigDecimal(200.00f);
+		BigDecimal amount = new BigDecimal(200.00f).setScale(decimals, rounding);
 		Map<String, Object> resp = callActivateCloudCardAndRecharge(STORE_1_USER, cardCode1_1, amount, CUSTOMER_1_TEL);
 
 		assertTrue("Service 'activateCloudCardAndRecharge' SHOULD result success", ServiceUtil.isSuccess(resp));
