@@ -50,6 +50,8 @@ public class AlipayNotification implements Serializable {
 	private Double price;
 
 	private String body;
+	
+	private String extraCommonParam;
 
 	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	private Date gmtCreate;
@@ -290,4 +292,12 @@ public class AlipayNotification implements Serializable {
 		this.verifyResult = verifyResult;
 	}
 
+	public String getExtraCommonParam() {
+		return extraCommonParam;
+	}
+
+	public void setExtraCommonParam(String extraCommonParam) {
+		this.extraCommonParam = extraCommonParam;
+	}
+	
 }
