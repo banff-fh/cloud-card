@@ -131,5 +131,9 @@
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="qrCode.expirationTime" systemPropertyValue="120" description="qrCode的有效时间"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="qrCode.issuer" systemPropertyValue="cloudcard" description="qrCode的issuer"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="qrCode.secret" systemPropertyValue="{{secret used for signing}}" description="qrCode的secret"/>
+
+    <!-- 支付宝和微信支付的paymentMethodTypeId -->
+    <PaymentMethodType description="支付宝" paymentMethodTypeId="EXT_ALIPAY"/>
+    <PaymentMethodType description="微信支付" paymentMethodTypeId="EXT_WXPAY"/>
  
 </entity-engine-xml>
