@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
+import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
@@ -44,20 +45,13 @@ public class CloudCardCustServices {
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
 
-		double longitude = Double.parseDouble(context.get("longitude").toString());
-		double latitude = Double.parseDouble(context.get("latitude").toString());
-		
-		 //经度最大是180° 最小是0°  
-	    if (0.0 < longitude || 180.0 > longitude)  
-	    {  
-			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardAbnormalPositioning", locale));
-	    }  
-	      
-	    //纬度最大是90° 最小是0°  
-	    if (0.0 < latitude || 90.0 > latitude)  
-	    {  
-			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardAbnormalPositioning", locale));
-	    }  
+        double longitude = Double.parseDouble(UtilFormatOut.checkNull((String) context.get("longitude"), "0.00"));
+        double latitude = Double.parseDouble(UtilFormatOut.checkNull((String) context.get("latitude"), "0.00"));
+		double exp = 10e-10;
+        // 经度最大是180° 最小是-180° 纬度最大是90° 最小是-90°
+        if (Math.abs(longitude) - 180.00 > exp || Math.abs(latitude) - 90.00 > exp) {
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardAbnormalPositioning", locale));
+        }
 
 		String ak = EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.ak", delegator);
 		String getTableId = EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.getTableId", delegator);

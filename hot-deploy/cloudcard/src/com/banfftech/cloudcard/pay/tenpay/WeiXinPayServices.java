@@ -117,7 +117,8 @@ public class WeiXinPayServices {
 		// 返回app签名等信息
 		String noncestr = TenpayUtil.getNonceStr(32);
 		String prepayid = prepayOrderMap.get("prepay_id").toString();
-		String timestamp = TenpayUtil.getCurrTime();
+		String timestamp = String.valueOf(System.currentTimeMillis()/1000);
+//TenpayUtil.getCurrTime();
 		
 		SortedMap<String, Object> parameterMap = new TreeMap<String, Object>();
 		parameterMap.put("appid", wxAppID);

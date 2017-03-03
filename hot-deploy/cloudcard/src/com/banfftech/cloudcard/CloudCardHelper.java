@@ -979,4 +979,23 @@ public class CloudCardHelper {
         return groupOwnerRel.getString("partyIdTo");
     }
 
+    /**
+     * 获取商家的未结算金额
+     * 
+     * @param delegator
+     * @param storeId
+     * @return
+     * @throws GenericEntityException
+     */
+    public static BigDecimal getSettlementAmountByStoreId(Delegator delegator, String storeId) {
+        GenericValue settlementAccount = getSettlementAccount(delegator, storeId, false);
+        if (null == settlementAccount) {
+            return ZERO;
+        }
+        BigDecimal balance = settlementAccount.getBigDecimal("actualBalance");
+        if (null == balance) {
+            return ZERO;
+        }
+        return balance.setScale(decimals, rounding);
+    }
 }
