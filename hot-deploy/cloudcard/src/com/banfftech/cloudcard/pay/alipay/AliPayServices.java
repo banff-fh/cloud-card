@@ -126,7 +126,8 @@ public class AliPayServices {
                     GenericValue payment = delegator.findByPrimaryKey("Payment", UtilMisc.toMap("paymentId", paymentId));
                     if("PMNT_RECEIVED".equals(payment.getString("statusId"))){
                         resultResponse = "success";
-                        if ("9000".equals(notice.getCode())) {
+                        String tradeStatus = notice.getTradeStatus();
+                        if ("TRADE_SUCCESS".equals(tradeStatus) || "TRADE_FINISHED".equals(tradeStatus)) {
                             GenericValue systemUserLogin = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
                             Map<String, Object> rechargeCloudCardDepositOutMap = dispatcher.runSync("rechargeCloudCardDeposit", UtilMisc.toMap("userLogin",
                                     systemUserLogin, "cardId", cardId, "receiptPaymentId", paymentId, "organizationPartyId", storeId));
