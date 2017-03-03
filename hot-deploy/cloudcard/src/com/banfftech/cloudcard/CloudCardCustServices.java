@@ -435,20 +435,24 @@ public class CloudCardCustServices {
 		
 		//生成的卡号
 		String newCardCode = null;
+		String description = partyGroup.getString("groupName")+"库胖卡";
+		String customerPartyId = userLogin.getString("partyId");
+		String cardId = "";
 		try {
 			newCardCode = CloudCardHelper.generateCloudCardCode(delegator);
 			String finAccountId = delegator.getNextSeqId("FinAccount");
 			Map<String, Object> finAccountMap = FastMap.newInstance();
 			finAccountMap.put("finAccountId", finAccountId);
 			finAccountMap.put("finAccountTypeId", "GIFTCERT_ACCOUNT");
-			finAccountMap.put("statusId", "FNACT_PUBLISHED");
-			finAccountMap.put("finAccountName", partyGroup.getString("groupName")+"库胖卡");
+			finAccountMap.put("finAccountName", description);
 			finAccountMap.put("finAccountCode", newCardCode);
-			finAccountMap.put("organizationPartyId", "Company");
-			finAccountMap.put("ownerPartyId", "_NA_");
+			finAccountMap.put("organizationPartyId", CloudCardConstant.PLATFORM_PARTY_ID);
+			finAccountMap.put("ownerPartyId", customerPartyId);
 			finAccountMap.put("currencyUomId", "CNY");
 			finAccountMap.put("postToGlAccountId", "213200");
 			finAccountMap.put("isRefundable", "Y");
+			finAccountMap.put("statusId", "FNACT_ACTIVE");
+	        finAccountMap.put("fromDate", UtilDateTime.nowTimestamp());
 			
 			//保存finaccount数据
 			GenericValue finAccount = delegator.makeValue("FinAccount", finAccountMap);
@@ -457,6 +461,22 @@ public class CloudCardCustServices {
 			//保存finaccountRole数据
 			GenericValue finAccountRole = delegator.makeValue("FinAccountRole", UtilMisc.toMap( "finAccountId", finAccountId, "partyId", storeId, "roleTypeId", "DISTRIBUTOR","fromDate", UtilDateTime.nowTimestamp()));
 			finAccountRole.create();
+			
+			
+            // 创建PaymentMethod GiftCard
+            Map<String, Object> giftCardInMap = FastMap.newInstance();
+            giftCardInMap.putAll(context);
+            giftCardInMap.put("cardNumber", newCardCode);
+            giftCardInMap.put("description", description);
+            giftCardInMap.put("customerPartyId", customerPartyId);
+            giftCardInMap.put("finAccountId", finAccountId);
+            Map<String, Object> giftCardOutMap = CloudCardHelper.createPaymentMethodAndGiftCard(dctx, giftCardInMap);
+            if (ServiceUtil.isError(giftCardOutMap)) {
+                return giftCardOutMap;
+            }
+
+            cardId = (String) giftCardOutMap.get("paymentMethodId");
+			
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardGenCardNumberError", locale));
@@ -467,15 +487,15 @@ public class CloudCardCustServices {
 		try {
 			Map<String,Object> initMap = FastMap.newInstance();
 			initMap.put("userLogin", userLogin);
-			initMap.put("cardId", newCardCode);
+			initMap.put("cardId", cardId);
 			initMap.put("paymentType", paymentType);
 			initMap.put("body", "买卡");
 			initMap.put("totalFee", totalFee);
 			initMap.put("paymentService", paymentService);
 
-			if("aliPay".equals(paymentType)){
+			if(CloudCardConstant.PAY_CHANNEL_ALIPAY.equals(paymentType)){
 				initMap.put("subject", "购买库胖卡");
-			}else if("wxPay".equals(paymentType)){
+			}else if(CloudCardConstant.PAY_CHANNEL_WXPAY.equals(paymentType)){
 				initMap.put("tradeType", "APP");
 			}
 			uniformOrderMap = dispatcher.runSync("uniformOrder", initMap);
