@@ -91,8 +91,8 @@ public class CloudCardCustServices {
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("listSize", lbsResult.get("total").toString());
-		result.put("longitude", longitude);
-		result.put("latitude",latitude);
+		result.put("longitude", String.valueOf(longitude));
+		result.put("latitude",String.valueOf(latitude));
 		result.put("storeList", storeList);
 		return result;
 	}
