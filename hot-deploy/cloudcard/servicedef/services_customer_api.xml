@@ -99,8 +99,8 @@
 	<service name="userStoreListLBS" engine="java"
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="userStoreListLBS" auth="true">
 		<description>查找圈子</description>
-		<attribute name="longitude" type="String" mode="IN" optional="true"><description>经度</description></attribute>
-		<attribute name="latitude" type="String" mode="IN" optional="false"><description>纬度</description></attribute>
+		<attribute name="longitude" type="String" mode="INOUT" optional="true"><description>经度</description></attribute>
+		<attribute name="latitude" type="String" mode="INOUT" optional="false"><description>纬度</description></attribute>
 		<attribute name="listSize" type="String" mode="OUT" optional="true"><description>店铺列表大小</description></attribute>
 		<attribute name="storeList" type="List" mode="OUT" optional="true"><description>店铺列表</description></attribute>
 	</service>
