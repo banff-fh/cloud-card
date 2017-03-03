@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
@@ -99,6 +101,14 @@ public class SmsServices {
 		String teleNumber = (String) context.get("teleNumber");
 		String userType = (String) context.get("userType");
 		java.sql.Timestamp nowTimestamp  = UtilDateTime.nowTimestamp();
+		
+		//校验电话号码是否非法
+		Pattern p = Pattern.compile("^((13[0-9])|(15[^4,\\D])|(14[57])|(17[0])|(17[7])|(18[0,0-9]))\\d{8}$");  
+		Matcher m = p.matcher(teleNumber);  
+		
+		if(!m.matches()){
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardTelNumIllegal", locale));
+		}
 
 		GenericValue customer;
 		try {

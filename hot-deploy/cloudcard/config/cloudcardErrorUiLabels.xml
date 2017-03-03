@@ -241,4 +241,8 @@
         <value xml:lang="en">Abnormal positioning</value>
         <value xml:lang="zh">手机定位异常</value>
     </property>
+    <property key="CloudCardTelNumIllegal">
+        <value xml:lang="en">Telephone number illegal</value>
+        <value xml:lang="zh">手机号码输入有误</value>
+    </property>
 </resource>
