@@ -1,5 +1,7 @@
 package com.banfftech.cloudcard;
 
+import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -438,6 +440,8 @@ public class CloudCardCustServices {
 		String description = partyGroup.getString("groupName")+"库胖卡";
 		String customerPartyId = userLogin.getString("partyId");
 		String cardId = "";
+		Timestamp fromDate = UtilDateTime.adjustTimestamp(UtilDateTime.nowTimestamp(), Calendar.SECOND, -2);
+		
 		try {
 			newCardCode = CloudCardHelper.generateCloudCardCode(delegator);
 			String finAccountId = delegator.getNextSeqId("FinAccount");
@@ -452,14 +456,14 @@ public class CloudCardCustServices {
 			finAccountMap.put("postToGlAccountId", "213200");
 			finAccountMap.put("isRefundable", "Y");
 			finAccountMap.put("statusId", "FNACT_ACTIVE");
-	        finAccountMap.put("fromDate", UtilDateTime.nowTimestamp());
+	        finAccountMap.put("fromDate", fromDate);
 			
 			//保存finaccount数据
 			GenericValue finAccount = delegator.makeValue("FinAccount", finAccountMap);
 			finAccount.create();
 			
 			//保存finaccountRole数据
-			GenericValue finAccountRole = delegator.makeValue("FinAccountRole", UtilMisc.toMap( "finAccountId", finAccountId, "partyId", storeId, "roleTypeId", "DISTRIBUTOR","fromDate", UtilDateTime.nowTimestamp()));
+			GenericValue finAccountRole = delegator.makeValue("FinAccountRole", UtilMisc.toMap( "finAccountId", finAccountId, "partyId", storeId, "roleTypeId", "DISTRIBUTOR","fromDate", fromDate));
 			finAccountRole.create();
 			
 			
@@ -470,6 +474,7 @@ public class CloudCardCustServices {
             giftCardInMap.put("description", description);
             giftCardInMap.put("customerPartyId", customerPartyId);
             giftCardInMap.put("finAccountId", finAccountId);
+            giftCardInMap.put("fromDate", fromDate);
             Map<String, Object> giftCardOutMap = CloudCardHelper.createPaymentMethodAndGiftCard(dctx, giftCardInMap);
             if (ServiceUtil.isError(giftCardOutMap)) {
                 return giftCardOutMap;
