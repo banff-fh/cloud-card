@@ -69,6 +69,10 @@ public class CloudCardCustServices {
 		
 		List<Map<String,Object>> storeList = FastList.newInstance();
 		JSONObject lbsResult = JSONObject.parseObject(BaiduLBSUtil.nearby(params));
+		//如果地图返回状态非0，全部定义为手机定位异常
+		if(!"0".equals(lbsResult.get("status").toString())){
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardAbnormalPositioning", locale));
+		}
 		if(!"0".equalsIgnoreCase(lbsResult.get("total").toString())){
 			JSONArray jsonArray = JSONObject.parseArray(lbsResult.get("contents").toString());
 			for(int i = 0 ;i<jsonArray.size();i++){
