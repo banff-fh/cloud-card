@@ -15,9 +15,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.jdom.JDOMException;
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.LocalDispatcher;
@@ -31,6 +34,9 @@ import javolution.util.FastMap;
 
 public class WeiXinPayServices {
 	public static final String resourceError = "cloudcardErrorUiLabels";
+	public static final String  module = WeiXinPayServices.class.getName();
+	
+	
 
 	// 获取商品信息
 	public static String getProduct(Delegator delegator, Map<String, Object> context) {
@@ -40,8 +46,10 @@ public class WeiXinPayServices {
 		String wxAppID = (String) context.get("wxAppID");
 		String wxPartnerid = (String) context.get("wxPartnerid");
 		String notifyUrl = (String) context.get("notifyUrl");
-		String paymentService = (String) context.get("paymentService");
-		String cardCode= (String) context.get("cardId");
+//		String paymentService = (String) context.get("paymentService");
+		String receiptPaymentId = (String) context.get("receiptPaymentId");
+		String cardId= (String) context.get("cardId");
+		String storeId= (String) context.get("storeId");
 
 		// 获取随机数
 		String nonceStr = TenpayUtil.getNonceStr(32);
@@ -59,7 +67,7 @@ public class WeiXinPayServices {
 		parameterMap.put("spbill_create_ip", "127.0.0.1");
 		parameterMap.put("total_fee", Integer.valueOf(totalFee) * 100);
 		parameterMap.put("trade_type", tradeType);
-		parameterMap.put("attach", paymentService + "," + cardCode);
+        parameterMap.put("attach", receiptPaymentId + "," + cardId + "," + storeId);
 
 		// 签名参数
 		String sign = TenpayUtil.createSign("UTF-8", parameterMap, context.get("appKey").toString());
@@ -116,7 +124,7 @@ public class WeiXinPayServices {
 
 		// 返回app签名等信息
 		String noncestr = TenpayUtil.getNonceStr(32);
-		String prepayid = prepayOrderMap.get("prepay_id").toString();
+		String prepayid = prepayOrderMap.get("prepay_id");
 		String timestamp = String.valueOf(System.currentTimeMillis()/1000);
 //TenpayUtil.getCurrTime();
 		
@@ -163,12 +171,38 @@ public class WeiXinPayServices {
 			inStream.close();
 			String result = new String(outSteam.toByteArray(), "utf-8");// 获取微信调用我们notify_url的返回信息
 			Map<Object, Object> map = XMLUtil.doXMLParse(result);
-			if (map.get("result_code").toString().equalsIgnoreCase("SUCCESS")) {
+			if (map.get("return_code").toString().equalsIgnoreCase("SUCCESS")) {
 				String appKey = EntityUtilProperties.getPropertyValue("cloudcard", "weixin.key", delegator);
 				boolean verifyWeixinNotifySign = verifyWeixinNotify(map, appKey);
 				if (verifyWeixinNotifySign) {
 					// 支付成功
-					
+				     if( "SUCCESS".equalsIgnoreCase((String) map.get("result_code"))){
+
+                        String attach = (String) map.get("attach");
+                        String[] arr = attach.split(",");
+                        String paymentId = "";
+                        String cardId = "";
+                        String storeId = "";
+                        if (arr.length >= 3) {
+                            paymentId = arr[0];
+                            cardId = arr[1];
+                            storeId = arr[2];
+                        }
+
+				         GenericValue systemUserLogin = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+                         Map<String, Object> rechargeCloudCardDepositOutMap = dispatcher.runSync("rechargeCloudCardDeposit", UtilMisc.toMap("userLogin",
+                                 systemUserLogin, "cardId", cardId, "receiptPaymentId", paymentId, "organizationPartyId", storeId));
+
+                         if (!ServiceUtil.isSuccess(rechargeCloudCardDepositOutMap)) {
+                             // TODO 平台入账 不成功 发起退款
+                         }
+				         
+				     }else{
+				         //支付失败
+				         
+				     }
+				    
+				    
 					SortedMap<String,Object> sort=new TreeMap<String,Object>();
 					sort.put("return_code", "SUCCESS");
 					sort.put("return_msg", "OK");
@@ -183,10 +217,8 @@ public class WeiXinPayServices {
 				}
 			}
 
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (JDOMException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+		    Debug.logError(e.getMessage(), module);
 		}
 		
 		//返回给微信
@@ -195,8 +227,7 @@ public class WeiXinPayServices {
 			response.getWriter().write(wxReturn);
 			response.getWriter().flush();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		    Debug.logError(e.getMessage(), module);
 		}
 	}
 	

@@ -174,14 +174,14 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 	
-	<!-- 支付宝预支付订单 -->
+	<!-- 支付宝回调通知 -->
     <request-map uri="aliPayNotify">
     	<security https="false" auth="false" />
         <event type="java" path="com.banfftech.cloudcard.pay.PayServices" invoke="aliPayNotify"></event>
         <response name="success" type="none"/>
     </request-map>
 	
-	<!-- 微信预支付订单 -->
+	<!-- 微信回调通知 -->
     <request-map uri="wxPayNotify">
         <security https="false" auth="false" />
         <event type="java" path="com.banfftech.cloudcard.pay.PayServices" invoke="wxPayNotify"></event>
@@ -369,12 +369,6 @@
 		<event type="java" path="com.banfftech.cloudcard.CloudCardQueryServices" invoke="exportCardExcel"></event>
 		<response name="success" type="none"/>
 		<response name="error" type="request-redirect-noparam" value="findCard"/>
-	</request-map>
-	
-	<!-- 支付结果 -->
-	<request-map uri="receiveNotify">
-		<event type="java" path="com.banfftech.cloudcard.pay.alipay.AsynAlipayNotifyServices" invoke="receiveNotify"></event>
-		<response name="success" type="none"></response>
 	</request-map>
 	
     <!-- 商家结算页面 -->

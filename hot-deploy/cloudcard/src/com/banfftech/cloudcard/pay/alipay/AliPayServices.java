@@ -12,10 +12,13 @@ import java.util.Random;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.ofbiz.base.util.UtilHttp;
+import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
+import org.ofbiz.entity.GenericEntityException;
+import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.LocalDispatcher;
@@ -27,12 +30,12 @@ import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.request.AlipayTradeQueryRequest;
 import com.alipay.api.response.AlipayTradeQueryResponse;
+import com.banfftech.cloudcard.CloudCardHelper;
+import com.banfftech.cloudcard.constant.CloudCardConstant;
 import com.banfftech.cloudcard.pay.alipay.bean.AlipayNotification;
 import com.banfftech.cloudcard.pay.alipay.util.AlipayNotify;
 import com.banfftech.cloudcard.pay.alipay.util.RequestUtils;
 import com.banfftech.cloudcard.pay.alipay.util.StringUtils;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import javolution.util.FastMap;
 import net.sf.json.JSONObject;
@@ -58,10 +61,11 @@ public class AliPayServices {
 		String rsaPrivate = EntityUtilProperties.getPropertyValue("cloudcard.properties", "aliPay.rsa_private",delegator);
 		String notifyUrl = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.notifyUrl", delegator);
 		String signType = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.signType", delegator);
-		String paymentService = (String) context.get("paymentService");
-		String cardCode = (String) context.get("cardId");
+		String receiptPaymentId = (String) context.get("receiptPaymentId");
+		String storeId = (String) context.get("storeId");
+		String cardId = (String) context.get("cardId");
 		
-		String orderInfo = getOrderInfo(partner, seller, subject, body, totalFee, getOutTradeNo(), notifyUrl,paymentService,cardCode);
+		String orderInfo = getOrderInfo(partner, seller, subject, body, totalFee, getOutTradeNo(), notifyUrl,receiptPaymentId,cardId, storeId);
 		String sign = StringUtils.sign(orderInfo, rsaPrivate, signType);
 
 		try {
@@ -88,6 +92,9 @@ public class AliPayServices {
 
 	public static void aliPayNotify(HttpServletRequest request, HttpServletResponse response) {
 
+	    LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
+	    Delegator delegator =  dispatcher.getDelegator();
+
 		Map<String, String> underScoreKeyMap = RequestUtils.getStringParams(request);
 		Map<String, String> camelCaseKeyMap = RequestUtils.convertKeyToCamelCase(underScoreKeyMap);
 		// 首先验证调用是否来自支付宝
@@ -103,9 +110,36 @@ public class AliPayServices {
 			try {
 				printWriter = response.getWriter();
 				// do business
-				if (verifyResult) {
-					resultResponse = "success";
-				}
+                if (verifyResult) {
+                    resultResponse = "success";
+                    String cbstr = notice.getExtraCommonParam();
+                    String[] arr = cbstr.split(",");
+                    String paymentId = "";
+                    String cardId = "";
+                    String storeId = "";
+                    if (arr.length >= 3) {
+                        paymentId = arr[0];
+                        cardId = arr[1];
+                        storeId = arr[2];
+                    }
+
+                    GenericValue payment = delegator.findByPrimaryKey("Payment", UtilMisc.toMap("paymentId", paymentId));
+                    if("PMNT_RECEIVED".equals(payment.getString("statusId"))){
+                        resultResponse = "success";
+                        if ("9000".equals(notice.getCode())) {
+                            GenericValue systemUserLogin = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+                            Map<String, Object> rechargeCloudCardDepositOutMap = dispatcher.runSync("rechargeCloudCardDeposit", UtilMisc.toMap("userLogin",
+                                    systemUserLogin, "cardId", cardId, "receiptPaymentId", paymentId, "organizationPartyId", storeId));
+
+                            if (!ServiceUtil.isSuccess(rechargeCloudCardDepositOutMap)) {
+                                // TODO 平台入账 不成功 发起退款
+                            }
+                            
+                        } else {
+                            
+                        }
+                    }
+                }
 				// fail due to verification error
 				else {
 					resultResponse = "fail";
@@ -199,9 +233,10 @@ public class AliPayServices {
 
 	/**
 	 * create the order info. 创建订单信息 由服务器生成
+	 * @param storeId 
 	 */
 	private static String getOrderInfo(String partner, String seller, String subject, String body, String price,
-			String out_trade_no, String notifyUrl,String paymentService,String cardCode) {
+			String out_trade_no, String notifyUrl,String receiptPaymentId,String cardId, String storeId) {
 
 		// 签约合作者身份ID
 		String orderInfo = "partner=" + "\"" + partner + "\"";
@@ -247,7 +282,7 @@ public class AliPayServices {
 		orderInfo += "&return_url=\"m.alipay.com\"";
 		
 		//回调返回
-		orderInfo += "&passback_params=" + "\"" + paymentService+","+cardCode + "\"";
+        orderInfo += "&passback_params=" + "\"" + receiptPaymentId + "," + cardId + "," + storeId + "\"";
 
 		// 调用银行卡支付，需配置此参数，参与签名， 固定值 （需要签约《无线银行卡快捷支付》才能使用）
 		// orderInfo += "&paymethod=\"expressGateway\"";

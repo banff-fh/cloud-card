@@ -12,6 +12,8 @@ public class AlipayNotification implements Serializable {
 	 */
 	private static final long serialVersionUID = -8638199167144867399L;
 
+	private String code;
+
 	private Integer alipayNoticeId;
 
 	private String notifyId;
@@ -67,7 +69,15 @@ public class AlipayNotification implements Serializable {
 
 	private String refundStatus;
 
-	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
+	public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	private Date gmtRefund;
 
 	private Boolean verifyResult;
