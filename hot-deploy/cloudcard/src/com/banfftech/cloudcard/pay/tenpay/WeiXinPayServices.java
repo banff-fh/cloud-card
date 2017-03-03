@@ -65,7 +65,7 @@ public class WeiXinPayServices {
 		parameterMap.put("notify_url", notifyUrl);
 		parameterMap.put("out_trade_no", TenpayUtil.getCurrTime());
 		parameterMap.put("spbill_create_ip", "127.0.0.1");
-        parameterMap.put("total_fee", Double.valueOf(totalFee) * 100 );
+        parameterMap.put("total_fee", Math.rint(Double.valueOf(totalFee) * 100));
 		parameterMap.put("trade_type", tradeType);
         parameterMap.put("attach", receiptPaymentId + "," + cardId + "," + storeId);
 
