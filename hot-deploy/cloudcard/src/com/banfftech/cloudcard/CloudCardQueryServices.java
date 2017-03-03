@@ -58,7 +58,8 @@ public class CloudCardQueryServices {
 		GenericValue userLogin = (GenericValue) context.get("userLogin");
 		String partyId = (String) userLogin.get("partyId");
 		String storeId = (String) context.get("storeId");
-		
+		//是否能再次购买卡
+		String isBuyCard = "Y";
 		Integer viewIndex = (Integer) context.get("viewIndex");
 		Integer viewSize = (Integer) context.get("viewSize");
         viewIndex = (viewIndex == null || viewIndex < 0) ? 0 : viewIndex;
@@ -155,11 +156,16 @@ public class CloudCardQueryServices {
 			cloudCardMap.put("distributorPartyId", cloudCard.get("distributorPartyId")); //发卡商家partyId
 			// 卡主
 			cloudCardMap.put("ownerPartyId", cloudCard.get("ownerPartyId")); 
+			//如果本店已经购买卡，不能在购买卡
+			if(storeId.equalsIgnoreCase(cloudCard.getString("distributorPartyId"))){
+				isBuyCard = "N";
+			}
 			cloudCardList.add(cloudCardMap);
 		}
 		
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("cloudCardList", cloudCardList);
+		result.put("isBuyCard", isBuyCard);
 		result.put("listSize", listSize);
 		return result;
 	}

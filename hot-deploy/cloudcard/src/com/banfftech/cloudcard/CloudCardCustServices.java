@@ -359,6 +359,7 @@ public class CloudCardCustServices {
 		result.put("qrCode", qrCode);
 		result.put("storeId", storeId);
 		result.put("storeName", groupName);
+		result.put("isBuyCard", cloudCardMap.get("isBuyCard"));
 		result.put("cloudCardList", cloudCardMap.get("cloudCardList"));
 		return result;
 	}
