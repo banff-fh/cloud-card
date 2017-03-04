@@ -17,6 +17,7 @@ import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
+import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
@@ -28,6 +29,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.auth0.jwt.JWTSigner;
 import com.banfftech.cloudcard.constant.CloudCardConstant;
 import com.banfftech.cloudcard.lbs.BaiduLBSUtil;
+import com.banfftech.cloudcard.util.CloudCardInfoUtil;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
@@ -314,55 +316,73 @@ public class CloudCardCustServices {
 		
 	}
 	
-	/**
-	 * C端扫码获取商户信息和卡列表
-	 * @param dctx
-	 * @param context
-	 * @return
-	 */
-	public static Map<String, Object> userScanCodeGetCardAndStoreInfo(DispatchContext dctx, Map<String, Object> context) {
-		LocalDispatcher dispatcher = dctx.getDispatcher();
-		Delegator delegator = dctx.getDelegator();
-		GenericValue userLogin = (GenericValue) context.get("userLogin");
-		Locale locale = (Locale) context.get("locale");
-		//获取店铺二维码
-		String qrCode = (String) context.get("qrCode");
-		GenericValue partyGroup = null;
-		try {
-			partyGroup = CloudCardHelper.getPartyGroupByQRcode(qrCode, delegator);
-		} catch (GenericEntityException e) {
-			Debug.logError(e.getMessage(), module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-		}
+    /**
+     * C端扫码获取商户信息和卡列表
+     * 
+     * @param dctx
+     * @param context
+     * @return
+     */
+    public static Map<String, Object> userScanCodeGetCardAndStoreInfo(DispatchContext dctx, Map<String, Object> context) {
+        // LocalDispatcher dispatcher = dctx.getDispatcher();
+        Delegator delegator = dctx.getDelegator();
+        GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
+        // 获取店铺二维码
+        String qrCode = (String) context.get("qrCode");
+        GenericValue partyGroup = null;
+        try {
+            partyGroup = CloudCardHelper.getPartyGroupByQRcode(qrCode, delegator);
+        } catch (GenericEntityException e) {
+            Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+        }
 
-		if(null == partyGroup){
-			Debug.logWarning("商户qrCode:" + qrCode + "不存在", module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardOrganizationPartyNotFound", locale));
-		}
+        if (null == partyGroup) {
+            Debug.logWarning("商户qrCode:" + qrCode + "不存在", module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardOrganizationPartyNotFound", locale));
+        }
 
-		String storeId = partyGroup.getString("partyId");
-		String groupName = partyGroup.getString("groupName");
+        String storeId = partyGroup.getString("partyId");
+        String groupName = partyGroup.getString("groupName");
+        String groupOwnerId = null;
 
-		Map<String,Object> cardMap = FastMap.newInstance();
-		cardMap.put("userLogin", userLogin);
-		cardMap.put("storeId", storeId);
-		Map<String,Object> cloudCardMap = FastMap.newInstance();
-		try {
-			cloudCardMap = dispatcher.runSync("myCloudCards", cardMap);
-		} catch (GenericServiceException e) {
-			 Debug.logError(e.getMessage(), module);
-	         return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-		}
-		
-		// 返回结果
-		Map<String, Object> result = ServiceUtil.returnSuccess();
-		result.put("qrCode", qrCode);
-		result.put("storeId", storeId);
-		result.put("storeName", groupName);
-		result.put("isBuyCard", cloudCardMap.get("isBuyCard"));
-		result.put("cloudCardList", cloudCardMap.get("cloudCardList"));
-		return result;
-	}
+        List<GenericValue> cloudCards = null;
+        try {
+            EntityCondition cond = CloudCardInfoUtil.createLookupMyStoreCardCondition(delegator, userLogin.getString("partyId"), storeId);
+            cloudCards = delegator.findList("CloudCardInfo", cond, null, UtilMisc.toList("-fromDate"), null, false);
+            groupOwnerId = CloudCardHelper.getGroupOwneIdByStoreId(delegator, storeId, true);
+        } catch (GenericEntityException e) {
+            Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+        }
+
+        // 有本店卡？
+        boolean hasStoreCard = false;
+        // 有圈主店的卡？
+        boolean hasGroupCard = false;
+
+        List<Object> cloudCardList = FastList.newInstance();
+        if (UtilValidate.isNotEmpty(cloudCards)) {
+            List<String> distributorPartyIds = EntityUtil.getFieldListFromEntityList(cloudCards, "distributorPartyId", true);
+            hasStoreCard = distributorPartyIds.contains(storeId);
+            hasGroupCard = distributorPartyIds.contains(groupOwnerId);
+            for (GenericValue card : cloudCards) {
+                cloudCardList.add(CloudCardInfoUtil.packageCloudCardInfo(delegator, card));
+            }
+        }
+
+        // 返回结果
+        Map<String, Object> result = ServiceUtil.returnSuccess();
+        result.put("qrCode", qrCode);
+        result.put("storeId", storeId);
+        result.put("groupOwnerId", groupOwnerId);
+        result.put("storeName", groupName);
+        result.put("hasStoreCard", hasStoreCard ? CloudCardConstant.IS_Y : CloudCardConstant.IS_N);
+        result.put("hasGroupCard", hasGroupCard ? CloudCardConstant.IS_Y : CloudCardConstant.IS_N);
+        result.put("cloudCardList", cloudCardList);
+        return result;
+    }
 	
 	/**
 	 * C端选卡获取商户信息

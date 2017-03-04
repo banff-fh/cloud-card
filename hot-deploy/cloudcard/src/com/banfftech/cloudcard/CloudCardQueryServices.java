@@ -3,7 +3,6 @@ package com.banfftech.cloudcard;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -17,6 +16,7 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilHttp;
 import org.ofbiz.base.util.UtilMisc;
@@ -37,6 +37,7 @@ import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
 import com.banfftech.cloudcard.constant.CloudCardConstant;
+import com.banfftech.cloudcard.util.CloudCardInfoUtil;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
@@ -44,48 +45,34 @@ import javolution.util.FastMap;
 public class CloudCardQueryServices {
 	public static final String module = CloudCardQueryServices.class.getName();
 
-	/**
-	 * 查询用户卡列表
-	 * @param dctx
-	 * @param context
-	 * @return Map
-	 */
-	public static Map<String, Object> myCloudCards(DispatchContext dctx, Map<String, Object> context) {
-		LocalDispatcher dispatcher = dctx.getDispatcher();
-		Delegator delegator = dispatcher.getDelegator();
-		Locale locale = (Locale) context.get("locale");
-		
-		GenericValue userLogin = (GenericValue) context.get("userLogin");
-		String partyId = (String) userLogin.get("partyId");
-		String storeId = (String) context.get("storeId");
-		//是否能再次购买卡
-		String isBuyCard = "Y";
-		Integer viewIndex = (Integer) context.get("viewIndex");
-		Integer viewSize = (Integer) context.get("viewSize");
+    /**
+     * 查询用户卡列表
+     * 
+     * @param dctx
+     * @param context
+     * @return Map
+     */
+    public static Map<String, Object> myCloudCards(DispatchContext dctx, Map<String, Object> context) {
+        LocalDispatcher dispatcher = dctx.getDispatcher();
+        Delegator delegator = dispatcher.getDelegator();
+        Locale locale = (Locale) context.get("locale");
+
+        GenericValue userLogin = (GenericValue) context.get("userLogin");
+        String partyId = (String) userLogin.get("partyId");
+        String storeId = (String) context.get("storeId");
+        Integer viewIndex = (Integer) context.get("viewIndex");
+        Integer viewSize = (Integer) context.get("viewSize");
         viewIndex = (viewIndex == null || viewIndex < 0) ? 0 : viewIndex;
         viewSize = (viewSize == null || viewSize == 0) ? 20 : viewSize;
 
-       int start = viewIndex.intValue() * viewSize.intValue();
-       int maxRows = viewSize.intValue() * (viewIndex.intValue() + 1);
-       int listSize = 0;
+        int start = viewIndex.intValue() * viewSize.intValue();
+        int maxRows = viewSize.intValue() * (viewIndex.intValue() + 1);
+        int listSize = 0;
 
         List<GenericValue> retList = FastList.newInstance();
-
         EntityListIterator listIt = null;
-
         try {
-            EntityCondition lookupConditions = EntityCondition.makeCondition(UtilMisc.toMap("partyId", partyId, "statusId", "FNACT_ACTIVE"));
-            if (UtilValidate.isNotEmpty(storeId)) {
-                EntityCondition storeCond = EntityCondition.makeCondition("distributorPartyId", storeId);
-                String groupOwnerId = CloudCardHelper.getGroupOwneIdByStoreId(delegator, storeId, true);
-                if (null != groupOwnerId && !partyId.equals(groupOwnerId)) {
-                    // 存在圈主，且不是自己的情况，
-                    storeCond = EntityCondition.makeCondition(EntityOperator.OR, storeCond, EntityCondition.makeCondition("distributorPartyId", groupOwnerId));
-                }
-                lookupConditions = EntityCondition.makeCondition(lookupConditions, storeCond);
-            }
-            lookupConditions = EntityCondition.makeCondition(lookupConditions, EntityUtil.getFilterByDateExpr());
-
+            EntityCondition lookupConditions = CloudCardInfoUtil.createLookupMyStoreCardCondition(delegator, partyId, storeId);
             listIt = delegator.find("CloudCardInfo", lookupConditions, null, null, UtilMisc.toList("-fromDate"),
                     new EntityFindOptions(true, EntityFindOptions.TYPE_SCROLL_INSENSITIVE, EntityFindOptions.CONCUR_READ_ONLY, -1, maxRows, false));
             listSize = listIt.getResultsSizeAfterPartialList();
@@ -99,76 +86,24 @@ public class CloudCardQueryServices {
                 try {
                     listIt.close();
                 } catch (GenericEntityException e) {
-                    Debug.logError(e.getMessage().toString(), module);
+                    Debug.logError(e.getMessage(), module);
                 }
             }
         }
 
-		List<Object> cloudCardList = FastList.newInstance();
+        List<Object> cloudCardList = FastList.newInstance();
 
-		for(GenericValue cloudCard : retList){
-			Map<String, Object> cloudCardMap = FastMap.newInstance();
-			String organizationPartyId = cloudCard.get("distributorPartyId").toString();
-			if(organizationPartyId != null){
-				//图片地址
-				cloudCardMap.put("cardImg", EntityUtilProperties.getPropertyValue("cloudcard","cardImg."+organizationPartyId,delegator));
-			}
-			String cardName = UtilFormatOut.checkEmpty(cloudCard.getString("description"), cloudCard.getString("finAccountName"));
-			String authThruDate="";
-			cloudCardMap.put("cardName", cardName); //卡名
-			String cardCode = cloudCard.getString("cardNumber");
-			cloudCardMap.put("cardCode", cardCode); //卡二维码
-			cloudCardMap.put("cardId", cloudCard.get("paymentMethodId"));// 卡id
-			
-			boolean isAuthorized = false;
-			if(cardCode.startsWith(CloudCardConstant.AUTH_CARD_CODE_PREFIX)){
-				// 如果是别人授权给我的卡，显示授权金额的余额
-				cloudCardMap.put("isAuthToMe", "Y"); // 已授权给我
-				cloudCardMap.put("isAuthToOthers", "N"); // 已授权给别人
-				cloudCardMap.put("authFromDate", cloudCard.getTimestamp("fromDate").toString()); // 授权开始时间
-				if(UtilValidate.isNotEmpty(cloudCard.getTimestamp("thruDate"))){
-					authThruDate = cloudCard.getTimestamp("thruDate").toString();
-				}
-				cloudCardMap.put("authThruDate", authThruDate); // 授权结束时间
-				cloudCardMap.put("authFromPartyId", cloudCard.get("ownerPartyId")); // 谁授权
-				cloudCardMap.put("authToPartyId", partyId); // 授权给谁
-			}else{
-				//账户可用余额
-				// 如果是已经授权给别人的卡，展示授权开始、结束时间，以及授权给谁
-				Map<String, Object> cardAuthorizeInfo = CloudCardHelper.getCardAuthorizeInfo(cloudCard, delegator);
-				isAuthorized = (boolean) cardAuthorizeInfo.get("isAuthorized");
-				if(isAuthorized){
-					cloudCardMap.put("isAuthToMe", "N"); // 已授权给我
-					cloudCardMap.put("isAuthToOthers", "Y"); // 已授权给别人
-					cloudCardMap.put("authFromDate", ((Timestamp)cardAuthorizeInfo.get("fromDate")).toString()); // 授权开始时间
-					if(UtilValidate.isNotEmpty(cardAuthorizeInfo.get("thruDate"))){
-						authThruDate = ((Timestamp)cardAuthorizeInfo.get("thruDate")).toString();
-					}
-					cloudCardMap.put("authThruDate", authThruDate); // 授权结束时间
-					cloudCardMap.put("authFromPartyId", partyId); // 谁授权
-					cloudCardMap.put("authToPartyId", cardAuthorizeInfo.get("toPartyId")); // 授权给谁
-				}else{
-					cloudCardMap.put("isAuthToMe", "N"); // 已授权给我
-					cloudCardMap.put("isAuthToOthers", "N"); // 已授权给别人
-				}
-			}
-			cloudCardMap.put("cardBalance", CloudCardHelper.getCloudCardBalance(cloudCard, isAuthorized));
-			cloudCardMap.put("distributorPartyId", cloudCard.get("distributorPartyId")); //发卡商家partyId
-			// 卡主
-			cloudCardMap.put("ownerPartyId", cloudCard.get("ownerPartyId")); 
-			//如果本店已经购买卡，不能在购买卡
-			if(storeId.equalsIgnoreCase(cloudCard.getString("distributorPartyId"))){
-				isBuyCard = "N";
-			}
-			cloudCardList.add(cloudCardMap);
-		}
-		
-		Map<String, Object> result = ServiceUtil.returnSuccess();
-		result.put("cloudCardList", cloudCardList);
-		result.put("isBuyCard", isBuyCard);
-		result.put("listSize", listSize);
-		return result;
-	}
+        for (GenericValue cloudCard : retList) {
+            Map<String, Object> cloudCardMap = CloudCardInfoUtil.packageCloudCardInfo(delegator, cloudCard);
+            cloudCardList.add(cloudCardMap);
+        }
+
+        Map<String, Object> result = ServiceUtil.returnSuccess();
+        result.put("cloudCardList", cloudCardList);
+        result.put("listSize", listSize);
+        return result;
+    }
+
 
 	/**
 	 * 查询用户交易流水
@@ -236,7 +171,7 @@ public class CloudCardQueryServices {
                     eli = null;  
                 }  
             } catch (GenericEntityException e) {  
-                Debug.logError(e.getMessage().toString(), module);  
+                Debug.logError(e.getMessage(), module);  
             }  
         }
 		List<Map<String, Object>> paymentsList = FastList.newInstance();
@@ -330,7 +265,7 @@ public class CloudCardQueryServices {
                     eli = null;  
                 }  
             } catch (GenericEntityException e) {  
-                Debug.logError(e.getMessage().toString(), module);  
+                Debug.logError(e.getMessage(), module);  
             }  
         }
 		
@@ -576,7 +511,7 @@ public class CloudCardQueryServices {
 			it.close();
 
 			HSSFWorkbook wb = new HSSFWorkbook();
-			HSSFSheet sheet = wb.createSheet("卡云卡");
+			HSSFSheet sheet = wb.createSheet("库胖卡");
 			HSSFRow row1 = sheet.createRow(0);
 			HSSFCell cell0 = row1.createCell((short) 0);
 			HSSFCell cell1 = row1.createCell((short) 1);
@@ -593,7 +528,7 @@ public class CloudCardQueryServices {
 					ce1.setCellValue(String.valueOf(mm.get("finAccountCode")));
 					try {
 						//导出后更新finaccount状态
-						if(mm.get("statusId").toString().equalsIgnoreCase("FNACT_CREATED") ){
+						if("FNACT_CREATED".equalsIgnoreCase(mm.getString("statusId"))){
 							GenericValue finAccount = delegator.findByPrimaryKey("FinAccount",UtilMisc.toMap("finAccountId", mm.get("finAccountId")) );
 							finAccount.put("statusId", "FNACT_PUBLISHED");
 							finAccounts.add(finAccount);
@@ -604,7 +539,8 @@ public class CloudCardQueryServices {
 				}
 				delegator.storeAll(finAccounts);
 				response.reset();
-				response.addHeader("Content-Disposition", "attachment;filename=" + new String("卡云卡生成的卡号.xls".getBytes("utf-8"), "ISO8859-1"));
+                response.addHeader("Content-Disposition",
+                        "attachment;filename=" + new String(("库胖卡_" + UtilDateTime.nowAsString() + ".xls").getBytes("utf-8"), "ISO8859-1"));
 				response.setContentType("application/msexcel;charset=utf-8");
 				OutputStream out = response.getOutputStream();
 				wb.write(out);
@@ -623,6 +559,7 @@ public class CloudCardQueryServices {
 	 * @param dctx
 	 * @param context
 	 * @return Map
+	 * @deprecated 不需要这个接口，由各app商店负责更新
 	 */
 	public static Map<String, Object> checkAppVersion(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();

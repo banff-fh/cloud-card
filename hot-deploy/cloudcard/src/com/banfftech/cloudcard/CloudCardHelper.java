@@ -998,4 +998,5 @@ public class CloudCardHelper {
         }
         return balance.setScale(decimals, rounding);
     }
+
 }
