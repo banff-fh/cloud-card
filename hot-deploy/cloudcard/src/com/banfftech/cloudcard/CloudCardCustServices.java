@@ -380,8 +380,8 @@ public class CloudCardCustServices {
         result.put("storeId", storeId);
         result.put("groupOwnerId", groupOwnerId);
         result.put("storeName", groupName);
-        result.put("hasStoreCard", hasStoreCard ? CloudCardConstant.IS_Y : CloudCardConstant.IS_N);
-        result.put("hasGroupCard", hasGroupCard ? CloudCardConstant.IS_Y : CloudCardConstant.IS_N);
+        result.put("canBuyStoreCard", hasStoreCard ? CloudCardConstant.IS_N : CloudCardConstant.IS_Y);
+        result.put("canBuyGroupCard", (groupOwnerId != null && !hasGroupCard) ? CloudCardConstant.IS_Y : CloudCardConstant.IS_N);
         result.put("cloudCardList", cloudCardList);
         return result;
     }
