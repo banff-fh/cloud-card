@@ -124,8 +124,8 @@ public class CloudCardCustServices {
 		try {
 			partyGroup = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", storeId));
 		} catch (GenericEntityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		    Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 
 		if (UtilValidate.isNotEmpty( partyGroup)) {
@@ -139,8 +139,8 @@ public class CloudCardCustServices {
 		try {
 			PartyAndContactMechs = delegator.findList("PartyAndContactMech", EntityCondition.makeCondition("partyId", storeId), null, null, null, true);
 		} catch (GenericEntityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		    Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 
 		if (UtilValidate.isNotEmpty(PartyAndContactMechs)) {
@@ -159,8 +159,8 @@ public class CloudCardCustServices {
 		try {
 			partyAndGeoPoints = delegator.findList("PartyAndGeoPoint", EntityCondition.makeCondition("partyId", storeId), null, null, null, true);
 		} catch (GenericEntityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		    Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 		
 		if(UtilValidate.isNotEmpty(partyAndGeoPoints)){
@@ -198,8 +198,9 @@ public class CloudCardCustServices {
 		String partyGroupId = null;
 		try {
 			partyGroupId = CloudCardHelper.getGroupIdByStoreId(delegator,storeId,false);
-		} catch (GenericEntityException e1) {
-			e1.printStackTrace();
+		} catch (GenericEntityException e) {
+		    Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 		
 		//获取圈名
@@ -207,8 +208,9 @@ public class CloudCardCustServices {
 		GenericValue pg = null;
 		try {
 			pg = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", partyGroupId));
-		} catch (GenericEntityException e1) {
-			e1.printStackTrace();
+		} catch (GenericEntityException e) {
+		    Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 		
 		if(UtilValidate.isNotEmpty(pg)){
@@ -220,8 +222,8 @@ public class CloudCardCustServices {
 		try {
 			storeIdList = CloudCardHelper.getStoreGroupPartnerListByStoreId(delegator,storeId,true);
 		} catch (GenericEntityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		    Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 		
 		List<Map<String,Object>> storeList = FastList.newInstance();
@@ -238,9 +240,9 @@ public class CloudCardCustServices {
 				Boolean isStoreGroupOwner = null;
 				try {
 					isStoreGroupOwner = CloudCardHelper.isStoreGroupOwner(delegator,storeRs,false);
-				} catch (GenericEntityException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+				} catch (GenericEntityException e) {
+				    Debug.logError(e.getMessage(), module);
+		            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 				}
 				if(isStoreGroupOwner){
 					isGroupOwner = "Y";
@@ -252,8 +254,8 @@ public class CloudCardCustServices {
 				try {
 					partyGroup = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", storeRs));
 				} catch (GenericEntityException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				    Debug.logError(e.getMessage(), module);
+		            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 				}
 
 				if (UtilValidate.isNotEmpty( partyGroup)) {
@@ -267,8 +269,8 @@ public class CloudCardCustServices {
 				try {
 					PartyAndContactMechs = delegator.findList("PartyAndContactMech", EntityCondition.makeCondition("partyId", storeRs), null, null, null, true);
 				} catch (GenericEntityException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				    Debug.logError(e.getMessage(), module);
+		            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 				}
 
 				if (UtilValidate.isNotEmpty(PartyAndContactMechs)) {
@@ -286,8 +288,8 @@ public class CloudCardCustServices {
 				try {
 					partyAndGeoPoints = delegator.findList("PartyAndGeoPoint", EntityCondition.makeCondition("partyId", storeRs), null, null, null, true);
 				} catch (GenericEntityException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				    Debug.logError(e.getMessage(), module);
+		            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 				}
 				
 				if(UtilValidate.isNotEmpty(partyAndGeoPoints)){
@@ -391,9 +393,9 @@ public class CloudCardCustServices {
 	 * @return
 	 */
 	public static Map<String, Object> getStoreInfoByCardId(DispatchContext dctx, Map<String, Object> context) {
-		LocalDispatcher dispatcher = dctx.getDispatcher();
+//		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dctx.getDelegator();
-		GenericValue userLogin = (GenericValue) context.get("userLogin");
+//		GenericValue userLogin = (GenericValue) context.get("userLogin");
 		Locale locale = (Locale) context.get("locale");
 		
 		String cardId = (String) context.get("cardId");
