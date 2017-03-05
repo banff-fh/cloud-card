@@ -1243,8 +1243,7 @@ public class CloudCardBossServices {
         BigDecimal actualSettlementAmount = CloudCardHelper.ZERO;
 
         try {
-            String groupOwnerId;
-            groupOwnerId = CloudCardHelper.getGroupOwneIdByStoreId(delegator, storeId, true);
+            String groupOwnerId = CloudCardHelper.getGroupOwneIdByStoreId(delegator, storeId, true);
             // 检查是否已有发出但对方还未处理的结算
             GenericValue settlement = EntityUtil
                     .getFirst(delegator.findByAnd("Payment",
