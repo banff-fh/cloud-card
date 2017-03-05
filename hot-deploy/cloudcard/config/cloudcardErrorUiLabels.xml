@@ -245,4 +245,20 @@
         <value xml:lang="en">Telephone number illegal</value>
         <value xml:lang="zh">手机号码输入有误</value>
     </property>
+    <property key="CloudCardPaymentCodeExpired">
+        <value xml:lang="en">User payment code has expired, please refresh</value>
+        <value xml:lang="zh">用户付款码已过期，请刷新付款码</value>
+    </property>
+    <property key="CloudCardPaymentCodeIllegal">
+        <value xml:lang="en">User payment code illegal</value>
+        <value xml:lang="zh">用户付款码无效</value>
+    </property>
+    <property key="CloudCardNoCardInTheStore">
+        <value xml:lang="en">No card in this store, please buy the card first</value>
+        <value xml:lang="zh">用户在本店没有卡，请先买卡</value>
+    </property>
+    <property key="CloudCardNoCardBalanceEnough">
+        <value xml:lang="en">No card balance enough</value>
+        <value xml:lang="zh">用户卡余额不足</value>
+    </property>
 </resource>

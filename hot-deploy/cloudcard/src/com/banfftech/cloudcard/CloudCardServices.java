@@ -21,13 +21,17 @@ import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityJoinOperator;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.util.EntityUtil;
+import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
+import com.auth0.jwt.JWTExpiredException;
+import com.auth0.jwt.JWTVerifier;
 import com.banfftech.cloudcard.constant.CloudCardConstant;
 import com.banfftech.cloudcard.jpush.JPushServices;
+import com.banfftech.cloudcard.util.CloudCardInfoUtil;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
@@ -916,6 +920,7 @@ public class CloudCardServices {
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
 		}
 
+		
 		// 调用内部 云卡支付服务
 		Map<String, Object> cloudCardWithdrawOut;
 		try {
@@ -1364,16 +1369,75 @@ public class CloudCardServices {
                 return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale)); 
             }
         }
-        // 卡二维码
-		if(null == cloudCard && UtilValidate.isNotEmpty(cardCode)){
-			needFindCard = true;
-			try {
-				cloudCard = CloudCardHelper.getCloudCardByCardCode(cardCode, delegator);
-			} catch (GenericEntityException e2) {
-				Debug.logError(e2.getMessage(), module);
-				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale)); 
-			}
-		}
+        
+        // 卡二维码 或用户付款码
+        if (null == cloudCard && UtilValidate.isNotEmpty(cardCode)) {
+            needFindCard = true;
+
+            // 如果扫的码 cardCode字段是 个用户付款码，则根据付款码进行自动找卡
+            if (cardCode.startsWith(CloudCardConstant.CODE_PREFIX_PAY_)) {
+
+                cardCode = cardCode.substring(CloudCardConstant.CODE_PREFIX_PAY_.length());
+
+                String iss = EntityUtilProperties.getPropertyValue("cloudcard", "qrCode.issuer", delegator);
+                String tokenSecret = EntityUtilProperties.getPropertyValue("cloudcard", "qrCode.secret", delegator);
+                String customerPartyId = null;
+                try {
+                    JWTVerifier verifier = new JWTVerifier(tokenSecret, null, iss);
+                    Map<String, Object> claims = verifier.verify(cardCode);
+                    customerPartyId = (String) claims.get("user");
+                } catch (JWTExpiredException e1) {
+                    // 用户付款码已过期
+                    Debug.logWarning("付款码已经过期", module);
+                    return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardPaymentCodeExpired", locale));
+                } catch (Exception e) {
+                    // 非法的码
+                    Debug.logError(e.getMessage(), module);
+                    return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardPaymentCodeIllegal", locale));
+                }
+
+                // 优先取圈主卡，余额不够，再取余额够的圈子卡
+                String groupOwnerId = null;
+                List<GenericValue> cloudCards = null;
+                try {
+                    EntityCondition cond = CloudCardInfoUtil.createLookupMyStoreCardCondition(delegator, customerPartyId, organizationPartyId);
+                    cloudCards = delegator.findList("CloudCardInfo", cond, null, UtilMisc.toList("-fromDate"), null, false);
+                    groupOwnerId = CloudCardHelper.getGroupOwneIdByStoreId(delegator, organizationPartyId, true);
+                } catch (GenericEntityException e) {
+                    Debug.logError(e.getMessage(), module);
+                    return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+                }
+
+                if (UtilValidate.isEmpty(cloudCards)) {
+                    // 本店没有卡
+                    Debug.logWarning("用户在本店没有卡", module);
+                    return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardNoCardInTheStore", locale));
+                }
+                for (GenericValue card : cloudCards) {
+                    BigDecimal ba = CloudCardHelper.getCloudCardBalance(card);
+                    if (ba.compareTo(amount) >= 0) {
+                        cloudCard = card;
+                        if (null == groupOwnerId || card.getString("distributorPartyId").equals(groupOwnerId)) {
+                            break;
+                        }
+                    }
+                }
+                if (null == cloudCard) {
+                    // 没有满足条件的卡
+                    Debug.logWarning("没有满足条件的卡，可能是卡余额不足", module);
+                    return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardNoCardBalanceEnough", locale));
+                }
+
+            } else {
+                // 卡二维码
+                try {
+                    cloudCard = CloudCardHelper.getCloudCardByCardCode(cardCode, delegator);
+                } catch (GenericEntityException e2) {
+                    Debug.logError(e2.getMessage(), module);
+                    return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+                }
+            }
+        }
 
 		if(needFindCard && null == cloudCard){
 			// 需要查找卡，却找不到卡

@@ -99,5 +99,10 @@ public class CloudCardConstant {
      * 付款渠道： 支付宝 {@value}
      */
     public static final String PAY_CHANNEL_ALIPAY = "aliPay";
+    
+    /**
+     * 付款码前缀 {@value}
+     */
+    public static final String CODE_PREFIX_PAY_ = "user_pay_";
 
 }

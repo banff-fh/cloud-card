@@ -534,9 +534,9 @@ public class CloudCardCustServices {
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("storeId", storeId);
-		if("aliPay".equals(paymentType)){
+		if(CloudCardConstant.PAY_CHANNEL_ALIPAY.equals(paymentType)){
 			result.put("payInfo", uniformOrderMap.get("payInfo"));
-		}else if("wxPay".equals(paymentType)){
+		}else if(CloudCardConstant.PAY_CHANNEL_WXPAY.equals(paymentType)){
 			result.put("appid", uniformOrderMap.get("appid"));
 			result.put("noncestr", uniformOrderMap.get("noncestr"));
 			result.put("partnerid", uniformOrderMap.get("partnerid"));
@@ -581,7 +581,7 @@ public class CloudCardCustServices {
 		
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
-		result.put("qrCode", qrCode);
+		result.put("qrCode", CloudCardConstant.CODE_PREFIX_PAY_ + qrCode);
 		return result;
 	}
 	
