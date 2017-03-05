@@ -1,5 +1,6 @@
 package com.banfftech.cloudcard;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -580,7 +581,12 @@ public class CloudCardBossServices {
                     return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardMustFirstFreezeToKickOut", locale));
                 }
 
-                // TODO再判断是否结清跨店交易产生的 未结算金额 才能踢出
+                // 再判断是否结清跨店交易产生的 未结算金额 才能踢出
+                BigDecimal settlementAmount = CloudCardHelper.getSettlementAmountByStoreId(delegator, storeId);
+                if (settlementAmount.compareTo(CloudCardHelper.ZERO) != 0) {
+                    Debug.logWarning("店铺[" + storeId + "] 未结算金额:" + settlementAmount.toPlainString(), module);
+                    return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardTheStoreNotSettled", locale));
+                }
 
                 // 将圈友关系设置为过期
                 groupStoreRelationship.set("thruDate", UtilDateTime.nowTimestamp());
@@ -595,7 +601,12 @@ public class CloudCardBossServices {
                         return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardPartnerExistsCanNotExit", locale));
                     }
                 }
-                // TODO 判断是否结清跨店交易产生的 未结算金额
+                // 判断是否结清跨店交易产生的 未结算金额
+                BigDecimal settlementAmount = CloudCardHelper.getSettlementAmountByStoreId(delegator, organizationPartyId);
+                if (settlementAmount.compareTo(CloudCardHelper.ZERO) != 0) {
+                    Debug.logWarning("店铺[" + organizationPartyId + "] 未结算金额:" + settlementAmount.toPlainString(), module);
+                    return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardTheStoreNotSettled", locale));
+                }
 
                 myPartyRelationship.set("thruDate", UtilDateTime.nowTimestamp());
                 myPartyRelationship.store();
@@ -731,8 +742,10 @@ public class CloudCardBossServices {
             List<GenericValue> onlyPartnerRelList = CloudCardHelper.getStoreGroupPartnerRelationships(storeRelList);
 
             if (UtilValidate.isEmpty(onlyPartnerRelList)) {
-                // 找不到列表 直接返回成功
+                // 找不到列表, 只剩下一个光杆司令？
                 Debug.logWarning("This store[" + organizationPartyId + "] is not in a group now! just return success.", module);
+                myGroupRelationship.set("thruDate", UtilDateTime.nowTimestamp());
+                myGroupRelationship.store();
                 return ServiceUtil.returnSuccess();
             }
 
@@ -745,7 +758,12 @@ public class CloudCardBossServices {
                 }
             }
 
-            // TODO 检查是否有未结算的， 有则不能解散
+            // 判断是否结清跨店交易产生的 未结算金额 有则不能解散
+            BigDecimal settlementAmount = CloudCardHelper.getSettlementAmountByStoreId(delegator, organizationPartyId);
+            if (settlementAmount.compareTo(CloudCardHelper.ZERO) != 0) {
+                Debug.logWarning("店铺[" + organizationPartyId + "] 未结算金额:" + settlementAmount.toPlainString(), module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardTheStoreNotSettled", locale));
+            }
 
             // 正式进行解散操作(让关系过期)
             for (GenericValue gv : storeRelList) {
@@ -977,12 +995,13 @@ public class CloudCardBossServices {
                 isFrozen = CloudCardHelper.isFrozenGroupRelationship(partyRelationship) ? CloudCardConstant.IS_Y : CloudCardConstant.IS_N;
             }
         } catch (GenericEntityException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
         }
 
         ;
-        // TODO 待结算金额settlementAmount的计算
+        // 待结算金额settlementAmount的计算
+        BigDecimal settlementAmount = CloudCardHelper.getSettlementAmountByStoreId(delegator, storeId);
 
         // 返回结果
         Map<String, Object> result = ServiceUtil.returnSuccess();
@@ -991,28 +1010,15 @@ public class CloudCardBossServices {
         result.put("storeImg", storeImg);
         result.put("storeAddress", storeAddress);
         result.put("storeTeleNumber", storeTeleNumber);
-        result.put("settlementAmount", CloudCardHelper.ZERO);
+        result.put("settlementAmount", settlementAmount);
         result.put("isJoinGroup", isJoinGroup);
         result.put("isGroupOwner", isGroupOwner);
         result.put("isFrozen", isFrozen);
         return result;
     }
 
-
     /**
-     * TODO
-     * <pre>
-         <service name="bizDoSettlement" engine="java"
-            location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizDoSettlement" auth="true">
-            <description>B端 圈主发起结算接口，需要等待圈友确认结算后，才会真正结算</description>
-            <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家Id（自己的商家id）</description></attribute>
-            <attribute name="storeId" type="String" mode="IN" optional="false"><description>要结算的圈友id</description></attribute>
-            <attribute name="settlementAmount" type="BigDecimal" mode="INOUT" optional="true" default-value="0"><description>待结算金额</description></attribute>
-            <attribute name="actualSettlementAmount" type="BigDecimal" mode="INOUT" optional="true" default-value="0"><description>实际结算金额，本次结算店家线下实际支付的结算金额</description></attribute>
-
-            <attribute name="settlementId" type="String" mode="OUT" optional="true"><description>结算id</description></attribute>
-        </service>
-     * </pre>
+     * 发起结算
      * 
      * @param dctx
      * @param context
@@ -1022,37 +1028,77 @@ public class CloudCardBossServices {
         LocalDispatcher dispatcher = dctx.getDispatcher();
         Delegator delegator = dispatcher.getDelegator();
         Locale locale = (Locale) context.get("locale");
-        // GenericValue userLogin = (GenericValue) context.get("userLogin");
 
-        String storeId = (String) context.get("storeId"); // 要查询的店家partyId
+        String storeId = (String) context.get("storeId"); // 对方店家的partyId
+        String organizationPartyId = (String) context.get("organizationPartyId"); // 本店家partyId
 
         Map<String, Object> checkInputParamRet = checkInputParam(dctx, context);
         if (!ServiceUtil.isSuccess(checkInputParamRet)) {
             return checkInputParamRet;
         }
 
+        BigDecimal settlementAmount = (BigDecimal) context.get("settlementAmount");
+        settlementAmount = settlementAmount.setScale(CloudCardHelper.decimals, CloudCardHelper.rounding);
+        BigDecimal actualSettlementAmount = (BigDecimal) context.get("actualSettlementAmount");
+        actualSettlementAmount = actualSettlementAmount.setScale(CloudCardHelper.decimals, CloudCardHelper.rounding);
+
+        if (settlementAmount.compareTo(CloudCardHelper.ZERO) <= 0 || actualSettlementAmount.compareTo(CloudCardHelper.ZERO) <= 0) {
+            Debug.logWarning("金额不合法，必须为正数", module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceAccountingError, "AccountingFinAccountMustBePositive", locale));
+        }
+
+        // 双方的 结算账户
+        GenericValue myAccount = CloudCardHelper.getSettlementAccount(delegator, organizationPartyId);
+        GenericValue storeAccount = CloudCardHelper.getSettlementAccount(delegator, storeId);
+
+        BigDecimal storeAmount = CloudCardHelper.getSettlementAmountByAccount(storeAccount);
+        if (storeAmount.compareTo(CloudCardHelper.ZERO) == 0) {
+            Debug.logWarning("店铺[" + storeId + "] 已经结清，不能再次对此店发起结算", module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardTheStoreHasBeenSettled", locale));
+        }
+
+        Map<String, Object> finAccountWithdrawalOutMap;
+        try {
+            // system账户
+            GenericValue systemUserLogin = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+
+            // 检查是否已有发出但对方还未处理的结算
+            List<GenericValue> oldPayments = delegator
+                    .findByAnd("Payment",
+                            UtilMisc.toMap("partyIdFrom", organizationPartyId, "partyIdTo", storeId, "statusId", "PMNT_SENT", "paymentTypeId", "DISBURSEMENT",
+                                    "paymentMethodTypeId", CloudCardConstant.PMT_CASH, "roleTypeIdTo", CloudCardConstant.STORE_GROUP_PARTNER_ROLE_TYPE_ID),
+                            null);
+            if (UtilValidate.isNotEmpty(oldPayments)) {
+                Debug.logWarning("已经发起过结算，需要等待对手方处理", module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardTheStoreRequestHasBeenIssued", locale));
+            }
+
+            // 扣除本店结算账户相应的金额
+            finAccountWithdrawalOutMap = dispatcher.runSync("createPaymentAndFinAccountTransForCloudCard",
+                    UtilMisc.toMap("userLogin", systemUserLogin, "locale", locale, "statusId", "PMNT_SENT", "currencyUomId",
+                            CloudCardConstant.DEFAULT_CURRENCY_UOM_ID, "actualCurrencyUomId", CloudCardConstant.DEFAULT_CURRENCY_UOM_ID,
+                            "finAccountTransTypeId", "WITHDRAWAL", "paymentTypeId", "DISBURSEMENT", "finAccountId", myAccount.getString("finAccountId"),
+                            "paymentMethodTypeId", CloudCardConstant.PMT_CASH, "partyIdFrom", organizationPartyId, "partyIdTo", storeId, "roleTypeIdTo",
+                            CloudCardConstant.STORE_GROUP_PARTNER_ROLE_TYPE_ID, "amount", settlementAmount, "actualCurrencyAmount", actualSettlementAmount,
+                            "comments", "结算：圈主付款", "reasonEnumId", "FATR_PURCHASE"));
+        } catch (GenericServiceException | GenericEntityException e1) {
+            Debug.logError(e1.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+        }
+        if (ServiceUtil.isError(finAccountWithdrawalOutMap)) {
+            return finAccountWithdrawalOutMap;
+        }
+
+        String withdrawalPaymentId = (String) finAccountWithdrawalOutMap.get("paymentId");
+
         // 返回结果
         Map<String, Object> result = ServiceUtil.returnSuccess();
-        result.put("settlementId", "xxxxxx");
+        result.put("settlementId", withdrawalPaymentId);
         return result;
     }
-    
-    
-    
+
     /**
-     * TODO
-     * <pre>
-          <service name="bizSettlementConfirm" engine="java"
-                location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizSettlementConfirm" auth="true">
-                <description>B端 圈友确认/拒绝结算</description>
-                <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家Id（自己的商家id）</description></attribute>
-                <attribute name="settlementId" type="String" mode="INOUT" optional="false"><description>圈主发起的结算id</description></attribute>
-                <attribute name="isConfirm" type="String" mode="INOUT" optional="true" default-value="Y"><description>是否确认 Y/N</description></attribute>
-                <attribute name="settlementAmount" type="BigDecimal" mode="OUT" optional="true" default-value="0"><description>待结算金额</description></attribute>
-                <attribute name="actualSettlementAmount" type="BigDecimal" mode="OUT" optional="true" default-value="0"><description>实际结算金额，本次结算店家线下实际支付的结算金额</description></attribute>
-         </service>
-     * </pre>
-     * 
+     * 结算确认/拒绝
      * 
      * @param dctx
      * @param context
@@ -1066,35 +1112,111 @@ public class CloudCardBossServices {
 
         String settlementId = (String) context.get("settlementId");
         String isConfirm = (String) context.get("isConfirm");
+        if (!CloudCardConstant.IS_Y.equals(isConfirm)) {
+            isConfirm = CloudCardConstant.IS_N;
+        }
+
+        String organizationPartyId = (String) context.get("organizationPartyId"); // 本店家partyId
 
         Map<String, Object> checkInputParamRet = checkInputParam(dctx, context);
         if (!ServiceUtil.isSuccess(checkInputParamRet)) {
             return checkInputParamRet;
         }
 
+        BigDecimal settlementAmount = CloudCardHelper.ZERO;
+        BigDecimal actualSettlementAmount = CloudCardHelper.ZERO;
+
+        try {
+
+            GenericValue systemUserLogin = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+
+            // 检查结算的状态
+            GenericValue settlePayment = delegator.findByPrimaryKey("Payment", UtilMisc.toMap("paymentId", settlementId));
+            if (UtilValidate.isEmpty(settlePayment)) {
+                Debug.logWarning("无效的结算", module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardParamIllegal", locale));
+            }
+
+            String statusId = settlePayment.getString("statusId");
+            if (!"PMNT_SENT".equals(statusId)) {
+                // 状态不符，可能已经 确认/拒绝 过了
+                Debug.logWarning("不能确认或拒绝结算[" + settlementId + "]，当前状态[" + statusId + "]", module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardSettlementStatusUnexpected", locale));
+            }
+
+            settlementAmount = settlePayment.getBigDecimal("amount");
+            actualSettlementAmount = settlePayment.getBigDecimal("actualCurrencyAmount");
+
+            // 1、拒绝结算：
+            if (CloudCardConstant.IS_N.equals(isConfirm)) {
+                Map<String, Object> setPaymentStatusOutMap = dispatcher.runSync("setPaymentStatus",
+                        UtilMisc.toMap("userLogin", systemUserLogin, "locale", locale, "paymentId", settlementId, "statusId", "PMNT_CANCELLED"));
+                if (ServiceUtil.isError(setPaymentStatusOutMap)) {
+                    return setPaymentStatusOutMap;
+                }
+                GenericValue finAccountTrans = settlePayment.getRelatedOne("FinAccountTrans");
+                if (UtilValidate.isNotEmpty(finAccountTrans)) {
+                    finAccountTrans.set("statusId", "FINACT_TRNS_CANCELED");
+                    finAccountTrans.store();
+                }
+                // 返回结果
+                Map<String, Object> result = ServiceUtil.returnSuccess();
+                result.put("settlementId", settlementId);
+                result.put("isConfirm", isConfirm);
+                result.put("settlementAmount", settlementAmount);
+                result.put("actualSettlementAmount", actualSettlementAmount);
+                return result;
+            }
+
+            // 2、同意结算 商家结算账户：
+            String partyIdFrom = settlePayment.getString("partyIdFrom");
+            GenericValue myAccount = CloudCardHelper.getSettlementAccount(delegator, organizationPartyId, true);
+
+            Map<String, Object> finAccountReceiptOutMap = dispatcher.runSync("createPaymentAndFinAccountTransForCloudCard",
+                    UtilMisc.toMap("userLogin", systemUserLogin, "locale", locale, "statusId", "PMNT_CONFIRMED", "currencyUomId",
+                            CloudCardConstant.DEFAULT_CURRENCY_UOM_ID, "actualCurrencyUomId", CloudCardConstant.DEFAULT_CURRENCY_UOM_ID,
+                            "finAccountTransTypeId", "DEPOSIT", "paymentTypeId", "RECEIPT", "finAccountId", myAccount.getString("finAccountId"),
+                            "paymentMethodTypeId", CloudCardConstant.PMT_CASH, "partyIdFrom", partyIdFrom, "partyIdTo", organizationPartyId, "roleTypeIdTo",
+                            CloudCardConstant.STORE_GROUP_PARTNER_ROLE_TYPE_ID, "amount", settlementAmount, "actualCurrencyAmount", actualSettlementAmount,
+                            "comments", "结算：圈友收款", "reasonEnumId", "FATR_PURCHASE"));
+            if (ServiceUtil.isError(finAccountReceiptOutMap)) {
+                return finAccountReceiptOutMap;
+            }
+
+            String receiptPaymentId = (String) finAccountReceiptOutMap.get("paymentId");
+
+            // 3、应用掉 结算 的两个payment
+            Map<String, Object> paymentApplicationOutMap = dispatcher.runSync("createPaymentApplication", UtilMisc.toMap("userLogin", systemUserLogin, "locale",
+                    locale, "amountApplied", settlementAmount, "paymentId", settlementId, "toPaymentId", receiptPaymentId));
+            if (ServiceUtil.isError(paymentApplicationOutMap)) {
+                return paymentApplicationOutMap;
+            }
+
+            // 4、修改圈主发起结算的 payment的状态为PMNT_CONFIRMED
+            Map<String, Object> setPaymentStatusOutMap = dispatcher.runSync("setPaymentStatus",
+                    UtilMisc.toMap("userLogin", systemUserLogin, "locale", locale, "paymentId", settlementId, "statusId", "PMNT_CONFIRMED"));
+
+            if (ServiceUtil.isError(setPaymentStatusOutMap)) {
+                return setPaymentStatusOutMap;
+            }
+
+        } catch (GenericEntityException | GenericServiceException e) {
+            Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+        }
+
         // 返回结果
         Map<String, Object> result = ServiceUtil.returnSuccess();
         result.put("settlementId", settlementId);
         result.put("isConfirm", isConfirm);
-        result.put("settlementAmount", CloudCardHelper.ZERO);
-        result.put("actualSettlementAmount", CloudCardHelper.ZERO);
+        result.put("settlementAmount", settlementAmount);
+        result.put("actualSettlementAmount", actualSettlementAmount);
         return result;
     }
-    
+
     /**
-     * TODO
-     * <pre>
-        <service name="bizGetUnconfirmedSettlementInfo" engine="java"
-            location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizSettlementConfirm" auth="true">
-            <description>B端 获取待确认结算信息</description>
-            <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家Id（自己的商家id）</description></attribute>
-            <attribute name="storeId" type="String" mode="IN" optional="true"><description>结算的圈友partyId，圈主发起查询时，需要传入</description></attribute>
-            
-            <attribute name="settlementId" type="String" mode="OUT" optional="true"><description>还未确认的结算id</description></attribute>
-            <attribute name="settlementAmount" type="BigDecimal" mode="OUT" optional="true" default-value="0"><description>待结算金额</description></attribute>
-            <attribute name="actualSettlementAmount" type="BigDecimal" mode="OUT" optional="true" default-value="0"><description>实际结算金额，本次结算店家线下实际支付的结算金额</description></attribute>
-        </service>
-     * </pre>
+     * 获取待确认结算信息
+     * 
      * @param dctx
      * @param context
      * @return
@@ -1105,31 +1227,63 @@ public class CloudCardBossServices {
         Locale locale = (Locale) context.get("locale");
         // GenericValue userLogin = (GenericValue) context.get("userLogin");
 
-        String settlementId = "xxx";
-
         Map<String, Object> checkInputParamRet = checkInputParam(dctx, context);
         if (!ServiceUtil.isSuccess(checkInputParamRet)) {
             return checkInputParamRet;
         }
 
+        String settlementId = null;
+        String storeId = (String) context.get("storeId");
+        String organizationPartyId = (String) context.get("organizationPartyId");
+        if (UtilValidate.isEmpty(storeId)) {
+            storeId = organizationPartyId;
+        }
+
+        BigDecimal settlementAmount = CloudCardHelper.ZERO;
+        BigDecimal actualSettlementAmount = CloudCardHelper.ZERO;
+
+        try {
+            String groupOwnerId;
+            groupOwnerId = CloudCardHelper.getGroupOwneIdByStoreId(delegator, storeId, true);
+            // 检查是否已有发出但对方还未处理的结算
+            GenericValue settlement = EntityUtil
+                    .getFirst(delegator.findByAnd("Payment",
+                            UtilMisc.toMap("partyIdFrom", groupOwnerId, "partyIdTo", storeId, "statusId", "PMNT_SENT", "paymentTypeId", "DISBURSEMENT",
+                                    "paymentMethodTypeId", CloudCardConstant.PMT_CASH, "roleTypeIdTo", CloudCardConstant.STORE_GROUP_PARTNER_ROLE_TYPE_ID),
+                            null));
+            if (null != settlement) {
+                settlementId = settlement.getString("paymentId");
+                settlementAmount = settlement.getBigDecimal("amount");
+                actualSettlementAmount = settlement.getBigDecimal("actualCurrencyAmount");
+
+            }
+
+        } catch (GenericEntityException e) {
+            Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+        }
+
         // 返回结果
         Map<String, Object> result = ServiceUtil.returnSuccess();
         result.put("settlementId", settlementId);
-        result.put("settlementAmount", CloudCardHelper.ZERO);
-        result.put("actualSettlementAmount", CloudCardHelper.ZERO);
+        result.put("settlementAmount", settlementAmount);
+        result.put("actualSettlementAmount", actualSettlementAmount);
         return result;
     }
-    
-    
+
     /**
      * TODO
+     * 
      * <pre>
           <service name="bizSettlementRequest" engine="java"
-            location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizSettlementRequest" auth="true">
+            location="com.banfftech.cloudcard.CloudCardBossServices" invoke=
+    "bizSettlementRequest" auth="true">
             <description>B端 催款，提醒圈主进行结算</description>
-            <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家Id（自己的商家id）</description></attribute>
+            <attribute name="organizationPartyId" type="String" mode=
+    "IN" optional="false"><description>店家Id（自己的商家id）</description></attribute>
           </service>
      * </pre>
+     * 
      * @param dctx
      * @param context
      * @return
@@ -1149,9 +1303,7 @@ public class CloudCardBossServices {
         Map<String, Object> result = ServiceUtil.returnSuccess();
         return result;
     }
-    
-    
-    
+
     /**
      * 参数检查
      * 

@@ -261,4 +261,24 @@
         <value xml:lang="en">No card balance enough</value>
         <value xml:lang="zh">用户卡余额不足</value>
     </property>
+    <property key="CloudCardTheStoreNotSettled">
+        <value xml:lang="en">This store is not settled</value>
+        <value xml:lang="zh">此店未结清，不能操作</value>
+    </property>
+    <property key="CloudCardTheStoreHasBeenSettled">
+        <value xml:lang="en">This store has been settled</value>
+        <value xml:lang="zh">此店已结清</value>
+    </property>
+    <property key="CloudCardTheStoreRequestHasBeenIssued">
+        <value xml:lang="en">Request has been issued, please wait for processing</value>
+        <value xml:lang="zh">已发出请求，请等待处理</value>
+    </property>
+    <property key="CloudCardParamIllegal">
+        <value xml:lang="en">The param is illegal</value>
+        <value xml:lang="zh">非法参数</value>
+    </property>
+    <property key="CloudCardSettlementStatusUnexpected">
+        <value xml:lang="en">The value of the statusId field of Settlement is not expected</value>
+        <value xml:lang="zh">非预期的结算状态</value>
+    </property>
 </resource>

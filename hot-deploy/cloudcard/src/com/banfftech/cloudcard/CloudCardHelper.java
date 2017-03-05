@@ -984,11 +984,22 @@ public class CloudCardHelper {
      * 
      * @param delegator
      * @param storeId
-     * @return
+     * @return 没有结算金额的情况会返回 ZERO
      * @throws GenericEntityException
      */
     public static BigDecimal getSettlementAmountByStoreId(Delegator delegator, String storeId) {
         GenericValue settlementAccount = getSettlementAccount(delegator, storeId, false);
+        return getSettlementAmountByAccount(settlementAccount);
+    }
+
+    /**
+     * 从商家结算账户中获取商家的未结算金额
+     * 
+     * @param settlementAccount
+     *            商家结算账户实体
+     * @return
+     */
+    public static BigDecimal getSettlementAmountByAccount(GenericValue settlementAccount) {
         if (null == settlementAccount) {
             return ZERO;
         }
