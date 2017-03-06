@@ -16,6 +16,22 @@
         <value xml:lang="en">You are not allowed to view this page.</value>
         <value xml:lang="zh">不允许你浏览这个页面。</value>
     </property>
+    <property key="storeMenu">
+        <value xml:lang="en">store</value>
+        <value xml:lang="zh">商家</value>
+    </property>
+    <property key="applyTabBarMenu">
+        <value xml:lang="en">apply</value>
+        <value xml:lang="zh">开店申请</value>
+    </property>
+    <property key="groupListTabBarMenu">
+        <value xml:lang="en">group list</value>
+        <value xml:lang="zh">圈子列表</value>
+    </property>
+    <property key="storeListTabBarMenu">
+        <value xml:lang="en">store list</value>
+        <value xml:lang="zh">商家列表</value>
+    </property>
     <property key="settlementMenu">
         <value xml:lang="en">settlement</value>
         <value xml:lang="zh">商家结算</value>
@@ -171,6 +187,54 @@
     <property key="HideExpiredCards">
         <value xml:lang="en">hide expired cards</value>
         <value xml:lang="zh">隐藏过期的卡</value>
+    </property>
+    <property key="createStoreApplyId">
+        <value xml:lang="en">Apply ID</value>
+        <value xml:lang="zh">申请标识</value>
+    </property>
+    <property key="createStoreApplyStoreName">
+        <value xml:lang="en">Store Name</value>
+        <value xml:lang="zh">店 名</value>
+    </property>
+    <property key="createStoreApplyTeleNumber">
+        <value xml:lang="en">TeleNumber</value>
+        <value xml:lang="zh">店主手机</value>
+    </property>
+    <property key="createStoreApplyAddress">
+        <value xml:lang="en">Address</value>
+        <value xml:lang="zh">店铺地址</value>
+    </property>
+    <property key="createStoreApplyDate">
+        <value xml:lang="en">Apply Date</value>
+        <value xml:lang="zh">申请日期</value>
+    </property>
+    <property key="doApplyAccepted">
+        <value xml:lang="en">Accepted</value>
+        <value xml:lang="zh">接收</value>
+    </property>
+    <property key="doApplyRejected">
+        <value xml:lang="en">Rejected</value>
+        <value xml:lang="zh">拒绝</value>
+    </property>
+    <property key="PlzConfirmRejectApply">
+        <value xml:lang="en">Please confirm that reject this apply</value>
+        <value xml:lang="zh">确认要拒绝此开店申请吗？</value>
+    </property>
+    <property key="FindGroupPartyId">
+        <value xml:lang="en">Group ID</value>
+        <value xml:lang="zh">圈子标识</value>
+    </property>
+    <property key="FindGroupGroupName">
+        <value xml:lang="en">Group Name</value>
+        <value xml:lang="zh">圈子名称</value>
+    </property>
+    <property key="FindGroupGroupOwnerName">
+        <value xml:lang="en">Group Owner Name</value>
+        <value xml:lang="zh">圈主店名</value>
+    </property>
+    <property key="FindGroupFromDate">
+        <value xml:lang="en">From Date</value>
+        <value xml:lang="zh">建圈时间</value>
     </property>
     
 </resource>

@@ -125,6 +125,51 @@
 	    <prim-key field="fromDate"/>
 	</entity>
 	
+	
+	<view-entity entity-name="CreateStoreApplyView" package-name="org.ofbiz.content.survey"
+            title="云卡开店申请视图">
+      <member-entity entity-alias="SR" entity-name="SurveyResponse"/>
+      <member-entity entity-alias="SRAN" entity-name="SurveyResponseAnswer"/>
+      <member-entity entity-alias="SRAT" entity-name="SurveyResponseAnswer"/>
+      <member-entity entity-alias="SRAA" entity-name="SurveyResponseAnswer"/>
+      
+      <alias-all entity-alias="SR"/>
+      
+      <alias entity-alias="SRAN" name="storeName"  field="textResponse"/>
+      <alias entity-alias="SRAT" name="teleNumber" field="textResponse"/>
+      <alias entity-alias="SRAA" name="address" field="textResponse"/>
+      
+      <view-link entity-alias="SR" rel-entity-alias="SRAN">
+        <key-map field-name="surveyResponseId"/>
+        <entity-condition>
+			<condition-expr entity-alias="SRAN" field-name="surveyQuestionId" operator="equals" value="SQ_CC_STORE_NAME"/>
+		</entity-condition>
+      </view-link>
+      <view-link entity-alias="SR" rel-entity-alias="SRAT">
+        <key-map field-name="surveyResponseId"/>
+        <entity-condition>
+			<condition-expr entity-alias="SRAT" field-name="surveyQuestionId" operator="equals" value="SQ_CC_S_OWNER_TEL"/>
+		</entity-condition>
+      </view-link>
+      <view-link entity-alias="SR" rel-entity-alias="SRAA">
+        <key-map field-name="surveyResponseId"/>
+        <entity-condition>
+			<condition-expr entity-alias="SRAA" field-name="surveyQuestionId" operator="equals" value="SQ_CC_STORE_ADDR"/>
+		</entity-condition>
+      </view-link>
+      <relation type="one-nofk" rel-entity-name="Survey">
+        <key-map field-name="surveyId"/>
+      </relation>
+      <relation type="one-nofk" rel-entity-name="SurveyQuestion">
+        <key-map field-name="surveyQuestionId"/>
+      </relation>
+      <relation type="one-nofk" rel-entity-name="SurveyResponse">
+          <key-map field-name="surveyResponseId"/>
+      </relation>
+    </view-entity>
+	
+	
+	<!-- 废弃 -->
 	<view-entity entity-name="CloudCardCrossStorePaymentView" package-name="org.ofbiz.cloudcard.payment" title="跨店流水">
 		<description>
 			所有跨店消费的未结算流水
@@ -185,7 +230,7 @@
 	</view-entity>
 	
 	
-	
+	<!-- 废弃 -->
 	<view-entity entity-name="CloudCardPlatformAccountReceivableView" package-name="org.ofbiz.cloudcard.payment" title="平台对商家应收金额统计视图">
 		<description>
 			用于查询平台对各个商家应收金额
@@ -211,6 +256,7 @@
 		
 	</view-entity>
 	
+	<!-- 废弃 -->
 	<view-entity entity-name="CloudCardPlatformAccountPayableView" package-name="org.ofbiz.cloudcard.payment" title="平台对商家应付金额统计视图">
 		<description>
 			用于查询平台对各个商家应付金额
@@ -237,7 +283,7 @@
 	</view-entity>
 	
 	
-	
+	<!-- 废弃 -->
 	<view-entity entity-name="CloudCardPlatformArApView" package-name="org.ofbiz.cloudcard.payment" title="平台对商家应收应付金额统计视图">
 		<description>
 			用于查询平台对各个商家应收应付金额

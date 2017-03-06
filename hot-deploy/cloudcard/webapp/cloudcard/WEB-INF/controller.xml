@@ -327,8 +327,47 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
+	
+	<!-- 查找附件的店 -->
+	<request-map uri="userStoreListLBS">
+		<!--<security https="true" auth="false" />-->
+		<event type="service" invoke="userStoreListLBS" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
+	<!-- 用户扫码获取商家信息和卡列表 -->
+	<request-map uri="userScanCodeGetCardAndStoreInfo">
+		<!--<security https="true" auth="false" />-->
+		<event type="service" invoke="userScanCodeGetCardAndStoreInfo" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
+	<!-- 通过卡号获取店铺信息 -->
+	<request-map uri="getStoreInfoByCardId">
+		<!--<security https="true" auth="false" />-->
+		<event type="service" invoke="getStoreInfoByCardId" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
+	<!-- 用户获取付款码-->
+	<request-map uri="getPaymentQRCode">
+		<!--<security https="true" auth="false" />-->
+		<event type="service" invoke="getPaymentQRCode" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
 
-
+	<!-- 购买卡-->
+	<request-map uri="purchaseCard">
+		<!--<security https="true" auth="false" />-->
+		<event type="service" invoke="purchaseCard" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+		
 
 
 	<!-- 后台页面部分 Request Mappings -->
@@ -339,6 +378,25 @@
 		<response name="success" type="view" value="main" />
 	</request-map>
 	
+	<!-- 查询开店申请 -->
+	<request-map uri="findCreateStoreApply">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="findCreateStoreApply" />
+		<response name="error" type="view" value="findCreateStoreApply" />
+	</request-map>
+	<!-- 查询圈子列表 -->
+	<request-map uri="findCloudCardGroup">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="findCloudCardGroup" />
+		<response name="error" type="view" value="findCloudCardGroup" />
+	</request-map>
+	<!-- 查询商家列表 -->
+	<request-map uri="findCloudCardStore">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="findCloudCardStore" />
+		<response name="error" type="view" value="findCloudCardStore" />
+	</request-map>
+
 	<!-- 制卡-->
 	<request-map uri="genNewCloudCardCode">
 		<security https="true" auth="true" />
@@ -409,50 +467,15 @@
 		<security auth="true" https="true"/>
 		<response name="success" type="view" value="LookupCustomerName"/>
 	</request-map>
-	
-	<!-- 查找附件的店 -->
-	<request-map uri="userStoreListLBS">
-		<!--<security https="true" auth="false" />-->
-		<event type="service" invoke="userStoreListLBS" />
-		<response name="success" type="request" value="json" />
-		<response name="error" type="request" value="json" />
-	</request-map>
-	
-	<!-- 用户扫码获取商家信息和卡列表 -->
-	<request-map uri="userScanCodeGetCardAndStoreInfo">
-		<!--<security https="true" auth="false" />-->
-		<event type="service" invoke="userScanCodeGetCardAndStoreInfo" />
-		<response name="success" type="request" value="json" />
-		<response name="error" type="request" value="json" />
-	</request-map>
-	
-	<!-- 通过卡号获取店铺信息 -->
-	<request-map uri="getStoreInfoByCardId">
-		<!--<security https="true" auth="false" />-->
-		<event type="service" invoke="getStoreInfoByCardId" />
-		<response name="success" type="request" value="json" />
-		<response name="error" type="request" value="json" />
-	</request-map>
-	
-	<!-- 用户获取付款码-->
-	<request-map uri="getPaymentQRCode">
-		<!--<security https="true" auth="false" />-->
-		<event type="service" invoke="getPaymentQRCode" />
-		<response name="success" type="request" value="json" />
-		<response name="error" type="request" value="json" />
-	</request-map>
 
-	<!-- 购买卡-->
-	<request-map uri="purchaseCard">
-		<!--<security https="true" auth="false" />-->
-		<event type="service" invoke="purchaseCard" />
-		<response name="success" type="request" value="json" />
-		<response name="error" type="request" value="json" />
-	</request-map>
-		
-	
+
 	<!-- View Mappings -->
 	<view-map name="main" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#main" />
+
+	<view-map name="findCreateStoreApply" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#findCreateStoreApply" />
+	<view-map name="findCloudCardGroup" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#findCloudCardGroup" />
+	<view-map name="findCloudCardStore" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#findCloudCardStore" />
+
 	<view-map name="findCard" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#findCard" />
 	<view-map name="createCard" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#createCard" />
 	<view-map name="settlement" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#settlement" />
