@@ -80,15 +80,36 @@ public class CloudCardCustServices {
 		if(!"0".equalsIgnoreCase(lbsResult.get("total").toString())){
 			JSONArray jsonArray = JSONObject.parseArray(lbsResult.get("contents").toString());
 			for(int i = 0 ;i<jsonArray.size();i++){
-				Map<String, Object> storeMap = FastMap.newInstance();
-				storeMap.put("storeName",jsonArray.getJSONObject(i).getObject("storeName",String.class));
-				storeMap.put("address",jsonArray.getJSONObject(i).getObject("address",String.class));
-				storeMap.put("telNum",jsonArray.getJSONObject(i).getObject("telNum",String.class));
-				storeMap.put("storeId",jsonArray.getJSONObject(i).getObject("storeId",String.class) );
-				storeMap.put("isGroupOwner",jsonArray.getJSONObject(i).getObject("isGroupOwner",String.class) );
-				storeMap.put("distance",jsonArray.getJSONObject(i).getObject("distance",String.class) );
-				storeMap.put("location",jsonArray.getJSONObject(i).getObject("location",String.class) );
-				storeList.add(storeMap);
+				
+				boolean isGroupOwner = false;
+				try {
+				
+					boolean isStoreGroupOwner = CloudCardHelper.isStoreGroupOwner(delegator,jsonArray.getJSONObject(i).getObject("storeId", String.class), true);
+					if(isStoreGroupOwner){
+						isGroupOwner = true;
+					}
+					
+					context.put("storeId", jsonArray.getJSONObject(i).getObject("storeId",String.class));
+					//获取店铺信息
+					Map<String,Object> stroeInfo = userGetStoreInfo(dctx, context);
+						
+					Map<String, Object> storeMap = FastMap.newInstance();
+					storeMap.put("storeName",stroeInfo.get("storeName"));
+					storeMap.put("address",stroeInfo.get("storeAddress"));
+					storeMap.put("telNum",stroeInfo.get("storeTeleNumber"));
+					storeMap.put("storeId",stroeInfo.get("storeId"));
+					storeMap.put("isGroupOwner",isGroupOwner);
+					storeMap.put("distance",jsonArray.getJSONObject(i).getObject("distance",String.class) );
+					if (UtilValidate.isNotEmpty(stroeInfo.get("longitude")) && UtilValidate.isNotEmpty(stroeInfo.get("latitude"))) {
+						storeMap.put("location", "["+stroeInfo.get("longitude")+","+stroeInfo.get("latitude")+"]");
+					} else {
+						storeMap.put("location", jsonArray.getJSONObject(i).getObject("location", String.class));
+					}
+					storeList.add(storeMap);
+				} catch (GenericEntityException e) {
+					Debug.logError(e.getMessage(), module);
+		            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+				}
 			}
 		}
 		
