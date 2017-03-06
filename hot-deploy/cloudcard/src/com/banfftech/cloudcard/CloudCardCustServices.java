@@ -81,12 +81,12 @@ public class CloudCardCustServices {
 			JSONArray jsonArray = JSONObject.parseArray(lbsResult.get("contents").toString());
 			for(int i = 0 ;i<jsonArray.size();i++){
 				
-				boolean isGroupOwner = false;
+				String isGroupOwner = "N";
 				try {
 				
 					boolean isStoreGroupOwner = CloudCardHelper.isStoreGroupOwner(delegator,jsonArray.getJSONObject(i).getObject("storeId", String.class), true);
 					if(isStoreGroupOwner){
-						isGroupOwner = true;
+						isGroupOwner = "Y";
 					}
 					
 					context.put("storeId", jsonArray.getJSONObject(i).getObject("storeId",String.class));
