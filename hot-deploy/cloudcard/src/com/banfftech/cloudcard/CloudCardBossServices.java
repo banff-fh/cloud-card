@@ -152,30 +152,12 @@ public class CloudCardBossServices {
             return checkInputParamRet;
         }
         GenericValue ccStore = (GenericValue) checkInputParamRet.get("store");
+        // system用户
+        GenericValue systemUser = (GenericValue) checkInputParamRet.get("systemUserLogin");
 
         // 如果没有传入“圈子名：groupName”这个参数， 则使用 "商家名" + "的圈子" 作为名称
         if (UtilValidate.isEmpty(groupName)) {
             groupName = ccStore.getString("groupName") + "的圈子";
-        }
-
-        // 检查是否已经 建立/加入 圈子
-        List<EntityCondition> condList = FastList.newInstance();
-        condList.add(EntityCondition.makeCondition("partyIdTo", organizationPartyId));
-        condList.add(EntityCondition.makeCondition("roleTypeIdFrom", CloudCardConstant.STORE_GROUP_ROLE_TYPE_ID));
-        condList.add(EntityCondition.makeCondition("partyRelationshipTypeId", CloudCardConstant.STORE_GROUP_PARTY_RELATION_SHIP_TYPE_ID));
-        condList.add(EntityUtil.getFilterByDateExpr());
-        List<GenericValue> partyRelationships = null;
-        try {
-            // 这里可以查询缓存， 缓存未命中自动查数据库
-            partyRelationships = delegator.findList("PartyRelationship", EntityCondition.makeCondition(condList), null, null, null, true);
-        } catch (GenericEntityException e) {
-            Debug.logError(e.getMessage(), "Problem finding PartyRelationships. ", module);
-            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-        }
-
-        if (UtilValidate.isNotEmpty(partyRelationships)) {
-            // 已经在圈子里，不能创建新的圈子
-            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardIsInGroupCanNotCreateAnother", locale));
         }
 
         // 创建 “圈子”以及 圈子与圈主关系
@@ -183,8 +165,13 @@ public class CloudCardBossServices {
         String groupId;
         try {
 
-            // system用户
-            GenericValue systemUser = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+            // 检查是否已经 建立/加入 圈子
+            GenericValue myGroupRelationship = CloudCardHelper.getGroupRelationShipByStoreId(delegator, organizationPartyId, true);
+            if (UtilValidate.isNotEmpty(myGroupRelationship)) {
+                // 已经在圈子里，不能创建新的圈子
+                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardIsInGroupCanNotCreateAnother", locale));
+            }
+
             // 创建 “圈子”
             createPartyGroupOutMap = dispatcher.runSync("createPartyGroup", UtilMisc.toMap("locale", locale, "userLogin", systemUser, "groupName", groupName));
             if (!ServiceUtil.isSuccess(createPartyGroupOutMap)) {
@@ -435,7 +422,7 @@ public class CloudCardBossServices {
             }
 
             // system用户
-            GenericValue systemUser = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+            GenericValue systemUser = (GenericValue) checkInputParamRet.get("systemUserLogin");
             if (!isAccept) {
                 // 拒绝邀请
                 partyInvitation.set("statusId", "PARTYINV_DECLINED");
@@ -529,6 +516,9 @@ public class CloudCardBossServices {
             return checkInputParamRet;
         }
 
+        String commentsExit = "主动退出圈子";
+        String commentsKickOut = "被圈主踢出圈子";
+
         try {
             String myGroupId = null;
             GenericValue myPartyRelationship = CloudCardHelper.getGroupRelationShipByStoreId(delegator, organizationPartyId, false);
@@ -590,10 +580,11 @@ public class CloudCardBossServices {
 
                 // 将圈友关系设置为过期
                 groupStoreRelationship.set("thruDate", UtilDateTime.nowTimestamp());
+                groupStoreRelationship.set("comments", commentsKickOut);
                 groupStoreRelationship.store();
             } else {
                 if (isGroupOwner) {
-                    // 如果自己是圈主，需要查看还有多少圈友，还有圈友，不能自己退出圈子吧
+                    // 如果自己是圈主，需要查看还有多少圈友，还有圈友时，自己不能退出圈子吧
                     List<String> partnerIdList = CloudCardHelper.getStoreGroupPartnerIdListByGroupId(delegator, myGroupId, true);
                     if (null != partnerIdList && partnerIdList.size() > 1) {
                         Debug.logWarning("There are other partners in the Group[" + myGroupId + "], the owner[" + organizationPartyId + "] can not quit group",
@@ -609,6 +600,7 @@ public class CloudCardBossServices {
                 }
 
                 myPartyRelationship.set("thruDate", UtilDateTime.nowTimestamp());
+                myPartyRelationship.set("comments", commentsExit);
                 myPartyRelationship.store();
             }
         } catch (GenericEntityException e) {
@@ -715,15 +707,17 @@ public class CloudCardBossServices {
         // GenericValue userLogin = (GenericValue) context.get("userLogin");
 
         String organizationPartyId = (String) context.get("organizationPartyId"); // 店家partyId
+        String comments = "圈主解散了圈子";
 
         Map<String, Object> checkInputParamRet = checkInputParam(dctx, context);
         if (!ServiceUtil.isSuccess(checkInputParamRet)) {
             return checkInputParamRet;
         }
+        GenericValue systemUserLogin = (GenericValue) checkInputParamRet.get("systemUserLogin");
 
         boolean isGroupOwner = false;
         try {
-            GenericValue myGroupRelationship = CloudCardHelper.getGroupRelationShipByStoreId(delegator, organizationPartyId, true);
+            GenericValue myGroupRelationship = CloudCardHelper.getGroupRelationShipByStoreId(delegator, organizationPartyId, false);
             if (null == myGroupRelationship) {
                 // 如果不存在圈子，直接返回成功
                 Debug.logWarning("This store[" + organizationPartyId + "] is not in a group now! just return success.", module);
@@ -738,23 +732,18 @@ public class CloudCardBossServices {
             }
 
             String myGroupId = CloudCardHelper.getGroupIdByRelationship(myGroupRelationship);
+
             List<GenericValue> storeRelList = CloudCardHelper.getStoreGroupRelationshipByGroupId(delegator, myGroupId, false);
             List<GenericValue> onlyPartnerRelList = CloudCardHelper.getStoreGroupPartnerRelationships(storeRelList);
 
-            if (UtilValidate.isEmpty(onlyPartnerRelList)) {
-                // 找不到列表, 只剩下一个光杆司令？
-                Debug.logWarning("This store[" + organizationPartyId + "] is not in a group now! just return success.", module);
-                myGroupRelationship.set("thruDate", UtilDateTime.nowTimestamp());
-                myGroupRelationship.store();
-                return ServiceUtil.returnSuccess();
-            }
-
-            // 查找圈友中是否存在未冻结
-            for (GenericValue gv : onlyPartnerRelList) {
-                if (!CloudCardHelper.isFrozenGroupRelationship(gv)) {
-                    // 有没有冻结的，不能解散
-                    Debug.logWarning("Store[" + gv.getString("partyIdTo") + "] is Not frozen store in a group,can not dissolve the group! ", module);
-                    return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardMustFreezeAllToDissolve", locale));
+            if (UtilValidate.isNotEmpty(onlyPartnerRelList)) {
+                // 查找圈友中是否存在未冻结
+                for (GenericValue gv : onlyPartnerRelList) {
+                    if (!CloudCardHelper.isFrozenGroupRelationship(gv)) {
+                        // 有没有冻结的，不能解散
+                        Debug.logWarning("Store[" + gv.getString("partyIdTo") + "] is Not frozen store in a group,can not dissolve the group! ", module);
+                        return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardMustFreezeAllToDissolve", locale));
+                    }
                 }
             }
 
@@ -768,10 +757,19 @@ public class CloudCardBossServices {
             // 正式进行解散操作(让关系过期)
             for (GenericValue gv : storeRelList) {
                 gv.set("thruDate", UtilDateTime.nowTimestamp());
+                gv.set("comments", comments);
             }
             delegator.storeAll(storeRelList);
 
-        } catch (GenericEntityException e) {
+            // 把圈子本身对应的那个 party 设置成 PARTY_DISABLED
+            Map<String, Object> setPartyStatusOut = dispatcher.runSync("setPartyStatus",
+                    UtilMisc.toMap("userLogin", systemUserLogin, "locale", locale, "statusId", "PARTY_DISABLED", "partyId", myGroupId));
+
+            if (!ServiceUtil.isSuccess(setPartyStatusOut)) {
+                return setPartyStatusOut;
+            }
+
+        } catch (GenericEntityException | GenericServiceException e) {
             Debug.logError(e.getMessage(), module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
         }
@@ -1060,7 +1058,7 @@ public class CloudCardBossServices {
         Map<String, Object> finAccountWithdrawalOutMap;
         try {
             // system账户
-            GenericValue systemUserLogin = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+            GenericValue systemUserLogin = (GenericValue) checkInputParamRet.get("systemUserLogin");
 
             // 检查是否已有发出但对方还未处理的结算
             List<GenericValue> oldPayments = delegator
@@ -1128,7 +1126,7 @@ public class CloudCardBossServices {
 
         try {
 
-            GenericValue systemUserLogin = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+            GenericValue systemUserLogin = (GenericValue) checkInputParamRet.get("systemUserLogin");
 
             // 检查结算的状态
             GenericValue settlePayment = delegator.findByPrimaryKey("Payment", UtilMisc.toMap("paymentId", settlementId));
@@ -1359,6 +1357,18 @@ public class CloudCardBossServices {
                         UtilMisc.toMap("organizationPartyId", storeId), locale));
             }
             result.put("store", store);
+        }
+
+        // 后续可能要用到 system用户操作
+        GenericValue systemUserLogin = (GenericValue) context.get("systemUserLogin");
+        if (null == systemUserLogin) {
+            try {
+                systemUserLogin = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+                result.put("systemUserLogin", systemUserLogin);
+            } catch (GenericEntityException e1) {
+                Debug.logError(e1.getMessage(), module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+            }
         }
 
         // 返回结果
