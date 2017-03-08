@@ -12,12 +12,9 @@ import java.util.Random;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
-import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
-import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
@@ -30,8 +27,6 @@ import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.request.AlipayTradeQueryRequest;
 import com.alipay.api.response.AlipayTradeQueryResponse;
-import com.banfftech.cloudcard.CloudCardHelper;
-import com.banfftech.cloudcard.constant.CloudCardConstant;
 import com.banfftech.cloudcard.pay.alipay.bean.AlipayNotification;
 import com.banfftech.cloudcard.pay.alipay.util.AlipayNotify;
 import com.banfftech.cloudcard.pay.alipay.util.RequestUtils;
@@ -65,7 +60,7 @@ public class AliPayServices {
 		String storeId = (String) context.get("storeId");
 		String cardId = (String) context.get("cardId");
 		
-		String orderInfo = getOrderInfo(partner, seller, subject, body, totalFee, getOutTradeNo(), notifyUrl,receiptPaymentId,cardId, storeId);
+		String orderInfo = getOrderInfo(partner, seller, subject, body, totalFee, receiptPaymentId, notifyUrl,receiptPaymentId,cardId, storeId);
 		String sign = StringUtils.sign(orderInfo, rsaPrivate, signType);
 
 		try {

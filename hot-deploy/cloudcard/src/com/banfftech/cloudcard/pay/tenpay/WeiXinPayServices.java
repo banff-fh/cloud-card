@@ -3,9 +3,7 @@ package com.banfftech.cloudcard.pay.tenpay;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.SortedMap;
@@ -63,7 +61,9 @@ public class WeiXinPayServices {
 		parameterMap.put("body", body);
 		parameterMap.put("nonce_str", nonceStr);
 		parameterMap.put("notify_url", notifyUrl);
-		parameterMap.put("out_trade_no", TenpayUtil.getCurrTime());
+		//将receiptPaymentId做商家流水号
+		parameterMap.put("out_trade_no", receiptPaymentId);
+		//parameterMap.put("out_trade_no", TenpayUtil.getCurrTime());
 		parameterMap.put("spbill_create_ip", "127.0.0.1");
         parameterMap.put("total_fee", Math.round((Double.valueOf(totalFee) * 100)));
 		parameterMap.put("trade_type", tradeType);
