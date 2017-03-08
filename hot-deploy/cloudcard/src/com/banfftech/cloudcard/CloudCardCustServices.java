@@ -143,7 +143,7 @@ public class CloudCardCustServices {
 		String latitude = null;
 		String isHasCard = CloudCardConstant.IS_N;
 		
-		
+		//获取店铺信息
 		Map<String,Object> cardAndStoreInfoMap = CloudCardHelper.getCardAndStoreInfo(dctx, context);
 		if(UtilValidate.isNotEmpty(cardAndStoreInfoMap)){
 			storeName = (String) cardAndStoreInfoMap.get("storeName");
@@ -158,38 +158,13 @@ public class CloudCardCustServices {
 		storeImg = EntityUtilProperties.getPropertyValue("cloudcard","cardImg." + storeId,delegator);
 
 
-		List<GenericValue> PartyAndContactMechs = FastList.newInstance();
-		try {
-			PartyAndContactMechs = delegator.findList("PartyAndContactMech", EntityCondition.makeCondition("partyId", storeId), null, null, null, true);
-		} catch (GenericEntityException e) {
-		    Debug.logError(e.getMessage(), module);
-            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-		}
-
-		if (UtilValidate.isNotEmpty(PartyAndContactMechs)) {
-			for (GenericValue partyAndContactMech : PartyAndContactMechs) {
-			     String cmType=partyAndContactMech.getString("contactMechTypeId");
-				if("POSTAL_ADDRESS".equals(cmType)){
-					storeAddress = (String) partyAndContactMech.get("paAddress1");
-				}else if(("TELECOM_NUMBER".equals(cmType))){
-					storeTeleNumber = (String) partyAndContactMech.get("tnContactNumber");
-				}
-			}
-		}
-		
-		
-		List<GenericValue> partyAndGeoPoints = FastList.newInstance();
-		try {
-			partyAndGeoPoints = delegator.findList("PartyAndGeoPoint", EntityCondition.makeCondition("partyId", storeId), null, null, null, true);
-		} catch (GenericEntityException e) {
-		    Debug.logError(e.getMessage(), module);
-            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-		}
-		
-		if(UtilValidate.isNotEmpty(partyAndGeoPoints)){
-			longitude = partyAndGeoPoints.get(0).getString("longitude");
-			latitude = partyAndGeoPoints.get(0).getString("latitude");
-		}
+		Map<String, Object> geoAndContactMechInfoMap = CloudCardHelper.getGeoAndContactMechInfoByStoreId(delegator,locale,storeId);
+        if(UtilValidate.isNotEmpty(geoAndContactMechInfoMap)){
+        	storeAddress = (String) geoAndContactMechInfoMap.get("storeAddress");
+        	storeTeleNumber = (String) geoAndContactMechInfoMap.get("storeTeleNumber");
+        	longitude = (String) geoAndContactMechInfoMap.get("longitude");
+        	latitude = (String) geoAndContactMechInfoMap.get("latitude");
+        }
 		
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();

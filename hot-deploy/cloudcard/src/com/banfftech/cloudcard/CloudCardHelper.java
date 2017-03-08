@@ -1042,7 +1042,10 @@ public class CloudCardHelper {
         // 获取店铺二维码
         String qrCode = (String) context.get("qrCode");
         String storeId = (String) context.get("storeId");
-        
+        String storeAddress = "";
+    	String storeTeleNumber = "";
+    	String longitude = "";
+    	String latitude = "";
     	try {
     		if(UtilValidate.isNotEmpty(qrCode)){
     			partyGroup = CloudCardHelper.getPartyGroupByQRcode(qrCode, delegator);
@@ -1090,19 +1093,87 @@ public class CloudCardHelper {
                 cloudCardList.add(CloudCardInfoUtil.packageCloudCardInfo(delegator, card));
             }
         }
-
+        
+        //获取店铺联系方式
+        Map<String, Object> geoAndContactMechInfoMap = getGeoAndContactMechInfoByStoreId(delegator,locale,storeId);
+        if(UtilValidate.isNotEmpty(geoAndContactMechInfoMap)){
+        	storeAddress = (String) geoAndContactMechInfoMap.get("storeAddress");
+        	storeTeleNumber = (String) geoAndContactMechInfoMap.get("storeTeleNumber");
+        	longitude = (String) geoAndContactMechInfoMap.get("longitude");
+        	latitude = (String) geoAndContactMechInfoMap.get("latitude");
+        }
+        
         // 返回结果
         Map<String, Object> result = ServiceUtil.returnSuccess();
         if(UtilValidate.isNotEmpty(qrCode)){
             result.put("qrCode", qrCode);
         }
+        
         result.put("storeId", storeId);
         result.put("groupOwnerId", groupOwnerId);
         result.put("storeName", groupName);
+        result.put("storeAddress", storeAddress);
+        result.put("storeTeleNumber", storeTeleNumber);
+        result.put("longitude", longitude);
+        result.put("latitude", latitude);
         result.put("canBuyStoreCard", hasStoreCard ? CloudCardConstant.IS_N : CloudCardConstant.IS_Y);
         result.put("canBuyGroupCard", (groupOwnerId != null && !hasGroupCard) ? CloudCardConstant.IS_Y : CloudCardConstant.IS_N);
         result.put("cloudCardList", cloudCardList);
         return result;
     }
 
+    /**
+     * 根据店铺ID查询店铺geo和联系方式
+     * 
+     * @param 
+     *            
+     * @return
+     */
+	public static Map<String, Object> getGeoAndContactMechInfoByStoreId(Delegator delegator, Locale locale, String storeId) {
+    	String storeAddress = "";
+    	String storeTeleNumber = "";
+    	String longitude = "";
+    	String latitude = "";
+    	
+    	List<GenericValue> PartyAndContactMechs = FastList.newInstance();
+		try {
+			PartyAndContactMechs = delegator.findList("PartyAndContactMech", EntityCondition.makeCondition("partyId", storeId), null, null, null, true);
+		} catch (GenericEntityException e) {
+		    Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+
+		if (UtilValidate.isNotEmpty(PartyAndContactMechs)) {
+			for (GenericValue partyAndContactMech : PartyAndContactMechs) {
+			     String cmType=partyAndContactMech.getString("contactMechTypeId");
+				if("POSTAL_ADDRESS".equals(cmType)){
+					storeAddress = (String) partyAndContactMech.get("paAddress1");
+				}else if(("TELECOM_NUMBER".equals(cmType))){
+					storeTeleNumber = (String) partyAndContactMech.get("tnContactNumber");
+				}
+			}
+		}
+		
+		
+		List<GenericValue> partyAndGeoPoints = FastList.newInstance();
+		try {
+			partyAndGeoPoints = delegator.findList("PartyAndGeoPoint", EntityCondition.makeCondition("partyId", storeId), null, null, null, true);
+		} catch (GenericEntityException e) {
+		    Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		if(UtilValidate.isNotEmpty(partyAndGeoPoints)){
+			longitude = partyAndGeoPoints.get(0).getString("longitude");
+			latitude = partyAndGeoPoints.get(0).getString("latitude");
+		}
+    	
+		// 返回结果
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("storeAddress", storeAddress);
+		result.put("storeTeleNumber", storeTeleNumber);
+		result.put("longitude", longitude);
+		result.put("latitude", latitude);
+		return result;
+    }
 }
