@@ -29,6 +29,7 @@ import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
 import com.banfftech.cloudcard.constant.CloudCardConstant;
+import com.banfftech.cloudcard.util.CloudCardInfoUtil;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
@@ -725,6 +726,22 @@ public class CloudCardHelper {
     }
 
     /**
+     * 根据商家店铺Id获取商家partyGroup实体
+     * 
+     * @param qrCode
+     *            商家店铺Id
+     * @param delegator
+     * @return 返回对应的商家实体，若未找到返回null
+     * @throws GenericEntityException
+     */
+    public static GenericValue getPartyGroupByStoreId(String storeId, Delegator delegator) throws GenericEntityException {
+        GenericValue partyGroup = null;
+        if (UtilValidate.isNotEmpty(storeId)) {
+            partyGroup = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId",storeId));
+        }
+        return partyGroup;
+    }
+    /**
      * 根据商家二维码获取商家partyGroup实体
      * 
      * @param qrCode
@@ -1008,6 +1025,84 @@ public class CloudCardHelper {
             return ZERO;
         }
         return balance.setScale(decimals, rounding);
+    }
+    
+    /**
+     * 根据卡号或店铺二维码获取卡信息和店铺信息
+     * 
+     * @param 
+     *            
+     * @return
+     */
+    public static Map<String, Object> getCardAndStoreInfo(DispatchContext dctx, Map<String, Object> context) {
+    	Delegator delegator = dctx.getDelegator();
+        GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Locale locale = (Locale) context.get("locale");
+        GenericValue partyGroup = null;
+        // 获取店铺二维码
+        String qrCode = (String) context.get("qrCode");
+        String storeId = (String) context.get("storeId");
+        
+    	try {
+    		if(UtilValidate.isNotEmpty(qrCode)){
+    			partyGroup = CloudCardHelper.getPartyGroupByQRcode(qrCode, delegator);
+    		}else if(UtilValidate.isNotEmpty(storeId)){
+    			partyGroup = CloudCardHelper.getPartyGroupByStoreId(storeId, delegator);
+            }
+        } catch (GenericEntityException e) {
+            Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+        }
+
+    	if (UtilValidate.isEmpty(partyGroup) && UtilValidate.isNotEmpty(qrCode)) {
+            Debug.logWarning("商户qrCode:" + qrCode + "不存在", module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardOrganizationPartyNotFound", locale));
+        }else if(UtilValidate.isEmpty(partyGroup) && UtilValidate.isNotEmpty(storeId)){
+        	Debug.logWarning("商户店铺Id:" + storeId + "不存在", module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardOrganizationPartyNotFound", locale));
+        }
+    
+        storeId = partyGroup.getString("partyId");
+        String groupName = partyGroup.getString("groupName");
+        String groupOwnerId = null;
+
+        List<GenericValue> cloudCards = null;
+        try {
+            EntityCondition cond = CloudCardInfoUtil.createLookupMyStoreCardCondition(delegator, userLogin.getString("partyId"), storeId);
+            cloudCards = delegator.findList("CloudCardInfo", cond, null, UtilMisc.toList("-fromDate"), null, false);
+            groupOwnerId = CloudCardHelper.getGroupOwneIdByStoreId(delegator, storeId, true);
+        } catch (GenericEntityException e) {
+            Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+        }
+
+        // 有本店卡？
+        boolean hasStoreCard = false;
+        // 有圈主店的卡？
+        boolean hasGroupCard = false;
+
+        List<Object> cloudCardList = FastList.newInstance();
+        if (UtilValidate.isNotEmpty(cloudCards)) {
+            List<String> distributorPartyIds = EntityUtil.getFieldListFromEntityList(cloudCards, "distributorPartyId", true);
+            hasStoreCard = distributorPartyIds.contains(storeId);
+            hasGroupCard = distributorPartyIds.contains(groupOwnerId);
+            for (GenericValue card : cloudCards) {
+                cloudCardList.add(CloudCardInfoUtil.packageCloudCardInfo(delegator, card));
+            }
+        }
+
+        // 返回结果
+        Map<String, Object> result = ServiceUtil.returnSuccess();
+        if(UtilValidate.isNotEmpty(qrCode)){
+            result.put("qrCode", qrCode);
+        }
+        result.put("storeId", storeId);
+        result.put("groupOwnerId", groupOwnerId);
+        result.put("storeName", groupName);
+        result.put("canBuyStoreCard", hasStoreCard ? CloudCardConstant.IS_N : CloudCardConstant.IS_Y);
+        result.put("canBuyGroupCard", (groupOwnerId != null && !hasGroupCard) ? CloudCardConstant.IS_Y : CloudCardConstant.IS_N);
+        result.put("cloudCardList", cloudCardList);
+        return result;
     }
 
 }

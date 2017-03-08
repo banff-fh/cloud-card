@@ -208,6 +208,17 @@ public class AliPayServices {
 		return orderPayMap;
 	}
 	
+	/**
+	 * 支付宝退款服务
+	 * 
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> refund(DispatchContext dctx, Map<String, Object> context) {
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		return result;
+	}
 	
 	/**
 	 * get the out_trade_no for an order. 获取外部订单号

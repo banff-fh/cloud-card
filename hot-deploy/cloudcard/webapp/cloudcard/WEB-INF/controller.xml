@@ -367,9 +367,15 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
+	
+	<!-- C端根据店铺Id获取商户信息和卡列表-->
+	<request-map uri="getCardAndStoreInfoByStoreId">
+		<!--<security https="true" auth="false" />-->
+		<event type="service" invoke="getCardAndStoreInfoByStoreId" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
 		
-
-
 	<!-- 后台页面部分 Request Mappings -->
 
 

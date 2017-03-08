@@ -10,6 +10,7 @@ import java.util.Map;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilFormatOut;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
@@ -99,6 +100,7 @@ public class CloudCardCustServices {
 					storeMap.put("telNum",stroeInfo.get("storeTeleNumber"));
 					storeMap.put("storeId",stroeInfo.get("storeId"));
 					storeMap.put("isGroupOwner",isGroupOwner);
+					storeMap.put("isHasCard",stroeInfo.get("isHasCard"));
 					storeMap.put("distance",jsonArray.getJSONObject(i).getObject("distance",String.class) );
 					if (UtilValidate.isNotEmpty(stroeInfo.get("longitude")) && UtilValidate.isNotEmpty(stroeInfo.get("latitude"))) {
 						storeMap.put("location", "["+stroeInfo.get("longitude")+","+stroeInfo.get("latitude")+"]");
@@ -141,16 +143,18 @@ public class CloudCardCustServices {
 		String storeTeleNumber = null;
 		String longitude = null;
 		String latitude = null;
-		GenericValue partyGroup = null;
-		try {
-			partyGroup = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", storeId));
-		} catch (GenericEntityException e) {
-		    Debug.logError(e.getMessage(), module);
-            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-		}
-
-		if (UtilValidate.isNotEmpty( partyGroup)) {
-			storeName = (String) partyGroup.get("groupName");
+		String isHasCard = CloudCardConstant.IS_N;
+		
+		
+		Map<String,Object> cardAndStoreInfoMap = CloudCardHelper.getCardAndStoreInfo(dctx, context);
+		if(UtilValidate.isNotEmpty(cardAndStoreInfoMap)){
+			storeName = (String) cardAndStoreInfoMap.get("storeName");
+			List<Object> cloudCardList  = UtilGenerics.checkList(cardAndStoreInfoMap.get("cloudCardList")) ;
+			if(cloudCardList.size() > 0 ){
+				isHasCard = CloudCardConstant.IS_N;
+			}else{
+				isHasCard = CloudCardConstant.IS_Y;
+			}
 		}
 		
 		storeImg = EntityUtilProperties.getPropertyValue("cloudcard","cardImg." + storeId,delegator);
@@ -198,6 +202,7 @@ public class CloudCardCustServices {
 		result.put("storeTeleNumber", storeTeleNumber);
 		result.put("longitude", longitude);
 		result.put("latitude", latitude);
+		result.put("isHasCard", isHasCard);
 
 		return result;
 	}
@@ -347,64 +352,9 @@ public class CloudCardCustServices {
      * @return
      */
     public static Map<String, Object> userScanCodeGetCardAndStoreInfo(DispatchContext dctx, Map<String, Object> context) {
-        // LocalDispatcher dispatcher = dctx.getDispatcher();
-        Delegator delegator = dctx.getDelegator();
-        GenericValue userLogin = (GenericValue) context.get("userLogin");
-        Locale locale = (Locale) context.get("locale");
-        // 获取店铺二维码
-        String qrCode = (String) context.get("qrCode");
-        GenericValue partyGroup = null;
-        try {
-            partyGroup = CloudCardHelper.getPartyGroupByQRcode(qrCode, delegator);
-        } catch (GenericEntityException e) {
-            Debug.logError(e.getMessage(), module);
-            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-        }
-
-        if (null == partyGroup) {
-            Debug.logWarning("商户qrCode:" + qrCode + "不存在", module);
-            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardOrganizationPartyNotFound", locale));
-        }
-
-        String storeId = partyGroup.getString("partyId");
-        String groupName = partyGroup.getString("groupName");
-        String groupOwnerId = null;
-
-        List<GenericValue> cloudCards = null;
-        try {
-            EntityCondition cond = CloudCardInfoUtil.createLookupMyStoreCardCondition(delegator, userLogin.getString("partyId"), storeId);
-            cloudCards = delegator.findList("CloudCardInfo", cond, null, UtilMisc.toList("-fromDate"), null, false);
-            groupOwnerId = CloudCardHelper.getGroupOwneIdByStoreId(delegator, storeId, true);
-        } catch (GenericEntityException e) {
-            Debug.logError(e.getMessage(), module);
-            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-        }
-
-        // 有本店卡？
-        boolean hasStoreCard = false;
-        // 有圈主店的卡？
-        boolean hasGroupCard = false;
-
-        List<Object> cloudCardList = FastList.newInstance();
-        if (UtilValidate.isNotEmpty(cloudCards)) {
-            List<String> distributorPartyIds = EntityUtil.getFieldListFromEntityList(cloudCards, "distributorPartyId", true);
-            hasStoreCard = distributorPartyIds.contains(storeId);
-            hasGroupCard = distributorPartyIds.contains(groupOwnerId);
-            for (GenericValue card : cloudCards) {
-                cloudCardList.add(CloudCardInfoUtil.packageCloudCardInfo(delegator, card));
-            }
-        }
-
-        // 返回结果
-        Map<String, Object> result = ServiceUtil.returnSuccess();
-        result.put("qrCode", qrCode);
-        result.put("storeId", storeId);
-        result.put("groupOwnerId", groupOwnerId);
-        result.put("storeName", groupName);
-        result.put("canBuyStoreCard", hasStoreCard ? CloudCardConstant.IS_N : CloudCardConstant.IS_Y);
-        result.put("canBuyGroupCard", (groupOwnerId != null && !hasGroupCard) ? CloudCardConstant.IS_Y : CloudCardConstant.IS_N);
-        result.put("cloudCardList", cloudCardList);
-        return result;
+        //根据二维码获取卡和店铺信息
+        Map<String,Object> cardAndStoreInfoMap = CloudCardHelper.getCardAndStoreInfo(dctx, context);
+        return cardAndStoreInfoMap;
     }
 	
 	/**
@@ -606,5 +556,16 @@ public class CloudCardCustServices {
 		return result;
 	}
 	
-	
+	/**
+     * C端根据店铺Id获取商户信息和卡列表
+     * 
+     * @param dctx
+     * @param context
+     * @return
+     */
+    public static Map<String, Object> getCardAndStoreInfoByStoreId(DispatchContext dctx, Map<String, Object> context) {
+        //根据二维码获取卡和店铺信息
+        Map<String,Object> cardAndStoreInfoMap = CloudCardHelper.getCardAndStoreInfo(dctx, context);
+        return cardAndStoreInfoMap;
+    }
 }
