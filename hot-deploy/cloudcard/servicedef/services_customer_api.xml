@@ -115,6 +115,7 @@
 		<attribute name="storeTeleNumber" type="String" mode="OUT" optional="true"><description>店铺联系电话（店主电话）</description></attribute>
 		<attribute name="longitude" type="String" mode="OUT" optional="true"><description>经度</description></attribute>
 		<attribute name="latitude" type="String" mode="OUT" optional="true"><description>纬度</description></attribute>
+		<attribute name="isHasCard" type="String" mode="OUT" optional="true"><description>是否有卡</description></attribute>
 	</service>
 	
 	<service name="userGetGroupInfo" engine="java"
