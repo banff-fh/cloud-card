@@ -148,7 +148,7 @@ public class CloudCardCustServices {
 		if(UtilValidate.isNotEmpty(cardAndStoreInfoMap)){
 			storeName = (String) cardAndStoreInfoMap.get("storeName");
 			List<Object> cloudCardList  = UtilGenerics.checkList(cardAndStoreInfoMap.get("cloudCardList")) ;
-			if(cloudCardList.size() > 0 ){
+			if(cloudCardList.size() <= 0 ){
 				isHasCard = CloudCardConstant.IS_N;
 			}else{
 				isHasCard = CloudCardConstant.IS_Y;
