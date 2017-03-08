@@ -18,7 +18,6 @@ import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
-import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
@@ -30,7 +29,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.auth0.jwt.JWTSigner;
 import com.banfftech.cloudcard.constant.CloudCardConstant;
 import com.banfftech.cloudcard.lbs.BaiduLBSUtil;
-import com.banfftech.cloudcard.util.CloudCardInfoUtil;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
@@ -552,6 +550,7 @@ public class CloudCardCustServices {
 		
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("refreshTime", expirationTime);
 		result.put("qrCode", CloudCardConstant.CODE_PREFIX_PAY_ + qrCode);
 		return result;
 	}

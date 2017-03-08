@@ -169,6 +169,7 @@
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="getPaymentQRCode" auth="true">
 		<description>C端获取二维码</description>
 		<attribute name="qrCode" type="String" mode="OUT" optional="false"><description>二维码</description></attribute>
+		<attribute name="refreshTime" type="Long" mode="OUT" optional="false"><description>刷新时间</description></attribute>
 	</service>
 	
 	<service name="getCardAndStoreInfoByStoreId" engine="java"
