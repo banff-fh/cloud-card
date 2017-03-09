@@ -400,12 +400,8 @@ public class CloudCardQueryServices {
 		
 		
 		Map<String, Object> results = ServiceUtil.returnSuccess();
-		if("FNACT_ACTIVE".equals(statusId)){
-			results.put("isActivated", "Y");
-		}else{
-			results.put("isActivated", "N");
-		}
-		
+		boolean isActivated = "FNACT_ACTIVE".equals(statusId);
+		results.put("isActivated", CloudCardHelper.bool2YN(isActivated));
 		results.put("cardBalance", CloudCardHelper.getCloudCardBalance(cloudCard));
 
 		String cardOrganizationPartyId = cloudCard.getString("distributorPartyId");

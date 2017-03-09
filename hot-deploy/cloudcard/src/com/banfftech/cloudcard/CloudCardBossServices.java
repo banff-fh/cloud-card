@@ -918,17 +918,26 @@ public class CloudCardBossServices {
         // TODO 圈主 需要查询一些 圈子相关的金额信息
         if (isGroupOwner) {
             // 跨店消费额，圈主卡 到 圈友店 消费总额，
-            result.put("crossStoreAmount", CloudCardHelper.ZERO);
+            BigDecimal crossStoreAmount = CloudCardHelper.ZERO;
             // 已卖卡总额，圈主卖出的卡总金额，
-            result.put("presellAmount", CloudCardHelper.ZERO);
+            BigDecimal presellAmount = CloudCardHelper.ZERO;
             // 已消费总额，圈主本店消费 + 到圈友店里跨店消费，
-            result.put("totalConsumptionAmount", CloudCardHelper.ZERO);
-            result.put("balance", CloudCardHelper.ZERO); // 剩余额度，剩余卖卡额度
-            result.put("income", CloudCardHelper.ZERO); // 收益总额，因为跨店消费的圈主给圈友的打折而产生的收益总额，
+            BigDecimal totalConsumptionAmount = CloudCardHelper.ZERO;
+            // 剩余额度，剩余卖卡额度
+            BigDecimal balance = CloudCardHelper.ZERO;
+            // 收益总额，因为跨店消费的圈主给圈友的打折而产生的收益总额，
+            BigDecimal income = CloudCardHelper.ZERO;
+
+            
+            result.put("crossStoreAmount", crossStoreAmount);
+            result.put("presellAmount", presellAmount);
+            result.put("totalConsumptionAmount", totalConsumptionAmount);
+            result.put("balance", balance);
+            result.put("income", income);
         }
 
         result.put("isJoinGroup", CloudCardConstant.IS_Y);
-        result.put("isGroupOwner", isGroupOwner ? CloudCardConstant.IS_Y : CloudCardConstant.IS_N);
+        result.put("isGroupOwner", CloudCardHelper.bool2YN(isGroupOwner));
         result.put("groupId", groupId);
         result.put("groupName", storeGroup.getString("groupName"));
         return result;
@@ -982,15 +991,15 @@ public class CloudCardBossServices {
         }
 
         // 圈子相关
-        String isJoinGroup = CloudCardConstant.IS_N;
-        String isGroupOwner = CloudCardConstant.IS_N;
-        String isFrozen = CloudCardConstant.IS_N;
+        boolean isJoinGroup = false;
+        boolean isGroupOwner = false;
+        boolean isFrozen = false;
         try {
             GenericValue partyRelationship = CloudCardHelper.getGroupRelationShipByStoreId(delegator, storeId, false);
             if (null != partyRelationship) {
-                isJoinGroup = CloudCardConstant.IS_Y;
-                isGroupOwner = CloudCardHelper.isStoreGroupOwnerRelationship(partyRelationship) ? CloudCardConstant.IS_Y : CloudCardConstant.IS_N;
-                isFrozen = CloudCardHelper.isFrozenGroupRelationship(partyRelationship) ? CloudCardConstant.IS_Y : CloudCardConstant.IS_N;
+                isJoinGroup = true;
+                isGroupOwner = CloudCardHelper.isStoreGroupOwnerRelationship(partyRelationship);
+                isFrozen = CloudCardHelper.isFrozenGroupRelationship(partyRelationship);
             }
         } catch (GenericEntityException e) {
             Debug.logError(e.getMessage(), module);
@@ -1009,9 +1018,9 @@ public class CloudCardBossServices {
         result.put("storeAddress", storeAddress);
         result.put("storeTeleNumber", storeTeleNumber);
         result.put("settlementAmount", settlementAmount);
-        result.put("isJoinGroup", isJoinGroup);
-        result.put("isGroupOwner", isGroupOwner);
-        result.put("isFrozen", isFrozen);
+        result.put("isJoinGroup", CloudCardHelper.bool2YN(isJoinGroup));
+        result.put("isGroupOwner", CloudCardHelper.bool2YN(isGroupOwner));
+        result.put("isFrozen", CloudCardHelper.bool2YN(isFrozen));
         return result;
     }
 

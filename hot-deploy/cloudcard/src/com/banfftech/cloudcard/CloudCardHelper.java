@@ -34,6 +34,7 @@ import com.banfftech.cloudcard.util.CloudCardInfoUtil;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
+
 /**
  * @author cy
  */
@@ -737,10 +738,11 @@ public class CloudCardHelper {
     public static GenericValue getPartyGroupByStoreId(String storeId, Delegator delegator) throws GenericEntityException {
         GenericValue partyGroup = null;
         if (UtilValidate.isNotEmpty(storeId)) {
-            partyGroup = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId",storeId));
+            partyGroup = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", storeId));
         }
         return partyGroup;
     }
+
     /**
      * 根据商家二维码获取商家partyGroup实体
      * 
@@ -908,8 +910,7 @@ public class CloudCardHelper {
         condList.add(EntityUtil.getFilterByDateExpr());
         return delegator.findList("PartyRelationship", EntityCondition.makeCondition(condList), null, null, null, useCache);
     }
-    
-    
+
     /**
      * 从 圈子与商家的 partyRelationship 列表 中 筛选出 普通圈友
      * 
@@ -1026,16 +1027,26 @@ public class CloudCardHelper {
         }
         return balance.setScale(decimals, rounding);
     }
-    
+
+    /**
+     * 将boolean 类型的值用 Y / N 来表示
+     * 
+     * @param boolValue
+     * @return
+     */
+    public static String bool2YN(boolean boolValue) {
+        return boolValue ? CloudCardConstant.IS_Y : CloudCardConstant.IS_N;
+    }
+
     /**
      * 根据卡号或店铺二维码获取卡信息和店铺信息
      * 
-     * @param 
-     *            
+     * @param
+     * 
      * @return
      */
     public static Map<String, Object> getCardAndStoreInfo(DispatchContext dctx, Map<String, Object> context) {
-    	Delegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         GenericValue userLogin = (GenericValue) context.get("userLogin");
         Locale locale = (Locale) context.get("locale");
         GenericValue partyGroup = null;
@@ -1043,28 +1054,28 @@ public class CloudCardHelper {
         String qrCode = (String) context.get("qrCode");
         String storeId = (String) context.get("storeId");
         String storeAddress = "";
-    	String storeTeleNumber = "";
-    	String longitude = "";
-    	String latitude = "";
-    	try {
-    		if(UtilValidate.isNotEmpty(qrCode)){
-    			partyGroup = CloudCardHelper.getPartyGroupByQRcode(qrCode, delegator);
-    		}else if(UtilValidate.isNotEmpty(storeId)){
-    			partyGroup = CloudCardHelper.getPartyGroupByStoreId(storeId, delegator);
+        String storeTeleNumber = "";
+        String longitude = "";
+        String latitude = "";
+        try {
+            if (UtilValidate.isNotEmpty(qrCode)) {
+                partyGroup = CloudCardHelper.getPartyGroupByQRcode(qrCode, delegator);
+            } else if (UtilValidate.isNotEmpty(storeId)) {
+                partyGroup = CloudCardHelper.getPartyGroupByStoreId(storeId, delegator);
             }
         } catch (GenericEntityException e) {
             Debug.logError(e.getMessage(), module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
         }
 
-    	if (UtilValidate.isEmpty(partyGroup) && UtilValidate.isNotEmpty(qrCode)) {
+        if (UtilValidate.isEmpty(partyGroup) && UtilValidate.isNotEmpty(qrCode)) {
             Debug.logWarning("商户qrCode:" + qrCode + "不存在", module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardOrganizationPartyNotFound", locale));
-        }else if(UtilValidate.isEmpty(partyGroup) && UtilValidate.isNotEmpty(storeId)){
-        	Debug.logWarning("商户店铺Id:" + storeId + "不存在", module);
+        } else if (UtilValidate.isEmpty(partyGroup) && UtilValidate.isNotEmpty(storeId)) {
+            Debug.logWarning("商户店铺Id:" + storeId + "不存在", module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardOrganizationPartyNotFound", locale));
         }
-    
+
         storeId = partyGroup.getString("partyId");
         String groupName = partyGroup.getString("groupName");
         String groupOwnerId = null;
@@ -1093,22 +1104,22 @@ public class CloudCardHelper {
                 cloudCardList.add(CloudCardInfoUtil.packageCloudCardInfo(delegator, card));
             }
         }
-        
-        //获取店铺联系方式
-        Map<String, Object> geoAndContactMechInfoMap = getGeoAndContactMechInfoByStoreId(delegator,locale,storeId);
-        if(UtilValidate.isNotEmpty(geoAndContactMechInfoMap)){
-        	storeAddress = (String) geoAndContactMechInfoMap.get("storeAddress");
-        	storeTeleNumber = (String) geoAndContactMechInfoMap.get("storeTeleNumber");
-        	longitude = (String) geoAndContactMechInfoMap.get("longitude");
-        	latitude = (String) geoAndContactMechInfoMap.get("latitude");
+
+        // 获取店铺联系方式
+        Map<String, Object> geoAndContactMechInfoMap = getGeoAndContactMechInfoByStoreId(delegator, locale, storeId);
+        if (UtilValidate.isNotEmpty(geoAndContactMechInfoMap)) {
+            storeAddress = (String) geoAndContactMechInfoMap.get("storeAddress");
+            storeTeleNumber = (String) geoAndContactMechInfoMap.get("storeTeleNumber");
+            longitude = (String) geoAndContactMechInfoMap.get("longitude");
+            latitude = (String) geoAndContactMechInfoMap.get("latitude");
         }
-        
+
         // 返回结果
         Map<String, Object> result = ServiceUtil.returnSuccess();
-        if(UtilValidate.isNotEmpty(qrCode)){
+        if (UtilValidate.isNotEmpty(qrCode)) {
             result.put("qrCode", qrCode);
         }
-        
+
         result.put("storeId", storeId);
         result.put("groupOwnerId", groupOwnerId);
         result.put("storeName", groupName);
@@ -1125,55 +1136,54 @@ public class CloudCardHelper {
     /**
      * 根据店铺ID查询店铺geo和联系方式
      * 
-     * @param 
-     *            
+     * @param
+     * 
      * @return
      */
-	public static Map<String, Object> getGeoAndContactMechInfoByStoreId(Delegator delegator, Locale locale, String storeId) {
-    	String storeAddress = "";
-    	String storeTeleNumber = "";
-    	String longitude = "";
-    	String latitude = "";
-    	
-    	List<GenericValue> PartyAndContactMechs = FastList.newInstance();
-		try {
-			PartyAndContactMechs = delegator.findList("PartyAndContactMech", EntityCondition.makeCondition("partyId", storeId), null, null, null, true);
-		} catch (GenericEntityException e) {
-		    Debug.logError(e.getMessage(), module);
-            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-		}
+    public static Map<String, Object> getGeoAndContactMechInfoByStoreId(Delegator delegator, Locale locale, String storeId) {
+        String storeAddress = "";
+        String storeTeleNumber = "";
+        String longitude = "";
+        String latitude = "";
 
-		if (UtilValidate.isNotEmpty(PartyAndContactMechs)) {
-			for (GenericValue partyAndContactMech : PartyAndContactMechs) {
-			     String cmType=partyAndContactMech.getString("contactMechTypeId");
-				if("POSTAL_ADDRESS".equals(cmType)){
-					storeAddress = (String) partyAndContactMech.get("paAddress1");
-				}else if(("TELECOM_NUMBER".equals(cmType))){
-					storeTeleNumber = (String) partyAndContactMech.get("tnContactNumber");
-				}
-			}
-		}
-		
-		
-		List<GenericValue> partyAndGeoPoints = FastList.newInstance();
-		try {
-			partyAndGeoPoints = delegator.findList("PartyAndGeoPoint", EntityCondition.makeCondition("partyId", storeId), null, null, null, true);
-		} catch (GenericEntityException e) {
-		    Debug.logError(e.getMessage(), module);
+        List<GenericValue> PartyAndContactMechs = FastList.newInstance();
+        try {
+            PartyAndContactMechs = delegator.findList("PartyAndContactMech", EntityCondition.makeCondition("partyId", storeId), null, null, null, true);
+        } catch (GenericEntityException e) {
+            Debug.logError(e.getMessage(), module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-		}
-		
-		if(UtilValidate.isNotEmpty(partyAndGeoPoints)){
-			longitude = partyAndGeoPoints.get(0).getString("longitude");
-			latitude = partyAndGeoPoints.get(0).getString("latitude");
-		}
-    	
-		// 返回结果
-		Map<String, Object> result = ServiceUtil.returnSuccess();
-		result.put("storeAddress", storeAddress);
-		result.put("storeTeleNumber", storeTeleNumber);
-		result.put("longitude", longitude);
-		result.put("latitude", latitude);
-		return result;
+        }
+
+        if (UtilValidate.isNotEmpty(PartyAndContactMechs)) {
+            for (GenericValue partyAndContactMech : PartyAndContactMechs) {
+                String cmType = partyAndContactMech.getString("contactMechTypeId");
+                if ("POSTAL_ADDRESS".equals(cmType)) {
+                    storeAddress = (String) partyAndContactMech.get("paAddress1");
+                } else if (("TELECOM_NUMBER".equals(cmType))) {
+                    storeTeleNumber = (String) partyAndContactMech.get("tnContactNumber");
+                }
+            }
+        }
+
+        List<GenericValue> partyAndGeoPoints = FastList.newInstance();
+        try {
+            partyAndGeoPoints = delegator.findList("PartyAndGeoPoint", EntityCondition.makeCondition("partyId", storeId), null, null, null, true);
+        } catch (GenericEntityException e) {
+            Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+        }
+
+        if (UtilValidate.isNotEmpty(partyAndGeoPoints)) {
+            longitude = partyAndGeoPoints.get(0).getString("longitude");
+            latitude = partyAndGeoPoints.get(0).getString("latitude");
+        }
+
+        // 返回结果
+        Map<String, Object> result = ServiceUtil.returnSuccess();
+        result.put("storeAddress", storeAddress);
+        result.put("storeTeleNumber", storeTeleNumber);
+        result.put("longitude", longitude);
+        result.put("latitude", latitude);
+        return result;
     }
 }

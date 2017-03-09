@@ -80,13 +80,9 @@ public class CloudCardCustServices {
 			JSONArray jsonArray = JSONObject.parseArray(lbsResult.get("contents").toString());
 			for(int i = 0 ;i<jsonArray.size();i++){
 				
-				String isGroupOwner = "N";
 				try {
 				
-					boolean isStoreGroupOwner = CloudCardHelper.isStoreGroupOwner(delegator,jsonArray.getJSONObject(i).getObject("storeId", String.class), true);
-					if(isStoreGroupOwner){
-						isGroupOwner = "Y";
-					}
+					boolean isGroupOwner = CloudCardHelper.isStoreGroupOwner(delegator,jsonArray.getJSONObject(i).getObject("storeId", String.class), true);
 					
 					context.put("storeId", jsonArray.getJSONObject(i).getObject("storeId",String.class));
 					//获取店铺信息
@@ -97,7 +93,7 @@ public class CloudCardCustServices {
 					storeMap.put("address",stroeInfo.get("storeAddress"));
 					storeMap.put("telNum",stroeInfo.get("storeTeleNumber"));
 					storeMap.put("storeId",stroeInfo.get("storeId"));
-					storeMap.put("isGroupOwner",isGroupOwner);
+					storeMap.put("isGroupOwner",CloudCardHelper.bool2YN(isGroupOwner));
 					storeMap.put("isHasCard",stroeInfo.get("isHasCard"));
 					storeMap.put("distance",jsonArray.getJSONObject(i).getObject("distance",String.class) );
 					if (UtilValidate.isNotEmpty(stroeInfo.get("longitude")) && UtilValidate.isNotEmpty(stroeInfo.get("latitude"))) {
@@ -235,19 +231,13 @@ public class CloudCardCustServices {
 				String storeTeleNumber = null;
 				String longitude = null;
 				String latitude = null;
-				String isGroupOwner = null;
 				
-				Boolean isStoreGroupOwner = null;
+				Boolean isGroupOwner = null;
 				try {
-					isStoreGroupOwner = CloudCardHelper.isStoreGroupOwner(delegator,storeRs,false);
+				    isGroupOwner = CloudCardHelper.isStoreGroupOwner(delegator,storeRs,false);
 				} catch (GenericEntityException e) {
 				    Debug.logError(e.getMessage(), module);
 		            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-				}
-				if(isStoreGroupOwner){
-					isGroupOwner = "Y";
-				}else{
-					isGroupOwner = "N";
 				}
 				
 				GenericValue partyGroup = null;
@@ -304,7 +294,7 @@ public class CloudCardCustServices {
 				storeMap.put("storeImg", storeImg);
 				storeMap.put("storeAddress", storeAddress);
 				storeMap.put("storeTeleNumber", storeTeleNumber);
-				storeMap.put("isGroupOwner", isGroupOwner);
+				storeMap.put("isGroupOwner", CloudCardHelper.bool2YN(isGroupOwner));
 				storeMap.put("longitude", longitude);
 				storeMap.put("latitude", latitude);
 				storeList.add(storeMap);
