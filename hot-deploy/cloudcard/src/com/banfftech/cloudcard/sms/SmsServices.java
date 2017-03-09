@@ -103,7 +103,7 @@ public class SmsServices {
 		java.sql.Timestamp nowTimestamp  = UtilDateTime.nowTimestamp();
 		
 		//校验电话号码是否非法
-		Pattern p = Pattern.compile("^((13[0-9])|(15[^4,\\D])|(14[57])|(17[0])|(17[5])|(17[6])|(17[7])|(18[0,0-9]))\\d{8}$");  
+		Pattern p = Pattern.compile("^((13[0-9])|(15[^4,\\D])|(14[57])|(17[0])|(17[3])|(17[5])|(17[6])|(17[7])|(18[0,0-9]))\\d{8}$");  
 		Matcher m = p.matcher(teleNumber);  
 		
 		if(!m.matches()){
