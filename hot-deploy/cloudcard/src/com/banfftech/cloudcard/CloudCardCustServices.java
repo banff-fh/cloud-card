@@ -229,6 +229,7 @@ public class CloudCardCustServices {
 		if(UtilValidate.isNotEmpty(storeIdList)){
 			for(String storeRs: storeIdList){
 				String storeName = null;
+				String storeIdTmp = null;
 				String storeImg = null;
 				String storeAddress = null;
 				String storeTeleNumber = null;
@@ -258,7 +259,8 @@ public class CloudCardCustServices {
 				}
 
 				if (UtilValidate.isNotEmpty( partyGroup)) {
-					storeName = (String) partyGroup.get("groupName");
+					storeName = partyGroup.getString("groupName");
+					storeIdTmp = partyGroup.getString("partyId");
 				}
 				
 				storeImg = EntityUtilProperties.getPropertyValue("cloudcard","cardImg." + storeRs,delegator);
@@ -297,7 +299,7 @@ public class CloudCardCustServices {
 				}
 				
 				Map<String,Object> storeMap = FastMap.newInstance();
-				storeMap.put("storeId", storeId);
+				storeMap.put("storeId", storeIdTmp);
 				storeMap.put("storeName", storeName);
 				storeMap.put("storeImg", storeImg);
 				storeMap.put("storeAddress", storeAddress);
