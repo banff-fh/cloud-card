@@ -75,4 +75,11 @@ under the License.
         <set field-name="partyId" env-name="customerPartyId" />
         <action service="pushNotifOrMessage"  mode="async"/>
     </eca>
+    
+    <!-- 云卡支付后增加相应积分 -->
+    <eca service="cloudCardWithdraw" event="return">
+        <set field-name="partyId" env-name="customerPartyId" />
+        <action service="addUserScore"  mode="async"/>
+    </eca>
+    
 </service-eca>

@@ -1,15 +1,22 @@
 package com.banfftech.cloudcard.util;
 
 import java.math.BigDecimal;
+import java.util.Locale;
 import java.util.Map;
 
+import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.util.EntityUtil;
+import org.ofbiz.service.DispatchContext;
+import org.ofbiz.service.GenericServiceException;
+import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.service.ServiceUtil;
 
 import com.banfftech.cloudcard.CloudCardHelper;
 import com.banfftech.cloudcard.constant.CloudCardConstant;
@@ -101,6 +108,44 @@ public class CloudCardLevelScoreUtil {
         }
 
         return partyClassification.getRelatedOneCache("PartyClassificationGroup");
+    }
+
+    /**
+     * 内部服务--增加用户积分的服务， 云卡支付完成时 eca会触发此服务
+     * 
+     * @param dctx
+     * @param context
+     * @return
+     */
+    public static Map<String, Object> addUserScore(DispatchContext dctx, Map<String, Object> context) {
+
+        LocalDispatcher dispatcher = dctx.getDispatcher();
+        Delegator delegator = dctx.getDelegator();
+        Locale locale = (Locale) context.get("locale");
+
+        String customerPartyId = (String) context.get("customerPartyId"); // 用户partyId
+        String amount = (String) context.get("amount"); // 增加多少积分
+        String paymentId = (String) context.get("paymentId"); // 如果有的话，也记录下支付id
+
+        Map<String, Object> retMap = ServiceUtil.returnSuccess();
+
+        Map<String, Object> finAccountDepoistOutMap = null;
+        try {
+            GenericValue scoreAccount = CloudCardLevelScoreUtil.getOrCreateUserScoreAccount(delegator, customerPartyId);
+            GenericValue systemUserLogin = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+            finAccountDepoistOutMap = dispatcher.runSync("createFinAccountTrans",
+                    UtilMisc.toMap("userLogin", systemUserLogin, "locale", locale, "finAccountId", scoreAccount.getString("finAccountId"), "partyId",
+                            customerPartyId, "amount", amount, "finAccountTransTypeId", "DEPOSIT", "paymentId", paymentId, "reasonEnumId", "FATR_PURCHASE",
+                            "glAccountId", "210000", "comments", "积分增加", "statusId", "FINACT_TRNS_APPROVED"));
+        } catch (GenericServiceException | GenericEntityException e) {
+            Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+        }
+        if (ServiceUtil.isError(finAccountDepoistOutMap)) {
+            return finAccountDepoistOutMap;
+        }
+
+        return retMap;
     }
 
 }

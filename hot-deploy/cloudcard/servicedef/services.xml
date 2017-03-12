@@ -214,4 +214,10 @@
 		<attribute name="partyId" type="String" mode="IN" optional="false"><description>商家交易流水ID</description></attribute>
 	</service>
 
+	<service name="addUserScore" engine="java"
+		location="com.banfftech.cloudcard.util.CloudCardLevelScoreUtil" invoke="addUserScore" auth="true">
+		<description>内部服务-增加用户积分</description>
+		<attribute name="amount" type="BigDecimal" mode="IN" optional="false"><description>要增加的积分数</description></attribute>
+		<attribute name="partyId" type="String" mode="IN" optional="false"><description>给哪个用户增加</description></attribute>
+	</service>
 </services>
