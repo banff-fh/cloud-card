@@ -304,88 +304,100 @@ public class CloudCardHelper {
      * 获取商家用于扣减开卡限额的金融账户
      * 
      * @param delegator
-     * @param organizationPartyId
+     * @param ownerPartyId
      *            商家partyId
      * @return
      */
-    public static GenericValue getCreditLimitAccount(Delegator delegator, String organizationPartyId) {
-        return getCreditLimitAccount(delegator, organizationPartyId, false);
+    public static GenericValue getCreditLimitAccount(Delegator delegator, String ownerPartyId) {
+        return getCreditLimitAccount(delegator, ownerPartyId, false);
     }
 
     /**
      * 获取商家用于扣减开卡限额的金融账户
      * 
      * @param delegator
-     * @param organizationPartyId
+     * @param ownerPartyId
      *            商家partyId
      * @param useCache
      * @return
      */
-    public static GenericValue getCreditLimitAccount(Delegator delegator, String organizationPartyId, boolean useCache) {
-        return getPartyGroupFinAccount(delegator, organizationPartyId, "SVCCRED_ACCOUNT", useCache);
+    public static GenericValue getCreditLimitAccount(Delegator delegator, String ownerPartyId, boolean useCache) {
+        return getPartyGroupFinAccount(delegator, ownerPartyId, "SVCCRED_ACCOUNT", useCache);
     }
 
     /**
      * 获取商家用于收款的金融账户
      * 
      * @param delegator
-     * @param organizationPartyId
+     * @param ownerPartyId
      *            商家partyId
      * @return
      */
-    public static GenericValue getReceiptAccount(Delegator delegator, String organizationPartyId) {
-        return getReceiptAccount(delegator, organizationPartyId, false);
+    public static GenericValue getReceiptAccount(Delegator delegator, String ownerPartyId) {
+        return getReceiptAccount(delegator, ownerPartyId, false);
     }
 
     /**
      * 获取商家用于收款的金融账户
      * 
      * @param delegator
-     * @param organizationPartyId
+     * @param ownerPartyId
      *            商家partyId
      * @param useCache
      * @return
      */
-    public static GenericValue getReceiptAccount(Delegator delegator, String organizationPartyId, boolean useCache) {
-        return getPartyGroupFinAccount(delegator, organizationPartyId, "DEPOSIT_ACCOUNT", useCache);
+    public static GenericValue getReceiptAccount(Delegator delegator, String ownerPartyId, boolean useCache) {
+        return getPartyGroupFinAccount(delegator, ownerPartyId, "DEPOSIT_ACCOUNT", useCache);
     }
 
     /**
      * 获取商家用于平台对账结算的金融账户
      * 
      * @param delegator
-     * @param organizationPartyId
+     * @param ownerPartyId
      * @return
      */
-    public static GenericValue getSettlementAccount(Delegator delegator, String organizationPartyId) {
-        return getSettlementAccount(delegator, organizationPartyId, false);
+    public static GenericValue getSettlementAccount(Delegator delegator, String ownerPartyId) {
+        return getSettlementAccount(delegator, ownerPartyId, false);
     }
 
     /**
      * 获取商家用于平台对账结算的金融账户
      * 
      * @param delegator
-     * @param organizationPartyId
+     * @param ownerPartyId
      * @param useCache
      * @return
      */
-    public static GenericValue getSettlementAccount(Delegator delegator, String organizationPartyId, boolean useCache) {
-        return getPartyGroupFinAccount(delegator, organizationPartyId, "BANK_ACCOUNT", useCache);
+    public static GenericValue getSettlementAccount(Delegator delegator, String ownerPartyId, boolean useCache) {
+        return getPartyGroupFinAccount(delegator, ownerPartyId, "BANK_ACCOUNT", useCache);
     }
 
     /**
-     * 根据organizationPartyId和 finAccountTypeId获取商家的金融账户
+     * 获取用户积分账户
      * 
      * @param delegator
-     * @param organizationPartyId
+     * @param ownerPartyId
+     * @param useCache
+     * @return
+     */
+    public static GenericValue getUserScoreAccount(Delegator delegator, String ownerPartyId, boolean useCache) {
+        return getPartyGroupFinAccount(delegator, ownerPartyId, CloudCardConstant.FANT_SCORE, useCache);
+    }
+
+    /**
+     * 根据ownerPartyId和 finAccountTypeId获取商家的金融账户
+     * 
+     * @param delegator
+     * @param ownerPartyId
      * @param finAccountTypeId
      * @param useCache
      * @return
      */
-    private static GenericValue getPartyGroupFinAccount(Delegator delegator, String organizationPartyId, String finAccountTypeId, boolean useCache) {
+    private static GenericValue getPartyGroupFinAccount(Delegator delegator, String ownerPartyId, String finAccountTypeId, boolean useCache) {
         EntityCondition dateCond = EntityUtil.getFilterByDateExpr();
         EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toMap("organizationPartyId", CloudCardConstant.PLATFORM_PARTY_ID, "ownerPartyId",
-                organizationPartyId, "finAccountTypeId", finAccountTypeId, "statusId", "FNACT_ACTIVE"));
+                ownerPartyId, "finAccountTypeId", finAccountTypeId, "statusId", "FNACT_ACTIVE"));
         GenericValue partyGroupFinAccount = null;
         try {
             partyGroupFinAccount = EntityUtil.getFirst(delegator.findList("FinAccount", EntityCondition.makeCondition(cond, dateCond), null,

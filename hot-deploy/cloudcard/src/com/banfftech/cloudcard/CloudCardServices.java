@@ -1511,7 +1511,7 @@ public class CloudCardServices {
 				finAccountMap.put("statusId", "FNACT_CREATED");
 				finAccountMap.put("finAccountName", finAccountName);
 				finAccountMap.put("finAccountCode", newCardCode);
-				finAccountMap.put("organizationPartyId", "Company");
+				finAccountMap.put("organizationPartyId", CloudCardConstant.PLATFORM_PARTY_ID);
 				finAccountMap.put("ownerPartyId", "_NA_");
 				finAccountMap.put("currencyUomId", currencyUomId);
 				finAccountMap.put("postToGlAccountId", "213200");

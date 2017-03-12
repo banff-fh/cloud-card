@@ -375,7 +375,17 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-		
+	
+	<!-- C端获取用户自己的积分和会员等级-->
+	<request-map uri="getUserLevelAndScore">
+		<security https="false" auth="false"/>
+		<event type="service" invoke="getUserLevelAndScore" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+
+
+
 	<!-- 后台页面部分 Request Mappings -->
 
 

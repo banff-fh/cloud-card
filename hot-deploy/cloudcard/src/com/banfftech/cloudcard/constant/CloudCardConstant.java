@@ -104,5 +104,10 @@ public class CloudCardConstant {
      * 付款码前缀 {@value}
      */
     public static final String CODE_PREFIX_PAY_ = "user_pay_";
+    
+    /**
+     * 积分账户的账户类型 {@value}
+     */
+    public static final String FANT_SCORE = "CC_SCORE_ACCOUNT";
 
 }

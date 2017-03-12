@@ -135,5 +135,14 @@
     <!-- 支付宝和微信支付的paymentMethodTypeId -->
     <PaymentMethodType description="支付宝" paymentMethodTypeId="EXT_ALIPAY"/>
     <PaymentMethodType description="微信支付" paymentMethodTypeId="EXT_WXPAY"/>
+    
+    <!-- 积分等级相关 -->
+    <FinAccountType description="云卡积分账户" finAccountTypeId="CC_SCORE_ACCOUNT" replenishEnumId="FARP_MANUAL" hasTable="N" isRefundable="N" parentTypeId="DEPOSIT_ACCOUNT"/>
+    <PartyClassificationType description="会员等级" hasTable="N" parentTypeId="" partyClassificationTypeId="LEVEL_CLASSIFICATION"/>
+    <PartyClassificationGroup partyClassificationGroupId="LEVEL_1" description="大众会员" parentGroupId=""  partyClassificationTypeId="LEVEL_CLASSIFICATION" />
+    <PartyClassificationGroup partyClassificationGroupId="LEVEL_2" description="黄金会员" parentGroupId="LEVEL_1"  partyClassificationTypeId="LEVEL_CLASSIFICATION" />
+    <PartyClassificationGroup partyClassificationGroupId="LEVEL_3" description="铂金会员" parentGroupId="LEVEL_2"  partyClassificationTypeId="LEVEL_CLASSIFICATION" />
+    <PartyClassificationGroup partyClassificationGroupId="LEVEL_4" description="钻石会员" parentGroupId="LEVEL_3"  partyClassificationTypeId="LEVEL_CLASSIFICATION" />
+    
  
 </entity-engine-xml>

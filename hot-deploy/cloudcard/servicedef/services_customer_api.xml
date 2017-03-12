@@ -191,4 +191,11 @@
 		<attribute name="canBuyGroupCard" type="String" mode="OUT" optional="false"><description>能否再买圈主店的卡 Y/N</description></attribute>
 		<attribute name="cloudCardList" type="List" mode="OUT" optional="false"><description>卡列表</description></attribute>
 	</service>
+
+	<service name="getUserLevelAndScore" engine="java"
+		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="getUserLevelAndScore" auth="true">
+		<description>C端获取用户等级和积分</description>
+		<attribute name="userLevel" type="String" mode="OUT" optional="false"><description>积分</description></attribute>
+		<attribute name="score" type="BigDecimal" mode="OUT" optional="false"><description>会员等级</description></attribute>
+	</service>
 </services>

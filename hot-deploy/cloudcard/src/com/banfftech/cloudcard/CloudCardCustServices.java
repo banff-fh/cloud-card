@@ -1,5 +1,6 @@
 package com.banfftech.cloudcard;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -29,6 +30,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.auth0.jwt.JWTSigner;
 import com.banfftech.cloudcard.constant.CloudCardConstant;
 import com.banfftech.cloudcard.lbs.BaiduLBSUtil;
+import com.banfftech.cloudcard.util.CloudCardLevelScoreUtil;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
@@ -533,5 +535,38 @@ public class CloudCardCustServices {
         //根据二维码获取卡和店铺信息
         Map<String,Object> cardAndStoreInfoMap = CloudCardHelper.getCardAndStoreInfo(dctx, context);
         return cardAndStoreInfoMap;
+    }
+    
+    
+    /**
+     * C端获取用户积分和等级
+     * 
+     * @param dctx
+     * @param context
+     * @return
+     */
+    public static Map<String, Object> getUserLevelAndScore(DispatchContext dctx, Map<String, Object> context) {
+        LocalDispatcher dispatcher = dctx.getDispatcher();
+        Delegator delegator = dispatcher.getDelegator();
+        Locale locale = (Locale) context.get("locale");
+
+        GenericValue userLogin = (GenericValue) context.get("userLogin");
+
+        String userPartyId = userLogin.getString("partyId");
+        Map<String, Object> retMap = ServiceUtil.returnSuccess();
+
+        // 根据二维码获取卡和店铺信息
+        try {
+            BigDecimal scoreAmount = CloudCardLevelScoreUtil.getUserScoreAmount(delegator, userPartyId);
+            GenericValue userLevel = CloudCardLevelScoreUtil.getUserLevel(delegator, userPartyId);
+
+            retMap.put("score", scoreAmount);
+            retMap.put("userLevel", userLevel.getString("description"));
+            return retMap;
+        } catch (GenericEntityException e) {
+            Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+        }
+
     }
 }
