@@ -123,8 +123,8 @@ public class CloudCardLevelScoreUtil {
         Delegator delegator = dctx.getDelegator();
         Locale locale = (Locale) context.get("locale");
 
-        String customerPartyId = (String) context.get("customerPartyId"); // 用户partyId
-        String amount = (String) context.get("amount"); // 增加多少积分
+        String customerPartyId = (String) context.get("partyId"); // 用户partyId
+        BigDecimal amount = (BigDecimal) context.get("amount"); // 增加多少积分
         String paymentId = (String) context.get("paymentId"); // 如果有的话，也记录下支付id
 
         Map<String, Object> retMap = ServiceUtil.returnSuccess();
