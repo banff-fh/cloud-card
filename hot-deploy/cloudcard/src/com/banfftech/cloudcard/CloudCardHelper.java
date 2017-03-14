@@ -1092,16 +1092,18 @@ public class CloudCardHelper {
         String groupName = partyGroup.getString("groupName");
         String groupOwnerId = null;
 
-        List<GenericValue> cloudCards = null;
-        try {
-            EntityCondition cond = CloudCardInfoUtil.createLookupMyStoreCardCondition(delegator, userLogin.getString("partyId"), storeId);
-            cloudCards = delegator.findList("CloudCardInfo", cond, null, UtilMisc.toList("-fromDate"), null, false);
-            groupOwnerId = CloudCardHelper.getGroupOwneIdByStoreId(delegator, storeId, true);
-        } catch (GenericEntityException e) {
-            Debug.logError(e.getMessage(), module);
-            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-        }
-
+		List<GenericValue> cloudCards = null;
+		if (UtilValidate.isNotEmpty(userLogin)) {
+			try {
+				EntityCondition cond = CloudCardInfoUtil.createLookupMyStoreCardCondition(delegator,userLogin.getString("partyId"), storeId);
+				cloudCards = delegator.findList("CloudCardInfo", cond, null, UtilMisc.toList("-fromDate"), null, false);
+				groupOwnerId = CloudCardHelper.getGroupOwneIdByStoreId(delegator, storeId, true);
+			} catch (GenericEntityException e) {
+				Debug.logError(e.getMessage(), module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,"CloudCardInternalServiceError", locale));
+			}
+		}
+       
         // 有本店卡？
         boolean hasStoreCard = false;
         // 有圈主店的卡？
