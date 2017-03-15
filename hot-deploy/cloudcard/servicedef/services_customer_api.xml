@@ -106,7 +106,7 @@
 	</service>
 
 	<service name="userGetStoreInfo" engine="java"
-		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="userGetStoreInfo" auth="true">
+		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="userGetStoreInfo" auth="false">
 		<description>查看店铺简要信息</description>
 		<attribute name="storeId" type="String" mode="INOUT" optional="false"><description>商家partyId</description></attribute>
 		<attribute name="storeName" type="String" mode="OUT" optional="true"><description>店名</description></attribute>
@@ -178,7 +178,7 @@
 	</service>
 	
 	<service name="getCardAndStoreInfoByStoreId" engine="java"
-		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="getCardAndStoreInfoByStoreId" auth="true">
+		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="getCardAndStoreInfoByStoreId" auth="false">
 		<description>C端根据店铺Id获取商户信息和卡列表</description>
 		<attribute name="storeId" type="String" mode="INOUT" optional="false"><description>商家ID</description></attribute>
 		<attribute name="groupOwnerId" type="String" mode="OUT" optional="true"><description>圈主的商家ID</description></attribute>
