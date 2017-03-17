@@ -376,6 +376,16 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 	
+	<!-- C端根据店铺名获取商户信息和卡列表-->
+	<request-map uri="getCardAndStoreInfoByStoreName">
+		<!--<security https="true" auth="false" />-->
+		<event type="service" invoke="getCardAndStoreInfoByStoreName" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
+	
+	
 	<!-- C端获取用户自己的积分和会员等级-->
 	<request-map uri="getUserLevelAndScore">
 		<security https="false" auth="false"/>

@@ -19,6 +19,7 @@ import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
+import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
@@ -537,6 +538,44 @@ public class CloudCardCustServices {
         return cardAndStoreInfoMap;
     }
     
+    
+    /**
+     * C端根据店铺名获取商户信息和卡列表
+     * 
+     * @param dctx
+     * @param context
+     * @return
+     */
+    public static Map<String, Object> getCardAndStoreInfoByStoreName(DispatchContext dctx, Map<String, Object> context) {
+        LocalDispatcher dispatcher = dctx.getDispatcher();
+        Delegator delegator = dispatcher.getDelegator();
+        Locale locale = (Locale) context.get("locale");
+
+    	String storeName = (String) context.get("storeName");
+    	List<GenericValue> partyGroupList = FastList.newInstance();
+        if (UtilValidate.isNotEmpty(storeName)) {
+        	try {
+				partyGroupList = delegator.findList("PartyGroup",
+						EntityCondition.makeCondition("groupName", EntityOperator.LIKE, "%" + storeName + "%"), null, null, null, true);
+			} catch (GenericEntityException e) {
+				Debug.logError(e.getMessage(), module);
+	            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+			}
+        }
+        
+		List<Map<String, Object>> cardAndStoreInfoList = FastList.newInstance();
+        for(GenericValue partyGroup:partyGroupList){
+        	//根据二维码获取卡和店铺信息
+        	context.put("storeId", partyGroup.getString("partyId"));
+            Map<String,Object> cardAndStoreInfoMap = CloudCardHelper.getCardAndStoreInfo(dctx, context);
+            cardAndStoreInfoList.add(cardAndStoreInfoMap);
+        }
+        
+        Map<String, Object> result = ServiceUtil.returnSuccess();
+        result.put("storeInfoList", cardAndStoreInfoList);
+        return result;
+
+    }
     
     /**
      * C端获取用户积分和等级
