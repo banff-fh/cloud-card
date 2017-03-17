@@ -220,4 +220,16 @@
 		<attribute name="amount" type="BigDecimal" mode="IN" optional="false"><description>要增加的积分数</description></attribute>
 		<attribute name="partyId" type="String" mode="IN" optional="false"><description>给哪个用户增加</description></attribute>
 	</service>
+	
+	<service name="getProvinceOrCityOrArea" engine="java"
+        invoke="getProvinceOrCityOrArea" location="com.banfftech.cloudcard.CloudCardServices" auth="true">
+        <description>获取省市县</description>
+        <attribute name="geoAssocTypeId" mode="IN" type="String"/>
+        <attribute name="provinceId" mode="IN" type="String" optional="true"/>
+        <attribute name="cityId" mode="IN" type="String" optional="true"/>
+
+        <attribute name="provinceList" mode="OUT" type="List" optional="true"/>
+        <attribute name="cityList" mode="OUT" type="List" optional="true"/>
+        <attribute name="countyList" mode="OUT" type="List" optional="true"/>
+    </service>
 </services>

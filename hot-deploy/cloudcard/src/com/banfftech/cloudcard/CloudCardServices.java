@@ -1956,4 +1956,65 @@ public class CloudCardServices {
 		retMap.put("cardBalance", cardBalance);
 		return retMap;
 	}
+	
+	/**
+     * 获取省市级数据
+     * 
+     * @param
+     * 
+     * @return
+     */
+    public static Map<String, Object> getProvinceOrCityOrArea(DispatchContext dctx, Map<String, Object> context) {
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		Delegator delegator = dctx.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+
+		String geoAssocTypeId = (String) context.get("geoAssocTypeId");
+		String cityId = (String) context.get("cityId");
+		String provinceId = (String) context.get("provinceId");
+		try {
+			if (geoAssocTypeId.equals("REGIONS")) {
+				List<Map<String, Object>> provinceList = FastList.newInstance();
+				List<GenericValue> provinceGvList = delegator.findByAnd("GeoAssocAndGeoTo",
+						UtilMisc.toMap("geoIdFrom", "CHN", "geoAssocTypeId", geoAssocTypeId));
+				for (GenericValue provinceGv : provinceGvList) {
+					Map<String,Object> provinceMap = FastMap.newInstance();
+					provinceMap.put("provinceGeoId", provinceGv.getString("geoId"));
+					provinceMap.put("provinceName", provinceGv.getString("geoName"));
+					provinceList.add(provinceMap);
+				}
+				result.put("provinceList", provinceList);// 省列表
+			}
+
+			if (geoAssocTypeId.equals("PROVINCE_CITY")) {
+				List<Map<String, Object>> cityList = FastList.newInstance();
+				List<GenericValue> cityGvList = delegator.findByAnd("GeoAssocAndGeoTo",
+						UtilMisc.toMap("geoIdFrom", provinceId, "geoAssocTypeId", geoAssocTypeId));
+				for (GenericValue cityGv : cityGvList) {
+					Map<String, Object> cityMap = FastMap.newInstance();
+					cityMap.put("cityGeoId", cityGv.getString("geoId"));
+					cityMap.put("cityName", cityGv.getString("geoName"));
+					cityList.add(cityMap);
+				}
+				result.put("cityList", cityList);// 市列表
+			}
+			if (geoAssocTypeId.equals("CITY_COUNTY")) {
+				List<Map<String, Object>> countyList = FastList.newInstance();
+				List<GenericValue> countyGvList = delegator.findByAnd("GeoAssocAndGeoTo",
+						UtilMisc.toMap("geoIdFrom", cityId, "geoAssocTypeId", geoAssocTypeId));
+				for (GenericValue countyGv : countyGvList) {
+					Map<String, Object> countyMap = FastMap.newInstance();
+					countyMap.put("countyGeoId", countyGv.getString("geoId"));
+					countyMap.put("countyName", countyGv.getString("geoName"));
+					countyList.add(countyMap);
+				}
+				result.put("countyList", countyList);// 县列表
+			}
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		return result;
+	}
 }

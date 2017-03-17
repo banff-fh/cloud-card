@@ -393,8 +393,15 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-
-
+	
+	<!-- 获取地市级-->
+	<request-map uri="getProvinceOrCityOrArea">
+		<!--<security https="true" auth="false" />-->
+		<event type="service" invoke="getProvinceOrCityOrArea" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
 
 	<!-- 后台页面部分 Request Mappings -->
 
