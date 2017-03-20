@@ -53,6 +53,9 @@ public class CloudCardCustServices {
 
         double longitude = Double.parseDouble(UtilFormatOut.checkNull((String) context.get("longitude"), "0.00"));
         double latitude = Double.parseDouble(UtilFormatOut.checkNull((String) context.get("latitude"), "0.00"));
+        String storeName = (String) context.get("storeName");
+        String region = (String) context.get("region");
+
 		double exp = 10e-10;
         // 经度最大是180° 最小是-180° 纬度最大是90° 最小是-90°
         if (Math.abs(longitude) - 180.00 > exp || Math.abs(latitude) - 90.00 > exp) {
@@ -70,11 +73,44 @@ public class CloudCardCustServices {
 		params.put("geotable_id", getTableId);
 		params.put("q", q);
 		params.put("Coord_type", CoordType);
-		params.put("location", longitude + "," + latitude);
-		params.put("radius", radius);
 		
 		List<Map<String,Object>> storeList = FastList.newInstance();
-		JSONObject lbsResult = JSONObject.parseObject(BaiduLBSUtil.nearby(params));
+		
+		List<GenericValue> partyGroupList = FastList.newInstance();
+		JSONObject lbsResult = null;
+        if(UtilValidate.isNotEmpty(storeName)){
+        	try {
+				partyGroupList = delegator.findList("PartyGroup",
+						EntityCondition.makeCondition("groupName", EntityOperator.LIKE, "%" + storeName + "%"), UtilMisc.toSet("partyId"), null, null, true);
+			} catch (GenericEntityException e) {
+				Debug.logError(e.getMessage(), module);
+	            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+			}
+        	
+        	String startChar = "[";
+        	String endTmpChar = "]";
+        	int partyGroupListSize = partyGroupList.size();
+        	for(int i = 0;i < partyGroupListSize;i++){
+        		startChar += partyGroupList.get(i).get("partyId").toString();
+        		if(i == (partyGroupListSize-1 )){
+        			startChar += endTmpChar;
+        		}else{
+        			startChar+=",";
+        		}
+        	}
+        	if(UtilValidate.isNotEmpty(region)){
+            	params.put("region", region);
+        	}
+        	params.put("filter", "storeId:"+ startChar);
+        	lbsResult = JSONObject.parseObject(BaiduLBSUtil.local(params));
+        }else{
+    		params.put("location", longitude + "," + latitude);
+    		params.put("radius", radius);
+        	lbsResult = JSONObject.parseObject(BaiduLBSUtil.nearby(params));
+        }
+        
+		
+		
 		//如果地图返回状态非0，全部定义为手机定位异常
 		if(!"0".equals(lbsResult.get("status").toString())){
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardAbnormalPositioning", locale));

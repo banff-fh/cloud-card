@@ -242,7 +242,7 @@ public class BaiduLBSUtil {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public String local(Map params){
+	public static String local(Map params){
 		String url = "http://api.map.baidu.com/geosearch/v3/local";
 		return HttpRequestProxy.doGet(url,params,getRecEncoding());
 	}
