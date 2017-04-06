@@ -127,6 +127,8 @@ public class UtilFileUpload {
         ByteBuffer imageDataBytes = (ByteBuffer) context.get("uploadedFile");
         String _uploadedFile_fileName = (String) context.get("_uploadedFile_fileName");
         String contentType = (String) context.get("_uploadedFile_contentType");
+        String fileKey = (String) context.get("fileKey");
+
         String fileSuffix = null;
         try {
             int index = _uploadedFile_fileName.lastIndexOf(".");
