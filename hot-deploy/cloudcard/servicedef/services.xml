@@ -232,4 +232,14 @@
         <attribute name="cityList" mode="OUT" type="List" optional="true"/>
         <attribute name="countyList" mode="OUT" type="List" optional="true"/>
     </service>
+    
+    <service name="uploadedFile" engine="java"
+        invoke="uploadedFile" location="com.banfftech.cloudcard.util" auth="true">
+        <description>上传图片</description>
+		<attribute mode="IN" name="uploadedFile" type="java.nio.ByteBuffer" optional="true" />
+		<attribute mode="IN" name="_uploadedFile_fileName" type="String" optional="true" />
+		<attribute mode="IN" name="_uploadedFile_contentType" type="String" optional="true"/>
+		
+        <attribute name="status" mode="OUT" type="String" optional="true"><description>返回状态值</description></attribute>
+    </service>
 </services>
