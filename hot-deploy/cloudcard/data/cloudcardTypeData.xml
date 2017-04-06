@@ -144,5 +144,10 @@
     <PartyClassificationGroup partyClassificationGroupId="LEVEL_3" description="铂金会员" parentGroupId="LEVEL_2"  partyClassificationTypeId="LEVEL_CLASSIFICATION" />
     <PartyClassificationGroup partyClassificationGroupId="LEVEL_4" description="钻石会员" parentGroupId="LEVEL_3"  partyClassificationTypeId="LEVEL_CLASSIFICATION" />
     
- 
+    <!-- oss文件服务 -->
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="oss.endpoint" systemPropertyValue="xx" description="oss的endpoint"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="oss.accessKeyId" systemPropertyValue="xx" description="oss的accessKeyId"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="oss.accessKeySecret" systemPropertyValue="xx" description="oss的accessKeySecret"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="oss.bucketName" systemPropertyValue="xx" description="oss的bucketName"/>
+  
 </entity-engine-xml>

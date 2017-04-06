@@ -301,7 +301,11 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 
-
+	<!-- 商户上传商品图片 -->
+    <request-map uri="uploadFile">
+        <event type="java" path="com.banfftech.cloudcard.util.UtilFileUpload" invoke="uploadFile"></event>
+        <response name="success" type="none"/>
+    </request-map>
 
 
 	<!-- 店铺信息 -->
