@@ -176,7 +176,8 @@ public class UtilFileUpload {
             String key = OSSFileLocation + UUID.randomUUID() + "." + fileSuffix;//fileSuffix==null?"":"."+fileSuffix;
             PutObjectResult pr = client.putObject(BUCKET_NAME, key, input, objectMeta);
             client.shutdown();
-            result.put("fileName", key);            
+            result.put("fileName", key); 
+            result.put("status", "Y");            
         }
 
         return result;

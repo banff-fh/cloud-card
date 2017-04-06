@@ -234,7 +234,7 @@
     </service>
     
     <service name="uploadedFile" engine="java"
-        invoke="uploadedFile" location="com.banfftech.cloudcard.util" auth="true">
+        invoke="uploadedFile" location="com.banfftech.cloudcard.util.UtilFileUpload" auth="true">
         <description>上传图片</description>
 		<attribute mode="IN" name="uploadedFile" type="java.nio.ByteBuffer" optional="true" />
 		<attribute mode="IN" name="_uploadedFile_fileName" type="String" optional="true" />
