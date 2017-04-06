@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -66,7 +67,7 @@ public class UtilFileUpload {
      * @return
      * @throws Exception
      */
-    public static Map<String, Object> uploadFile(HttpServletRequest request) throws Exception {
+    public static Map<String, Object> uploadFile(HttpServletRequest request,HttpServletResponse response) throws Exception {
 		LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
 		Delegator delegator = dispatcher.getDelegator();
         Map<String, Object> context = FastMap.newInstance();
