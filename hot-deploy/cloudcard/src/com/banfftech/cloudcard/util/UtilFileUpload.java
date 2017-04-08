@@ -127,7 +127,6 @@ public class UtilFileUpload {
         ByteBuffer imageDataBytes = (ByteBuffer) context.get("uploadedFile");
         String _uploadedFile_fileName = (String) context.get("_uploadedFile_fileName");
         String contentType = (String) context.get("_uploadedFile_contentType");
-        String fileKey = (String) context.get("fileKey");
 
         String fileSuffix = null;
         try {
@@ -178,7 +177,7 @@ public class UtilFileUpload {
             String key = OSSFileLocation + UUID.randomUUID() + "." + fileSuffix;//fileSuffix==null?"":"."+fileSuffix;
             PutObjectResult pr = client.putObject(BUCKET_NAME, key, input, objectMeta);
             client.shutdown();
-            result.put("fileName", key); 
+            result.put("_uploadedFile_fileName", _uploadedFile_fileName); 
             result.put("status", "Y");            
         }
 

@@ -238,9 +238,8 @@
         <description>上传图片</description>
         <attribute mode="IN" name="fileKey" type="String" optional="true" />
 		<attribute mode="IN" name="uploadedFile" type="java.nio.ByteBuffer" optional="true" />
-		<attribute mode="IN" name="_uploadedFile_fileName" type="String" optional="true" />
+		<attribute mode="INOUT" name="_uploadedFile_fileName" type="String" optional="true" />
 		<attribute mode="IN" name="_uploadedFile_contentType" type="String" optional="true"/>
-		
         <attribute name="status" mode="OUT" type="String" optional="true"><description>返回状态值</description></attribute>
     </service>
 </services>
