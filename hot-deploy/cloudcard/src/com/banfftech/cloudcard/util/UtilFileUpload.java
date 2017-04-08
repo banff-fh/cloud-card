@@ -52,12 +52,11 @@ public class UtilFileUpload {
      * @return
      */
     public static OSSClient getNewOssClient(Delegator delegator) {
-		OSSClient client = new OSSClient(ENDPOINT, ACCESS_ID, ACCESS_KEY_SECRET);
 		ENDPOINT = EntityUtilProperties.getPropertyValue("cloudcard","oss.endpoint",delegator);
 		ACCESS_ID = EntityUtilProperties.getPropertyValue("cloudcard","oss.accessKeyId",delegator);
 		ACCESS_KEY_SECRET = EntityUtilProperties.getPropertyValue("cloudcard","oss.accessKeySecret",delegator);
 		BUCKET_NAME = EntityUtilProperties.getPropertyValue("cloudcard","oss.bucketName",delegator);
-        return client;
+        return  new OSSClient(ENDPOINT, ACCESS_ID, ACCESS_KEY_SECRET);
     }
 	
     /**
