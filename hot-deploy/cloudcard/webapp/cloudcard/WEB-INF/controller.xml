@@ -301,16 +301,10 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 
-	<!-- 商户上传商品图片 -->
-    <request-map uri="uploadFile">
-        <event type="java" path="com.banfftech.cloudcard.util.UtilFileUpload" invoke="uploadFile"></event>
-        <response name="success" type="none"/>
-    </request-map>
-    
-    <!-- 商户上传商品图片 -->
-    <request-map uri="uploadedFile">
+    <!-- 商户上传图片服务 -->
+    <request-map uri="upload">
         <security https="false" auth="false"/>
-		<event type="service" invoke="uploadedFile" />
+		<event type="service" invoke="upload" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
     </request-map>
