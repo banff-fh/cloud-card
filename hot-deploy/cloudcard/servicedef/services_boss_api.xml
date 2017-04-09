@@ -233,7 +233,7 @@
 	<service name="getPayVerificationCodeOfCustomer" engine="java"
 		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="getPayVerificationCodeOfCustomer" auth="true">
 		<description>无卡消费短信通知C端</description>
-		<attribute name="teleNumber" type="String" mode="IN" optional="false"><description>顾客电话号码</description></attribute>
+		<attribute name="teleNumber" type="String" mode="INOUT" optional="false"><description>顾客电话号码</description></attribute>
 		<attribute name="amount" type="String" mode="INOUT" optional="false"><description>消费金额</description></attribute>
 		<attribute name="status" type="String" mode="OUT" optional="false"><description>短信发送状态</description></attribute>
 	</service>

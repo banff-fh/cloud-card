@@ -25,6 +25,7 @@ import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
 import com.banfftech.cloudcard.constant.CloudCardConstant;
+import com.banfftech.cloudcard.sms.SmsServices;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
@@ -1397,7 +1398,9 @@ public class CloudCardBossServices {
 		
 		String teleNumber = (String) context.get("teleNumber");
 		String amount = (String) context.get("amount");
-		
+		String smsType = CloudCardConstant.USER_PAY_CAPTCHA_SMS_TYPE;
+		context.put("smsType", smsType);
+		context.put("isValid", "N");
 		GenericValue customer;
 		try {
 			customer = CloudCardHelper.getUserByTeleNumber(delegator, teleNumber);
@@ -1410,10 +1413,9 @@ public class CloudCardBossServices {
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserNotExistError", locale));
 		}
 		
-		
-		
-		Map<String, Object> result = ServiceUtil.returnSuccess();
+		Map<String, Object> result = SmsServices.getSMSCaptcha(dctx, context);
 		result.put("amount", amount);
+		result.put("status", "Y");
 		return result;
 	}
 
