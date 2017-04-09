@@ -71,13 +71,13 @@ public class SmsServices {
 			smsType = "sms.smsLoginTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_PAY_SMS_TYPE)){
 			String amount = (String) context.get("amount");
-			String time = (String) context.get("time");
-			smsParamString = "{money:'"+amount+"',verfiyCode:'"+captcha+"',time:'"+time+"'}";
+			String storeName = (String) context.get("time");
+			smsParamString = "{storeName:'"+storeName+"',amount:'"+amount+"'}";
 			smsType = "sms.smsUserPayTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_PAY_CAPTCHA_SMS_TYPE)){
 			String amount = (String) context.get("amount");
-			String storeName = (String) context.get("time");
-			smsParamString = "{storeName:'"+storeName+"',amount:'"+amount+"'}";
+			String time = (String) context.get("time");
+			smsParamString = "{money:'"+amount+"',verfiyCode:'"+captcha+"',time:'"+time+"'}";
 			smsType = "sms.smsUserPayVCTemplateCode";
 		}
 		//初始化短信发送配置文件
@@ -343,7 +343,6 @@ public class SmsServices {
 			//发送短信
 			context.put("captcha", captcha);
 			context.put("phone", teleNumber);
-			context.put("smsType", CloudCardConstant.LOGIN_SMS_TYPE);
 			SmsServices.sendMessage(dctx, context);
 		}
 		

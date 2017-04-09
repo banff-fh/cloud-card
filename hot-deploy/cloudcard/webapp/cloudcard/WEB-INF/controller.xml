@@ -414,6 +414,14 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 	
+	<!-- 无卡消费发送验证码-->
+	<request-map uri="getPayVerificationCodeOfCustomer">
+		<!--<security https="true" auth="false" />-->
+		<event type="service" invoke="getPayVerificationCodeOfCustomer" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
 
 	<!-- 后台页面部分 Request Mappings -->
 

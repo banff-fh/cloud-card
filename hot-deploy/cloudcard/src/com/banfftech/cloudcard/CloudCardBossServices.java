@@ -1416,6 +1416,7 @@ public class CloudCardBossServices {
 		}
 		
 		Map<String, Object> result = SmsServices.getSMSCaptcha(dctx, context);
+		result.put("teleNumber", teleNumber);
 		result.put("amount", amount);
 		result.put("status", "Y");
 		return result;
