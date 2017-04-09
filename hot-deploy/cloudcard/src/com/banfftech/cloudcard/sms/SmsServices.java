@@ -53,7 +53,7 @@ public class SmsServices {
 		url = EntityUtilProperties.getPropertyValue("cloudcard","sms.url",delegator);
 		appkey = EntityUtilProperties.getPropertyValue("cloudcard","sms.appkey",delegator);
 		secret = EntityUtilProperties.getPropertyValue("cloudcard","sms.secret",delegator);
-		smsFreeSignName = EntityUtilProperties.getPropertyValue("cloudcard",smsType,delegator);
+		smsFreeSignName = EntityUtilProperties.getPropertyValue("cloudcard","sms.smsFreeSignName",delegator);
 		smsTemplateCode = EntityUtilProperties.getPropertyValue("cloudcard","sms.smsTemplateCode",delegator);
 	}
 
