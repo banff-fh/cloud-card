@@ -41,6 +41,7 @@ import javolution.util.FastMap;
 public class CloudCardBossServices {
 
     public static final String module = CloudCardBossServices.class.getName();
+	public static final String resourceError = "cloudcardErrorUiLabels";
 
     /**
      * 商户开通申请 通过搜集的信息创建一个SurveyResponse 与 SurveyResponseAnswer
@@ -1433,7 +1434,6 @@ public class CloudCardBossServices {
      */
 	public static Map<String, Object> getCloudcardsOfUser(DispatchContext dctx,Map<String, Object> context) {
 		Delegator delegator = dctx.getDelegator();
-		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Locale locale = (Locale) context.get("locale");
 		
 		String teleNumber = (String) context.get("teleNumber");
@@ -1465,5 +1465,64 @@ public class CloudCardBossServices {
 		return result;
 	}
 	
+	/**
+	 * 无卡消费收款
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> receiptByCardId(DispatchContext dctx, Map<String, Object> context) {
+
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dctx.getDelegator();
+		GenericValue userLogin = (GenericValue) context.get("userLogin");
+		Locale locale = (Locale) context.get("locale");
+		
+		String teleNumber = (String) context.get("teleNumber");
+		String cardId = (String) context.get("cardId");
+		String organizationPartyId = (String) context.get("organizationPartyId");
+		String captcha = (String) context.get("captcha");
+		
+		EntityCondition captchaCondition = EntityCondition.makeCondition(
+				EntityCondition.makeCondition("teleNumber", EntityOperator.EQUALS, teleNumber),
+				EntityUtil.getFilterByDateExpr(),
+				EntityCondition.makeCondition("isValid", EntityOperator.EQUALS,"N"),EntityCondition.makeCondition("smsType", EntityOperator.EQUALS,CloudCardConstant.USER_PAY_CAPTCHA_SMS_TYPE));
+
+		GenericValue sms = null;
+		try {
+			sms = EntityUtil.getFirst( 
+					delegator.findList("SmsValidateCode", captchaCondition, null,UtilMisc.toList("-" + ModelEntity.CREATE_STAMP_FIELD), null, false)
+					);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardGetCAPTCHAFailedError", locale));
+		}
+		
+		if(UtilValidate.isEmpty(sms)){
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardGetCAPTCHAFailedError", locale));
+		}
+		
+		if(!captcha.equalsIgnoreCase(sms.getString("captcha"))){
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardCaptchaCheckFailedError", locale));
+		}
+		
+		// 数据权限检查，先放这里
+		if( !CloudCardHelper.isManager(delegator, userLogin.getString("partyId"), organizationPartyId)){
+			Debug.logWarning("partyId: " + userLogin.getString("partyId") + " 不是商户："+organizationPartyId + "的管理人员，不能对用户卡进行扫码消费", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
+		}
+
+		
+		// 调用内部 云卡支付服务
+		Map<String, Object> cloudCardWithdrawOut;
+		try {
+			context.put("cardId", cardId);
+			cloudCardWithdrawOut = dispatcher.runSync("cloudCardWithdraw", context);
+		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		return cloudCardWithdrawOut;
+	}
 
 }

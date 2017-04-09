@@ -249,4 +249,13 @@
 		<attribute name="cloudCardList" type="List" mode="OUT" optional="false"/>
 	</service>
 	
+	<service name="receiptByCardId" engine="java"
+		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="receiptByCardId" auth="true">
+		<description>无卡消费收款</description>
+		<attribute name="organizationPartyId" type="String" mode="IN" optional="false"/>
+		<attribute name="cardId" type="String" mode="IN" optional="false"/>
+		<attribute name="captcha" type="String" mode="IN" optional="false"/>
+		<attribute name="teleNumber" type="String" mode="IN" optional="false"/>
+		<attribute name="status" type="String" mode="OUT" optional="false"/>
+	</service>
 </services>
