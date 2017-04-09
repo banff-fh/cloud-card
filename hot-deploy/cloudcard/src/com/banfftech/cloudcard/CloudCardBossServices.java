@@ -1400,7 +1400,9 @@ public class CloudCardBossServices {
 		String amount = (String) context.get("amount");
 		String smsType = CloudCardConstant.USER_PAY_CAPTCHA_SMS_TYPE;
 		context.put("smsType", smsType);
+		context.put("amount", amount);
 		context.put("isValid", "N");
+		
 		GenericValue customer;
 		try {
 			customer = CloudCardHelper.getUserByTeleNumber(delegator, teleNumber);

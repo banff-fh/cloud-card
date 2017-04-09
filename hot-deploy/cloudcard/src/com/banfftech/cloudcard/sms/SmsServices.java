@@ -63,13 +63,21 @@ public class SmsServices {
 		Locale locale = (Locale) context.get("locale");
 		String phone = (String) context.get("phone");
 		String smsType = (String) context.get("smsType");
-		String smsParamString = (String) context.get("smsParamString");
-		
+		String smsParamString = "";
+		String captcha = (String) context.get("captcha");
+
 		if(smsType.equals(CloudCardConstant.LOGIN_SMS_TYPE)){
+			smsParamString = "{code:'"+captcha+"',product:'"+"库胖"+"'}";
 			smsType = "sms.smsLoginTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_PAY_SMS_TYPE)){
+			String amount = (String) context.get("amount");
+			String time = (String) context.get("time");
+			smsParamString = "{money:'"+amount+"',verfiyCode:'"+captcha+"',time:'"+time+"'}";
 			smsType = "sms.smsUserPayTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_PAY_CAPTCHA_SMS_TYPE)){
+			String amount = (String) context.get("amount");
+			String storeName = (String) context.get("time");
+			smsParamString = "{storeName:'"+storeName+"',amount:'"+amount+"'}";
 			smsType = "sms.smsUserPayVCTemplateCode";
 		}
 		//初始化短信发送配置文件
@@ -332,10 +340,8 @@ public class SmsServices {
 				Debug.logError(e, module);
 				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardSendFailedError", locale));
 			}
-			String smsParamString = "{code:'"+captcha+"',product:'"+"库胖"+"'}";
 			//发送短信
 			context.put("phone", teleNumber);
-			context.put("smsParamString", smsParamString);
 			context.put("smsType", CloudCardConstant.LOGIN_SMS_TYPE);
 			SmsServices.sendMessage(dctx, context);
 		}
