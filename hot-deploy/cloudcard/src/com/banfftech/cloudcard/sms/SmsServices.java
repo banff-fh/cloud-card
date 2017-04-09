@@ -125,9 +125,8 @@ public class SmsServices {
 		
 		context.put("smsType", CloudCardConstant.LOGIN_SMS_TYPE);
 		context.put("isValid", "N");
-		getSMSCaptcha(dctx, context);
-		
-		return ServiceUtil.returnSuccess();
+		Map<String, Object> result = getSMSCaptcha(dctx, context);
+		return result;
 	}
 	
 	/**
@@ -341,8 +340,7 @@ public class SmsServices {
 			SmsServices.sendMessage(dctx, context);
 		}
 		
-		Map<String, Object> result = ServiceUtil.returnSuccess();
-		return result;
+		return ServiceUtil.returnSuccess();
 	}
 	
 }

@@ -1391,7 +1391,7 @@ public class CloudCardBossServices {
      * @param context
      * @return
      */
-	private static Map<String, Object> getPayVerificationCodeOfCustomer(DispatchContext dctx,Map<String, Object> context) {
+	public static Map<String, Object> getPayVerificationCodeOfCustomer(DispatchContext dctx,Map<String, Object> context) {
 		Delegator delegator = dctx.getDelegator();
 		Locale locale = (Locale) context.get("locale");
 		
