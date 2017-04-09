@@ -341,6 +341,7 @@ public class SmsServices {
 				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardSendFailedError", locale));
 			}
 			//发送短信
+			context.put("captcha", captcha);
 			context.put("phone", teleNumber);
 			context.put("smsType", CloudCardConstant.LOGIN_SMS_TYPE);
 			SmsServices.sendMessage(dctx, context);
