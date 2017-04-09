@@ -109,5 +109,19 @@ public class CloudCardConstant {
      * 积分账户的账户类型 {@value}
      */
     public static final String FANT_SCORE = "CC_SCORE_ACCOUNT";
+    
+    /**
+     * 发送登录短信验证码{@value}
+     */
+    public static final String LOGIN_SMS_TYPE = "LoginSMS";
+    
+    /**
+     * 发送用户消费短信验证码{@value}
+     */
+    public static final String USER_PAY_VERFIY_CODE_SMS_TYPE = "userPayVerfiyCodeSMS";
 
+    /**
+     * 发送用户消费通知短信{@value}
+     */
+    public static final String USER_PAY_SMS_TYPE = "userPaySMS";
 }

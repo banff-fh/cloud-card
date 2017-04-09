@@ -30,6 +30,7 @@ import org.ofbiz.service.ServiceUtil;
 import com.auth0.jwt.JWTSigner;
 import com.banfftech.cloudcard.CloudCardHelper;
 import com.banfftech.cloudcard.CloudCardQueryServices;
+import com.banfftech.cloudcard.constant.CloudCardConstant;
 import com.taobao.api.ApiException;
 import com.taobao.api.DefaultTaobaoClient;
 import com.taobao.api.TaobaoClient;
@@ -48,11 +49,11 @@ public class SmsServices {
 	private static String smsFreeSignName = null;
 	private static String smsTemplateCode = null;
 	
-	public static void getSmsProperty(Delegator delegator){
+	public static void getSmsProperty(Delegator delegator,String smsType){
 		url = EntityUtilProperties.getPropertyValue("cloudcard","sms.url",delegator);
 		appkey = EntityUtilProperties.getPropertyValue("cloudcard","sms.appkey",delegator);
 		secret = EntityUtilProperties.getPropertyValue("cloudcard","sms.secret",delegator);
-		smsFreeSignName = EntityUtilProperties.getPropertyValue("cloudcard","sms.smsFreeSignName",delegator);
+		smsFreeSignName = EntityUtilProperties.getPropertyValue("cloudcard",smsType,delegator);
 		smsTemplateCode = EntityUtilProperties.getPropertyValue("cloudcard","sms.smsTemplateCode",delegator);
 	}
 
@@ -61,17 +62,25 @@ public class SmsServices {
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
 		String phone = (String) context.get("phone");
-		String code = (String) context.get("code");
-		String product = (String) context.get("product");
+		String smsType = (String) context.get("smsType");
+		String smsParamString = (String) context.get("smsParamString");
+		
+		if(smsType.equals(CloudCardConstant.LOGIN_SMS_TYPE)){
+			smsType = "sms.smsLoginTemplateCode";
+		}else if(smsType.equals(CloudCardConstant.USER_PAY_SMS_TYPE)){
+			smsType = "sms.smsUserPayTemplateCode";
+		}else if(smsType.equals(CloudCardConstant.USER_PAY_VERFIY_CODE_SMS_TYPE)){
+			smsType = "sms.smsUserPayVCTemplateCode";
+		}
 		//初始化短信发送配置文件
-		getSmsProperty(delegator);
+		getSmsProperty(delegator,smsType);
 		//发送短信
 		TaobaoClient client = new DefaultTaobaoClient(url, appkey, secret);
 		AlibabaAliqinFcSmsNumSendRequest req = new AlibabaAliqinFcSmsNumSendRequest();
 		req.setExtend("");
 		req.setSmsType("normal");
 		req.setSmsFreeSignName(smsFreeSignName);
-		req.setSmsParamString("{code:'"+code+"',product:'"+product+"'}");
+		req.setSmsParamString(smsParamString);
 		req.setRecNum(phone);
 		req.setSmsTemplateCode(smsTemplateCode);
 		AlibabaAliqinFcSmsNumSendResponse rsp = null;
@@ -179,11 +188,11 @@ public class SmsServices {
 				Debug.logError(e, module);
 				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardSendFailedError", locale));
 			}
-			
+			String smsParamString = "{code:'"+captcha+"',product:'"+"库胖"+"'}";
 			//发送短信
 			context.put("phone", teleNumber);
-			context.put("code", captcha);
-			context.put("product", "卡云卡");
+			context.put("smsParamString", smsParamString);
+			context.put("smsType", CloudCardConstant.LOGIN_SMS_TYPE);
 			SmsServices.sendMessage(dctx, context);
 		}
 		return ServiceUtil.returnSuccess();
