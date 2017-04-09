@@ -69,7 +69,7 @@ public class SmsServices {
 			smsType = "sms.smsLoginTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_PAY_SMS_TYPE)){
 			smsType = "sms.smsUserPayTemplateCode";
-		}else if(smsType.equals(CloudCardConstant.USER_PAY_VERFIY_CODE_SMS_TYPE)){
+		}else if(smsType.equals(CloudCardConstant.USER_PAY_CAPTCHA_SMS_TYPE)){
 			smsType = "sms.smsUserPayVCTemplateCode";
 		}
 		//初始化短信发送配置文件
@@ -109,16 +109,7 @@ public class SmsServices {
 		Locale locale = (Locale) context.get("locale");
 		String teleNumber = (String) context.get("teleNumber");
 		String userType = (String) context.get("userType");
-		java.sql.Timestamp nowTimestamp  = UtilDateTime.nowTimestamp();
 		
-		//校验电话号码是否非法
-		Pattern p = Pattern.compile("^((13[0-9])|(15[^4,\\D])|(14[57])|(17[0])|(17[3])|(17[5])|(17[6])|(17[7])|(18[0,0-9]))\\d{8}$");  
-		Matcher m = p.matcher(teleNumber);  
-		
-		if(!m.matches()){
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardTelNumIllegal", locale));
-		}
-
 		GenericValue customer;
 		try {
 			customer = CloudCardHelper.getUserByTeleNumber(delegator, teleNumber);
@@ -132,69 +123,10 @@ public class SmsServices {
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardUserNotExistError", locale));
 		}
 		
-		EntityCondition captchaCondition = EntityCondition.makeCondition(
-						EntityCondition.makeCondition("teleNumber", EntityOperator.EQUALS, teleNumber),
-						EntityUtil.getFilterByDateExpr(),
-						EntityCondition.makeCondition("isValid", EntityOperator.EQUALS,"N"));
+		context.put("smsType", CloudCardConstant.LOGIN_SMS_TYPE);
+		context.put("isValid", "N");
+		getSMSCaptcha(dctx, context);
 		
-		GenericValue sms = null;
-		try {
-			sms = EntityUtil.getFirst( 
-					delegator.findList("SmsValidateCode", captchaCondition, null,UtilMisc.toList("-" + ModelEntity.CREATE_STAMP_FIELD), null, false)
-					);
-		} catch (GenericEntityException e) {
-			Debug.logError(e.getMessage(), module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardGetCAPTCHAFailedError", locale));
-		}
-		
-		
-		int validTime = Integer.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","sms.validTime","900",delegator));
-		int intervalTime = Integer.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","sms.intervalTime","60",delegator));
-		
-		
-		boolean sendSMS = false;
-		if(UtilValidate.isEmpty(sms)){
-			sendSMS = true;
-		}else{
-			Debug.logInfo("The user tel:[" + teleNumber + "]  verfiy code[" + sms.getString("captcha") + "], check the interval time , if we'll send new code", module);
-			// 如果已有未验证的记录存在，则检查是否过了再次重发的时间间隔，没过就忽略本次请求
-			if(UtilDateTime.nowTimestamp().after(UtilDateTime.adjustTimestamp((java.sql.Timestamp)sms.get("fromDate"), Calendar.SECOND, intervalTime))){
-				sms.set("thruDate", nowTimestamp);
-				try {
-					sms.store();
-				} catch (GenericEntityException e) {
-					Debug.logError(e, module);
-					return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
-				}
-				Debug.logInfo("The user tel:[" + teleNumber + "]  will get new verfiy code!", module);
-				sendSMS = true;
-			}
-		}
-		
-		if(sendSMS){
-			//生成验证码
-			String captcha = UtilFormatOut.padString(String.valueOf(Math.round((Math.random()*10e6))), 6, false, '0');
-			Map<String,Object> smsValidateCodeMap = FastMap.newInstance();
-			smsValidateCodeMap.put("teleNumber", teleNumber);
-			smsValidateCodeMap.put("captcha", captcha);
-			smsValidateCodeMap.put("smsType", "LOGIN");
-			smsValidateCodeMap.put("isValid", "N");
-			smsValidateCodeMap.put("fromDate", nowTimestamp);
-			smsValidateCodeMap.put("thruDate",UtilDateTime.adjustTimestamp(nowTimestamp, Calendar.SECOND, validTime));
-			try {
-				GenericValue smstGV = delegator.makeValue("SmsValidateCode", smsValidateCodeMap);
-				smstGV.create();
-			} catch (GenericEntityException e) {
-				Debug.logError(e, module);
-				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardSendFailedError", locale));
-			}
-			String smsParamString = "{code:'"+captcha+"',product:'"+"库胖"+"'}";
-			//发送短信
-			context.put("phone", teleNumber);
-			context.put("smsParamString", smsParamString);
-			context.put("smsType", CloudCardConstant.LOGIN_SMS_TYPE);
-			SmsServices.sendMessage(dctx, context);
-		}
 		return ServiceUtil.returnSuccess();
 	}
 	
@@ -272,9 +204,10 @@ public class SmsServices {
 			}
 		}
 		
+		
 		//查找用户验证码是否存在
 		EntityConditionList<EntityCondition> captchaConditions = EntityCondition
-				.makeCondition(EntityCondition.makeCondition("teleNumber", EntityOperator.EQUALS, teleNumber),EntityUtil.getFilterByDateExpr(),EntityCondition.makeCondition("isValid", EntityOperator.EQUALS, "N"));
+				.makeCondition(EntityCondition.makeCondition("teleNumber", EntityOperator.EQUALS, teleNumber),EntityUtil.getFilterByDateExpr(),EntityCondition.makeCondition("isValid", EntityOperator.EQUALS, "N"),EntityCondition.makeCondition("smsType", EntityOperator.EQUALS, CloudCardConstant.LOGIN_SMS_TYPE));
 		List<GenericValue> smsList = FastList.newInstance();
 		try {
 			smsList = delegator.findList("SmsValidateCode", captchaConditions, null,
@@ -325,6 +258,90 @@ public class SmsServices {
 			}
 		}
 
+		return result;
+	}
+	
+	public static  Map<String, Object> getSMSCaptcha(DispatchContext dctx, Map<String, Object> context){
+		java.sql.Timestamp nowTimestamp  = UtilDateTime.nowTimestamp();
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+		String teleNumber = (String) context.get("teleNumber");
+		String isValid = (String) context.get("isValid");
+		String smsType = (String) context.get("smsType");
+		
+		//校验电话号码是否非法
+		Pattern p = Pattern.compile("^((13[0-9])|(15[^4,\\D])|(14[57])|(17[0])|(17[3])|(17[5])|(17[6])|(17[7])|(18[0,0-9]))\\d{8}$");  
+		Matcher m = p.matcher(teleNumber);  
+		if(!m.matches()){
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardTelNumIllegal", locale));
+		}
+		
+		EntityCondition captchaCondition = EntityCondition.makeCondition(
+						EntityCondition.makeCondition("teleNumber", EntityOperator.EQUALS, teleNumber),
+						EntityUtil.getFilterByDateExpr(),
+						EntityCondition.makeCondition("isValid", EntityOperator.EQUALS,"N"),EntityCondition.makeCondition("smsType", EntityOperator.EQUALS,smsType));
+		
+		GenericValue sms = null;
+		try {
+			sms = EntityUtil.getFirst( 
+					delegator.findList("SmsValidateCode", captchaCondition, null,UtilMisc.toList("-" + ModelEntity.CREATE_STAMP_FIELD), null, false)
+					);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardGetCAPTCHAFailedError", locale));
+		}
+		
+		
+		int validTime = Integer.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","sms.validTime","900",delegator));
+		int intervalTime = Integer.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","sms.intervalTime","60",delegator));
+		
+		
+		boolean sendSMS = false;
+		if(UtilValidate.isEmpty(sms)){
+			sendSMS = true;
+		}else{
+			Debug.logInfo("The user tel:[" + teleNumber + "]  verfiy code[" + sms.getString("captcha") + "], check the interval time , if we'll send new code", module);
+			// 如果已有未验证的记录存在，则检查是否过了再次重发的时间间隔，没过就忽略本次请求
+			if(UtilDateTime.nowTimestamp().after(UtilDateTime.adjustTimestamp((java.sql.Timestamp)sms.get("fromDate"), Calendar.SECOND, intervalTime))){
+				sms.set("thruDate", nowTimestamp);
+				try {
+					sms.store();
+				} catch (GenericEntityException e) {
+					Debug.logError(e, module);
+					return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+				}
+				Debug.logInfo("The user tel:[" + teleNumber + "]  will get new verfiy code!", module);
+				sendSMS = true;
+			}
+		}
+		
+		if(sendSMS){
+			//生成验证码
+			String captcha = UtilFormatOut.padString(String.valueOf(Math.round((Math.random()*10e6))), 6, false, '0');
+			Map<String,Object> smsValidateCodeMap = FastMap.newInstance();
+			smsValidateCodeMap.put("teleNumber", teleNumber);
+			smsValidateCodeMap.put("captcha", captcha);
+			smsValidateCodeMap.put("smsType", smsType);
+			smsValidateCodeMap.put("isValid", isValid);
+			smsValidateCodeMap.put("fromDate", nowTimestamp);
+			smsValidateCodeMap.put("thruDate",UtilDateTime.adjustTimestamp(nowTimestamp, Calendar.SECOND, validTime));
+			try {
+				GenericValue smstGV = delegator.makeValue("SmsValidateCode", smsValidateCodeMap);
+				smstGV.create();
+			} catch (GenericEntityException e) {
+				Debug.logError(e, module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardSendFailedError", locale));
+			}
+			String smsParamString = "{code:'"+captcha+"',product:'"+"库胖"+"'}";
+			//发送短信
+			context.put("phone", teleNumber);
+			context.put("smsParamString", smsParamString);
+			context.put("smsType", CloudCardConstant.LOGIN_SMS_TYPE);
+			SmsServices.sendMessage(dctx, context);
+		}
+		
+		Map<String, Object> result = ServiceUtil.returnSuccess();
 		return result;
 	}
 	

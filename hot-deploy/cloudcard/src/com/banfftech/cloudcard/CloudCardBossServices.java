@@ -1383,4 +1383,38 @@ public class CloudCardBossServices {
         // 返回结果
         return result;
     }
+    
+    /**
+     * 获取用户消费验证码
+     * 
+     * @param dctx
+     * @param context
+     * @return
+     */
+	private static Map<String, Object> getPayVerificationCodeOfCustomer(DispatchContext dctx,Map<String, Object> context) {
+		Delegator delegator = dctx.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+		
+		String teleNumber = (String) context.get("teleNumber");
+		String amount = (String) context.get("amount");
+		
+		GenericValue customer;
+		try {
+			customer = CloudCardHelper.getUserByTeleNumber(delegator, teleNumber);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		if(UtilValidate.isEmpty(customer)){
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserNotExistError", locale));
+		}
+		
+		
+		
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("amount", amount);
+		return result;
+	}
+
 }

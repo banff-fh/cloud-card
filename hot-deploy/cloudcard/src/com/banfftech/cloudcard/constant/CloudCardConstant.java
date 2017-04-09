@@ -113,15 +113,15 @@ public class CloudCardConstant {
     /**
      * 发送登录短信验证码{@value}
      */
-    public static final String LOGIN_SMS_TYPE = "LoginSMS";
+    public static final String LOGIN_SMS_TYPE = "Login";
     
     /**
      * 发送用户消费短信验证码{@value}
      */
-    public static final String USER_PAY_VERFIY_CODE_SMS_TYPE = "userPayVerfiyCodeSMS";
+    public static final String USER_PAY_CAPTCHA_SMS_TYPE = "userPayCaptcha";
 
     /**
      * 发送用户消费通知短信{@value}
      */
-    public static final String USER_PAY_SMS_TYPE = "userPaySMS";
+    public static final String USER_PAY_SMS_TYPE = "userPay";
 }
