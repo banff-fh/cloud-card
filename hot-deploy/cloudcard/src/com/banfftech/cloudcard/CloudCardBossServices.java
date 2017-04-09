@@ -22,7 +22,9 @@ import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
+import org.ofbiz.service.ServiceAuthException;
 import org.ofbiz.service.ServiceUtil;
+import org.ofbiz.service.ServiceValidationException;
 
 import com.banfftech.cloudcard.constant.CloudCardConstant;
 import com.banfftech.cloudcard.sms.SmsServices;
@@ -1392,7 +1394,7 @@ public class CloudCardBossServices {
      * @param context
      * @return
      */
-	public static Map<String, Object> getPayVerificationCodeOfCustomer(DispatchContext dctx,Map<String, Object> context) {
+	public static Map<String, Object> getPayCaptchaOfUser(DispatchContext dctx,Map<String, Object> context) {
 		Delegator delegator = dctx.getDelegator();
 		Locale locale = (Locale) context.get("locale");
 		
@@ -1421,5 +1423,47 @@ public class CloudCardBossServices {
 		result.put("status", "Y");
 		return result;
 	}
+	
+	/**
+     * 根据电话号码获取用户卡包
+     * 
+     * @param dctx
+     * @param context
+     * @return
+     */
+	public static Map<String, Object> getCloudcardsOfUser(DispatchContext dctx,Map<String, Object> context) {
+		Delegator delegator = dctx.getDelegator();
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Locale locale = (Locale) context.get("locale");
+		
+		String teleNumber = (String) context.get("teleNumber");
+		String amount = (String) context.get("amount");
+		context.put("amount", amount);
+		GenericValue customer;
+		try {
+			customer = CloudCardHelper.getUserByTeleNumber(delegator, teleNumber);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		if(UtilValidate.isEmpty(customer)){
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserNotExistError", locale));
+		}
+		Map<String, Object> result = FastMap.newInstance();
+		try {
+		String partyId = customer.getString("partyId");
+		context.put("partyId",partyId );
+		result = dispatcher.runSync("myCloudCards", context);
+		} catch (Exception e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		result.put("teleNumber", teleNumber);
+		result.put("amount", amount);
+		return result;
+	}
+	
 
 }

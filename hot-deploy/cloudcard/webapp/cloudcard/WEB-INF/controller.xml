@@ -415,12 +415,22 @@
 	</request-map>
 	
 	<!-- 无卡消费发送验证码-->
-	<request-map uri="getPayVerificationCodeOfCustomer">
+	<request-map uri="getPayCaptchaOfUser">
 		<!--<security https="true" auth="false" />-->
-		<event type="service" invoke="getPayVerificationCodeOfCustomer" />
+		<event type="service" invoke="getPayCaptchaOfUser" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
+	
+	<!-- 无卡消费获取用户卡-->
+	<request-map uri="getCloudcardsOfUser">
+		<!--<security https="true" auth="false" />-->
+		<event type="service" invoke="getCloudcardsOfUser" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
+	getCloudcardsOfUser
 	
 
 	<!-- 后台页面部分 Request Mappings -->
