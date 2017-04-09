@@ -70,9 +70,9 @@ public class SmsServices {
 			smsParamString = "{code:'"+captcha+"',product:'"+"库胖"+"'}";
 			smsType = "sms.smsLoginTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_PAY_SMS_TYPE)){
-			String amount = (String) context.get("amount");
+			String validTime = (String) context.get("validTime");
 			String storeName = (String) context.get("time");
-			smsParamString = "{storeName:'"+storeName+"',amount:'"+amount+"'}";
+			smsParamString = "{storeName:'"+storeName+"',amount:'"+validTime+"'}";
 			smsType = "sms.smsUserPayTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_PAY_CAPTCHA_SMS_TYPE)){
 			String amount = (String) context.get("amount");
