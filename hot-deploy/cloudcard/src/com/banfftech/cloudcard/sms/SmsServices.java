@@ -54,7 +54,7 @@ public class SmsServices {
 		appkey = EntityUtilProperties.getPropertyValue("cloudcard","sms.appkey",delegator);
 		secret = EntityUtilProperties.getPropertyValue("cloudcard","sms.secret",delegator);
 		smsFreeSignName = EntityUtilProperties.getPropertyValue("cloudcard","sms.smsFreeSignName",delegator);
-		smsTemplateCode = EntityUtilProperties.getPropertyValue("cloudcard","sms.smsTemplateCode",delegator);
+		smsTemplateCode = EntityUtilProperties.getPropertyValue("cloudcard",smsType,delegator);
 	}
 
 	public static Map<String, Object> sendMessage(DispatchContext dctx, Map<String, Object> context) {
