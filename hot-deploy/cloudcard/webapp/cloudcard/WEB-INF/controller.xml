@@ -430,8 +430,13 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 	
-	getCloudcardsOfUser
-	
+	<!-- 无卡消费获取用户卡-->
+	<request-map uri="bizByTeleNumberWithdraw">
+		<!--<security https="true" auth="false" />-->
+		<event type="service" invoke="receiptByCardId" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
 
 	<!-- 后台页面部分 Request Mappings -->
 
