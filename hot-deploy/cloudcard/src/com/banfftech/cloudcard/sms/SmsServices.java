@@ -343,6 +343,7 @@ public class SmsServices {
 			//发送短信
 			context.put("captcha", captcha);
 			context.put("phone", teleNumber);
+			context.put("validTime", validTime/60);
 			SmsServices.sendMessage(dctx, context);
 		}
 		
