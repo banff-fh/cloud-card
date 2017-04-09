@@ -56,10 +56,13 @@ public class CloudCardQueryServices {
         LocalDispatcher dispatcher = dctx.getDispatcher();
         Delegator delegator = dispatcher.getDelegator();
         Locale locale = (Locale) context.get("locale");
-
-        GenericValue userLogin = (GenericValue) context.get("userLogin");
-        String partyId = (String) userLogin.get("partyId");
         String storeId = (String) context.get("storeId");
+        String partyId = (String) context.get("partyId");
+        if(UtilValidate.isEmpty(partyId)){
+        	GenericValue userLogin = (GenericValue) context.get("userLogin");
+            partyId = (String) userLogin.get("partyId");
+        }
+        
         Integer viewIndex = (Integer) context.get("viewIndex");
         Integer viewSize = (Integer) context.get("viewSize");
         viewIndex = (viewIndex == null || viewIndex < 0) ? 0 : viewIndex;

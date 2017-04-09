@@ -1454,7 +1454,7 @@ public class CloudCardBossServices {
 		try {
 		String partyId = customer.getString("partyId");
 		context.put("partyId",partyId );
-		result = dispatcher.runSync("myCloudCards", context);
+		result = CloudCardQueryServices.myCloudCards(dctx, context);
 		} catch (Exception e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
