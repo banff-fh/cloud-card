@@ -1544,6 +1544,15 @@ public class CloudCardBossServices {
 		context.put("amount", amount);
 		SmsServices.sendMessage(dctx, context);
 		
+		//修改验证码状态
+		sms.set("isValid", "Y");
+		try {
+			sms.store();
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
 		cloudCardWithdrawOut.put("cardCode", cardCode);
 		cloudCardWithdrawOut.put("teleNumber", teleNumber);
 		return cloudCardWithdrawOut;
