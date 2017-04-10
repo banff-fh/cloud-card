@@ -1540,7 +1540,7 @@ public class CloudCardBossServices {
 		
 		context.put("smsType", CloudCardConstant.USER_PAY_SMS_TYPE);
 		context.put("phone", teleNumber);
-		context.put("storeName", partyGroup.getString("partyName"));
+		context.put("storeName", partyGroup.getString("groupName"));
 		context.put("amount", amount);
 		SmsServices.sendMessage(dctx, context);
 		
@@ -1638,7 +1638,7 @@ public class CloudCardBossServices {
 		
 		//3、返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
-		result.put("teleNumber", rechargeCloudCardOutMap.get("teleNumber"));
+		result.put("teleNumber", teleNumber);
 		result.put("cardCode", cloudCardMap.get("cardCode"));
 		result.put("amount", amount);
 		result.put("cardBalance", rechargeCloudCardOutMap.get("actualBalance"));
