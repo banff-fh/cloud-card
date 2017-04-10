@@ -1482,6 +1482,7 @@ public class CloudCardBossServices {
 		String cardId = (String) context.get("cardId");
 		String organizationPartyId = (String) context.get("organizationPartyId");
 		String captcha = (String) context.get("captcha");
+		BigDecimal amount = (BigDecimal) context.get("amount");
 		
 		EntityCondition captchaCondition = EntityCondition.makeCondition(
 				EntityCondition.makeCondition("teleNumber", EntityOperator.EQUALS, teleNumber),
@@ -1516,8 +1517,14 @@ public class CloudCardBossServices {
 		// 调用内部 云卡支付服务
 		Map<String, Object> cloudCardWithdrawOut;
 		try {
-			context.put("cardId", cardId);
-			cloudCardWithdrawOut = dispatcher.runSync("cloudCardWithdraw", context);
+			Map<String,Object> withdrawMap = FastMap.newInstance();
+			withdrawMap.put("organizationPartyId", organizationPartyId);
+			withdrawMap.put("cardId", cardId);
+			withdrawMap.put("amount", amount);
+			
+			cloudCardWithdrawOut = dispatcher.runSync("cloudCardWithdraw",
+					UtilMisc.toMap("organizationPartyId", organizationPartyId, "cardId", cardId, "organizationPartyId",
+							organizationPartyId, "amount", amount));
 		} catch (GenericServiceException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
@@ -1539,6 +1546,7 @@ public class CloudCardBossServices {
 		context.put("phone", teleNumber);
 		context.put("storeName", partyGroup.getString("partyName"));
 		context.put("amount", partyGroup.getString("amount"));
+		context.put("time", "90");
 		SmsServices.sendMessage(dctx, context);
 		
 		return cloudCardWithdrawOut;
