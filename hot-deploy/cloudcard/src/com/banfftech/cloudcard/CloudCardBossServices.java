@@ -1543,6 +1543,7 @@ public class CloudCardBossServices {
 		context.put("amount", amount);
 		SmsServices.sendMessage(dctx, context);
 		
+		cloudCardWithdrawOut.put("teleNumber", teleNumber);
 		return cloudCardWithdrawOut;
 	}
 	
@@ -1626,6 +1627,8 @@ public class CloudCardBossServices {
 		
 		//3、返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("teleNumber", rechargeCloudCardOutMap.get("teleNumber"));
+		result.put("cardCode", cloudCardMap.get("finAccountCode"));
 		result.put("amount", amount);
 		result.put("cardBalance", rechargeCloudCardOutMap.get("actualBalance"));
 		result.put("customerPartyId", customerMap.getString("partyId"));
