@@ -256,7 +256,7 @@
 		<attribute name="cardId" type="String" mode="IN" optional="false"/>
 		<attribute name="captcha" type="String" mode="IN" optional="false"/>
 		<attribute name="teleNumber" type="String" mode="IN" optional="false"/>
-		<attribute name="amount" type="BigDecimal" mode="IN" optional="false"/>
+		<attribute name="amount" type="BigDecimal" mode="INOUT" optional="false"/>
 		
 		<attribute name="cardId" type="String" mode="OUT" optional="true"><description>卡Id</description></attribute>
 		<attribute name="cardBalance" type="BigDecimal" mode="OUT" optional="false"><description>可用余额</description></attribute>
