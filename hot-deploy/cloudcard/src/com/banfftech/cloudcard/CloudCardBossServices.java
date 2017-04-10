@@ -1646,7 +1646,6 @@ public class CloudCardBossServices {
 		result.put("amount", amount);
 		result.put("cardBalance", rechargeCloudCardOutMap.get("actualBalance"));
 		result.put("customerPartyId", customerMap.getString("partyId"));
-		result.put("cardId", cloudCardMap.get("cardId"));
 		return result;
 	}
 	
