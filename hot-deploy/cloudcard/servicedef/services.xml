@@ -233,13 +233,12 @@
         <attribute name="countyList" mode="OUT" type="List" optional="true"/>
     </service>
     
-    <service name="uploadedFile" engine="java"
-        invoke="uploadedFile" location="com.banfftech.cloudcard.util.UtilFileUpload" auth="false">
-        <description>上传图片</description>
-        <attribute mode="IN" name="fileKey" type="String" optional="true" />
-		<attribute mode="IN" name="uploadedFile" type="java.nio.ByteBuffer" optional="true" />
-		<attribute mode="INOUT" name="_uploadedFile_fileName" type="String" optional="true" />
-		<attribute mode="IN" name="_uploadedFile_contentType" type="String" optional="true"/>
-        <attribute name="status" mode="OUT" type="String" optional="true"><description>返回状态值</description></attribute>
+    <service name="upload" engine="java"
+        invoke="uploadOSS" location="com.banfftech.cloudcard.util.UtilFileUpload" auth="false">
+        <description>获取用户上传的文件，并传到阿里云OSS存储</description>
+		<attribute mode="IN" name="uploadedFile" type="java.nio.ByteBuffer" optional="false"><description>文件流</description></attribute>
+		<attribute mode="IN" name="_uploadedFile_fileName" type="String" optional="false"><description>文件名</description></attribute>
+		<attribute mode="IN" name="_uploadedFile_contentType" type="String" optional="false"><description>文件mime类型</description></attribute>
+        <attribute name="filePath" mode="OUT" type="String" optional="true"><description>返回文件上传后的远程路径</description></attribute>
     </service>
 </services>
