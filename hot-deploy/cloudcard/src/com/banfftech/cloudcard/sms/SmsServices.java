@@ -76,7 +76,7 @@ public class SmsServices {
 			smsType = "sms.smsUserPayTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_PAY_CAPTCHA_SMS_TYPE)){
 			String amount = (String) context.get("amount");
-			String validTime = (String) context.get("validTime");
+			Integer validTime = (Integer) context.get("validTime");
 			smsParamString = "{money:'"+amount+"',verfiyCode:'"+captcha+"',time:'"+validTime+"'}";
 			smsType = "sms.smsUserPayVCTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_RECHARGE_SMS_TYPE)){
