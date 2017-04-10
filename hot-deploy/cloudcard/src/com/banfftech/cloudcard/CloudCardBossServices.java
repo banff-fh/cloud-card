@@ -1632,14 +1632,14 @@ public class CloudCardBossServices {
 		//发送充值短信
 		context.put("smsType", CloudCardConstant.USER_RECHARGE_SMS_TYPE);
 		context.put("phone", teleNumber);
-		context.put("storeName", partyGroup.getString("partyName"));
+		context.put("storeName", partyGroup.getString("groupName"));
 		context.put("amount", amount);
 		SmsServices.sendMessage(dctx, context);
 		
 		//3、返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("teleNumber", rechargeCloudCardOutMap.get("teleNumber"));
-		result.put("cardCode", cloudCardMap.get("finAccountCode"));
+		result.put("cardCode", cloudCardMap.get("cardCode"));
 		result.put("amount", amount);
 		result.put("cardBalance", rechargeCloudCardOutMap.get("actualBalance"));
 		result.put("customerPartyId", customerMap.getString("partyId"));
