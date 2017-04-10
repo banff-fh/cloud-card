@@ -1483,6 +1483,7 @@ public class CloudCardBossServices {
 		String organizationPartyId = (String) context.get("organizationPartyId");
 		String captcha = (String) context.get("captcha");
 		BigDecimal amount = (BigDecimal) context.get("amount");
+		String cardCode = (String) context.get("cardCode");
 		
 		EntityCondition captchaCondition = EntityCondition.makeCondition(
 				EntityCondition.makeCondition("teleNumber", EntityOperator.EQUALS, teleNumber),
@@ -1543,6 +1544,7 @@ public class CloudCardBossServices {
 		context.put("amount", amount);
 		SmsServices.sendMessage(dctx, context);
 		
+		cloudCardWithdrawOut.put("cardCode", cardCode);
 		cloudCardWithdrawOut.put("teleNumber", teleNumber);
 		return cloudCardWithdrawOut;
 	}
