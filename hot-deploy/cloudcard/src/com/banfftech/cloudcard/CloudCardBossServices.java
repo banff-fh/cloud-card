@@ -1517,14 +1517,9 @@ public class CloudCardBossServices {
 		// 调用内部 云卡支付服务
 		Map<String, Object> cloudCardWithdrawOut;
 		try {
-			Map<String,Object> withdrawMap = FastMap.newInstance();
-			withdrawMap.put("organizationPartyId", organizationPartyId);
-			withdrawMap.put("cardId", cardId);
-			withdrawMap.put("amount", amount);
-			
 			cloudCardWithdrawOut = dispatcher.runSync("cloudCardWithdraw",
 					UtilMisc.toMap("organizationPartyId", organizationPartyId, "cardId", cardId, "organizationPartyId",
-							organizationPartyId, "amount", amount));
+							organizationPartyId, "amount", amount,"userLogin",userLogin));
 		} catch (GenericServiceException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
