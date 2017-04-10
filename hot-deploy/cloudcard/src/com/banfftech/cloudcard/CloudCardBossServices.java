@@ -1540,8 +1540,7 @@ public class CloudCardBossServices {
 		context.put("smsType", CloudCardConstant.USER_PAY_SMS_TYPE);
 		context.put("phone", teleNumber);
 		context.put("storeName", partyGroup.getString("partyName"));
-		context.put("amount", partyGroup.getString("amount"));
-		context.put("time", "90");
+		context.put("amount", amount);
 		SmsServices.sendMessage(dctx, context);
 		
 		return cloudCardWithdrawOut;
