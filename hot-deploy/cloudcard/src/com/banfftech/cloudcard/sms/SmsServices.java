@@ -70,15 +70,20 @@ public class SmsServices {
 			smsParamString = "{code:'"+captcha+"',product:'"+"库胖"+"'}";
 			smsType = "sms.smsLoginTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_PAY_SMS_TYPE)){
-			String validTime = (String) context.get("validTime");
-			String storeName = (String) context.get("time");
-			smsParamString = "{storeName:'"+storeName+"',amount:'"+validTime+"'}";
+			String amount = (String) context.get("amount");
+			String storeName = (String) context.get("storeName");
+			smsParamString = "{storeName:'"+storeName+"',amount:'"+amount+"'}";
 			smsType = "sms.smsUserPayTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_PAY_CAPTCHA_SMS_TYPE)){
 			String amount = (String) context.get("amount");
 			String time = (String) context.get("time");
 			smsParamString = "{money:'"+amount+"',verfiyCode:'"+captcha+"',time:'"+time+"'}";
 			smsType = "sms.smsUserPayVCTemplateCode";
+		}else if(smsType.equals(CloudCardConstant.USER_RECHARGE_SMS_TYPE)){
+			String amount = (String) context.get("amount");
+			String storeName = (String) context.get("storeName");
+			smsParamString = "{storeName:'"+storeName+"',amount:'"+amount+"'}";
+			smsType = "sms.smsUserRechargeTemplateCode";
 		}
 		//初始化短信发送配置文件
 		getSmsProperty(delegator,smsType);

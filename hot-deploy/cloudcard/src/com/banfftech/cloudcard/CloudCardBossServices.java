@@ -1522,6 +1522,25 @@ public class CloudCardBossServices {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
+		
+		GenericValue partyGroup = null;
+		try {
+			partyGroup = CloudCardHelper.getPartyGroupByStoreId(organizationPartyId,delegator);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		if(UtilValidate.isEmpty(partyGroup)){
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		context.put("smsType", CloudCardConstant.USER_PAY_SMS_TYPE);
+		context.put("phone", teleNumber);
+		context.put("storeName", partyGroup.getString("partyName"));
+		context.put("amount", partyGroup.getString("amount"));
+		SmsServices.sendMessage(dctx, context);
+		
 		return cloudCardWithdrawOut;
 	}
 	
@@ -1539,6 +1558,8 @@ public class CloudCardBossServices {
 		
 		String teleNumber = (String) context.get("teleNumber");
 		String organizationPartyId = (String) context.get("organizationPartyId");
+		String amount = (String) context.get("amount");
+
 		GenericValue customerMap;
 		try {
 			customerMap = CloudCardHelper.getUserByTeleNumber(delegator,teleNumber);
@@ -1559,18 +1580,54 @@ public class CloudCardBossServices {
 		if(UtilValidate.isEmpty(cloudcardsMap)){
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardNoCardInTheStore", locale));
 		}
-		// 调用内部 云卡支付服务
-		Map<String, Object> cloudCardWithdrawOut;
+		
+		//查询该用户在本店的卡
+		List<Object> cloudcardList = (List<Object>) cloudcardsMap.get("cloudCardList");
+		Map<String,Object> cloudCardMap = (Map<String, Object>) cloudcardList.get(0);
+		
+		//充值
+		Map<String, Object> rechargeCloudCardOutMap;
 		try {
-			List<Object> cloudcardList = (List<Object>) cloudcardsMap.get("cloudCardList");
-			Map<String,Object> cloudCardMap = (Map<String, Object>) cloudcardList.get(0);
-			context.put("cardId", cloudCardMap.get("cardId"));
-			cloudCardWithdrawOut = dispatcher.runSync("cloudCardWithdraw", context);
-		} catch (GenericServiceException e) {
+			rechargeCloudCardOutMap = dispatcher.runSync("rechargeCloudCard",
+					UtilMisc.toMap("userLogin", userLogin, "locale",locale,
+							"organizationPartyId", organizationPartyId, 
+							"cardId", cloudCardMap.get("cardId"),
+							"amount", amount));
+		} catch (GenericServiceException e1) {
+			Debug.logError(e1, module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		if (ServiceUtil.isError(rechargeCloudCardOutMap)) {
+			return rechargeCloudCardOutMap;
+		}
+		
+		//查询店铺名称
+		GenericValue partyGroup = null;
+		try {
+			partyGroup = CloudCardHelper.getPartyGroupByStoreId(organizationPartyId,delegator);
+		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		return cloudCardWithdrawOut;
+		
+		if(UtilValidate.isEmpty(partyGroup)){
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		
+		//3、返回结果
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("amount", amount);
+		result.put("cardBalance", rechargeCloudCardOutMap.get("actualBalance"));
+		result.put("customerPartyId", customerMap.getString("partyId"));
+		result.put("cardId", cloudCardMap.get("cardId"));
+		
+		context.put("smsType", CloudCardConstant.USER_RECHARGE_SMS_TYPE);
+		context.put("phone", teleNumber);
+		context.put("storeName", partyGroup.getString("partyName"));
+		context.put("amount", amount);
+		SmsServices.sendMessage(dctx, context);
+		return result;
 	}
 	
 }

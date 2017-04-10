@@ -124,4 +124,9 @@ public class CloudCardConstant {
      * 发送用户消费通知短信{@value}
      */
     public static final String USER_PAY_SMS_TYPE = "userPay";
+    
+    /**
+     * 发送用户充值通知短信{@value}
+     */
+    public static final String USER_RECHARGE_SMS_TYPE = "userRecharge";
 }
