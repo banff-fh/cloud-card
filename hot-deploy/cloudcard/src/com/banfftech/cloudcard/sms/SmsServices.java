@@ -1,5 +1,6 @@
 package com.banfftech.cloudcard.sms;
 
+import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -70,7 +71,7 @@ public class SmsServices {
 			smsParamString = "{code:'"+captcha+"',product:'"+"库胖"+"'}";
 			smsType = "sms.smsLoginTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_PAY_SMS_TYPE)){
-			String amount = (String) context.get("amount");
+			BigDecimal amount = (BigDecimal) context.get("amount");
 			String storeName = (String) context.get("storeName");
 			smsParamString = "{storeName:'"+storeName+"',amount:'"+amount+"'}";
 			smsType = "sms.smsUserPayTemplateCode";
@@ -80,7 +81,7 @@ public class SmsServices {
 			smsParamString = "{money:'"+amount+"',verfiyCode:'"+captcha+"',time:'"+validTime+"'}";
 			smsType = "sms.smsUserPayVCTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_RECHARGE_SMS_TYPE)){
-			String amount = (String) context.get("amount");
+			BigDecimal amount = (BigDecimal) context.get("amount");
 			String storeName = (String) context.get("storeName");
 			smsParamString = "{storeName:'"+storeName+"',amount:'"+amount+"'}";
 			smsType = "sms.smsUserRechargeTemplateCode";
