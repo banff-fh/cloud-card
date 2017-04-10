@@ -273,6 +273,6 @@
 
         <attribute name="cardCode" type="String" mode="OUT" optional="false"/>
         <attribute name="customerPartyId" type="String" mode="OUT" optional="false"><description>客户partyId</description></attribute>
-        <attribute name="actualBalance" type="BigDecimal" mode="OUT" optional="false"><description>可用余额</description></attribute>
+        <attribute name="cardBalance" type="BigDecimal" mode="OUT" optional="false"><description>可用余额</description></attribute>
 	</service>
 </services>

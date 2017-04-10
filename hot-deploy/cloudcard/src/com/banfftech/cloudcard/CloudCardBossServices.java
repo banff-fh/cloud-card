@@ -1588,6 +1588,9 @@ public class CloudCardBossServices {
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
 		}
 		
+		if(UtilValidate.isEmpty(customerMap)){
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
 		context.put("storeId", organizationPartyId);
 		context.put("partyId", customerMap.getString("partyId"));
 		Map<String, Object> cloudcardsMap = CloudCardQueryServices.myCloudCards(dctx, context);
@@ -1609,7 +1612,7 @@ public class CloudCardBossServices {
 							"amount", amount));
 		} catch (GenericServiceException e1) {
 			Debug.logError(e1, module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserNotExistError", locale));
 		}
 		if (ServiceUtil.isError(rechargeCloudCardOutMap)) {
 			return rechargeCloudCardOutMap;
