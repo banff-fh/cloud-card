@@ -22,9 +22,7 @@ import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
-import org.ofbiz.service.ServiceAuthException;
 import org.ofbiz.service.ServiceUtil;
-import org.ofbiz.service.ServiceValidationException;
 
 import com.banfftech.cloudcard.constant.CloudCardConstant;
 import com.banfftech.cloudcard.sms.SmsServices;
@@ -1642,6 +1640,7 @@ public class CloudCardBossServices {
 		//3、返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("teleNumber", teleNumber);
+		result.put("cardName", cloudCardMap.get("cardName"));
 		result.put("cardCode", cloudCardMap.get("cardCode"));
 		result.put("amount", amount);
 		result.put("cardBalance", rechargeCloudCardOutMap.get("actualBalance"));
