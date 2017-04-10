@@ -259,5 +259,17 @@
 		
 		<attribute name="cardId" type="String" mode="OUT" optional="true"><description>卡Id</description></attribute>
 		<attribute name="cardBalance" type="BigDecimal" mode="OUT" optional="false"><description>可用余额</description></attribute>
-		<attribute name="customerPartyId" type="String" mode="OUT" optional="false"><description>客户partyId</description></attribute>	</service>
+		<attribute name="customerPartyId" type="String" mode="OUT" optional="false"><description>客户partyId</description></attribute>	
+	</service>
+	
+	<service name="rechargeCloudCardByCardId" engine="java"
+            location="com.banfftech.cloudcard.CloudCardBossServices" invoke="rechargeCloudCardByCardId" auth="true">
+        <description>云卡充值-内部服务--内部调用rechargeCloudCardReceipt 和 rechargeCloudCardDeposit</description>
+        <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家partyId</description></attribute>
+        <attribute name="cardId" type="String" mode="INOUT" optional="false"><description>卡Id</description></attribute>
+        <attribute name="amount" type="BigDecimal" mode="INOUT" optional="false"><description>充值金额</description></attribute>
+
+        <attribute name="customerPartyId" type="String" mode="OUT" optional="false"><description>客户partyId</description></attribute>
+        <attribute name="actualBalance" type="BigDecimal" mode="OUT" optional="false"><description>可用余额</description></attribute>
+	</service>
 </services>

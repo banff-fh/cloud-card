@@ -1524,5 +1524,53 @@ public class CloudCardBossServices {
 		}
 		return cloudCardWithdrawOut;
 	}
-
+	
+	/**
+	 * 无卡消费充值
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> rechargeCloudCardByCardId(DispatchContext dctx, Map<String, Object> context) {
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dctx.getDelegator();
+		GenericValue userLogin = (GenericValue) context.get("userLogin");
+		Locale locale = (Locale) context.get("locale");
+		
+		String teleNumber = (String) context.get("teleNumber");
+		String organizationPartyId = (String) context.get("organizationPartyId");
+		GenericValue customerMap;
+		try {
+			customerMap = CloudCardHelper.getUserByTeleNumber(delegator,teleNumber);
+		} catch (GenericEntityException e1) {
+			Debug.logError(e1.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		// 数据权限检查，先放这里
+		if( !CloudCardHelper.isManager(delegator, userLogin.getString("partyId"), organizationPartyId)){
+			Debug.logWarning("partyId: " + userLogin.getString("partyId") + " 不是商户："+organizationPartyId + "的管理人员，不能对用户卡进行扫码消费", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
+		}
+		
+		context.put("storeId", organizationPartyId);
+		context.put("partyId", customerMap.getString("partyId"));
+		Map<String, Object> cloudcardsMap = CloudCardQueryServices.myCloudCards(dctx, context);
+		if(UtilValidate.isEmpty(cloudcardsMap)){
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardNoCardInTheStore", locale));
+		}
+		// 调用内部 云卡支付服务
+		Map<String, Object> cloudCardWithdrawOut;
+		try {
+			List<Object> cloudcardList = (List<Object>) cloudcardsMap.get("cloudCardList");
+			Map<String,Object> cloudCardMap = (Map<String, Object>) cloudcardList.get(0);
+			context.put("cardId", cloudCardMap.get("cardId"));
+			cloudCardWithdrawOut = dispatcher.runSync("cloudCardWithdraw", context);
+		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		return cloudCardWithdrawOut;
+	}
+	
 }
