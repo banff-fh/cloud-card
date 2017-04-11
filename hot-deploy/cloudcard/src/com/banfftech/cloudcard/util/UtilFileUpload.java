@@ -72,7 +72,7 @@ public class UtilFileUpload {
         Map<String, Object> result = ServiceUtil.returnSuccess();
         String fileSuffixTmp = fileName.substring(fileName.lastIndexOf(".") + 1);
         String fileSuffix = fileSuffixTmp.substring(0,fileSuffixTmp.lastIndexOf("}"));
-        if (UtilValidate.isNotEmpty(fileSuffix)) {
+        /*if (UtilValidate.isNotEmpty(fileSuffix)) {
             GenericValue gv;
             try {
                 gv = delegator.findOne("FileExtension", true, UtilMisc.toMap("fileExtensionId", fileSuffix.toLowerCase()));
@@ -82,8 +82,11 @@ public class UtilFileUpload {
             }
             if (gv != null)
                 contentType = gv.getString("mimeTypeId");
-        }
-
+        }*/
+        
+        //通过文件名判断并获取OSS服务文件上传时文件的contentType  
+        contentType = getContentType(fileSuffix);
+        
         if (UtilValidate.isNotEmpty(imageDataBytes)) {
             InputStream input = new ByteArrayInputStream(imageDataBytes.array());
             // 创建OSSClient实例
@@ -195,5 +198,24 @@ public class UtilFileUpload {
             client.deleteObject(BUCKET_NAME, key);
         }
     }
+    
+    /**  
+     * 通过文件名判断并获取OSS服务文件上传时文件的contentType  
+     * @param fileName 文件名 
+     * @return 文件的contentType    
+     */    
+     public static final String getContentType(String fileName){    
+        String fileExtension = fileName.substring(fileName.lastIndexOf("."));  
+        if("bmp".equalsIgnoreCase(fileExtension)) return "image/bmp";  
+        if("gif".equalsIgnoreCase(fileExtension)) return "image/gif";  
+        if("jpeg".equalsIgnoreCase(fileExtension) || "jpg".equalsIgnoreCase(fileExtension)  || "png".equalsIgnoreCase(fileExtension) ) return "image/jpeg";  
+        if("html".equalsIgnoreCase(fileExtension)) return "text/html";  
+        if("txt".equalsIgnoreCase(fileExtension)) return "text/plain";  
+        if("vsd".equalsIgnoreCase(fileExtension)) return "application/vnd.visio";  
+        if("ppt".equalsIgnoreCase(fileExtension) || "pptx".equalsIgnoreCase(fileExtension)) return "application/vnd.ms-powerpoint";  
+        if("doc".equalsIgnoreCase(fileExtension) || "docx".equalsIgnoreCase(fileExtension)) return "application/msword";  
+        if("xml".equalsIgnoreCase(fileExtension)) return "text/xml";  
+        return "text/html";    
+     } 
 
 }
