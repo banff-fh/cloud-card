@@ -3,6 +3,8 @@ package com.banfftech.cloudcard;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -129,14 +131,28 @@ public class CloudCardQueryServices {
 		
         EntityCondition paymentConditions = null;
         
+
+		Timestamp fromDate =(Timestamp)context.get("fromDate");
+        fromDate = UtilDateTime.adjustTimestamp(fromDate, Calendar.SECOND, -2);
+
+		Timestamp thruDate =(Timestamp)context.get("thruDate");
+		thruDate =  UtilDateTime.getDayStart(thruDate, 1);
+		
+        EntityCondition timeConditions = EntityCondition.makeCondition("effectiveDate", EntityOperator.BETWEEN, UtilMisc.toList(fromDate, thruDate));
+        
         if("1".equals(type)){
-	        paymentConditions = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdTo", partyId));
+        	EntityCondition depositConditions = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdTo", partyId));
+        	paymentConditions = EntityCondition.makeCondition(EntityOperator.AND, depositConditions, timeConditions);
+
 		}else if("2".equals(type)){
-	        paymentConditions = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdFrom", partyId));
+			EntityCondition withDrawalCondition = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdFrom", partyId));
+        	paymentConditions = EntityCondition.makeCondition(EntityOperator.AND, withDrawalCondition, timeConditions);
+
 		}else{
 			EntityCondition depositCond = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdTo", partyId));
 	        EntityCondition withDrawalCond = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdFrom", partyId));
-	        paymentConditions = EntityCondition.makeCondition(EntityOperator.OR, depositCond, withDrawalCond);
+			EntityCondition allConditions = EntityCondition.makeCondition(EntityOperator.OR, depositCond, withDrawalCond);
+	        paymentConditions = EntityCondition.makeCondition(EntityOperator.AND, allConditions, timeConditions);
 		}
 
         if(UtilValidate.isNotEmpty(cardId)){
@@ -226,16 +242,32 @@ public class CloudCardQueryServices {
         Integer viewSize  = (Integer) context.get("viewSize");
 
         EntityCondition paymentConditions = null;
+        
+		Timestamp fromDate =(Timestamp)context.get("fromDate");
+        fromDate = UtilDateTime.adjustTimestamp(fromDate, Calendar.SECOND, -2);
 
+		Timestamp thruDate =(Timestamp)context.get("thruDate");
+		thruDate =  UtilDateTime.getDayStart(thruDate, 1);
+		
+        EntityCondition timeConditions = EntityCondition.makeCondition("effectiveDate", EntityOperator.BETWEEN, UtilMisc.toList(fromDate, thruDate));
+        
         if("1".equals(type)){
-			paymentConditions = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdFrom", organizationPartyId));
-		}else if("2".equals(type)){
-			paymentConditions = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdTo", organizationPartyId));
+        	EntityCondition  depositConditions =  EntityCondition.makeCondition(EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdFrom", organizationPartyId)));
+        	paymentConditions = EntityCondition.makeCondition(EntityOperator.AND, depositConditions, timeConditions);
+			
+        }else if("2".equals(type)){
+        	
+        	EntityCondition withDrawalConditions = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdTo", organizationPartyId));
+        	paymentConditions = EntityCondition.makeCondition(EntityOperator.AND, withDrawalConditions, timeConditions);
+
 		}else{
 			EntityCondition depositCondition = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdFrom", organizationPartyId));
 			EntityCondition withDrawalCondition = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdTo", organizationPartyId));
-			paymentConditions = EntityCondition.makeCondition(EntityOperator.OR, depositCondition, withDrawalCondition);
+			EntityCondition allConditions = EntityCondition.makeCondition(EntityOperator.OR, depositCondition, withDrawalCondition);
+			paymentConditions = EntityCondition.makeCondition(EntityOperator.AND, allConditions, timeConditions);
 		}
+
+        
 
         //每页显示条数
         int number =  (viewSize  == null || viewSize  == 0) ? 20 : viewSize ;
