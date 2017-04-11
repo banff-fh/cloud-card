@@ -325,11 +325,88 @@ public class CloudCardServices {
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
 		}
 		
+		//如果cardCode不存在,则创建一个
+		if(UtilValidate.isEmpty(cardCode)){
+			//根据teleNumber查找用户，不存在则创建 
+			context.put("ensureCustomerRelationship", true);
+			Map<String, Object>	 getOrCreateCustomerOut  = CloudCardHelper.getOrCreateCustomer(dctx, context);
+			if (ServiceUtil.isError(getOrCreateCustomerOut)) {
+				return getOrCreateCustomerOut;
+			}		
+			String customerPartyId = (String) getOrCreateCustomerOut.get("customerPartyId");
+			
+			// 传入的organizationPartyId必须是一个存在的partyGroup
+			GenericValue partyGroup;
+			try {
+				partyGroup = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", organizationPartyId));
+			} catch (GenericEntityException e) {
+				Debug.logError(e.getMessage(), module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+			}
+			if(null == partyGroup ){
+				Debug.logWarning("商户："+organizationPartyId + "不存在", module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, 
+						"CloudCardOrganizationPartyNotFound", UtilMisc.toMap("organizationPartyId", organizationPartyId), locale));
+			}
+			
+			//生成的卡号
+			String newCardCode = null;
+			String description = partyGroup.getString("groupName")+"库胖卡";
+			String cardId = "";
+			Timestamp fromDate = UtilDateTime.adjustTimestamp(UtilDateTime.nowTimestamp(), Calendar.SECOND, -2);
+			
+			try {
+				newCardCode = CloudCardHelper.generateCloudCardCode(delegator);
+				String finAccountId = delegator.getNextSeqId("FinAccount");
+				Map<String, Object> finAccountMap = FastMap.newInstance();
+				finAccountMap.put("finAccountId", finAccountId);
+				finAccountMap.put("finAccountTypeId", "GIFTCERT_ACCOUNT");
+				finAccountMap.put("finAccountName", description);
+				finAccountMap.put("finAccountCode", newCardCode);
+				finAccountMap.put("organizationPartyId", CloudCardConstant.PLATFORM_PARTY_ID);
+				finAccountMap.put("ownerPartyId", customerPartyId);
+				finAccountMap.put("currencyUomId", "CNY");
+				finAccountMap.put("postToGlAccountId", "213200");
+				finAccountMap.put("isRefundable", "Y");
+				finAccountMap.put("statusId", "FNACT_ACTIVE");
+		        finAccountMap.put("fromDate", fromDate);
+				
+				//保存finaccount数据
+				GenericValue finAccount = delegator.makeValue("FinAccount", finAccountMap);
+				finAccount.create();
+				
+				//保存finaccountRole数据
+				GenericValue finAccountRole = delegator.makeValue("FinAccountRole", UtilMisc.toMap( "finAccountId", finAccountId, "partyId", organizationPartyId, "roleTypeId", "DISTRIBUTOR","fromDate", fromDate));
+				finAccountRole.create();
+				
+				
+	            // 创建PaymentMethod GiftCard
+	            Map<String, Object> giftCardInMap = FastMap.newInstance();
+	            giftCardInMap.putAll(context);
+	            giftCardInMap.put("cardNumber", newCardCode);
+	            giftCardInMap.put("description", description);
+	            giftCardInMap.put("customerPartyId", customerPartyId);
+	            giftCardInMap.put("finAccountId", finAccountId);
+	            giftCardInMap.put("fromDate", fromDate);
+	            Map<String, Object> giftCardOutMap = CloudCardHelper.createPaymentMethodAndGiftCard(dctx, giftCardInMap);
+	            if (ServiceUtil.isError(giftCardOutMap)) {
+	                return giftCardOutMap;
+	            }
+
+	    		context.put("cardCode", (String) newCardCode);
+	    		context.put("cardId", (String) giftCardOutMap.get("paymentMethodId"));
+	    		
+			} catch (GenericEntityException e) {
+				Debug.logError(e.getMessage(), module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardGenCardNumberError", locale));
+			}
+		}
+		
+		
 		Map<String, Object> checkParamOut = checkInputParam(dctx, context);
 		if(ServiceUtil.isError(checkParamOut)){
 			return checkParamOut;
 		}
-
 		
 		//1、根据二维码获取卡信息
 		GenericValue cloudCard = (GenericValue) checkParamOut.get("cloudCard");
