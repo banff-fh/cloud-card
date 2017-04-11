@@ -1679,7 +1679,9 @@ public class CloudCardBossServices {
 	 */
 	public static Map<String, Object> readMyNote(DispatchContext dctx, Map<String, Object> context) {
 		Delegator delegator = dctx.getDelegator();
+		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Locale locale = (Locale) context.get("locale");
+        GenericValue userLogin = (GenericValue) context.get("userLogin");
 
 		String organizationPartyId = (String) context.get("organizationPartyId");
 		String noteId = (String) context.get("noteId");
@@ -1695,6 +1697,14 @@ public class CloudCardBossServices {
 		}
 		
 		Map<String, Object> result = ServiceUtil.returnSuccess();
+		Map<String, Object> listMyNoteMap = null;
+		try {
+			listMyNoteMap = dispatcher.runSync("listMyNote", UtilMisc.toMap("organizationPartyId", organizationPartyId,"userLogin",userLogin));
+		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		result.put("partyNotes", listMyNoteMap.get("partyNotes"));
 		result.put("organizationPartyId", organizationPartyId);
 		result.put("noteId", noteId);
 		result.put("isViewed", "Y");
@@ -1709,7 +1719,9 @@ public class CloudCardBossServices {
 	 */
 	public static Map<String, Object> deleteMyNote(DispatchContext dctx, Map<String, Object> context) {
 		Delegator delegator = dctx.getDelegator();
+		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Locale locale = (Locale) context.get("locale");
+        GenericValue userLogin = (GenericValue) context.get("userLogin");
 
 		String organizationPartyId = (String) context.get("organizationPartyId");
 		String noteId = (String) context.get("noteId");
@@ -1725,6 +1737,14 @@ public class CloudCardBossServices {
 		}
 		
 		Map<String, Object> result = ServiceUtil.returnSuccess();
+		Map<String, Object> listMyNoteMap = null;
+		try {
+			listMyNoteMap = dispatcher.runSync("listMyNote", UtilMisc.toMap("organizationPartyId", organizationPartyId,"userLogin",userLogin));
+		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		result.put("partyNotes", listMyNoteMap.get("partyNotes"));
 		result.put("organizationPartyId", organizationPartyId);
 		result.put("noteId", noteId);
 		result.put("removed", "Y");

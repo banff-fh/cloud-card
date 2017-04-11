@@ -280,22 +280,24 @@
             location="com.banfftech.cloudcard.CloudCardBossServices" invoke="listMyNote" auth="true">
         <description>我的消息</description>
         <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家partyId</description></attribute>
-        <attribute name="partyNotes" type="List" mode="OUT" optional="false"><description>消费列表</description></attribute>
+        <attribute name="partyNotes" type="List" mode="OUT" optional="false"><description>消息列表</description></attribute>
 	</service>
 	
 	<service name="readMyNote" engine="java"
             location="com.banfftech.cloudcard.CloudCardBossServices" invoke="readMyNote" auth="true">
         <description>已读消息标记</description>
         <attribute name="organizationPartyId" type="String" mode="INOUT" optional="false"><description>店家partyId</description></attribute>
-        <attribute name="noteId" type="String" mode="INOUT" optional="false"><description>消费列表</description></attribute>
-        <attribute name="isViewed" type="String" mode="INOUT" optional="false"><description>消费列表</description></attribute>
+        <attribute name="noteId" type="String" mode="INOUT" optional="false"><description>noteId</description></attribute>
+        <attribute name="isViewed" type="String" mode="INOUT" optional="false"><description>是否已读</description></attribute>
+        <attribute name="partyNotes" type="List" mode="OUT" optional="false"><description>消费列表</description></attribute>
 	</service>
 	
 	<service name="deleteMyNote" engine="java"
             location="com.banfftech.cloudcard.CloudCardBossServices" invoke="deleteMyNote" auth="true">
         <description>删除消息标记</description>
         <attribute name="organizationPartyId" type="String" mode="INOUT" optional="false"><description>店家partyId</description></attribute>
-        <attribute name="noteId" type="String" mode="INOUT" optional="false"><description>消费列表</description></attribute>
-        <attribute name="removed" type="String" mode="INOUT" optional="false"><description>消费列表</description></attribute>
+        <attribute name="noteId" type="String" mode="INOUT" optional="false"><description>noteId</description></attribute>
+        <attribute name="removed" type="String" mode="INOUT" optional="false"><description>是否删除</description></attribute>
+        <attribute name="partyNotes" type="List" mode="OUT" optional="false"><description>消费列表</description></attribute>
 	</service>
 </services>
