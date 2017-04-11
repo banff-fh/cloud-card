@@ -463,6 +463,13 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
+	
+	<!-- 上传图片 -->
+	<request-map uri="uploadPictureWall">
+		<event type="java" path="com.banfftech.cloudcard.util.UtilFileUpload" invoke="uploadPictureWall"></event>
+		<response name="success" type="none"/>
+	</request-map>
+	
 	<!-- 后台页面部分 Request Mappings -->
 
 
