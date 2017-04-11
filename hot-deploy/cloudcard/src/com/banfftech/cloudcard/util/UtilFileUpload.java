@@ -26,6 +26,7 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
+import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
 import com.aliyun.oss.OSSClient;
@@ -118,8 +119,10 @@ public class UtilFileUpload {
 			throws GenericServiceException {
 		// Servlet Head
 		Delegator delegator = (Delegator) request.getAttribute("delegator");
+		LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
 		HttpSession session = request.getSession();
-		String contentType = "";
+		GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");		
+		String mimeType = "image/jpeg";
 		
 		try {
 			ServletFileUpload dfu = new ServletFileUpload(new DiskFileItemFactory(10240, null));
@@ -139,7 +142,7 @@ public class UtilFileUpload {
 					try {
 						gv = delegator.findOne("FileExtension", true, UtilMisc.toMap("fileExtensionId", fileSuffix.toLowerCase()));
 						if (gv != null){
-							contentType = gv.getString("mimeTypeId");
+							mimeType = gv.getString("mimeTypeId");
 						}
 					} catch (GenericEntityException e) {
 						Debug.logError(e.getMessage(), module);
@@ -153,17 +156,34 @@ public class UtilFileUpload {
 		            ObjectMetadata objectMeta = new ObjectMetadata();
                     objectMeta.setContentLength(item.getSize());
                     // 可以在metadata中标记文件类型
-                    objectMeta.setContentType("image/jpeg");
+                    objectMeta.setContentType(mimeType);
                     String key = UUID.randomUUID().toString() + System.currentTimeMillis();
                     InputStream input = item.getInputStream();
 		            PutObjectResult pr = client.putObject(BUCKET_NAME, key, in, objectMeta);
 		            // pr 的结果需要判断下吧
 		            client.shutdown();
+		            
+		            // 1.CREATE DATA RESOURCE
+		    		Map<String, Object> createDataResourceMap = UtilMisc.toMap("userLogin", userLogin, "partyId", "admin",
+		    				"dataResourceTypeId", "LOCAL_FILE", "dataCategoryId", "PERSONAL", "dataResourceName", fileName,
+		    				"mimeTypeId", mimeType, "isPublic", "Y", "dataTemplateTypeId", "NONE", "statusId", "CTNT_PUBLISHED",
+		    				"objectInfo", key);
+		    		Map<String, Object> serviceResultByDataResource = dispatcher.runSync("createDataResource",
+		    				createDataResourceMap);
+		    		String dataResourceId = (String) serviceResultByDataResource.get("dataResourceId");
+
+		    		// 2.CREATE CONTENT  type=ACTIVITY_PICTURE
+		    		Map<String, Object> createContentMap = UtilMisc.toMap("userLogin", userLogin, "contentTypeId",
+		    				"ACTIVITY_PICTURE", "mimeTypeId", mimeType, "dataResourceId", dataResourceId, "partyId", "admin");
+		    		Map<String, Object> serviceResultByCreateContentMap = dispatcher.runSync("createContent", createContentMap);
 				}
 			}
 		} catch (Exception e) {
 			Debug.logError(e.getMessage(), module);
 		}
+		
+		
+
 		return "success";
 	}
 
