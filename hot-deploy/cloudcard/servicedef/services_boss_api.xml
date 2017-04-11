@@ -31,7 +31,7 @@
 			开卡(激活)充值统一接口， 根据cardCode查询卡信息，如果已经激活直接充值，没激活先激活再充值，激活需要teleNumber
 		</description>
 		<attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家partyId</description></attribute>
-		<attribute name="teleNumber" type="String" mode="IN" optional="false"><description>客户手机号码</description></attribute>
+		<attribute name="teleNumber" type="String" mode="IN" optional="true"><description>客户手机号码</description></attribute>
 		<attribute name="cardCode" type="String" mode="IN" optional="true"><description>卡二维码、条码等唯一标识数据</description></attribute>
 		<attribute name="amount" type="BigDecimal" mode="INOUT" optional="false"><description>充值金额</description></attribute>
 
