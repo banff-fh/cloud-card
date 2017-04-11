@@ -70,8 +70,9 @@ public class UtilFileUpload {
         String contentType = (String) context.get("_uploadedFile_contentType");// 文件mime类型，必输
 
         Map<String, Object> result = ServiceUtil.returnSuccess();
-        String fileSuffix = fileName.substring(fileName.lastIndexOf(".") + 1);
-        if (UtilValidate.isEmpty(contentType) && UtilValidate.isNotEmpty(fileSuffix)) {
+        String fileSuffixTmp = fileName.substring(fileName.lastIndexOf(".") + 1);
+        String fileSuffix = fileSuffixTmp.substring(0,fileSuffixTmp.lastIndexOf("}"));
+        if (UtilValidate.isNotEmpty(fileSuffix)) {
             GenericValue gv;
             try {
                 gv = delegator.findOne("FileExtension", true, UtilMisc.toMap("fileExtensionId", fileSuffix.toLowerCase()));
