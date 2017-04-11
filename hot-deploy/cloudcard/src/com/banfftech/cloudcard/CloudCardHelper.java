@@ -1200,4 +1200,36 @@ public class CloudCardHelper {
         result.put("latitude", latitude);
         return result;
     }
+    
+    /**
+     * 记录app推送消息
+     * 
+     * @param
+     * 
+     * @return
+     */
+    public static Map<String, Object> saveMyNote(DispatchContext dctx, Map<String, Object> context) {
+		Delegator delegator = dctx.getDelegator();
+		GenericValue noteData = delegator.makeValue("NoteData");
+		String noteId = delegator.getNextSeqId("NoteData");
+		try {
+			noteData.set("noteId", noteId);
+			noteData.put("noteInfo",context.get("noteInfo"));
+			noteData.put("noteName",context.get("noteName"));
+			noteData.put("noteDateTime",UtilDateTime.nowTimestamp());
+			noteData.create();
+
+			GenericValue partyNote = delegator.makeValue("PartyNote");
+			partyNote.put("partyId", context.get("partyId"));
+			partyNote.put("noteId", noteId);
+			partyNote.put("removed", "N");
+			partyNote.put("isViewed", "N");
+			partyNote.create();
+		} catch (GenericEntityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		return result;
+	}
 }

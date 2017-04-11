@@ -439,7 +439,30 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
+	
+	<!-- 我的消息接口-->
+	<request-map uri="listMyNote">
+		<!--<security https="true" auth="false" />-->
+		<event type="service" invoke="listMyNote" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
 
+	<!-- 标记消息已读接口-->
+	<request-map uri="readMyNote">
+		<!--<security https="true" auth="false" />-->
+		<event type="service" invoke="readMyNote" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+
+	<!-- 标记消息已删除接口-->
+	<request-map uri="deleteMyNote">
+		<!--<security https="true" auth="false" />-->
+		<event type="service" invoke="deleteMyNote" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
 	<!-- 后台页面部分 Request Mappings -->
 
 

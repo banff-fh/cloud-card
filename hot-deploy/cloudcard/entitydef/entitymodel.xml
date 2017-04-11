@@ -342,5 +342,19 @@
 		
 	</view-entity>
 	
+	<!-- 扩展app消息状态 -->
+	<extend-entity entity-name="PartyNote">
+		<field name="isViewed" type="indicator" />
+		<field name="removed" type="indicator" />
+	</extend-entity>
 	
+	<view-entity entity-name="PartyNoteView2" package-name="org.ofbiz.cloudcard.note">
+		<member-entity entity-alias="PN" entity-name="PartyNote" />
+		<member-entity entity-alias="ND" entity-name="NoteData" />
+		<alias-all entity-alias="PN" />
+		<alias-all entity-alias="ND" />
+		<view-link entity-alias="PN" rel-entity-alias="ND">
+			<key-map field-name="noteId" />
+		</view-link>
+	</view-entity>
 </entitymodel>

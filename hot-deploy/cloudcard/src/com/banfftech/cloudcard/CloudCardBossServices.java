@@ -1648,4 +1648,87 @@ public class CloudCardBossServices {
 		return result;
 	}
 	
+	/**
+	 * 我的消息列表
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> listMyNote(DispatchContext dctx, Map<String, Object> context) {
+		Delegator delegator = dctx.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+
+		String organizationPartyId = (String) context.get("organizationPartyId");
+		List<GenericValue> partyNotes = FastList.newInstance();
+		try {
+			partyNotes = delegator.findList("PartyNoteView2", EntityCondition.makeCondition(UtilMisc.toMap("partyId", organizationPartyId, "removed",  "N")),null, UtilMisc.toList("-noteDateTime"), null, false);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("partyNotes", partyNotes);
+		return result;
+	}
+	
+	/**
+	 * 标记消息为已读
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> readMyNote(DispatchContext dctx, Map<String, Object> context) {
+		Delegator delegator = dctx.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+
+		String organizationPartyId = (String) context.get("organizationPartyId");
+		String noteId = (String) context.get("noteId");
+		
+		GenericValue partyNote;
+		try {
+			partyNote = delegator.findByPrimaryKey("PartyNote",  UtilMisc.toMap("partyId", organizationPartyId, "noteId", noteId));
+			partyNote.set("isViewed", "Y");
+			delegator.store(partyNote);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("organizationPartyId", organizationPartyId);
+		result.put("noteId", noteId);
+		result.put("isViewed", "Y");
+		return result;
+	}
+	
+	/**
+	 * 标记消息为已删除
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> deleteMyNote(DispatchContext dctx, Map<String, Object> context) {
+		Delegator delegator = dctx.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+
+		String organizationPartyId = (String) context.get("organizationPartyId");
+		String noteId = (String) context.get("noteId");
+		
+		GenericValue partyNote;
+		try {
+			partyNote = delegator.findByPrimaryKey("PartyNote",  UtilMisc.toMap("partyId", organizationPartyId, "noteId", noteId));
+			partyNote.set("removed", "Y");
+			delegator.store(partyNote);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("organizationPartyId", organizationPartyId);
+		result.put("noteId", noteId);
+		result.put("removed", "Y");
+		return result;
+	}
+	
 }
