@@ -91,14 +91,9 @@ public class UtilFileUpload {
             ObjectMetadata objectMeta = new ObjectMetadata();
             objectMeta.setContentLength(imageDataBytes.array().length);
             objectMeta.setContentEncoding("UTF-8");
-
             // 可以在metadata中标记文件类型
             objectMeta.setContentType(contentType);
-            // TODO 目录前缀，可能需要业务类型不同而不同啊
-            String OSSFileLocation = "others/";
-
-            // 上传key的时候，必须加上后缀，杀毒软件可能拦截
-            String key = OSSFileLocation + UUID.randomUUID() + "." + fileSuffix;
+            String key = UUID.randomUUID().toString() + System.currentTimeMillis();
             PutObjectResult pr = client.putObject(BUCKET_NAME, key, input, objectMeta);
             // pr 的结果需要判断下吧
             client.shutdown();
