@@ -204,8 +204,7 @@ public class UtilFileUpload {
      * @param fileName 文件名 
      * @return 文件的contentType    
      */    
-     public static final String getContentType(String fileName){    
-        String fileExtension = fileName.substring(fileName.lastIndexOf("."));  
+     public static final String getContentType(String fileExtension){    
         if("bmp".equalsIgnoreCase(fileExtension)) return "image/bmp";  
         if("gif".equalsIgnoreCase(fileExtension)) return "image/gif";  
         if("jpeg".equalsIgnoreCase(fileExtension) || "jpg".equalsIgnoreCase(fileExtension)  || "png".equalsIgnoreCase(fileExtension) ) return "image/jpeg";  
