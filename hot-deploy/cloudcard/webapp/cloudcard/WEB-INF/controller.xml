@@ -309,6 +309,13 @@
 		<response name="error" type="request" value="json" />
     </request-map>
 
+	<!-- 商户上传图片服务 new-->
+    <request-map uri="bizUploadStoreInfoImg">
+        <security https="false" auth="false"/>
+		<event type="service" invoke="bizUploadStoreInfoImg" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+    </request-map>
 
 	<!-- 店铺信息 -->
 	<request-map uri="userGetStoreInfo">

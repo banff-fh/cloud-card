@@ -1,9 +1,11 @@
 package com.banfftech.cloudcard;
 
 import java.math.BigDecimal;
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
@@ -1751,4 +1753,59 @@ public class CloudCardBossServices {
 		return result;
 	}
 	
+	/**
+	 * 标记消息为已删除
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> bizUploadStoreInfoImg(DispatchContext dctx, Map<String, Object> context) {
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+        Delegator delegator = dctx.getDelegator();
+        Locale locale = (Locale) context.get("locale");
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		
+		ByteBuffer imageDataBytes = (ByteBuffer) context.get("uploadedFile");// 文件流，必输
+        String fileName = (String) context.get("_uploadedFile_fileName");// 文件名，必输
+        String contentType = (String) context.get("_uploadedFile_contentType");// 文件mime类型，必输
+        String organizationPartyId = (String) context.get("organizationPartyId");
+		GenericValue userLogin = (GenericValue) context.get("userLogin");
+
+        String fileSuffixTmp = fileName.substring(fileName.lastIndexOf(".") + 1);
+        String fileSuffix = fileSuffixTmp.substring(0,fileSuffixTmp.lastIndexOf("}"));
+        if (UtilValidate.isNotEmpty(fileSuffix)) {
+            GenericValue gv;
+            try {
+                gv = delegator.findOne("FileExtension", true, UtilMisc.toMap("fileExtensionId", fileSuffix.toLowerCase()));
+            } catch (GenericEntityException e) {
+                Debug.logError(e.getMessage(), module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+            }
+            if (gv != null)
+                contentType = gv.getString("mimeTypeId");
+        }
+        String key = UUID.randomUUID().toString() + System.currentTimeMillis();
+		
+		try {
+		 // 1.CREATE DATA RESOURCE
+		Map<String, Object> createDataResourceMap = UtilMisc.toMap("userLogin", userLogin, "partyId", organizationPartyId,
+				"dataResourceTypeId", "LOCAL_FILE", "dataCategoryId", "PERSONAL", "dataResourceName", fileName,
+				"mimeTypeId", contentType, "isPublic", "Y", "dataTemplateTypeId", "NONE", "statusId", "CTNT_PUBLISHED",
+				"objectInfo", key);
+		Map<String, Object> serviceResultByDataResource;
+		serviceResultByDataResource = dispatcher.runSync("createDataResource",
+				createDataResourceMap);
+		String dataResourceId = (String) serviceResultByDataResource.get("dataResourceId");
+
+		// 2.CREATE CONTENT  type=ACTIVITY_PICTURE
+		Map<String, Object> createContentMap = UtilMisc.toMap("userLogin", userLogin, "contentTypeId",
+				"ACTIVITY_PICTURE", "mimeTypeId", contentType, "dataResourceId", dataResourceId, "partyId", organizationPartyId);
+		Map<String, Object> serviceResultByCreateContentMap = dispatcher.runSync("createContent", createContentMap);
+		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		return result;
+	}
 }
