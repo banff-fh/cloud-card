@@ -223,7 +223,7 @@ public class CloudCardCustServices {
 		result.put("longitude", longitude);
 		result.put("latitude", latitude);
 		result.put("isHasCard", isHasCard);
-		result.put("PartyContentDetail", storeInfoImgList);
+		result.put("storeInfoImgList", storeInfoImgList);
 		result.put("ossUrl", ossUrl);
 
 		return result;
