@@ -303,7 +303,7 @@
         <attribute name="partyNotes" type="List" mode="OUT" optional="false"><description>消费列表</description></attribute>
 	</service>
 	
-		<service name="bizUploadStoreInfoImg" engine="java"
+	<service name="bizUploadStoreInfoImg" engine="java"
             location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizUploadStoreInfoImg" auth="true">
         <description>商家上传图片</description>
         <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家partyId</description></attribute>
@@ -311,4 +311,11 @@
 		<attribute mode="IN" name="_uploadedFile_fileName" type="String" optional="false"><description>文件名</description></attribute>
 		<attribute mode="IN" name="_uploadedFile_contentType" type="String" optional="false"><description>文件mime类型</description></attribute>
 	</service>
+	
+	<service name="bizDeleteStoreInfoImg" engine="java"
+            location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizDeleteStoreInfoImg" auth="true">
+        <description>商家删除图片</description>
+        <attribute mode="IN" name="organizationPartyId" type="String" optional="false"><description>店家partyI</description></attribute>
+        <attribute mode="IN" name="contentId" type="String" optional="false"><description>dataResourceId</description></attribute>
+ 	</service>
 </services>

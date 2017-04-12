@@ -61,7 +61,7 @@ public class UtilFileUpload {
      * @return
      * @throws Exception
      */
-    public static Map<String, Object> uploadOSS(DispatchContext dctx, Map<String, ? extends Object> context) throws IOException {
+    public static Map<String, Object> uploadOSS(DispatchContext dctx, Map<String, ? extends Object> context) {
         // LocalDispatcher dispatcher = dctx.getDispatcher();
         Delegator delegator = dctx.getDelegator();
         Locale locale = (Locale) context.get("locale");
@@ -172,10 +172,15 @@ public class UtilFileUpload {
      * 
      * @param key
      */
-    public static void delFile(String key) {
+    public static Map<String, Object> delFile(DispatchContext dctx, Map<String, ? extends Object> context) {
+    	Delegator delegator = dctx.getDelegator(); 
+    	String key = (String) context.get("key");
         if (UtilValidate.isNotEmpty(key)) {
-            OSSClient client = new OSSClient(ENDPOINT, ACCESS_ID, ACCESS_KEY_SECRET);
+            OSSClient client = getNewOssClient(delegator);
             client.deleteObject(BUCKET_NAME, key);
+            client.shutdown();
         }
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		return result;
     }
 }

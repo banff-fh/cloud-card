@@ -1754,7 +1754,7 @@ public class CloudCardBossServices {
 	}
 	
 	/**
-	 * 标记消息为已删除
+	 * 商家上传图片
 	 * @param dctx
 	 * @param context
 	 * @return
@@ -1810,4 +1810,51 @@ public class CloudCardBossServices {
 		
 		return result;
 	}
+	
+	/**
+	 * 商家上传图片
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> bizDeleteStoreInfoImg(DispatchContext dctx, Map<String, Object> context){
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+	    Delegator delegator = dctx.getDelegator();
+	    Locale locale = (Locale) context.get("locale");
+        GenericValue userLogin = (GenericValue) context.get("userLogin");
+	    
+        String organizationPartyId = (String) context.get("organizationPartyId");
+        String contentId = (String) context.get("contentId");
+        
+        try {
+        	GenericValue partyContent = delegator.findByPrimaryKey("PartyContent", UtilMisc.toMap("contentId", contentId,"partyId",organizationPartyId));
+        	if(UtilValidate.isEmpty(partyContent)){
+    			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardPictureDoesNotExist", locale));
+        	}
+        	
+        	GenericValue content = delegator.findByPrimaryKey("Content", UtilMisc.toMap("contentId", contentId));
+        	
+        	String dataResourceId = content.getString("dataResourceId");
+			GenericValue dataResource = delegator.findByPrimaryKey("DataResource", UtilMisc.toMap("contentId", dataResourceId));
+        	
+        	//删除oss文件
+        	dispatcher.runSync("delFile", UtilMisc.toMap("userLogin", userLogin,"key", dataResource.getString("objectInfo")));
+        	
+        	//修改content状态
+			content.put("statusId", "CTNT_DEACTIVATED");
+			content.store();
+			
+        	//修改dataResource状态
+			dataResource.put("statusId", "CTNT_DEACTIVATED");
+			dataResource.store();
+			
+		} catch (Exception e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		return result;
+	}
+	
+	
 }

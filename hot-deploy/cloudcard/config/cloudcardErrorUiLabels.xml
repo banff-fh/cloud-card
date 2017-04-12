@@ -281,4 +281,9 @@
         <value xml:lang="en">The value of the statusId field of Settlement is not expected</value>
         <value xml:lang="zh">非预期的结算状态</value>
     </property>
+    <property key="CloudCardPictureDoesNotExist">
+        <value xml:lang="en">Picture does not exist</value>
+        <value xml:lang="zh">删除的图片不存在</value>
+    </property>
+    
 </resource>

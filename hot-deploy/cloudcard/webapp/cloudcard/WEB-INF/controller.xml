@@ -477,6 +477,13 @@
 		<response name="success" type="none"/>
 	</request-map>
 	
+	<!-- 上传图片 -->
+	<request-map uri="bizDeleteStoreInfoImg">
+		<event type="service" invoke="bizDeleteStoreInfoImg" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
 	<!-- 后台页面部分 Request Mappings -->
 
 

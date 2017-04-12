@@ -250,4 +250,9 @@
 		<attribute mode="IN" name="noteInfo" type="String" optional="false"><description>信息</description></attribute>
     </service>
     
+    <service name="delFile" engine="java"
+        invoke="delFile" location="com.banfftech.cloudcard.util.UtilFileUpload" auth="false">
+        <description>获取用户上传的文件，并传到阿里云OSS存储</description>
+		<attribute mode="IN" name="key" type="String" optional="false"><description>文件key</description></attribute>
+    </service>
 </services>
