@@ -211,7 +211,7 @@ public class CloudCardCustServices {
 		}
         
         //获取oss访问地址
-        String ossUrl = EntityUtilProperties.getPropertyValue("cloudcard","oss.url","kupang.oss-cn-shanghai.aliyuncs.com",delegator);
+        String ossUrl = EntityUtilProperties.getPropertyValue("cloudcard","oss.url","http://kupang.oss-cn-shanghai.aliyuncs.com/",delegator);
 
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
