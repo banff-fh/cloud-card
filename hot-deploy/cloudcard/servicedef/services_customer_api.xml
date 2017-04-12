@@ -30,7 +30,7 @@
 		<attribute name="viewIndex" type="Integer" mode="IN" optional="true" default-value="0"/>
 		<attribute name="viewSize" type="Integer" mode="IN" optional="true" default-value="20"/>
 		<attribute name="fromTime" type="String" mode="IN" optional="true"/>
-		<attribute name="ThruTime" type="String" mode="IN" optional="true"/>
+		<attribute name="thruTime" type="String" mode="IN" optional="true"/>
 		<attribute name="cardId" type="String" mode="IN" optional="true"/>
 		<attribute name="type" type="String" mode="IN" optional="true"/>
 		<attribute name="paymentList" type="List" mode="OUT" optional="false"/>

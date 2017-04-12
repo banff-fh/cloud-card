@@ -132,10 +132,10 @@ public class CloudCardQueryServices {
         EntityCondition paymentConditions = null;
         
 
-		Timestamp fromDate =(Timestamp)context.get("fromDate");
+		Timestamp fromDate =(Timestamp)context.get("fromTime");
         fromDate = UtilDateTime.adjustTimestamp(fromDate, Calendar.SECOND, -2);
 
-		Timestamp thruDate =(Timestamp)context.get("thruDate");
+		Timestamp thruDate =(Timestamp)context.get("thruTime");
 		thruDate =  UtilDateTime.getDayStart(thruDate, 1);
 		
         EntityCondition timeConditions = EntityCondition.makeCondition("effectiveDate", EntityOperator.BETWEEN, UtilMisc.toList(fromDate, thruDate));
@@ -243,10 +243,10 @@ public class CloudCardQueryServices {
 
         EntityCondition paymentConditions = null;
         
-		Timestamp fromDate =(Timestamp)context.get("fromDate");
+		Timestamp fromDate =(Timestamp)context.get("fromTime");
         fromDate = UtilDateTime.adjustTimestamp(fromDate, Calendar.SECOND, -2);
 
-		Timestamp thruDate =(Timestamp)context.get("thruDate");
+		Timestamp thruDate =(Timestamp)context.get("thruTime");
 		thruDate =  UtilDateTime.getDayStart(thruDate, 1);
 		
         EntityCondition timeConditions = EntityCondition.makeCondition("effectiveDate", EntityOperator.BETWEEN, UtilMisc.toList(fromDate, thruDate));
