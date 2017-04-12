@@ -201,6 +201,15 @@ public class CloudCardCustServices {
         	latitude = (String) geoAndContactMechInfoMap.get("latitude");
         }
 		
+        //获取店家商铺详细信息
+        List<GenericValue> partyContentDetailList = FastList.newInstance();
+        try {
+        	partyContentDetailList = delegator.findByAnd("PartyContentDetail", UtilMisc.toMap("partyId", storeId,"partyContentTypeId", "STORE_IMG","contentTypeId","ACTIVITY_PICTURE"));
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+        
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("storeId", storeId);

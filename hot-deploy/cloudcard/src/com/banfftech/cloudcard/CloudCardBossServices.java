@@ -1784,7 +1784,7 @@ public class CloudCardBossServices {
             if (gv != null)
                 contentType = gv.getString("mimeTypeId");
         }
-        String key = UUID.randomUUID().toString() + System.currentTimeMillis();
+        String key = UUID.randomUUID().toString() + System.currentTimeMillis() + "." + fileSuffix;
 		
 		try {
 		 // 1.CREATE DATA RESOURCE
