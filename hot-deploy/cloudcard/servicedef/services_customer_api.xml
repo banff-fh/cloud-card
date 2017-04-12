@@ -120,6 +120,8 @@
 		<attribute name="longitude" type="String" mode="OUT" optional="true"><description>经度</description></attribute>
 		<attribute name="latitude" type="String" mode="OUT" optional="true"><description>纬度</description></attribute>
 		<attribute name="isHasCard" type="String" mode="OUT" optional="true"><description>是否有卡</description></attribute>
+		<attribute name="ossUrl" type="String" mode="OUT" optional="true"><description>oss外网访问地址</description></attribute>
+		<attribute name="storeInfoImgList" type="List" mode="OUT" optional="true"><description>店铺图片信息</description></attribute>
 	</service>
 	
 	<service name="userGetGroupInfo" engine="java"
@@ -128,8 +130,6 @@
 		<attribute name="storeId" type="String" mode="INOUT" optional="false"><description>商家partyId</description></attribute>
 		<attribute name="groupName" type="String" mode="OUT" optional="true"><description>店名</description></attribute>
 		<attribute name="storeList" type="List" mode="OUT" optional="true"><description>店铺详细信息</description></attribute>
-		<attribute name="ossUrl" type="String" mode="OUT" optional="true"><description>oss外网访问地址</description></attribute>
-		<attribute name="storeInfoImgList" type="List" mode="OUT" optional="true"><description>店铺图片信息</description></attribute>
 	</service>
 	
 	<service name="purchaseCard" engine="java"
