@@ -357,4 +357,29 @@
 			<key-map field-name="noteId" />
 		</view-link>
 	</view-entity>
+	
+	<view-entity entity-name="PartyContentAndDataResourceDetail" package-name="org.ofbiz.content.content" title="Party Content Detail View Entity">
+        <member-entity entity-alias="PCT" entity-name="PartyContent"/>
+        <member-entity entity-alias="CNT" entity-name="Content"/>
+        <member-entity entity-alias="DRC" entity-name="DataResource"/>
+        
+        <alias entity-alias="PCT" name="partyId" field="partyId"/>
+        <alias entity-alias="PCT" name="partyContentTypeId" field="contentId"/>
+        <alias entity-alias="CNT" name="contentId" field="contentId"/>
+        <alias entity-alias="CNT" name="contentTypeId" field="contentTypeId"/>
+        <alias entity-alias="DRC" name="dataResourceName" field="dataResourceName"/>
+        <alias entity-alias="DRC" name="objectInfo" field="objectInfo"/>
+        
+        <view-link entity-alias="PCT" rel-entity-alias="CNT">
+            <key-map field-name="contentId"/>
+        </view-link>
+        
+        <view-link entity-alias="CNT" rel-entity-alias="DRC">
+            <key-map field-name="dataResourceId"/>
+        </view-link>
+        
+        <relation type="one-nofk" rel-entity-name="ContentType">
+            <key-map field-name="contentTypeId"/>
+        </relation>
+    </view-entity>
 </entitymodel>

@@ -204,7 +204,7 @@ public class CloudCardCustServices {
         //获取店家商铺详细信息
         List<GenericValue> storeInfoImgList = FastList.newInstance();
         try {
-        	storeInfoImgList = delegator.findByAnd("PartyContentDetail", UtilMisc.toMap("partyId", storeId,"partyContentTypeId", "STORE_IMG","contentTypeId","ACTIVITY_PICTURE"));
+        	storeInfoImgList = delegator.findByAnd("PartyContentAndDataResourceDetail", UtilMisc.toMap("partyId", storeId,"partyContentTypeId", "STORE_IMG","contentTypeId","ACTIVITY_PICTURE"));
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
