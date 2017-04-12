@@ -128,6 +128,8 @@
 		<attribute name="storeId" type="String" mode="INOUT" optional="false"><description>商家partyId</description></attribute>
 		<attribute name="groupName" type="String" mode="OUT" optional="true"><description>店名</description></attribute>
 		<attribute name="storeList" type="List" mode="OUT" optional="true"><description>店铺详细信息</description></attribute>
+		<attribute name="ossUrl" type="String" mode="OUT" optional="true"><description>oss外网访问地址</description></attribute>
+		<attribute name="storeInfoImgList" type="List" mode="OUT" optional="true"><description>店铺图片信息</description></attribute>
 	</service>
 	
 	<service name="purchaseCard" engine="java"

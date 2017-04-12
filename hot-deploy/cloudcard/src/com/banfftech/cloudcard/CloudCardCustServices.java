@@ -202,14 +202,17 @@ public class CloudCardCustServices {
         }
 		
         //获取店家商铺详细信息
-        List<GenericValue> partyContentDetailList = FastList.newInstance();
+        List<GenericValue> storeInfoImgList = FastList.newInstance();
         try {
-        	partyContentDetailList = delegator.findByAnd("PartyContentDetail", UtilMisc.toMap("partyId", storeId,"partyContentTypeId", "STORE_IMG","contentTypeId","ACTIVITY_PICTURE"));
+        	storeInfoImgList = delegator.findByAnd("PartyContentDetail", UtilMisc.toMap("partyId", storeId,"partyContentTypeId", "STORE_IMG","contentTypeId","ACTIVITY_PICTURE"));
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
         
+        //获取oss访问地址
+        String ossUrl = EntityUtilProperties.getPropertyValue("cloudcard","oss.url","kupang.oss-cn-shanghai.aliyuncs.com",delegator);
+
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("storeId", storeId);
@@ -220,6 +223,8 @@ public class CloudCardCustServices {
 		result.put("longitude", longitude);
 		result.put("latitude", latitude);
 		result.put("isHasCard", isHasCard);
+		result.put("PartyContentDetail", storeInfoImgList);
+		result.put("ossUrl", ossUrl);
 
 		return result;
 	}

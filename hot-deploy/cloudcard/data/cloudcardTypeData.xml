@@ -149,6 +149,7 @@
     
     <!-- oss文件服务 -->
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="oss.endpoint" systemPropertyValue="xx" description="oss的endpoint"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="oss.url" systemPropertyValue="xx" description="oss的库胖访问地址"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="oss.accessKeyId" systemPropertyValue="xx" description="oss的accessKeyId"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="oss.accessKeySecret" systemPropertyValue="xx" description="oss的accessKeySecret"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="oss.bucketName" systemPropertyValue="xx" description="oss的bucketName"/>
