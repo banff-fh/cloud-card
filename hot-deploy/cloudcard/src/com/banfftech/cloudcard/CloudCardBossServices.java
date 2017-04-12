@@ -1789,7 +1789,7 @@ public class CloudCardBossServices {
 		try {
 		 // 1.CREATE DATA RESOURCE
 		Map<String, Object> createDataResourceMap = UtilMisc.toMap("userLogin", userLogin, "partyId", organizationPartyId,
-				"dataResourceTypeId", "LOCAL_FILE", "dataCategoryId", "PERSONAL", "dataResourceName", fileName,
+				"dataResourceTypeId", "URL_RESOURCE", "dataCategoryId", "PERSONAL", "dataResourceName", key,
 				"mimeTypeId", contentType, "isPublic", "Y", "dataTemplateTypeId", "NONE", "statusId", "CTNT_PUBLISHED",
 				"objectInfo", key);
 		Map<String, Object> serviceResultByDataResource;
@@ -1801,6 +1801,13 @@ public class CloudCardBossServices {
 		Map<String, Object> createContentMap = UtilMisc.toMap("userLogin", userLogin, "contentTypeId",
 				"ACTIVITY_PICTURE", "mimeTypeId", contentType, "dataResourceId", dataResourceId, "partyId", organizationPartyId);
 		Map<String, Object> serviceResultByCreateContentMap = dispatcher.runSync("createContent", createContentMap);
+		
+		String contentId = (String) serviceResultByCreateContentMap.get("contentId");
+
+		// 2.CREATE PARTY CONTENT type=STORE_IMG
+		Map<String, Object> createPartyContentMap = UtilMisc.toMap("userLogin", userLogin, "partyId", organizationPartyId, "partyContentTypeId", "STORE_IMG", "contentId", contentId);
+		Map<String, Object> serviceResultByCreatePartyContentMap = dispatcher.runSync("createPartyContent",createPartyContentMap);
+		
 		} catch (GenericServiceException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));

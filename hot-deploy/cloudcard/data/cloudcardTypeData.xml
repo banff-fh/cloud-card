@@ -152,5 +152,10 @@
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="oss.accessKeyId" systemPropertyValue="xx" description="oss的accessKeyId"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="oss.accessKeySecret" systemPropertyValue="xx" description="oss的accessKeySecret"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="oss.bucketName" systemPropertyValue="xx" description="oss的bucketName"/>
-  
+    
+    <!-- ContentType库胖图片类型 -->
+    <ContentType contentTypeId="ACTIVITY_PICTURE" hasTable="N" description="库胖图片类型" />
+  	
+  	<!-- PartyContentType库胖商家图片类型 -->
+  	<PartyContentType partyContentTypeId="STORE_IMG" description="商家图片PartyContentType"/>
 </entity-engine-xml>
