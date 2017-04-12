@@ -365,6 +365,7 @@
         
         <alias entity-alias="PCT" name="partyId" field="partyId"/>
         <alias entity-alias="PCT" name="partyContentTypeId" field="partyContentTypeId"/>
+        <alias entity-alias="CNT" name="statusId" field="statusId"/>
         <alias entity-alias="CNT" name="contentId" field="contentId"/>
         <alias entity-alias="CNT" name="contentTypeId" field="contentTypeId"/>
         <alias entity-alias="DRC" name="dataResourceName" field="dataResourceName"/>
