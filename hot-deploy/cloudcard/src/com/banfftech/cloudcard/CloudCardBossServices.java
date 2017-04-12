@@ -1581,15 +1581,16 @@ public class CloudCardBossServices {
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 		
+        if (UtilValidate.isEmpty(customerMap)) {
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserNotExistError", locale));
+        }
+		
 		// 数据权限检查，先放这里
 		if( !CloudCardHelper.isManager(delegator, userLogin.getString("partyId"), organizationPartyId)){
 			Debug.logWarning("partyId: " + userLogin.getString("partyId") + " 不是商户："+organizationPartyId + "的管理人员，不能对用户卡进行扫码消费", module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
 		}
-		
-		if(UtilValidate.isEmpty(customerMap)){
-			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-		}
+	
 		context.put("storeId", organizationPartyId);
 		context.put("partyId", customerMap.getString("partyId"));
 		Map<String, Object> cloudcardsMap = CloudCardQueryServices.myCloudCards(dctx, context);
@@ -1609,9 +1610,9 @@ public class CloudCardBossServices {
 							"organizationPartyId", organizationPartyId, 
 							"cardId", cloudCardMap.get("cardId"),
 							"amount", amount));
-		} catch (GenericServiceException e1) {
-			Debug.logError(e1, module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserNotExistError", locale));
+		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 		if (!ServiceUtil.isSuccess(rechargeCloudCardOutMap)) {
 			return rechargeCloudCardOutMap;

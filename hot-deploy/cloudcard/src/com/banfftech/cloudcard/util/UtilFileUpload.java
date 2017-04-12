@@ -1,7 +1,6 @@
 package com.banfftech.cloudcard.util;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -11,7 +10,6 @@ import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -26,7 +24,6 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
-import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
 import com.aliyun.oss.OSSClient;
@@ -115,18 +112,18 @@ public class UtilFileUpload {
 			throws GenericServiceException {
 		// Servlet Head
 		Delegator delegator = (Delegator) request.getAttribute("delegator");
-		LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
-		HttpSession session = request.getSession();
-		GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");		
+		//LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
+		//HttpSession session = request.getSession();
+		//GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");		
 		String mimeType = "image/jpeg";
 		
 		try {
 			ServletFileUpload dfu = new ServletFileUpload(new DiskFileItemFactory(10240, null));
 			List<FileItem> items = dfu.parseRequest(request);
-			int itemSize = 0;
-			if(null!=items){
-				itemSize = items.size();
-			}
+			//int itemSize = 0;
+//			if(null!=items){
+//				itemSize = items.size();
+//			}
 			
 			for (FileItem item : items) {
 				InputStream in = item.getInputStream();

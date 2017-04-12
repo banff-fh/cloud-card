@@ -477,7 +477,7 @@
 		<response name="success" type="none"/>
 	</request-map>
 	
-	<!-- 上传图片 -->
+	<!-- 商家删除图片 -->
 	<request-map uri="bizDeleteStoreInfoImg">
 		<event type="service" invoke="bizDeleteStoreInfoImg" />
 		<response name="success" type="request" value="json" />
