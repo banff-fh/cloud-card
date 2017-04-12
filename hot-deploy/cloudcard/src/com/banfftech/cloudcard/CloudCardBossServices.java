@@ -1836,7 +1836,7 @@ public class CloudCardBossServices {
 			GenericValue dataResource = delegator.findByPrimaryKey("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
         	
 			String key = dataResource.getString("objectInfo");
-			if(UtilValidate.isNotEmpty(key)){
+			if(UtilValidate.isEmpty(key)){
     			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardPictureDoesNotExist", locale));
 			}
 			
