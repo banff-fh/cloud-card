@@ -158,20 +158,6 @@ public class UtilFileUpload {
 		            PutObjectResult pr = client.putObject(BUCKET_NAME, key, in, objectMeta);
 		            // pr 的结果需要判断下吧
 		            client.shutdown();
-		            
-		            // 1.CREATE DATA RESOURCE
-		    		Map<String, Object> createDataResourceMap = UtilMisc.toMap("userLogin", userLogin, "partyId", "admin",
-		    				"dataResourceTypeId", "LOCAL_FILE", "dataCategoryId", "PERSONAL", "dataResourceName", fileName,
-		    				"mimeTypeId", mimeType, "isPublic", "Y", "dataTemplateTypeId", "NONE", "statusId", "CTNT_PUBLISHED",
-		    				"objectInfo", key);
-		    		Map<String, Object> serviceResultByDataResource = dispatcher.runSync("createDataResource",
-		    				createDataResourceMap);
-		    		String dataResourceId = (String) serviceResultByDataResource.get("dataResourceId");
-
-		    		// 2.CREATE CONTENT  type=ACTIVITY_PICTURE
-		    		Map<String, Object> createContentMap = UtilMisc.toMap("userLogin", userLogin, "contentTypeId",
-		    				"ACTIVITY_PICTURE", "mimeTypeId", mimeType, "dataResourceId", dataResourceId, "partyId", "admin");
-		    		Map<String, Object> serviceResultByCreateContentMap = dispatcher.runSync("createContent", createContentMap);
 				}
 			}
 		} catch (Exception e) {

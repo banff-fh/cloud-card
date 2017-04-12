@@ -1775,7 +1775,7 @@ public class CloudCardBossServices {
         
 		try {
 			//上传oss
-			Map<String, Object> uploadMap = dispatcher.runSync("upload", UtilMisc.toMap("userLogin",userLogin,"imageDataBytes", imageDataBytes, "fileName", fileName, "contentType", contentType));
+			Map<String, Object> uploadMap = dispatcher.runSync("upload", UtilMisc.toMap("userLogin",userLogin,"uploadedFile", imageDataBytes, "_uploadedFile_fileName", fileName, "_uploadedFile_contentType", contentType));
 	        if(UtilValidate.isEmpty(uploadMap)){
 				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 	        }
