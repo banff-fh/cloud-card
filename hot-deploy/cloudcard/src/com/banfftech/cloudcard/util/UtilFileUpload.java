@@ -72,7 +72,7 @@ public class UtilFileUpload {
         Map<String, Object> result = ServiceUtil.returnSuccess();
         String fileSuffix = fileName.substring(fileName.lastIndexOf(".") + 1);
         
-        if (UtilValidate.isNotEmpty(contentType) && UtilValidate.isNotEmpty(fileSuffix)) {
+        if (UtilValidate.isEmpty(contentType) && UtilValidate.isNotEmpty(fileSuffix)) {
             GenericValue gv;
             try {
                 gv = delegator.findOne("FileExtension", true, UtilMisc.toMap("fileExtensionId", fileSuffix.toLowerCase()));

@@ -5,7 +5,6 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
@@ -1299,9 +1298,9 @@ public class CloudCardBossServices {
      * @return
      */
     public static Map<String, Object> bizSettlementRequest(DispatchContext dctx, Map<String, Object> context) {
-        LocalDispatcher dispatcher = dctx.getDispatcher();
-        Delegator delegator = dispatcher.getDelegator();
-        Locale locale = (Locale) context.get("locale");
+        //LocalDispatcher dispatcher = dctx.getDispatcher();
+        //Delegator delegator = dispatcher.getDelegator();
+        //Locale locale = (Locale) context.get("locale");
         // GenericValue userLogin = (GenericValue) context.get("userLogin");
 
         Map<String, Object> checkInputParamRet = checkInputParam(dctx, context);
@@ -1597,11 +1596,11 @@ public class CloudCardBossServices {
 		if(UtilValidate.isEmpty(cloudcardsMap)){
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardNoCardInTheStore", locale));
 		}
-		
+
 		//查询该用户在本店的卡
-		List<Object> cloudcardList = (List<Object>) cloudcardsMap.get("cloudCardList");
-		Map<String,Object> cloudCardMap = (Map<String, Object>) cloudcardList.get(0);
-		
+		List<Object> cloudcardList = UtilGenerics.checkList(cloudcardsMap.get("cloudCardList"));
+		Map<String,Object> cloudCardMap = UtilGenerics.checkMap(cloudcardList.get(0));
+
 		//充值
 		Map<String, Object> rechargeCloudCardOutMap;
 		try {
@@ -1614,7 +1613,7 @@ public class CloudCardBossServices {
 			Debug.logError(e1, module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserNotExistError", locale));
 		}
-		if (ServiceUtil.isError(rechargeCloudCardOutMap)) {
+		if (!ServiceUtil.isSuccess(rechargeCloudCardOutMap)) {
 			return rechargeCloudCardOutMap;
 		}
 		
@@ -1706,6 +1705,9 @@ public class CloudCardBossServices {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
+        if (!ServiceUtil.isSuccess(listMyNoteMap)) {
+            return listMyNoteMap;
+        }
 		result.put("partyNotes", listMyNoteMap.get("partyNotes"));
 		result.put("organizationPartyId", organizationPartyId);
 		result.put("noteId", noteId);
@@ -1746,6 +1748,9 @@ public class CloudCardBossServices {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
+	      if (!ServiceUtil.isSuccess(listMyNoteMap)) {
+	            return listMyNoteMap;
+	        }
 		result.put("partyNotes", listMyNoteMap.get("partyNotes"));
 		result.put("organizationPartyId", organizationPartyId);
 		result.put("noteId", noteId);
@@ -1761,7 +1766,7 @@ public class CloudCardBossServices {
 	 */
 	public static Map<String, Object> bizUploadStoreInfoImg(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
-        Delegator delegator = dctx.getDelegator();
+        //Delegator delegator = dctx.getDelegator();
         Locale locale = (Locale) context.get("locale");
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		
@@ -1776,10 +1781,9 @@ public class CloudCardBossServices {
 		try {
 			//上传oss
 			Map<String, Object> uploadMap = dispatcher.runSync("upload", UtilMisc.toMap("userLogin",userLogin,"uploadedFile", imageDataBytes, "_uploadedFile_fileName", fileName, "_uploadedFile_contentType", contentType));
-	        if(UtilValidate.isEmpty(uploadMap)){
-				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-	        }
-	        
+            if (!ServiceUtil.isSuccess(uploadMap)) {
+                return uploadMap;
+            }
 	        String key = (String) uploadMap.get("key");
 	        
 			 // 1.CREATE DATA RESOURCE
@@ -1787,22 +1791,28 @@ public class CloudCardBossServices {
 					"dataResourceTypeId", "URL_RESOURCE", "dataCategoryId", "PERSONAL", "dataResourceName", key,
 					"mimeTypeId", contentType, "isPublic", "Y", "dataTemplateTypeId", "NONE", "statusId", "CTNT_PUBLISHED",
 					"objectInfo", key);
-			Map<String, Object> serviceResultByDataResource;
-			serviceResultByDataResource = dispatcher.runSync("createDataResource",
-					createDataResourceMap);
+			Map<String, Object> serviceResultByDataResource = dispatcher.runSync("createDataResource",createDataResourceMap);
+			if (!ServiceUtil.isSuccess(serviceResultByDataResource)) {
+	            return serviceResultByDataResource;
+	        }
 			String dataResourceId = (String) serviceResultByDataResource.get("dataResourceId");
 	
 			// 2.CREATE CONTENT  type=ACTIVITY_PICTURE
 			Map<String, Object> createContentMap = UtilMisc.toMap("userLogin", userLogin, "contentTypeId",
 					"ACTIVITY_PICTURE", "mimeTypeId", contentType, "dataResourceId", dataResourceId, "partyId", organizationPartyId);
 			Map<String, Object> serviceResultByCreateContentMap = dispatcher.runSync("createContent", createContentMap);
-			
+            if (!ServiceUtil.isSuccess(serviceResultByCreateContentMap)) {
+                return serviceResultByCreateContentMap;
+            }
 			String contentId = (String) serviceResultByCreateContentMap.get("contentId");
 	
 			// 3.CREATE PARTY CONTENT type=STORE_IMG
 			Map<String, Object> createPartyContentMap = UtilMisc.toMap("userLogin", userLogin, "partyId", organizationPartyId, "partyContentTypeId", "STORE_IMG", "contentId", contentId);
 			Map<String, Object> serviceResultByCreatePartyContentMap = dispatcher.runSync("createPartyContent",createPartyContentMap);
-		
+            if (!ServiceUtil.isSuccess(serviceResultByCreatePartyContentMap)) {
+                return serviceResultByCreatePartyContentMap;
+            }
+			
 		} catch (GenericServiceException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
