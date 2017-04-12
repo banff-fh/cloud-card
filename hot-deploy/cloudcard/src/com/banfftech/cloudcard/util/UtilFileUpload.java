@@ -97,7 +97,7 @@ public class UtilFileUpload {
             PutObjectResult pr = client.putObject(BUCKET_NAME, key, input, objectMeta);
             // pr 的结果需要判断下吧
             client.shutdown();
-            result.put("filePath", key);
+            result.put("key", key);
         }
 
         return result;
