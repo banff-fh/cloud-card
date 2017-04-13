@@ -1885,5 +1885,29 @@ public class CloudCardBossServices {
 		return result;
 	}
 	
-	
+	/**
+	 * 商家获取已开的卡
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> getCloudCardByBiz(DispatchContext dctx, Map<String, Object> context){
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+	    Delegator delegator = dispatcher.getDelegator();
+	    Locale locale = (Locale) context.get("locale");
+	    String organizationPartyId = (String) context.get("organizationPartyId");
+        
+        List<GenericValue> finAccountList;
+        try {
+        	
+        	finAccountList = delegator.findList("FinAccountAndRole",EntityCondition.makeCondition(UtilMisc.toMap("partyId", organizationPartyId, "statusId", "FNACT_ACTIVE")), UtilMisc.toSet("finAccountCode","availableBalance","ownerPartyId"), null, null, true);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+        
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("finAccountList", finAccountList);
+		return result;
+	}
 }

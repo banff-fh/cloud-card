@@ -320,4 +320,12 @@
         <attribute name="ossUrl" type="String" mode="OUT" optional="false"><description>oss路径</description></attribute>
         <attribute name="storeInfoImgList" type="List" mode="OUT" optional="false"><description>图片信息</description></attribute>
  	</service>
+ 	
+ 	<service name="getCloudCardByBiz" engine="java"
+            location="com.banfftech.cloudcard.CloudCardBossServices" invoke="getCloudCardByBiz" auth="true">
+        <description>商家获取已开的卡</description>
+        <attribute mode="IN" name="organizationPartyId" type="String" optional="false"><description>店家partyI</description></attribute>
+ 	    <attribute name="finAccountList" type="List" mode="OUT" optional="false"><description>卡信息列表</description></attribute>
+ 	</service>
+ 	
 </services>

@@ -498,6 +498,14 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 	
+	<!-- 商家获取已开卡列表 -->
+	<request-map uri="getCloudCardByBiz">
+		<event type="service" invoke="getCloudCardByBiz" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
+	
 	<!-- 后台页面部分 Request Mappings -->
 
 
