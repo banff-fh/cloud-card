@@ -711,7 +711,7 @@ public class CloudCardCustServices {
         
         GenericValue userLogin = (GenericValue) context.get("userLogin");
         String partyId = userLogin.getString("partyId");
-        String userName = (String) context.get("partyId");
+        String userName = (String) context.get("userName");
         
         Map<String, Object> result = ServiceUtil.returnSuccess();
         GenericValue person;
