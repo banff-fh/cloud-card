@@ -434,7 +434,7 @@
 	<!-- 无卡消费收款-->
 	<request-map uri="bizByTeleNumberWithdraw">
 		<!--<security https="true" auth="false" />-->
-		<event type="service" invoke="receiptByCardId" />
+		<event type="service" invoke="bizByTeleNumberWithdraw" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
@@ -442,7 +442,7 @@
 	<!-- 无卡消费充值-->
 	<request-map uri="bizByTeleNumberRecharge">
 		<!--<security https="true" auth="false" />-->
-		<event type="service" invoke="rechargeCloudCardByCardId" />
+		<event type="service" invoke="bizByTeleNumberRecharge" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>

@@ -251,8 +251,8 @@
 		<attribute name="cloudCardList" type="List" mode="OUT" optional="false"/>
 	</service>
 	
-	<service name="receiptByCardId" engine="java"
-		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="receiptByCardId" auth="true">
+	<service name="bizByTeleNumberWithdraw" engine="java"
+		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizByTeleNumberWithdraw" auth="true">
 		<description>无卡消费收款</description>
 		<attribute name="organizationPartyId" type="String" mode="IN" optional="false"/>
 		<attribute name="cardId" type="String" mode="IN" optional="false"/>
@@ -266,8 +266,8 @@
 		<attribute name="customerPartyId" type="String" mode="OUT" optional="false"><description>客户partyId</description></attribute>	
 	</service>
 	
-	<service name="rechargeCloudCardByCardId" engine="java"
-            location="com.banfftech.cloudcard.CloudCardBossServices" invoke="rechargeCloudCardByCardId" auth="true">
+	<service name="bizByTeleNumberRecharge" engine="java"
+            location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizByTeleNumberRecharge" auth="true">
         <description>无卡消费充值</description>
         <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家partyId</description></attribute>
         <attribute name="teleNumber" type="String" mode="INOUT" optional="false"><description>电话号码</description></attribute>

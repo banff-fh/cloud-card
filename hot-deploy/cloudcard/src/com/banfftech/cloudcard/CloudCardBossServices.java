@@ -1470,7 +1470,7 @@ public class CloudCardBossServices {
 	 * @param context
 	 * @return
 	 */
-	public static Map<String, Object> receiptByCardId(DispatchContext dctx, Map<String, Object> context) {
+	public static Map<String, Object> bizByTeleNumberWithdraw(DispatchContext dctx, Map<String, Object> context) {
 
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dctx.getDelegator();
@@ -1563,7 +1563,7 @@ public class CloudCardBossServices {
 	 * @param context
 	 * @return
 	 */
-	public static Map<String, Object> rechargeCloudCardByCardId(DispatchContext dctx, Map<String, Object> context) {
+	public static Map<String, Object> bizByTeleNumberRecharge(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dctx.getDelegator();
 		GenericValue userLogin = (GenericValue) context.get("userLogin");
