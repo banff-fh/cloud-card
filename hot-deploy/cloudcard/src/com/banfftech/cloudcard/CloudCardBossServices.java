@@ -1594,12 +1594,13 @@ public class CloudCardBossServices {
 		context.put("storeId", organizationPartyId);
 		context.put("partyId", customerMap.getString("partyId"));
 		Map<String, Object> cloudcardsMap = CloudCardQueryServices.myCloudCards(dctx, context);
-		if(UtilValidate.isEmpty(cloudcardsMap)){
+		
+		//查询该用户在本店的卡
+		List<Object> cloudcardList = UtilGenerics.checkList(cloudcardsMap.get("cloudCardList"));
+		if(UtilValidate.isEmpty(cloudcardList)){
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardNoCardInTheStore", locale));
 		}
 
-		//查询该用户在本店的卡
-		List<Object> cloudcardList = UtilGenerics.checkList(cloudcardsMap.get("cloudCardList"));
 		Map<String,Object> cloudCardMap = UtilGenerics.checkMap(cloudcardList.get(0));
 
 		//充值
