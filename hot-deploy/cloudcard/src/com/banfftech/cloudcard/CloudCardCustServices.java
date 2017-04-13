@@ -25,7 +25,6 @@ import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
-import org.w3c.tidy.CheckAttribsImpl.CheckMap;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -669,19 +668,32 @@ public class CloudCardCustServices {
      */
     public static Map<String, Object> getUesrInfo(DispatchContext dctx, Map<String, Object> context){
     	LocalDispatcher dispatcher = dctx.getDispatcher();
+    	Delegator delegator = dispatcher.getDelegator();
         Locale locale = (Locale) context.get("locale");
         
         GenericValue userLogin = (GenericValue) context.get("userLogin");
-        Map<String, Object> personMap = FastMap.newInstance();
+        String partyId = userLogin.getString("partyId");
+        String userName = "";
+        String teleNumber = "";
         try {
-        	personMap = dispatcher.runSync("getPerson", UtilMisc.toMap("partyId", userLogin.getString("partyId")));
-		} catch (GenericServiceException e) {
+        	GenericValue person = delegator.findByPrimaryKeyCache("Person", UtilMisc.toMap("partyId", partyId));
+        	if(UtilValidate.isNotEmpty(person)){
+        		userName = (String) person.get("lastName");
+        	}
+        	
+        	List<GenericValue> partyAndTelecomNumbers = delegator.findByAnd("PartyAndTelecomNumber", UtilMisc.toMap("partyId",partyId,"statusId","PARTY_ENABLED"));
+        	if(UtilValidate.isNotEmpty(partyAndTelecomNumbers)){
+        		GenericValue partyAndTelecomNumber = partyAndTelecomNumbers.get(0);
+        		teleNumber = partyAndTelecomNumber.getString("contactNumber");
+        	}
+        	
+		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
         Map<String, Object> result = ServiceUtil.returnSuccess();
-        GenericValue person = (GenericValue) personMap.get("lookupPerson");
-        result.put("personInfo", person);
+        result.put("userName", userName);
+        result.put("teleNumber", teleNumber);
         return result;
     }
     
@@ -694,11 +706,24 @@ public class CloudCardCustServices {
      */
     public static Map<String, Object> updateUesrInfo(DispatchContext dctx, Map<String, Object> context){
     	LocalDispatcher dispatcher = dctx.getDispatcher();
+    	Delegator delegator = dispatcher.getDelegator();
         Locale locale = (Locale) context.get("locale");
         
         GenericValue userLogin = (GenericValue) context.get("userLogin");
+        String partyId = userLogin.getString("partyId");
+        String userName = (String) context.get("partyId");
         
         Map<String, Object> result = ServiceUtil.returnSuccess();
+        GenericValue person;
+		try {
+			person = delegator.findByPrimaryKeyCache("Person", UtilMisc.toMap("partyId", partyId));
+			person.set("lastName", userName);
+	        person.store();
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+        
         return result;
     }
 }

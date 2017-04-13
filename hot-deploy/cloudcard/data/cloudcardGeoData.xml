@@ -1230,7 +1230,7 @@
 	<Geo geoId="320830" geoName="盱眙县" geoTypeId="COUNTY" />
 	<Geo geoId="320831" geoName="金湖县" geoTypeId="COUNTY" />
 	<Geo geoId="320902" geoName="城区" geoTypeId="COUNTY" />
-	<Geo geoId="320903" geoName="亭湖区" eoId="320900" />
+	<Geo geoId="320903" geoName="亭湖区" geoTypeId="COUNTY" />
 	<Geo geoId="320921" geoName="响水县" geoTypeId="COUNTY" />
 	<Geo geoId="320922" geoName="滨海县" geoTypeId="COUNTY" />
 	<Geo geoId="320923" geoName="阜宁县" geoTypeId="COUNTY" />

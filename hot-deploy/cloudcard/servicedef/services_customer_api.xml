@@ -215,11 +215,13 @@
 	<service name="getUesrInfo" engine="java"
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="getUesrInfo" auth="true">
 		<description>C端获取个人信息</description>
-		<attribute name="personInfo" type="org.ofbiz.entity.GenericValue" mode="OUT"/>
+		<attribute name="userName" type="String" mode="OUT" optional="false"><description>名字</description></attribute>
+		<attribute name="teleNumber" type="String" mode="OUT" optional="false"><description>电话号码</description></attribute>
 	</service>
 	
 	<service name="updateUesrInfo" engine="java"
-		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="editUesrInfo" auth="true">
+		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="updateUesrInfo" auth="true">
 		<description>C端修改个人信息</description>
+		<attribute name="userName" type="String" mode="IN" optional="false"><description>用户姓名</description></attribute>
 	</service>
 </services>
