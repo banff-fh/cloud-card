@@ -211,4 +211,15 @@
 		<attribute name="userLevel" type="String" mode="OUT" optional="false"><description>积分</description></attribute>
 		<attribute name="score" type="BigDecimal" mode="OUT" optional="false"><description>会员等级</description></attribute>
 	</service>
+	
+	<service name="getUesrInfo" engine="java"
+		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="getUesrInfo" auth="true">
+		<description>C端获取个人信息</description>
+		<attribute name="personInfo" type="org.ofbiz.entity.GenericValue" mode="OUT"/>
+	</service>
+	
+	<service name="updateUesrInfo" engine="java"
+		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="editUesrInfo" auth="true">
+		<description>C端修改个人信息</description>
+	</service>
 </services>

@@ -484,6 +484,20 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 	
+	<!-- 商家删除图片 -->
+	<request-map uri="getUesrInfo">
+		<event type="service" invoke="getUesrInfo" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
+	<!-- 用户获取个人信息 -->
+	<request-map uri="updateUesrInfo">
+		<event type="service" invoke="updateUesrInfo" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
 	<!-- 后台页面部分 Request Mappings -->
 
 

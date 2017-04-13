@@ -25,6 +25,7 @@ import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
+import org.w3c.tidy.CheckAttribsImpl.CheckMap;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -657,5 +658,47 @@ public class CloudCardCustServices {
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
         }
 
+    }
+    
+    /**
+     * C端获取个人信息
+     * 
+     * @param dctx
+     * @param context
+     * @return
+     */
+    public static Map<String, Object> getUesrInfo(DispatchContext dctx, Map<String, Object> context){
+    	LocalDispatcher dispatcher = dctx.getDispatcher();
+        Locale locale = (Locale) context.get("locale");
+        
+        GenericValue userLogin = (GenericValue) context.get("userLogin");
+        Map<String, Object> personMap = FastMap.newInstance();
+        try {
+        	personMap = dispatcher.runSync("getPerson", UtilMisc.toMap("partyId", userLogin.getString("partyId")));
+		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+        Map<String, Object> result = ServiceUtil.returnSuccess();
+        GenericValue person = (GenericValue) personMap.get("lookupPerson");
+        result.put("personInfo", person);
+        return result;
+    }
+    
+    /**
+     * C端修改个人信息
+     * 
+     * @param dctx
+     * @param context
+     * @return
+     */
+    public static Map<String, Object> updateUesrInfo(DispatchContext dctx, Map<String, Object> context){
+    	LocalDispatcher dispatcher = dctx.getDispatcher();
+        Locale locale = (Locale) context.get("locale");
+        
+        GenericValue userLogin = (GenericValue) context.get("userLogin");
+        
+        Map<String, Object> result = ServiceUtil.returnSuccess();
+        return result;
     }
 }
