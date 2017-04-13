@@ -1931,8 +1931,8 @@ public class CloudCardBossServices {
 		}
 	    
 	    List<GenericValue> paymentsList =FastList.newInstance();
-	    if(UtilValidate.isNotEmpty(userPayment.get("paymentsList"))){
-	    	paymentsList =  UtilGenerics.checkList(userPayment.get("paymentsList"));
+	    if(UtilValidate.isNotEmpty(userPayment.get("paymentList"))){
+	    	paymentsList =  UtilGenerics.checkList(userPayment.get("paymentList"));
 	    }
 	    result.put("paymentList", paymentsList);
 		result.put("totalPage", userPayment.get("totalPage"));
