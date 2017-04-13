@@ -716,7 +716,7 @@ public class CloudCardCustServices {
         Map<String, Object> result = ServiceUtil.returnSuccess();
         GenericValue person;
 		try {
-			person = delegator.findByPrimaryKeyCache("Person", UtilMisc.toMap("partyId", partyId));
+			person = delegator.findByPrimaryKey("Person", UtilMisc.toMap("partyId", partyId));
 			person.set("lastName", userName);
 	        person.store();
 		} catch (GenericEntityException e) {
