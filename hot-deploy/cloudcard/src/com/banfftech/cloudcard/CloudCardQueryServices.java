@@ -122,7 +122,6 @@ public class CloudCardQueryServices {
 		Locale locale = (Locale) context.get("locale");
 		GenericValue userLogin = (GenericValue) context.get("userLogin");
 		String partyId = (String) userLogin.get("partyId");
-		String organizationPartyId = (String) context.get("organizationPartyId");
 		String type = (String) context.get("type");
 		String cardId = (String) context.get("cardId");
 		
@@ -142,34 +141,16 @@ public class CloudCardQueryServices {
         EntityCondition timeConditions = EntityCondition.makeCondition("effectiveDate", EntityOperator.BETWEEN, UtilMisc.toList(fromDate, thruDate));
         
         if("1".equals(type)){
-        	EntityCondition depositConditions;
-        	if(UtilValidate.isEmpty(organizationPartyId)){
-            	depositConditions = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdTo", partyId));
-        	}else{
-            	depositConditions = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdFrom", organizationPartyId));
-        	}
+        	EntityCondition depositConditions = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdTo", partyId));
         	paymentConditions = EntityCondition.makeCondition(EntityOperator.AND, depositConditions, timeConditions);
 
 		}else if("2".equals(type)){
-			EntityCondition withDrawalCondition;
-			if(UtilValidate.isEmpty(organizationPartyId)){
-				withDrawalCondition = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdFrom", partyId));
-        	}else{
-				withDrawalCondition = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdTo", organizationPartyId));
-        	}
+			EntityCondition withDrawalCondition = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdFrom", partyId));
         	paymentConditions = EntityCondition.makeCondition(EntityOperator.AND, withDrawalCondition, timeConditions);
 
 		}else{
-			EntityCondition depositCond;
-			EntityCondition withDrawalCond;
-			if(UtilValidate.isEmpty(organizationPartyId)){
-				depositCond = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdTo", partyId));
-		        withDrawalCond = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdFrom", partyId));
-        	}else{
-        		depositCond = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdFrom", organizationPartyId));
-    	        withDrawalCond = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdTo", organizationPartyId));
-        	}
-			
+			EntityCondition depositCond = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdTo", partyId));
+	        EntityCondition withDrawalCond = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdFrom", partyId));
 			EntityCondition allConditions = EntityCondition.makeCondition(EntityOperator.OR, depositCond, withDrawalCond);
 	        paymentConditions = EntityCondition.makeCondition(EntityOperator.AND, allConditions, timeConditions);
 		}
