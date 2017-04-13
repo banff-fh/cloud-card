@@ -1910,4 +1910,32 @@ public class CloudCardBossServices {
 		result.put("finAccountList", finAccountList);
 		return result;
 	}
+	
+	/**
+	 * 商家获取用户消费列表
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> getUserPaymentBybiz(DispatchContext dctx, Map<String, Object> context){
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+	    Locale locale = (Locale) context.get("locale");
+        
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		Map<String,Object> userPayment;
+	    try {
+	    	userPayment = dispatcher.runSync("getUserPayment", context);
+		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+	    
+	    List<GenericValue> paymentsList =FastList.newInstance();
+	    if(UtilValidate.isNotEmpty(userPayment.get("paymentsList"))){
+	    	paymentsList =  UtilGenerics.checkList(userPayment.get("paymentsList"));
+	    }
+	    result.put("paymentList", paymentsList);
+		result.put("totalPage", userPayment.get("totalPage"));
+		return result;
+	}
 }
