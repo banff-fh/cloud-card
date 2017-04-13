@@ -133,7 +133,7 @@ public class CloudCardQueryServices {
         
 
 		Timestamp fromDate =(Timestamp)context.get("fromTime");
-        fromDate = UtilDateTime.adjustTimestamp(fromDate, Calendar.SECOND, -2);
+        fromDate = UtilDateTime.getMonthStart(fromDate,0);
 
 		Timestamp thruDate =(Timestamp)context.get("thruTime");
 		thruDate =  UtilDateTime.getDayStart(thruDate, 1);
@@ -197,7 +197,7 @@ public class CloudCardQueryServices {
 		for(GenericValue payment : payments){
 			Map<String, Object> paymentMap = FastMap.newInstance();
 			paymentMap.put("amount", payment.get("amount"));
-			paymentMap.put("transDate", payment.getTimestamp("effectiveDate").toString());
+			paymentMap.put("transDate", UtilDateTime.toCalendar(payment.getTimestamp("effectiveDate")).getTimeInMillis());
 			if("GC_DEPOSIT".equals(payment.getString("paymentTypeId"))){
 				paymentMap.put("storeName", payment.get("partyFromGroupName"));
 				paymentMap.put("typeDesc", "充值");
