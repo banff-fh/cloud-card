@@ -268,4 +268,16 @@ public class BaiduLBSUtil {
 		String url = "http://api.map.baidu.com/geosearch/v3/detail/"+params.get("uid");
 		return HttpRequestProxy.doPost(url,params,getRecEncoding());
 	}
+	
+	/**
+	 * 从地址到经纬度坐标
+	 * @param params
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static String geocoder(Map params){
+		String url = "http://api.map.baidu.com/geocoder/v2/";
+		return HttpRequestProxy.doGet(url,params,getRecEncoding());
+	}
+	
 }
