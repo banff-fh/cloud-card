@@ -3,6 +3,7 @@ package com.banfftech.cloudcard;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -2032,10 +2033,12 @@ public class CloudCardBossServices {
         }
 
 		Map<String, Object> paymentsMap = FastMap.newInstance();
-		List<Map<String, Object>> paymentsList = FastList.newInstance();
+		
+		List<Map<String,Object>> paymentsList = FastList.newInstance();
 		int oldYear = 2000;
 		int oldMonth = 01;
 		boolean isNew = false;
+		List<Object> yearAndmonthPaymentList = FastList.newInstance();
 		for(GenericValue payment : payments){
 			Map<String, Object> paymentMap = FastMap.newInstance();
 			paymentMap.put("amount", payment.get("amount"));
@@ -2049,6 +2052,7 @@ public class CloudCardBossServices {
 				paymentMap.put("storeName", payment.get("partyToGroupName"));
 				paymentMap.put("typeDesc", "支付");
 				paymentMap.put("type", "2");
+				paymentsList.add(paymentMap);
 			}
 			
 			int year = UtilDateTime.getYear(payment.getTimestamp("effectiveDate"), TimeZone.getTimeZone("GMT+:08:00"), locale);
@@ -2059,20 +2063,27 @@ public class CloudCardBossServices {
 				isNew = true;
 			}
 			if(oldYear == year && oldMonth == month){
-				paymentsList.add(paymentMap);
-				paymentsMap.put(String.valueOf(year) + String.valueOf(month), paymentsList);
+				paymentsMap.put("dateTime", String.valueOf(year) + String.valueOf(month));
+				paymentsMap.put("paymentsList", paymentsList);
+				if(!yearAndmonthPaymentList.contains(paymentsMap)){
+					yearAndmonthPaymentList.add(0, paymentsMap);
+				}else{
+					yearAndmonthPaymentList.set(0, paymentsMap);
+				}
+				
 			}else{
 				paymentsList.clear();
-				paymentsList.add(paymentMap);
-				paymentsMap.put(String.valueOf(year) + String.valueOf(month), paymentsList);
+				paymentsMap.clear();
+				paymentsMap.put("dateTime", String.valueOf(year) + String.valueOf(month));
+				paymentsMap.put("paymentsList", paymentsList);
+				yearAndmonthPaymentList.set(0, paymentsMap);
 			}
-			
 			oldYear = year;
 			oldMonth = month;
 		}
 		
 		Map<String, Object> result = ServiceUtil.returnSuccess();
-		result.put("paymentsMap", paymentsMap);
+		result.put("yearAndmonthPaymentList", yearAndmonthPaymentList);
 		result.put("totalPage", totalPage);
 
 		return result;
