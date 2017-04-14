@@ -328,4 +328,19 @@
  	    <attribute name="finAccountList" type="List" mode="OUT" optional="false"><description>卡信息列表</description></attribute>
  	</service>
  	
+ 	<service name="getUserPaymentBybiz" engine="java"
+            location="com.banfftech.cloudcard.CloudCardBossServices" invoke="getUserPaymentBybiz" auth="true">
+        <description>商家获取用户消费列表</description>
+        <attribute name="viewIndex" type="Integer" mode="IN" optional="true" default-value="0"/>
+		<attribute name="viewSize" type="Integer" mode="IN" optional="true" default-value="20"/>
+		<attribute name="fromTime" type="String" mode="IN" optional="true"/>
+		<attribute name="thruTime" type="String" mode="IN" optional="true"/>
+	    <attribute name="cardNumber" type="String" mode="IN" optional="false"/>
+	    <attribute name="organizationPartyId" type="String" mode="IN" optional="false"/>
+	    <attribute name="ownerPartyId" type="String" mode="IN" optional="false"/>
+	   	<attribute name="cardId" type="String" mode="IN" optional="false"/>
+		<attribute name="type" type="String" mode="IN" optional="true"/>
+		<attribute name="paymentList" type="List" mode="OUT" optional="false"/>
+		<attribute name="totalPage" type="Integer" mode="OUT" optional="false"/>
+ 	</service>
 </services>

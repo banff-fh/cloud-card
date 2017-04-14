@@ -2,6 +2,7 @@ package com.banfftech.cloudcard;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -18,6 +19,7 @@ import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.model.ModelEntity;
+import org.ofbiz.entity.util.EntityListIterator;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
@@ -1900,7 +1902,7 @@ public class CloudCardBossServices {
         List<GenericValue> finAccountList;
         try {
         	
-        	finAccountList = delegator.findList("FinAccountAndRole",EntityCondition.makeCondition(UtilMisc.toMap("partyId", organizationPartyId, "statusId", "FNACT_ACTIVE")), UtilMisc.toSet("finAccountCode","availableBalance","ownerPartyId"), null, null, true);
+        	finAccountList = delegator.findList("CloudCardInfo",EntityCondition.makeCondition(UtilMisc.toMap("distributorPartyId", organizationPartyId)), UtilMisc.toSet("cardNumber","actualBalance","ownerPartyId","paymentMethodId","description"), UtilMisc.toList("-actualBalance"), null, true);
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
@@ -1908,6 +1910,132 @@ public class CloudCardBossServices {
         
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("finAccountList", finAccountList);
+		return result;
+	}
+	
+	
+	/**
+	 * 商家获取用户消费列表
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> getUserPaymentBybiz(DispatchContext dctx, Map<String, Object> context){
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+		
+		String organizationPartyId = (String) context.get("organizationPartyId");
+		String partyId = (String) context.get("ownerPartyId");
+		String type = (String) context.get("type");
+		String cardId = (String) context.get("cardId");
+		String cardNumber = (String) context.get("cardNumber");
+
+		// 分页相关
+        Integer viewIndex =  (Integer) context.get("viewIndex");
+        Integer viewSize  = (Integer) context.get("viewSize");
+		
+      
+        
+        List<GenericValue> finAccountAndRoles;
+    	try {
+            GenericValue encryptedGiftCard = delegator.makeValue("FinAccount", UtilMisc.toMap("finAccountCode", cardNumber));
+    		delegator.encryptFields(encryptedGiftCard);
+    		finAccountAndRoles = delegator.findList("CloudCardInfo",EntityCondition.makeCondition(UtilMisc.toMap("distributorPartyId", organizationPartyId, "finAccountCode", 
+    				encryptedGiftCard.getString("finAccountCode"))), UtilMisc.toSet("finAccountCode","finAccountId","ownerPartyId"), null, null, true);
+		} catch (GenericEntityException e1) {
+			Debug.logError(e1.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+        
+    	if(UtilValidate.isEmpty(finAccountAndRoles)){
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardNotOurCardCanNotBeQuery", locale));
+    	}
+
+		Timestamp fromDate =(Timestamp)context.get("fromTime");
+        fromDate = UtilDateTime.getMonthStart(fromDate,0);
+
+		Timestamp thruDate =(Timestamp)context.get("thruTime");
+		thruDate =  UtilDateTime.getDayStart(thruDate, 1);
+		
+        EntityCondition timeConditions = EntityCondition.makeCondition("effectiveDate", EntityOperator.BETWEEN, UtilMisc.toList(fromDate, thruDate));
+        
+        EntityCondition paymentConditions = null;
+        if("1".equals(type)){
+        	EntityCondition depositConditions = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdTo", partyId));
+        	paymentConditions = EntityCondition.makeCondition(EntityOperator.AND, depositConditions, timeConditions);
+
+		}else if("2".equals(type)){
+			EntityCondition withDrawalCondition = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdFrom", partyId));
+        	paymentConditions = EntityCondition.makeCondition(EntityOperator.AND, withDrawalCondition, timeConditions);
+
+		}else{
+			EntityCondition depositCond = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdTo", partyId));
+	        EntityCondition withDrawalCond = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdFrom", partyId));
+			EntityCondition allConditions = EntityCondition.makeCondition(EntityOperator.OR, depositCond, withDrawalCond);
+	        paymentConditions = EntityCondition.makeCondition(EntityOperator.AND, allConditions, timeConditions);
+		}
+
+        if(UtilValidate.isNotEmpty(cardId)){
+        	paymentConditions = EntityCondition.makeCondition(paymentConditions, EntityCondition.makeCondition("paymentMethodId", cardId));
+        }
+
+        //每页显示条数
+        int number =  (viewSize  == null || viewSize  == 0) ? 20 : viewSize ;
+        // 每页的开始记录 第一页为1 第二页为number +1
+        int lowIndex = viewIndex * number + 1;  
+        //总页数
+        int totalPage = 0;
+        int listSize = 0;
+        EntityListIterator eli  = null;
+		try {
+			eli = delegator.find("PaymentAndTypePartyNameView", paymentConditions, null, UtilMisc.toSet("amount","partyFromGroupName","partyToGroupName","paymentTypeId","effectiveDate"), UtilMisc.toList("-effectiveDate"), null);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		List<GenericValue> payments = FastList.newInstance();
+		try {
+			payments = eli.getPartialList(lowIndex, number);
+            eli.last();
+            listSize = eli.getResultsSizeAfterPartialList();
+			totalPage = listSize % number == 0 ? listSize/number : (listSize/number)+1;
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}finally {  
+            try {  
+                if (eli != null) {  
+                    eli.close();  
+                    eli = null;  
+                }  
+            } catch (GenericEntityException e) {  
+                Debug.logError(e.getMessage(), module);  
+            }  
+        }
+		List<Map<String, Object>> paymentsList = FastList.newInstance();
+		for(GenericValue payment : payments){
+			Map<String, Object> paymentMap = FastMap.newInstance();
+			paymentMap.put("amount", payment.get("amount"));
+			paymentMap.put("transDate", UtilDateTime.toCalendar(payment.getTimestamp("effectiveDate")).getTimeInMillis());
+			if("GC_DEPOSIT".equals(payment.getString("paymentTypeId"))){
+				paymentMap.put("storeName", payment.get("partyFromGroupName"));
+				paymentMap.put("typeDesc", "充值");
+				paymentMap.put("type", "1");
+				paymentsList.add(paymentMap);
+			}else if ("GC_WITHDRAWAL".equals(payment.getString("paymentTypeId"))){
+				paymentMap.put("storeName", payment.get("partyToGroupName"));
+				paymentMap.put("typeDesc", "支付");
+				paymentMap.put("type", "2");
+				paymentsList.add(paymentMap);
+			}
+		}
+		
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("paymentList", paymentsList);
+		result.put("totalPage", totalPage);
+
 		return result;
 	}
 }

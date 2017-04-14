@@ -285,5 +285,8 @@
         <value xml:lang="en">Picture does not exist</value>
         <value xml:lang="zh">删除的图片不存在</value>
     </property>
-    
+    <property key="CloudCardNotOurCardCanNotBeQuery">
+        <value xml:lang="en">Not our card, can not be query</value>
+        <value xml:lang="zh">不是本店的卡，不能查询</value>
+    </property>
 </resource>
