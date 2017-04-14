@@ -8,6 +8,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
@@ -132,27 +133,37 @@ public class CloudCardQueryServices {
         EntityCondition paymentConditions = null;
         
 
-		Timestamp fromDate =(Timestamp)context.get("fromTime");
+		/*Timestamp fromDate =(Timestamp)context.get("fromTime");
         fromDate = UtilDateTime.getMonthStart(fromDate,0);
 
 		Timestamp thruDate =(Timestamp)context.get("thruTime");
 		thruDate =  UtilDateTime.getDayStart(thruDate, 1);
 		
-        EntityCondition timeConditions = EntityCondition.makeCondition("effectiveDate", EntityOperator.BETWEEN, UtilMisc.toList(fromDate, thruDate));
+        EntityCondition timeConditions = EntityCondition.makeCondition("effectiveDate", EntityOperator.BETWEEN, UtilMisc.toList(fromDate, thruDate));*/
         
         if("1".equals(type)){
-        	EntityCondition depositConditions = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdTo", partyId));
-        	paymentConditions = EntityCondition.makeCondition(EntityOperator.AND, depositConditions, timeConditions);
+        	/*EntityCondition depositConditions = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdTo", partyId));
+        	paymentConditions = EntityCondition.makeCondition(EntityOperator.AND, depositConditions, timeConditions);*/
+        	
+        	paymentConditions = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdTo", partyId));
+
 
 		}else if("2".equals(type)){
-			EntityCondition withDrawalCondition = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdFrom", partyId));
-        	paymentConditions = EntityCondition.makeCondition(EntityOperator.AND, withDrawalCondition, timeConditions);
+			/*EntityCondition withDrawalCondition = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdFrom", partyId));
+        	paymentConditions = EntityCondition.makeCondition(EntityOperator.AND, withDrawalCondition, timeConditions);*/
+        	
+			paymentConditions = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdFrom", partyId));
+
 
 		}else{
-			EntityCondition depositCond = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdTo", partyId));
+			/*EntityCondition depositCond = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdTo", partyId));
 	        EntityCondition withDrawalCond = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdFrom", partyId));
 			EntityCondition allConditions = EntityCondition.makeCondition(EntityOperator.OR, depositCond, withDrawalCond);
-	        paymentConditions = EntityCondition.makeCondition(EntityOperator.AND, allConditions, timeConditions);
+	        paymentConditions = EntityCondition.makeCondition(EntityOperator.AND, allConditions, timeConditions);*/
+	        
+	        EntityCondition depositCond = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdTo", partyId));
+	        EntityCondition withDrawalCond = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdFrom", partyId));
+	        paymentConditions = EntityCondition.makeCondition(EntityOperator.OR, depositCond, withDrawalCond);
 		}
 
         if(UtilValidate.isNotEmpty(cardId)){
@@ -193,7 +204,13 @@ public class CloudCardQueryServices {
                 Debug.logError(e.getMessage(), module);  
             }  
         }
-		List<Map<String, Object>> paymentsList = FastList.newInstance();
+		Map<String, Object> paymentsMap = FastMap.newInstance();
+		
+		List<Map<String,Object>> paymentsList = FastList.newInstance();
+		int oldYear = 2000;
+		int oldMonth = 01;
+		boolean isNew = false;
+		List<Object> yearAndMonthPaymentList = FastList.newInstance();
 		for(GenericValue payment : payments){
 			Map<String, Object> paymentMap = FastMap.newInstance();
 			paymentMap.put("amount", payment.get("amount"));
@@ -209,10 +226,36 @@ public class CloudCardQueryServices {
 				paymentMap.put("type", "2");
 				paymentsList.add(paymentMap);
 			}
+			
+			int year = UtilDateTime.getYear(payment.getTimestamp("effectiveDate"), TimeZone.getTimeZone("GMT+:08:00"), locale);
+			int month = UtilDateTime.getMonth(payment.getTimestamp("effectiveDate"), TimeZone.getTimeZone("GMT+:08:00"), locale) + 1;
+			if(!isNew){
+				oldYear = year;
+				oldMonth = month;
+				isNew = true;
+			}
+			if(oldYear == year && oldMonth == month){
+				paymentsMap.put("dateTime", String.valueOf(year) +"年"+ String.valueOf(month)+"月");
+				paymentsMap.put("paymentsList", paymentsList);
+				if(!yearAndMonthPaymentList.contains(paymentsMap)){
+					yearAndMonthPaymentList.add(0, paymentsMap);
+				}else{
+					yearAndMonthPaymentList.set(0, paymentsMap);
+				}
+				
+			}else{
+				paymentsList.clear();
+				paymentsMap.clear();
+				paymentsMap.put("dateTime", String.valueOf(year) +"年"+ String.valueOf(month)+"月");
+				paymentsMap.put("paymentsList", paymentsList);
+				yearAndMonthPaymentList.set(0, paymentsMap);
+			}
+			oldYear = year;
+			oldMonth = month;
 		}
 		
 		Map<String, Object> result = ServiceUtil.returnSuccess();
-		result.put("paymentList", paymentsList);
+		result.put("yearAndMonthPaymentList", yearAndMonthPaymentList);
 		result.put("totalPage", totalPage);
 
 		return result;

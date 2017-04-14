@@ -2038,7 +2038,7 @@ public class CloudCardBossServices {
 		int oldYear = 2000;
 		int oldMonth = 01;
 		boolean isNew = false;
-		List<Object> yearAndmonthPaymentList = FastList.newInstance();
+		List<Object> yearAndMonthPaymentList = FastList.newInstance();
 		for(GenericValue payment : payments){
 			Map<String, Object> paymentMap = FastMap.newInstance();
 			paymentMap.put("amount", payment.get("amount"));
@@ -2056,34 +2056,34 @@ public class CloudCardBossServices {
 			}
 			
 			int year = UtilDateTime.getYear(payment.getTimestamp("effectiveDate"), TimeZone.getTimeZone("GMT+:08:00"), locale);
-			int month = UtilDateTime.getMonth(payment.getTimestamp("effectiveDate"), TimeZone.getTimeZone("GMT+:08:00"), locale);
+			int month = UtilDateTime.getMonth(payment.getTimestamp("effectiveDate"), TimeZone.getTimeZone("GMT+:08:00"), locale) + 1;
 			if(!isNew){
 				oldYear = year;
 				oldMonth = month;
 				isNew = true;
 			}
 			if(oldYear == year && oldMonth == month){
-				paymentsMap.put("dateTime", String.valueOf(year) + String.valueOf(month));
+				paymentsMap.put("dateTime", String.valueOf(year) +"年"+ String.valueOf(month)+"月");
 				paymentsMap.put("paymentsList", paymentsList);
-				if(!yearAndmonthPaymentList.contains(paymentsMap)){
-					yearAndmonthPaymentList.add(0, paymentsMap);
+				if(!yearAndMonthPaymentList.contains(paymentsMap)){
+					yearAndMonthPaymentList.add(0, paymentsMap);
 				}else{
-					yearAndmonthPaymentList.set(0, paymentsMap);
+					yearAndMonthPaymentList.set(0, paymentsMap);
 				}
 				
 			}else{
 				paymentsList.clear();
 				paymentsMap.clear();
-				paymentsMap.put("dateTime", String.valueOf(year) + String.valueOf(month));
+				paymentsMap.put("dateTime", String.valueOf(year) +"年"+ String.valueOf(month)+"月");
 				paymentsMap.put("paymentsList", paymentsList);
-				yearAndmonthPaymentList.set(0, paymentsMap);
+				yearAndMonthPaymentList.set(0, paymentsMap);
 			}
 			oldYear = year;
 			oldMonth = month;
 		}
 		
 		Map<String, Object> result = ServiceUtil.returnSuccess();
-		result.put("yearAndmonthPaymentList", yearAndmonthPaymentList);
+		result.put("yearAndMonthPaymentList", yearAndMonthPaymentList);
 		result.put("totalPage", totalPage);
 
 		return result;
