@@ -1901,8 +1901,12 @@ public class CloudCardBossServices {
         
         List<GenericValue> finAccountList;
         try {
+        	//有可能存在授权的卡
+        	EntityCondition thruDateEntityCondition = EntityCondition.makeCondition(EntityOperator.OR,EntityCondition.makeCondition("thruDate", EntityOperator.GREATER_THAN, UtilDateTime.nowTimestamp()),EntityCondition.makeCondition("thruDate", EntityOperator.EQUALS, null));
         	
-        	finAccountList = delegator.findList("CloudCardInfo",EntityCondition.makeCondition(UtilMisc.toMap("distributorPartyId", organizationPartyId)), UtilMisc.toSet("cardNumber","actualBalance","ownerPartyId","paymentMethodId","description"), UtilMisc.toList("-actualBalance"), null, true);
+        	EntityCondition cloudCardInfoEntityCondition = EntityCondition.makeCondition(EntityOperator.AND,
+                    EntityCondition.makeCondition(UtilMisc.toMap("distributorPartyId", organizationPartyId)),thruDateEntityCondition);
+        	finAccountList = delegator.findList("CloudCardInfo",cloudCardInfoEntityCondition, UtilMisc.toSet("cardNumber","actualBalance","ownerPartyId","paymentMethodId","description"), UtilMisc.toList("-actualBalance"), null, true);
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
