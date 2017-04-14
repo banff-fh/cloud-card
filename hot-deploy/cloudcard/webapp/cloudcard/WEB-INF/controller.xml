@@ -505,6 +505,12 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 	
+	<!-- 商家获取卡消费详情-->
+	<request-map uri="getUserPaymentBybiz">
+		<event type="service" invoke="getCloudCardByBiz" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
 	
 	<!-- 后台页面部分 Request Mappings -->
 
