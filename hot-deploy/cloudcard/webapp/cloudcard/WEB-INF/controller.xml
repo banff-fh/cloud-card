@@ -507,7 +507,7 @@
 	
 	<!-- 商家获取卡消费详情-->
 	<request-map uri="getUserPaymentBybiz">
-		<event type="service" invoke="getCloudCardByBiz" />
+		<event type="service" invoke="getUserPaymentBybiz" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
