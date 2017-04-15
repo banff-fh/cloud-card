@@ -1443,18 +1443,18 @@ public class CloudCardBossServices {
 		Locale locale = (Locale) context.get("locale");
 		
 		String teleNumber = (String) context.get("teleNumber");
-		String cardCode = (String) context.get("cardCode");
+		String qrCode = (String) context.get("qrCode");
 		String amount = (String) context.get("amount");
 		
 		context.put("amount", amount);
         String partyId = null;
 		 // 如果扫的码 cardCode字段是 个用户付款码，则根据付款码进行自动找卡
-        if (UtilValidate.isNotEmpty(cardCode) && cardCode.startsWith(CloudCardConstant.CODE_PREFIX_PAY_)) {
+        if (UtilValidate.isNotEmpty(qrCode) && qrCode.startsWith(CloudCardConstant.CODE_PREFIX_PAY_)) {
         	String iss = EntityUtilProperties.getPropertyValue("cloudcard", "qrCode.issuer", delegator);
             String tokenSecret = EntityUtilProperties.getPropertyValue("cloudcard", "qrCode.secret", delegator);
             try {
                 JWTVerifier verifier = new JWTVerifier(tokenSecret, null, iss);
-                Map<String, Object> claims = verifier.verify(cardCode);
+                Map<String, Object> claims = verifier.verify(qrCode);
                 partyId = (String) claims.get("user");
             } catch (JWTExpiredException e1) {
                 // 用户付款码已过期
