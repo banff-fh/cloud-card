@@ -29,6 +29,8 @@ import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
+import com.auth0.jwt.JWTExpiredException;
+import com.auth0.jwt.JWTVerifier;
 import com.banfftech.cloudcard.constant.CloudCardConstant;
 import com.banfftech.cloudcard.sms.SmsServices;
 import com.ibm.icu.util.Calendar;
@@ -1441,22 +1443,46 @@ public class CloudCardBossServices {
 		Locale locale = (Locale) context.get("locale");
 		
 		String teleNumber = (String) context.get("teleNumber");
+		String cardCode = (String) context.get("cardCode");
 		String amount = (String) context.get("amount");
-		context.put("amount", amount);
-		GenericValue customer;
-		try {
-			customer = CloudCardHelper.getUserByTeleNumber(delegator, teleNumber);
-		} catch (GenericEntityException e) {
-			Debug.logError(e.getMessage(), module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-		}
 		
-		if(UtilValidate.isEmpty(customer)){
-			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserNotExistError", locale));
+		context.put("amount", amount);
+        String partyId = null;
+		 // 如果扫的码 cardCode字段是 个用户付款码，则根据付款码进行自动找卡
+        if (UtilValidate.isNotEmpty(cardCode) && cardCode.startsWith(CloudCardConstant.CODE_PREFIX_PAY_)) {
+        	String iss = EntityUtilProperties.getPropertyValue("cloudcard", "qrCode.issuer", delegator);
+            String tokenSecret = EntityUtilProperties.getPropertyValue("cloudcard", "qrCode.secret", delegator);
+            try {
+                JWTVerifier verifier = new JWTVerifier(tokenSecret, null, iss);
+                Map<String, Object> claims = verifier.verify(cardCode);
+                partyId = (String) claims.get("user");
+            } catch (JWTExpiredException e1) {
+                // 用户付款码已过期
+                Debug.logWarning("付款码已经过期", module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardPaymentCodeExpired", locale));
+            } catch (Exception e) {
+                // 非法的码
+                Debug.logError(e.getMessage(), module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardPaymentCodeIllegal", locale));
+            }
+		}else if(UtilValidate.isNotEmpty(teleNumber)){
+			GenericValue customer = null;
+			try {
+				customer = CloudCardHelper.getUserByTeleNumber(delegator, teleNumber);
+			} catch (GenericEntityException e) {
+				Debug.logError(e.getMessage(), module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+			}
+			
+			if(UtilValidate.isEmpty(customer)){
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserNotExistError", locale));
+			}
+			
+			partyId = customer.getString("partyId");
 		}
-		Map<String, Object> result = FastMap.newInstance();
+        
+        Map<String, Object> result = FastMap.newInstance();
 		try {
-		String partyId = customer.getString("partyId");
 		context.put("partyId",partyId );
 		result = CloudCardQueryServices.myCloudCards(dctx, context);
 		} catch (Exception e) {
@@ -1592,7 +1618,7 @@ public class CloudCardBossServices {
 		
 		// 数据权限检查，先放这里
 		if( !CloudCardHelper.isManager(delegator, userLogin.getString("partyId"), organizationPartyId)){
-			Debug.logWarning("partyId: " + userLogin.getString("partyId") + " 不是商户："+organizationPartyId + "的管理人员，不能对用户卡进行扫码消费", module);
+			Debug.logWarning("partyId: " + userLogin.getString("partyId") + " 不是商户："+organizationPartyId + "的管理人员，不能对用户卡进行无卡消费", module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
 		}
 	
