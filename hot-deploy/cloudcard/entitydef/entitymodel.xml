@@ -390,8 +390,10 @@
        <member-entity entity-alias="PCG" entity-name="PartyClassificationGroup"/>
        
        <alias entity-alias="PC" name="partyId" field="partyId"/>
-       <alias entity-alias="PCG" name="partyClassificationGroupId" field="partyClassificationGroupId"/>
+       <alias entity-alias="PC" name="fromDate" field="fromDate"/>
        <alias entity-alias="PC" name="thruDate" field="thruDate"/>
+       <alias entity-alias="PCG" name="partyClassificationTypeId" field="partyClassificationTypeId"/>
+       <alias entity-alias="PCG" name="partyClassificationGroupId" field="partyClassificationGroupId"/>
        
        <view-link entity-alias="PCG" rel-entity-alias="PC">
            <key-map field-name="partyClassificationGroupId"/>

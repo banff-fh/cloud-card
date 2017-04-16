@@ -122,7 +122,7 @@ public class CloudCardInfoUtil {
         
         // 店家信用等级
         EntityCondition dateCond = EntityUtil.getFilterByDateExpr();
-        EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toMap("partyId", distributorPartyId));
+        EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toMap("partyId", distributorPartyId,"partyClassificationTypeId","STORE_LEVEL_CLASSIFI"));
         GenericValue partyClassification;
 		try {
 			partyClassification = EntityUtil.getFirst(
