@@ -93,17 +93,17 @@ public class CloudCardLevelScoreUtil {
     public static GenericValue getUserLevel(Delegator delegator, String userPartyId) throws GenericEntityException {
 
         EntityCondition dateCond = EntityUtil.getFilterByDateExpr();
-        EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toMap("partyId", userPartyId));
+        EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toMap("partyId", userPartyId,"partyClassificationTypeId","LEVEL_CLASSIFICATION"));
         GenericValue partyClassification = EntityUtil.getFirst(
-                delegator.findList("PartyClassification", EntityCondition.makeCondition(cond, dateCond), null, UtilMisc.toList("-fromDate"), null, true));
+                delegator.findList("PartyClassificationAndPartyClassificationGroup", EntityCondition.makeCondition(cond, dateCond), null, UtilMisc.toList("-fromDate"), null, true));
 
         if (null == partyClassification) {
             // 如果没有，则返回 最初级
-            Map<String, Object> finAccountMap = FastMap.newInstance();
-            finAccountMap.put("partyId", userPartyId);
-            finAccountMap.put("partyClassificationGroupId", "LEVEL_1");
-            finAccountMap.put("fromDate", UtilDateTime.nowTimestamp());
-            partyClassification = delegator.makeValue("PartyClassification", finAccountMap);
+            Map<String, Object> partyClassificationtMap = FastMap.newInstance();
+            partyClassificationtMap.put("partyId", userPartyId);
+            partyClassificationtMap.put("partyClassificationGroupId", "LEVEL_1");
+            partyClassificationtMap.put("fromDate", UtilDateTime.nowTimestamp());
+            partyClassification = delegator.makeValue("PartyClassification", partyClassificationtMap);
             partyClassification.create();
         }
 
