@@ -107,7 +107,7 @@ public class CloudCardLevelScoreUtil {
             partyClassification.create();
         }
 
-        return partyClassification.getRelatedOneCache("PartyClassificationGroup");
+        return partyClassification;
     }
 
     /**
