@@ -681,7 +681,7 @@ public class CloudCardCustServices {
         		userName = (String) person.get("lastName");
         	}
         	
-        	List<GenericValue> partyAndTelecomNumbers = delegator.findByAnd("PartyAndTelecomNumber", UtilMisc.toMap("partyId",partyId,"statusId","PARTY_ENABLED"));
+        	List<GenericValue> partyAndTelecomNumbers = delegator.findByAnd("PartyAndTelecomNumber", UtilMisc.toMap("partyId",partyId,"statusId","PARTY_ENABLED","statusId", "LEAD_ASSIGNED"));
         	if(UtilValidate.isNotEmpty(partyAndTelecomNumbers)){
         		GenericValue partyAndTelecomNumber = partyAndTelecomNumbers.get(0);
         		teleNumber = partyAndTelecomNumber.getString("contactNumber");
