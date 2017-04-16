@@ -1454,7 +1454,8 @@ public class CloudCardBossServices {
             String tokenSecret = EntityUtilProperties.getPropertyValue("cloudcard", "qrCode.secret", delegator);
             try {
                 JWTVerifier verifier = new JWTVerifier(tokenSecret, null, iss);
-                Map<String, Object> claims = verifier.verify(qrCode);
+                String qrCodeTmp = qrCode.replace(CloudCardConstant.CODE_PREFIX_PAY_, "");
+                Map<String, Object> claims = verifier.verify(qrCodeTmp);
                 partyId = (String) claims.get("user");
             } catch (JWTExpiredException e1) {
                 // 用户付款码已过期
@@ -1480,6 +1481,10 @@ public class CloudCardBossServices {
 			
 			partyId = customer.getString("partyId");
 		}
+        
+        if(UtilValidate.isEmpty(partyId)){
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserNotExistError", locale));
+        }
         
         Map<String, Object> result = FastMap.newInstance();
 		try {
