@@ -17,7 +17,7 @@ specific language governing permissions and limitations
 under the License.
 -->
 <script type="text/javascript">
-<#assign requestName><@ofbizUrl>getAssociatedGeoList</@ofbizUrl></#assign>
+<#assign requestName="/cloudcard/control/getAssociatedGeoList" />
 jQuery(document).ready( function() {
 
 	/* copy from images/getDependentDropdownValues.js but support requestData*/
