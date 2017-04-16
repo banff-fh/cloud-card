@@ -383,4 +383,18 @@
             <key-map field-name="contentTypeId"/>
         </relation>
     </view-entity>
+    
+    <!-- 获取PartyClassificationAndPartyClassificationGroup -->
+   	<view-entity entity-name="PartyClassificationAndPartyClassificationGroup" package-name="org.ofbiz.party" title="Party Classification View Entity">
+       <member-entity entity-alias="PC" entity-name="PartyClassification"/>
+       <member-entity entity-alias="PCG" entity-name="PartyClassificationGroup"/>
+       
+       <alias entity-alias="PC" name="partyId" field="partyId"/>
+       <alias entity-alias="PCG" name="partyClassificationGroupId" field="partyClassificationGroupId"/>
+       
+       <view-link entity-alias="PCG" rel-entity-alias="PC">
+           <key-map field-name="partyClassificationGroupId"/>
+       </view-link>
+      
+    </view-entity>
 </entitymodel>

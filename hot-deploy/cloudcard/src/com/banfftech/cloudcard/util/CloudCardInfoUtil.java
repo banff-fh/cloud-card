@@ -3,8 +3,11 @@ package com.banfftech.cloudcard.util;
 import java.sql.Timestamp;
 import java.util.Map;
 
+import org.ofbiz.base.util.Debug;
+import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilFormatOut;
 import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
@@ -13,6 +16,7 @@ import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.entity.util.EntityUtilProperties;
+import org.ofbiz.service.ServiceUtil;
 
 import com.banfftech.cloudcard.CloudCardHelper;
 import com.banfftech.cloudcard.constant.CloudCardConstant;
@@ -115,6 +119,28 @@ public class CloudCardInfoUtil {
         cloudCardMap.put("distributorPartyId", distributorPartyId); // 发卡商家partyId
         // 卡主
         cloudCardMap.put("ownerPartyId", cloudCard.get("ownerPartyId"));
+        
+        // 店家信用等级
+        EntityCondition dateCond = EntityUtil.getFilterByDateExpr();
+        EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toMap("partyId", distributorPartyId));
+        GenericValue partyClassification;
+		try {
+			partyClassification = EntityUtil.getFirst(
+			        delegator.findList("PartyClassificationAndPartyClassificationGroup", EntityCondition.makeCondition(cond, dateCond), null, UtilMisc.toList("-fromDate"), null, true));
+			if (null == partyClassification) {
+	            // 如果没有，则返回最高级
+	            Map<String, Object> partyClassificationMap = FastMap.newInstance();
+	            partyClassificationMap.put("partyId", distributorPartyId);
+	            partyClassificationMap.put("partyClassificationGroupId", "STORE_LEVEL_5");
+	            partyClassificationMap.put("fromDate", UtilDateTime.nowTimestamp());
+	            partyClassification = delegator.makeValue("PartyClassification", partyClassificationMap);
+	            partyClassification.create();
+	        }
+			cloudCardMap.put("storeLevel", partyClassification.getString("partyClassificationGroupId"));
+		} catch (GenericEntityException e) {
+			 Debug.logError(e.getMessage(), module);
+		}
+
         return cloudCardMap;
     }
 }
