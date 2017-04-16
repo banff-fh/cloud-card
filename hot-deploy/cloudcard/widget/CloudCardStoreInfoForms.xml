@@ -127,4 +127,116 @@ under the License.
         <on-event-update-area event-type="paginate" area-id="search-results" area-target="ListCloudCardGroupSearchResults"/>
     </form>
 	
+
+
+     <!--商家查询 查询条件表单 -->
+    <form name="FindCloudCardStore" type="single" target="findCloudCardStore" title="" 
+        header-row-style="header-row" default-table-style="basic-table" >
+
+        <field name="partyId" title="${uiLabelMap.LookupStoreId}"><text-find/></field>
+        <field name="groupName" title="${uiLabelMap.LookupStoreName}"><text-find/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit">
+            <submit button-type="button"/>
+        </field>
+    </form>
+
+     <!-- 商家查询 查询结果列表 -->
+    <form name="ListCloudCardStore" list-name="listIt" target="" title="" type="list"  paginate-target="findCloudCardGroup" odd-row-style="alternate-row" default-table-style="basic-table hover-bar" header-row-style="header-row-2">
+        <actions>
+            <set field="entityName" value="PartyRoleAndPartyDetail"/>
+            <set field="parameters.roleTypeId" value="DISTRIBUTOR"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" from-field="entityName"/>
+                <field-map field-name="orderBy" from-field="parameters.sortField"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        </actions>
+        <field name="partyId" title="${uiLabelMap.LookupStoreId}" widget-style="buttontext" sort-field="true">
+            <hyperlink description="${partyId}" target="EditCloudCardStore" also-hidden="false">
+                <parameter param-name="partyId"/>
+            </hyperlink>
+        </field>
+        <field name="groupName" title="${uiLabelMap.LookupStoreName}"><display/></field>
+        <field name="comments" title="${uiLabelMap.LookupStoreComments}"><display/></field>
+        <field name="statusId" title="${uiLabelMap.statusId}" sort-field="true"><display-entity entity-name="StatusItem"/></field>
+        <on-event-update-area event-type="paginate" area-id="search-results" area-target="ListCloudCardStoreSearchResults"/>
+    </form>
+
+    <!-- 商家新增、修改 -->
+    <form name="EditCloudCardStore" type="single" target="updateCloudCardStore"
+         header-row-style="header-row" default-table-style="basic-table">
+        
+        <alt-target use-when="partyId==null" target="createCloudCardStore"/>
+
+        <field position="1" use-when="partyId!=null" name="partyId" title="${uiLabelMap.LookupStoreId}" tooltip="不可修改"><display/></field>
+       
+        <field name="storeName" title="${uiLabelMap.LookupStoreName}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="40" maxlength="60"/></field>
+        
+        <field name="description" title="描述" ><text size="60" maxlength="250"/></field>
+        
+
+        <field position="1" name="storeOwnerName" title="店长姓名" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="40" maxlength="60"/></field>
+        <field position="2" name="storeOwnerTeleNumber" title="店长手机" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="40" maxlength="60"/></field>
+
+        <!-- 地址相关 -->
+        <!-- 国家 -->
+        <field position="1" name="geoCountry" title="${uiLabelMap.CommonCountry}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
+            <drop-down no-current-selected-key="CHN">
+                <entity-options entity-name="Geo" key-field-name="geoId" description="${geoId}: ${geoName}">
+                    <entity-constraint name="geoTypeId" value="COUNTRY"/>
+                    <entity-order-by field-name="geoId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <!-- 省 -->
+        <field position="1" name="geoProvince" title="${uiLabelMap.CommonStateProvince}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
+            <drop-down allow-empty="false"/>
+        </field>
+        <!-- 市 -->
+        <field position="1" name="geoCity" title="${uiLabelMap.CommonCity}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
+            <drop-down allow-empty="false"/>
+        </field>
+        <!-- 县 -->
+        <field position="1" name="geoCounty" title="${uiLabelMap.CommonCounty}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
+            <drop-down allow-empty="false"/>
+        </field>
+        <field name="postalCode" title="邮编"><text size="40" maxlength="60"/></field> 
+        <field name="address1" title="详细地址1" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="60" maxlength="250"/></field>
+        <field name="address2" title="详细地址2"><text size="60" maxlength="250"/></field> 
+        <field position="1" name="longitude" title="经度" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="40" maxlength="60"/></field> 
+        <field position="2" name="latitude" title="纬度" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="40" maxlength="60"/></field>
+        <field name="baiduMap" title=" " widget-style="baiDuMap"><container/></field>
+        
+      
+        
+        <field name="allowCrossStorePay"
+           title="跨店"
+           tooltip="是否允许跨店消费">
+            <drop-down no-current-selected-key="N"> 
+                <option key="Y" description="${uiLabelMap.CommonY}"/>
+                <option key="N" description="${uiLabelMap.CommonN}"/>
+            </drop-down>
+        </field>
+        <field name="level"
+           title="等级"
+           tooltip="信用评级">
+            <drop-down no-current-selected-key="STORE_LEVEL_5">
+                <entity-options entity-name="PartyClassificationGroup" key-field-name="partyClassificationGroupId" description="${description}">
+                    <entity-constraint name="partyClassificationTypeId" value="STORE_LEVEL_CLASSIFI"/>
+                    <entity-order-by field-name="partyClassificationGroupId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field position="1" name="creditLimit" title="卖卡限额" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="40" maxlength="60"/></field>
+        <field position="2" use-when="partyId!=null" name="creditLimitBalance" title="卖卡余额" ><display/></field>
+
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}" use-when="partyId==null" widget-style="smallSubmit"><submit button-type="button"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSave}" use-when="partyId!=null" widget-style="smallSubmit"><submit button-type="button"/></field>
+        
+       
+
+    </form>
 </forms>

@@ -5911,7 +5911,7 @@
         <value xml:lang="pt-BR">Nenhum estados/municípios existem: _NA_</value>
         <value xml:lang="ru">Не сущестивует ни штата, ни провинции: _NA_</value>
         <value xml:lang="vi">Không Tỉnh/Thành nào tồn tại : _NA</value>
-        <value xml:lang="zh">没有省： _NA_</value>
+        <value xml:lang="zh">没有省: _NA_</value>
     </property>
     <property key="CommonNoStatesProvincesExists">
         <value xml:lang="de">Es existiert kein Bundesland</value>
