@@ -15,6 +15,7 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
@@ -22,6 +23,9 @@ import org.ofbiz.service.ServiceUtil;
 
 import com.banfftech.cloudcard.CloudCardHelper;
 import com.banfftech.cloudcard.constant.CloudCardConstant;
+import com.banfftech.cloudcard.lbs.BaiduLBSUtil;
+
+import javolution.util.FastMap;
 
 /**
  * 后台店铺管理相关服务
@@ -238,6 +242,25 @@ public class CloudCardStoreAdminServices {
                     return createFinAccountAuthOutMap;
                 }
             }
+
+            // 上传poi数据
+            Map<String, Object> params = FastMap.newInstance();
+            params.put("ak", EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.ak", delegator));
+            params.put("geotable_id", EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.getTableId", delegator));
+            params.put("title", storeName);
+            params.put("address", address1);
+            // 纬度
+            params.put("latitude", latitude);
+            // 经度
+            params.put("longitude", longitude);
+            // params.put("tags", "酒店");
+            params.put("coord_type", "3");
+            // 自定义列
+            params.put("storeId", UtilMisc.toInteger(cloudCardStroreId));
+            BaiduLBSUtil bdLbs = new BaiduLBSUtil();
+            String ret = bdLbs.createPOI(params);
+            Debug.logInfo("== createPOI return: " + ret, module);
+
         } catch (GenericServiceException e1) {
             Debug.logError(e1.getMessage(), module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
