@@ -32,6 +32,7 @@ jQuery(document).ready( function() {
 	
 	// 百度地图API功能
 	var map = new BMap.Map(mapContainer);
+	map.enableScrollWheelZoom(true);
 	var point = new BMap.Point(lng, lat);
 	map.centerAndZoom(point,12);
 	// 创建地址解析器实例
@@ -57,43 +58,50 @@ jQuery(document).ready( function() {
 	
 	// 点击选点
 	map.addEventListener("click",function(e){
-		$lng.val(e.point.lng);
-		$lat.val(e.point.lat);
+		var pt = e.point;
+		$lng.val(pt.lng);
+		$lat.val(pt.lat);
 		if(curMarker){
 			map.removeOverlay(curMarker);
 		}
-		curMarker = new BMap.Marker(e.point);
+		curMarker = new BMap.Marker(pt);
 		map.addOverlay(curMarker);
+
+		myGeo.getLocation(pt, function(rs){
+			var addComp = rs.addressComponents;
+			showErrorAlert("address", addComp.province + ", " + addComp.city + ", " + addComp.district + ", " + addComp.street + ", " + addComp.streetNumber);
+		});     
+
 	});
 	
 	
-	 // 添加带有定位的导航控件
-	  var navigationControl = new BMap.NavigationControl({
-	    // 靠左上角位置
-	    anchor: BMAP_ANCHOR_TOP_LEFT,
-	    // LARGE类型
-	    type: BMAP_NAVIGATION_CONTROL_LARGE,
-	    // 启用显示定位
-	    enableGeolocation: true
-	  });
-	  map.addControl(navigationControl);
-	  // 添加定位控件
-	  var geolocationControl = new BMap.GeolocationControl();
-	  geolocationControl.addEventListener("locationSuccess", function(e){
-	    // 定位成功事件
-	    var address = '';
-	    address += e.addressComponent.province;
-	    address += e.addressComponent.city;
-	    address += e.addressComponent.district;
-	    address += e.addressComponent.street;
-	    address += e.addressComponent.streetNumber;
-	    alert("address：" + address);
-	  });
-	  geolocationControl.addEventListener("locationError",function(e){
-	    // 定位失败事件
-	    alert(e.message);
-	  });
-	  map.addControl(geolocationControl);
+	// 添加带有定位的导航控件
+	var navigationControl = new BMap.NavigationControl({
+	  // 靠左上角位置
+	  anchor: BMAP_ANCHOR_TOP_LEFT,
+	  // LARGE类型
+	  type: BMAP_NAVIGATION_CONTROL_LARGE,
+	  // 启用显示定位
+	  enableGeolocation: true
+	});
+	map.addControl(navigationControl);
+	// 添加定位控件
+	var geolocationControl = new BMap.GeolocationControl();
+	geolocationControl.addEventListener("locationSuccess", function(e){
+	  // 定位成功事件
+	  var address = '';
+	  address += e.addressComponent.province;
+	  address += e.addressComponent.city;
+	  address += e.addressComponent.district;
+	  address += e.addressComponent.street;
+	  address += e.addressComponent.streetNumber;
+	  alert("address：" + address);
+	});
+	geolocationControl.addEventListener("locationError",function(e){
+	  // 定位失败事件
+	  alert(e.message);
+	});
+	map.addControl(geolocationControl);
 	
 })
 </script>
