@@ -1065,7 +1065,7 @@ public class CloudCardServices {
 		String cardId = cloudCard.getString("paymentMethodId");
 		String distributorPartyId = cloudCard.getString("distributorPartyId");
 		boolean isSameStore = distributorPartyId.equals(organizationPartyId); //是否 店内消费（本店卖出去的卡在本店消费）
-        if (!isSameStore) {
+		/*if (!isSameStore) {
             // 如果是跨店，检查是否加入圈子，是否圈友关系被冻结，是否是圈主的卡(即distributorPartyId是否为圈主) 等条件
             try {
                 GenericValue groupRel = CloudCardHelper.getGroupRelationShipByStoreId(delegator, organizationPartyId, false);
@@ -1093,7 +1093,7 @@ public class CloudCardServices {
                 Debug.logError(e.getMessage(), module);
                 return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
             }
-        }
+        }*/
 
 		// 1、扣除用户余额
 		// 检查余额是否够用
