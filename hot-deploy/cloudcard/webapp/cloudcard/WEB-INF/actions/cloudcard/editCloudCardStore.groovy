@@ -21,6 +21,8 @@ import org.ofbiz.entity.condition.*
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.entity.util.EntityUtilProperties;
+import com.banfftech.cloudcard.util.CloudCardAdminUtil;
+import org.ofbiz.base.util.Debug;
 // context.inputParamEnums = delegator.findList("Enumeration", EntityCondition.makeCondition([enumTypeId : 'PROD_PRICE_IN_PARAM']), null, ['sequenceId'], null, true);
 // context.condOperEnums = delegator.findList("Enumeration", EntityCondition.makeCondition([enumTypeId : 'PROD_PRICE_COND']), null, ['sequenceId'], null, true);
 // context.productPriceActionTypes = delegator.findList("ProductPriceActionType", null, null, ['description'], null, true);
@@ -70,7 +72,30 @@ context.baiduMapAk = EntityUtilProperties.getPropertyValue("cloudcard", "baiduMa
 context.partyId = null;
 def partyId = parameters?.partyId?.trim();
 if(partyId && partyId.size()>0){
-    context.partyId=partyId;
-    // 查询库胖商家的相关信息
+    context.partyId = partyId;
+    // 查找店铺信息
+    partyGroup = delegator.findOne("PartyAndGroup", [partyId : partyId], false);
+    if(partyGroup){
+	    context.storeName = partyGroup.groupName;
+	    context.description = partyGroup.description;
+
+	    storeOwnerIds = CloudCardAdminUtil.getStoreOwnerPartyIds(delegator, partyId);
+	    Debug.logInfo("storeOwnerIds==="+storeOwnerIds,"CloudCardAdminUtil");
+	    if(storeOwnerIds){
+	    	storeOwnerIdOne = storeOwnerIds.get(0);
+	    	storeOwner = delegator.findOne("Person", [partyId : storeOwnerIdOne], false);
+	    	context.storeOwnerName = storeOwner?.firstName;
+
+	    	storeOwnerTeleNumberList = delegator.findList("TelecomNumberAndUserLogin", EntityCondition.makeCondition([partyId : storeOwnerIdOne]), null, null, null, true);
+	    	Debug.logInfo("storeOwnerTeleNumberList==="+storeOwnerTeleNumberList,"CloudCardAdminUtil");
+	    	context.storeOwnerTeleNumber = storeOwnerTeleNumberList?.get(0).contactNumber;
+
+
+	    	
+	    }
+    }
+
+
+
     
 }
