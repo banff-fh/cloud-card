@@ -504,6 +504,16 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
+
+
+
+
+	<!-- 获取下级geo列表 -->
+	<request-map uri="getAssociatedGeoList">
+		<event type="service" invoke="getAssociatedGeoList" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
 	
 	
 	<!-- 后台页面部分 Request Mappings -->
@@ -532,6 +542,26 @@
 		<response name="success" type="view" value="findCloudCardStore" />
 		<response name="error" type="view" value="findCloudCardStore" />
 	</request-map>
+
+	<!-- 新增/修改商家页面 -->
+	<request-map uri="EditCloudCardStore">
+        <security https="true" auth="true"/>
+        <response name="success" type="view" value="EditCloudCardStore"/>
+    </request-map>
+    <!-- 创建商家信息 -->
+  	<request-map uri="createCloudCardStore">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="createCloudCardStore"/>
+        <response name="success" type="request-redirect-noparam" value="findCloudCardStore"/>
+        <response name="error" type="request-redirect-noparam" value="findCloudCardStore"/>
+    </request-map>
+    <!-- 修改商家信息 -->
+    <request-map uri="updateCloudCardStore">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateCloudCardStore"/>
+        <response name="success" type="request-redirect-noparam" value="findCloudCardStore"/>
+        <response name="error" type="request-redirect-noparam" value="findCloudCardStore"/>
+    </request-map>
 
 	<!-- 制卡-->
 	<request-map uri="genNewCloudCardCode">
@@ -611,6 +641,7 @@
 	<view-map name="findCreateStoreApply" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#findCreateStoreApply" />
 	<view-map name="findCloudCardGroup" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#findCloudCardGroup" />
 	<view-map name="findCloudCardStore" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#findCloudCardStore" />
+	<view-map name="EditCloudCardStore" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#EditCloudCardStore"/>
 
 	<view-map name="findCard" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#findCard" />
 	<view-map name="createCard" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#createCard" />
@@ -618,6 +649,7 @@
 	<view-map name="crossStorePayment" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#crossStorePayment" />
 	<view-map name="settlementHistory" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#settlementHistory" />
 	
-	<view-map name="LookupCloudCardSeller" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#LookupCloudCardSeller"/>
 	<view-map name="LookupCustomerName" type="screen" page="component://party/widget/partymgr/LookupScreens.xml#LookupCustomerName"/>
+	<view-map name="LookupCloudCardSeller" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#LookupCloudCardSeller"/>
+
 </site-conf>

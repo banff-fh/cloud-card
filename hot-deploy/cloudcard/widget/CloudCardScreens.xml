@@ -94,6 +94,72 @@
         </section>
     </screen> 
 
+    
+    <!-- 商家列表页面 -->
+    <screen name="findCloudCardStore">
+       <section>
+            <actions>
+                <set field="titleProperty" value="storeListTabBarMenu"/>
+                <set field="tabButtonItem" value="storeListTabBarMenu"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonStoreDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                                    <decorator-section name="search-options">
+                                        <include-form name="FindCloudCardStore" location="component://cloudcard/widget/CloudCardStoreInfoForms.xml"/>
+                                    </decorator-section>
+                                    <decorator-section name="search-results">
+                                        <section>
+                                            <widgets>
+                                                <container style="button-bar button-style-1">
+                                                    <link target="EditCloudCardStore" text="${uiLabelMap.CommonAdd}" url-mode="intra-app">
+                                                    </link>
+                                                </container>
+                                            </widgets>
+                                        </section>
+                                        <include-form name="ListCloudCardStore" location="component://cloudcard/widget/CloudCardStoreInfoForms.xml"/>
+                                    </decorator-section>
+                                </decorator-screen>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen> 
+
+    <!-- 新建、编辑商家页面 getCloudCardStore.groovy -->
+    <screen name="EditCloudCardStore">
+        <section>
+            <actions>
+                <set field="titleProperty" value="storeListTabBarMenu"/>
+                <set field="tabButtonItem" value="storeListTabBarMenu"/>
+                 <script location="component://cloudcard/webapp/cloudcard/WEB-INF/actions/cloudcard/editCloudCardStore.groovy"/>
+                <set field="layoutSettings.javaScripts[]" value="https://api.map.baidu.com/api?v=2.0&amp;ak=${baiduMapAk}" global="true" />
+                <set field="layoutSettings.styleSheets[]" value="/cloudcard/images/css/mapStyles.css" global="true" />
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonStoreDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                         <platform-specific><html><html-template location="component://cloudcard/webapp/cloudcard/includes/setAddressDropdownValuesJs.ftl"/></html></platform-specific>
+                         <platform-specific><html><html-template location="component://cloudcard/webapp/cloudcard/includes/baiduMapGeocoder.ftl"/></html></platform-specific>
+                        <screenlet title="${uiLabelMap.PageTitleEditCloudCardStore}">
+                            <include-form name="EditCloudCardStore" location="component://cloudcard/widget/CloudCardStoreInfoForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+
+
+
+
+
     <screen name="findCard">
        <section>
             <actions>

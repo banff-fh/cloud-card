@@ -236,5 +236,9 @@
         <value xml:lang="en">From Date</value>
         <value xml:lang="zh">建圈时间</value>
     </property>
+    <property key="PageTitleEditCloudCardStore">
+        <value xml:lang="en">Edit CloudCard Store</value>
+        <value xml:lang="zh">编辑库胖商家</value>
+    </property>
     
 </resource>
