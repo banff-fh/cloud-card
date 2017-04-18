@@ -35,7 +35,6 @@ import com.banfftech.cloudcard.util.CloudCardLevelScoreUtil;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
-import sun.org.mozilla.javascript.internal.UintMap;
 
 public class CloudCardCustServices {
 	public static final String module = CloudCardCustServices.class.getName();
