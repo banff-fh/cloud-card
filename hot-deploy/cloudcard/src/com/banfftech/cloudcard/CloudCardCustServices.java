@@ -107,6 +107,13 @@ public class CloudCardCustServices {
     		params.put("location", longitude + "," + latitude);
     		params.put("radius", radius);
         	lbsResult = JSONObject.parseObject(BaiduLBSUtil.nearby(params));
+        	
+        	String geocoder = BaiduLBSUtil.geocoder(params);
+        	if(UtilValidate.isNotEmpty(region)){
+        		JSONObject addressJSONObject = JSONObject.parseObject(JSONObject.parseObject(JSONObject.parseObject(geocoder).getString("result")).getString("addressComponent"));
+            	region = addressJSONObject.getString("district");
+        	}
+        	
         }
         
 		
@@ -153,6 +160,7 @@ public class CloudCardCustServices {
 		result.put("listSize", lbsResult.get("total").toString());
 		result.put("longitude", String.valueOf(longitude));
 		result.put("latitude",String.valueOf(latitude));
+		result.put("region",region);
 		result.put("storeList", storeList);
 		return result;
 	}
@@ -726,4 +734,53 @@ public class CloudCardCustServices {
         
         return result;
     }
+    
+    /**
+     * C端修改个人信息
+     * 
+     * @param dctx
+     * @param context
+     * @return
+     */
+    public static Map<String, Object> findCloudCardStore(DispatchContext dctx, Map<String, Object> context){
+    	LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+
+        double longitude = Double.parseDouble(UtilFormatOut.checkNull((String) context.get("longitude"), "0.00"));
+        double latitude = Double.parseDouble(UtilFormatOut.checkNull((String) context.get("latitude"), "0.00"));
+        //店铺名称
+        String storeName = (String) context.get("storeName");
+        //省市区
+        String region = (String) context.get("region");
+
+		double exp = 10e-10;
+        // 经度最大是180° 最小是-180° 纬度最大是90° 最小是-90°
+        if (Math.abs(longitude) - 180.00 > exp || Math.abs(latitude) - 90.00 > exp) {
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardAbnormalPositioning", locale));
+        }
+
+		String ak = EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.ak", delegator);
+		String getTableId = EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.getTableId", delegator);
+		String radius = EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.radius", delegator);
+		String CoordType = EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.CoordType", delegator);
+		String q = EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.q", delegator);
+
+		Map<String, Object> params = FastMap.newInstance();
+		params.put("ak", ak);
+		params.put("geotable_id", getTableId);
+		params.put("q", q);
+		params.put("Coord_type", CoordType);
+		
+		params.put("location", longitude + "," + latitude);
+		params.put("radius", radius);
+
+		JSONObject lbsResult = null;
+    	lbsResult = JSONObject.parseObject(BaiduLBSUtil.nearby(params));
+        
+        Map<String, Object> result = ServiceUtil.returnSuccess();
+        GenericValue person;
+        return result;
+    }
+    
 }
