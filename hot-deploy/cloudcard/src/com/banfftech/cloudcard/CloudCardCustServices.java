@@ -35,6 +35,7 @@ import com.banfftech.cloudcard.util.CloudCardLevelScoreUtil;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
+import sun.org.mozilla.javascript.internal.UintMap;
 
 public class CloudCardCustServices {
 	public static final String module = CloudCardCustServices.class.getName();
@@ -108,9 +109,7 @@ public class CloudCardCustServices {
     		params.put("radius", radius);
         	lbsResult = JSONObject.parseObject(BaiduLBSUtil.nearby(params));
         	
-        	params.put("output", "json");
-        	params.put("callback", "showLocation");
-        	String geocoder = BaiduLBSUtil.geocoder(params);
+        	String geocoder = BaiduLBSUtil.geocoder(UtilMisc.toMap("ak", ak, "location", latitude + "," + longitude, "output", "json", "callback", "showLocation"));
         	if(UtilValidate.isNotEmpty(geocoder)){
         		geocoder = geocoder.replace("showLocation&&showLocation(", "");
             	geocoder = geocoder.replace(")", "");
