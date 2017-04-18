@@ -108,8 +108,12 @@ public class CloudCardCustServices {
     		params.put("radius", radius);
         	lbsResult = JSONObject.parseObject(BaiduLBSUtil.nearby(params));
         	
+        	params.put("output", "json");
+        	params.put("callback", "showLocation");
         	String geocoder = BaiduLBSUtil.geocoder(params);
-        	if(UtilValidate.isNotEmpty(region)){
+        	if(UtilValidate.isNotEmpty(geocoder)){
+        		geocoder = geocoder.replace("showLocation&&showLocation(", "");
+            	geocoder = geocoder.replace(")", "");
         		JSONObject addressJSONObject = JSONObject.parseObject(JSONObject.parseObject(JSONObject.parseObject(geocoder).getString("result")).getString("addressComponent"));
             	region = addressJSONObject.getString("district");
         	}
