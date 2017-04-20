@@ -33,6 +33,7 @@ import com.banfftech.cloudcard.constant.CloudCardConstant;
 import com.banfftech.cloudcard.lbs.BaiduLBSUtil;
 import com.banfftech.cloudcard.util.CloudCardLevelScoreUtil;
 
+import bsh.util.Util;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
@@ -116,7 +117,7 @@ public class CloudCardCustServices {
             	region = addressJSONObject.getString("city");
             	if(UtilValidate.isNotEmpty(region)){
             		try {
-            			List<GenericValue> geoList = delegator.findByAnd("geo", UtilMisc.toMap("geoName",region));
+            			List<GenericValue> geoList = delegator.findList("Geo", EntityCondition.makeCondition("geoName",EntityOperator.LIKE, region + "%"), UtilMisc.toSet("geoId"), null, null, true);
             			String geoIdFrom = null;
             			if(UtilValidate.isNotEmpty(geoList)){
             				geoIdFrom = geoList.get(0).getString("geoId");
