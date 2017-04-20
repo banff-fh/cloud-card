@@ -113,7 +113,23 @@ public class CloudCardCustServices {
         		geocoder = geocoder.replace("showLocation&&showLocation(", "");
             	geocoder = geocoder.replace(")", "");
         		JSONObject addressJSONObject = JSONObject.parseObject(JSONObject.parseObject(JSONObject.parseObject(geocoder).getString("result")).getString("addressComponent"));
-            	region = addressJSONObject.getString("district");
+            	region = addressJSONObject.getString("city");
+            	if(UtilValidate.isNotEmpty(region)){
+            		try {
+            			List<GenericValue> geoList = delegator.findByAnd("geo", UtilMisc.toMap("geoName",region));
+            			String geoIdFrom = null;
+            			if(UtilValidate.isNotEmpty(geoList)){
+            				geoIdFrom = geoList.get(0).getString("geoId");
+    						Map city = dispatcher.runSync("getProvinceOrCityOrArea", UtilMisc.toMap("geoAssocTypeId", "CITY_COUNTY","geoIdFrom",geoIdFrom));
+            			}
+					} catch (GenericServiceException e) {
+						Debug.logError(e.getMessage(), module);
+			            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+					} catch (GenericEntityException e) {
+						Debug.logError(e.getMessage(), module);
+			            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+					}
+            	}
         	}
         	
         }
