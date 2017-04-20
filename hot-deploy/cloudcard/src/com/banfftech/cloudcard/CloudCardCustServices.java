@@ -50,12 +50,13 @@ public class CloudCardCustServices {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
-
+		GenericValue userLogin = (GenericValue) context.get("userLogin");
+		
         double longitude = Double.parseDouble(UtilFormatOut.checkNull((String) context.get("longitude"), "0.00"));
         double latitude = Double.parseDouble(UtilFormatOut.checkNull((String) context.get("latitude"), "0.00"));
         String storeName = (String) context.get("storeName");
         String region = (String) context.get("region");
-
+		List<GenericValue> countyList = FastList.newInstance();
 		double exp = 10e-10;
         // 经度最大是180° 最小是-180° 纬度最大是90° 最小是-90°
         if (Math.abs(longitude) - 180.00 > exp || Math.abs(latitude) - 90.00 > exp) {
@@ -117,10 +118,14 @@ public class CloudCardCustServices {
             	if(UtilValidate.isNotEmpty(region)){
             		try {
             			List<GenericValue> geoList = delegator.findList("Geo", EntityCondition.makeCondition("geoName",EntityOperator.LIKE, region.replace("市", "") + "%"), UtilMisc.toSet("geoId"), null, null, true);
-            			String geoIdFrom = null;
+            			String cityId = null;
             			if(UtilValidate.isNotEmpty(geoList)){
-            				geoIdFrom = geoList.get(0).getString("geoId");
-    						Map city = dispatcher.runSync("getProvinceOrCityOrArea", UtilMisc.toMap("geoAssocTypeId", "CITY_COUNTY","geoIdFrom",geoIdFrom));
+            				cityId = geoList.get(0).getString("geoId");
+            				Map<String, Object> cityMap = dispatcher.runSync("getProvinceOrCityOrArea", UtilMisc.toMap("userLogin",userLogin,"geoAssocTypeId", "CITY_COUNTY","cityId",cityId));
+            				if(UtilValidate.isNotEmpty(cityMap)){
+            					countyList = UtilGenerics.checkList(cityMap.get("countyList"));
+            				}
+            				
             			}
 					} catch (GenericServiceException e) {
 						Debug.logError(e.getMessage(), module);
@@ -179,6 +184,7 @@ public class CloudCardCustServices {
 		result.put("longitude", String.valueOf(longitude));
 		result.put("latitude",String.valueOf(latitude));
 		result.put("region",region);
+		result.put("countyList",countyList);
 		result.put("storeList", storeList);
 		return result;
 	}
