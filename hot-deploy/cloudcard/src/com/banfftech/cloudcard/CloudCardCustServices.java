@@ -245,6 +245,17 @@ public class CloudCardCustServices {
         //获取oss访问地址
         String ossUrl = EntityUtilProperties.getPropertyValue("cloudcard","oss.url","http://kupang.oss-cn-shanghai.aliyuncs.com/",delegator);
 
+        //获取店铺收款二维码
+        String storeCode = "";
+        try {
+        	GenericValue partyIdentification = delegator.findOne("PartyIdentification", UtilMisc.toMap("partyId", storeId, "partyIdentificationTypeId", "STORE_QR_CODE"),true);
+        	if(UtilValidate.isNotEmpty(partyIdentification)){
+        		storeCode = partyIdentification.getString("idValue");
+        	}
+        } catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("storeId", storeId);
@@ -256,6 +267,7 @@ public class CloudCardCustServices {
 		result.put("latitude", latitude);
 		result.put("isHasCard", isHasCard);
 		result.put("storeInfoImgList", storeInfoImgList);
+		result.put("storeCode", storeCode);
 		result.put("ossUrl", ossUrl);
 
 		return result;
