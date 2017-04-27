@@ -356,7 +356,7 @@ public class CloudCardQueryServices {
 		for(GenericValue payment : payments){
 			Map<String, Object> paymentMap = FastMap.newInstance();
 			paymentMap.put("amount", payment.get("amount"));
-			paymentMap.put("transDate", payment.getTimestamp("effectiveDate").toString());
+			paymentMap.put("transDate", UtilDateTime.toCalendar(payment.getTimestamp("effectiveDate")).getTimeInMillis());
 			if("GC_DEPOSIT".equals(payment.getString("paymentTypeId"))){
 				//partyToLastName partyToFirstName
 				paymentMap.put("customerName", payment.get("partyToFirstName"));
