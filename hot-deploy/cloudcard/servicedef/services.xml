@@ -222,7 +222,7 @@
 	</service>
 	
 	<service name="getProvinceOrCityOrArea" engine="java"
-        invoke="getProvinceOrCityOrArea" location="com.banfftech.cloudcard.CloudCardServices" auth="true">
+        invoke="getProvinceOrCityOrArea" location="com.banfftech.cloudcard.CloudCardServices" auth="false">
         <description>获取省市县</description>
         <attribute name="geoAssocTypeId" mode="IN" type="String"/>
         <attribute name="provinceId" mode="IN" type="String" optional="true"/>
