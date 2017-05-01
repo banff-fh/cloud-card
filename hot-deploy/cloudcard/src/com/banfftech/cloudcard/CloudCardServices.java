@@ -11,6 +11,7 @@ import java.util.Random;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilFormatOut;
+import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
@@ -2117,16 +2118,7 @@ public class CloudCardServices {
         
     	//查询该时间段需要结算的店家
     	for(GenericValue cloudcardSettlementPeriod : cloudcardSettlementPeriodList){
-    		Debug.log(cloudcardSettlementPeriod.getString("partyIdFrom"));
-    		Debug.log(cloudcardSettlementPeriod.getString("partyIdTo"));
-    		Debug.log(cloudcardSettlementPeriod.getString("week"));
-    		Debug.log(cloudcardSettlementPeriod.getString("hour"));
-    		String paymentId = "10976";
-        	String payerPartyId = "10584";
-        	String payeePartyId = "10584";
-        	String amount = "100";
-        	
-        	//系统用户
+    		//系统用户
         	GenericValue systemUser;
     		try {
     			systemUser = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system"));
@@ -2134,14 +2126,58 @@ public class CloudCardServices {
     			Debug.logError(e1, module);
     			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
     		}
+    		String partyIdFrom = cloudcardSettlementPeriod.getString("partyIdFrom");
+    		String partyIdTo = cloudcardSettlementPeriod.getString("partyIdTo");
     		
-        	//发送结算请求服务
-        	try {
-    			dispatcher.runSync("initiateSettlement", UtilMisc.toMap("userLogin",systemUser,"paymentId", paymentId, "payerPartyId", payerPartyId, "payeePartyId", payeePartyId, "amount", amount));
-    		} catch (GenericServiceException e) {
-    			Debug.logError(e.getMessage(), module);
-    			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+    		
+    		List<GenericValue> ettlementList = null;
+    		try {
+    			EntityCondition lookupConditions = EntityCondition.makeCondition(UtilMisc.toMap("tradePartyId", partyIdFrom,"cardSellerId",partyIdTo));
+    			ettlementList = delegator.findList("CloudCardNeedSettlementPaymentView", lookupConditions, null, null, null, false);
+    			
+			} catch (GenericEntityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    		
+    		for(GenericValue bizListNeedSettlement : ettlementList){
+    			String paymentId = bizListNeedSettlement.getString("paymentId");
+            	String payerPartyId = bizListNeedSettlement.getString("tradePartyId");
+            	String payeePartyId = bizListNeedSettlement.getString("cardSellerId");
+            	String amount = bizListNeedSettlement.getString("amount");
+    			
+    			//发送结算请求服务
+            	try {
+        			dispatcher.runSync("initiateSettlement", UtilMisc.toMap("userLogin",systemUser,"paymentId", paymentId, "payerPartyId", payerPartyId, "payeePartyId", payeePartyId, "amount", amount));
+        		} catch (GenericServiceException e) {
+        			Debug.logError(e.getMessage(), module);
+        			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+        		}
     		}
+    		
+    		try {
+    			EntityCondition lookupConditions = EntityCondition.makeCondition(UtilMisc.toMap("tradePartyId", partyIdTo,"cardSellerId", partyIdFrom));
+    			ettlementList = delegator.findList("CloudCardNeedSettlementPaymentView", lookupConditions, null, null, null, false);
+			} catch (GenericEntityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    		
+    		for(GenericValue bizListNeedSettlement : ettlementList){
+    			String paymentId = bizListNeedSettlement.getString("paymentId");
+            	String payerPartyId = bizListNeedSettlement.getString("tradePartyId");
+            	String payeePartyId = bizListNeedSettlement.getString("cardSellerId");
+            	String amount = bizListNeedSettlement.getString("amount");
+    			
+    			//发送结算请求服务
+            	try {
+        			dispatcher.runSync("initiateSettlement", UtilMisc.toMap("userLogin",systemUser,"paymentId", paymentId, "payerPartyId", payerPartyId, "payeePartyId", payeePartyId, "amount", amount));
+        		} catch (GenericServiceException e) {
+        			Debug.logError(e.getMessage(), module);
+        			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+        		}
+    		}
+        	
     	}
     	
 		Map<String, Object> result = ServiceUtil.returnSuccess();
