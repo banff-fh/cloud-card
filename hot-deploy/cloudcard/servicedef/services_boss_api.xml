@@ -344,4 +344,13 @@
 		<attribute name="yearAndMonthPaymentList" type="List" mode="OUT" optional="false"/>
 		<attribute name="totalPage" type="Integer" mode="OUT" optional="false"/>
  	</service>
+ 	
+ 	<service name="initiateSettlement" engine="java"
+            location="com.banfftech.cloudcard.CloudCardBossServices" invoke="initiateSettlement" auth="true">
+        <description>发起结算请求</description>
+        <attribute name="organizationPartyId" type="String" mode="IN" optional="false"/>
+		<attribute name="payerPartyId" type="String" mode="IN" optional="false"/>
+		<attribute name="payeePartyId" type="String" mode="IN" optional="false"/>
+		<attribute name="amount" type="String" mode="IN" optional="false"/>
+ 	</service>
 </services>

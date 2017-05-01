@@ -521,6 +521,13 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
+
+	<!-- 收款方发起结算请求-->
+	<request-map uri="initiateSettlement">
+		<event type="service" invoke="initiateSettlement" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>	
 	
 	<!-- 后台页面部分 Request Mappings -->
 
