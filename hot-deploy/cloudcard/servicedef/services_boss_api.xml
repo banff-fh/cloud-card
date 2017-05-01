@@ -348,9 +348,11 @@
  	<service name="initiateSettlement" engine="java"
             location="com.banfftech.cloudcard.CloudCardBossServices" invoke="initiateSettlement" auth="true">
         <description>收款方向付款方发起结算请求</description>
+        <attribute name="paymentId" type="String" mode="IN" optional="false"/>
 		<attribute name="payerPartyId" type="String" mode="IN" optional="false"/>
 		<attribute name="payeePartyId" type="String" mode="IN" optional="false"/>
 		<attribute name="amount" type="String" mode="IN" optional="false"/>
+		<attribute name="reqCount" type="Integer" mode="OUT" optional="false"/>
  	</service>
  	
  	<service name="settlementRequest" engine="java"

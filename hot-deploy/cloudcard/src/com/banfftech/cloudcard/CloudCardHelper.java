@@ -1248,7 +1248,7 @@ public class CloudCardHelper {
      * @throws GenericEntityException
      */
     public static void setPaymentAttr(Delegator delegator, String paymentId, String attrName, String attrValue) throws GenericEntityException {
-        GenericValue paymentAttr = delegator.makeValidValue("PaymentAttribute", UtilMisc.toMap("paymentId", paymentId, "attrName", attrName));
+        GenericValue paymentAttr = delegator.makeValidValue("PaymentAttribute", UtilMisc.toMap("paymentId", paymentId, "attrName", attrName, "attrValue", attrValue));
         delegator.createOrStore(paymentAttr);
     }
 

@@ -2136,6 +2136,17 @@ public class CloudCardBossServices {
 		String payeePartyId = (String) context.get("payeePartyId");
 		//收款金额
 		String amount = (String) context.get("amount");
+		//paymentId
+		String paymentId = (String) context.get("paymentId");
+		
+		//修改payment的催款次数
+		int reqCount = 0;
+		try {
+			reqCount = CloudCardHelper.increaseSettlementReqCount(delegator, paymentId);
+		} catch (GenericEntityException e2) {
+			Debug.logError(e2.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
 		
 		//发送通知的请求
 		GenericValue partyGroup = null;
@@ -2164,6 +2175,7 @@ public class CloudCardBossServices {
 		}
 		
 		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("reqCount", reqCount);
 		return result;
 
 	}
