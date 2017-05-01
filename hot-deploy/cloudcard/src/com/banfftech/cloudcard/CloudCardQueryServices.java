@@ -759,9 +759,12 @@ public class CloudCardQueryServices {
         Delegator delegator = dispatcher.getDelegator();
         Locale locale = (Locale) context.get("locale");
         GenericValue userLogin = (GenericValue) context.get("userLogin");
+        String role = (String) context.get("payee");
         String partyId = (String) userLogin.get("partyId");
         String organizationPartyId = (String) context.get("organizationPartyId");
-        if (!CloudCardHelper.isManager(delegator, partyId, organizationPartyId)) {
+
+        if (!"system".equals(partyId) && !CloudCardHelper.isManager(delegator, partyId, organizationPartyId)) {
+            // 若不是 system userLogin，则需要验证是否是本店的manager
             Debug.logError("partyId: " + userLogin.getString("partyId") + " 不是商户：" + organizationPartyId + "的管理人员，不能进行账户流水查询操作", module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
         }
@@ -779,7 +782,16 @@ public class CloudCardQueryServices {
         EntityListIterator listIt = null;
         try {
 
-            EntityCondition lookupConditions = EntityCondition.makeCondition(UtilMisc.toMap("tradePartyId", organizationPartyId));
+            EntityCondition lookupConditions = null;
+            if ("payee".equals(role)) {
+                // 自己是收卡方（需要收款）
+                lookupConditions = EntityCondition.makeCondition(UtilMisc.toMap("tradePartyId", organizationPartyId));
+            } else {
+                // 自己是卖卡方 (需要付款), 条件是： 自己卖卡 且 对方已经发起了结算请求（请求次数不为0）
+                EntityCondition sellerCond = EntityCondition.makeCondition(UtilMisc.toMap("cardSellerId", organizationPartyId));
+                EntityCondition hasRequestCond = EntityCondition.makeCondition("settlementReqCount", EntityOperator.NOT_EQUAL, "0");
+                lookupConditions = EntityCondition.makeCondition(sellerCond, hasRequestCond);
+            }
             listIt = delegator.find("CloudCardNeedSettlementPaymentView", lookupConditions, null, null, UtilMisc.toList("-effectiveDate"),
                     new EntityFindOptions(true, EntityFindOptions.TYPE_SCROLL_INSENSITIVE, EntityFindOptions.CONCUR_READ_ONLY, -1, maxRows, false));
             listSize = listIt.getResultsSizeAfterPartialList();
