@@ -169,4 +169,9 @@
   	
   	<!-- PartyContentType库胖商家图片类型 -->
   	<PartyContentType partyContentTypeId="STORE_IMG" description="商家图片PartyContentType"/>
+  	
+  	<!-- 结算请求定时任务 -->
+  	<TemporalExpression tempExprId="EVERY_HOURS" tempExprTypeId="FREQUENCY" description="每小时" date1="2000-01-03 17:00:00.000" integer1="10" integer2="1"/>
+	<JobSandbox jobId="bizSettlementReqJob" jobName="bizSettlementReqJob" runTime="2015-03-01 00:00:00.000" serviceName="bizSettlementReqJob" poolId="pool" runAsUser="system" tempExprId="EVERY_HOURS" maxRecurrenceCount="-1"/>
+	
 </entity-engine-xml>

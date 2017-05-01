@@ -265,4 +265,9 @@
 		<attribute mode="IN" name="listOrderBy" type="String" optional="true"><description>排序字段</description></attribute>
 		<attribute mode="OUT" name="geoList" type="List" optional="true"><description>返回的下级Geo列表</description></attribute>
     </service>
+    
+    <service name="bizSettlementReqJob" engine="java"
+            location="com.banfftech.cloudcard.CloudCardServices" invoke="bizSettlementReqJob" auth="false">
+            <description>结算定时任务请求</description>
+    </service>
 </services>

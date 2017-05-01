@@ -2083,4 +2083,68 @@ public class CloudCardServices {
 		
 		return result;
 	}
+    
+    /**
+     * 结算请求定时任务
+     * 
+     * @param
+     * 
+     * @return
+     */
+    public static Map<String, Object> bizSettlementReqJob(DispatchContext dctx, Map<String, Object> context) {
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+    	Delegator delegator = dctx.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+		
+    	long week = -1;
+    	long hour = -1;
+    	com.ibm.icu.util.Calendar calendar = UtilDateTime.toCalendar(UtilDateTime.nowTimestamp());
+    	week = calendar.get(Calendar.DAY_OF_WEEK)-1;
+    	hour = calendar.get(Calendar.HOUR_OF_DAY);
+    	
+    	if(-1 == week && -1 == hour){
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+    	}
+    	
+    	//查询该时间段需要结算的店家
+    	List<GenericValue> cloudcardSettlementPeriodList = FastList.newInstance();
+    	try {
+    		cloudcardSettlementPeriodList = delegator.findByAnd("CloudcardSettlementPeriod", UtilMisc.toMap("week", week, "hour", hour));
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+        
+    	//查询该时间段需要结算的店家
+    	for(GenericValue cloudcardSettlementPeriod : cloudcardSettlementPeriodList){
+    		Debug.log(cloudcardSettlementPeriod.getString("partyIdFrom"));
+    		Debug.log(cloudcardSettlementPeriod.getString("partyIdTo"));
+    		Debug.log(cloudcardSettlementPeriod.getString("week"));
+    		Debug.log(cloudcardSettlementPeriod.getString("hour"));
+    		String paymentId = "10976";
+        	String payerPartyId = "10584";
+        	String payeePartyId = "10584";
+        	String amount = "100";
+        	
+        	//系统用户
+        	GenericValue systemUser;
+    		try {
+    			systemUser = delegator.findByPrimaryKey("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+    		} catch (GenericEntityException e1) {
+    			Debug.logError(e1, module);
+    			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+    		}
+    		
+        	//发送结算请求服务
+        	try {
+    			dispatcher.runSync("initiateSettlement", UtilMisc.toMap("userLogin",systemUser,"paymentId", paymentId, "payerPartyId", payerPartyId, "payeePartyId", payeePartyId, "amount", amount));
+    		} catch (GenericServiceException e) {
+    			Debug.logError(e.getMessage(), module);
+    			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+    		}
+    	}
+    	
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		return result;
+    }
 }
