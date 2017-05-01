@@ -373,10 +373,17 @@
  	
  	<service name="bizListNeedSettlement" engine="java"
             location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="bizListNeedSettlement" auth="true">
-        <description>列出待结算的payment（需要收款的部分）</description>
-        <attribute mode="IN" name="organizationPartyId" type="String" optional="false"><description>店家partyI</description></attribute>
-        <attribute name="viewIndex" type="Integer" mode="IN" optional="true" default-value="0"><description>页码，0开始</description></attribute>
-		<attribute name="viewSize" type="Integer" mode="IN" optional="true" default-value="20"><description>页大小 </description></attribute>
+        <description>列出待结算的payment（收款方列需要收款的部分， 付款方列需要付款的部分）</description>
+        <attribute  mode="IN" name="organizationPartyId" type="String" optional="false"><description>店家partyId</description></attribute>
+        <attribute  mode="IN" name="role" type="String" optional="false">
+        	<description>
+        		角色：
+        			payee：收款方
+        			payer: 付款方
+        	</description>
+        </attribute>
+        <attribute  mode="IN" name="viewIndex" type="Integer" optional="true" default-value="0"><description>页码，0开始</description></attribute>
+		<attribute  mode="IN" name="viewSize" type="Integer" optional="true" default-value="20"><description>页大小 </description></attribute>
 
         <!-- 
         [ 
