@@ -401,4 +401,16 @@
        </view-link>
       
     </view-entity>
+    
+    <entity entity-name="CloudcardSettlementPeriod" package-name="org.ofbiz.accounting" title="商家之间结算时间 ">
+		<description>商家与商家之间自定义结算时间</description>
+		<field name="partyIdTo" type="id"></field>
+		<field name="partyIdFrom" type="id"></field>
+		<field name="status" type="id-ne"></field>
+		<field name="week" type="numeric"></field>
+		<field name="hour" type="numeric"></field>
+      	<prim-key field="partyIdTo"/>
+      	<prim-key field="partyIdFrom"/>
+	</entity>
+    
 </entitymodel>

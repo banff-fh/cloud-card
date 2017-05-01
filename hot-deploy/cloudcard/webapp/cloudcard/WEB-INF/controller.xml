@@ -543,6 +543,20 @@
 		<response name="error" type="request" value="json" />
 	</request-map>	
 	
+	<!-- 商家设置结算时间-->
+	<request-map uri="bizSetCloudcardSettlementPeriod">
+		<event type="service" invoke="bizSetCloudcardSettlementPeriod" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
+	<!-- 商家查询结算时间-->
+	<request-map uri="bizGetCloudcardSettlementPeriod">
+		<event type="service" invoke="bizGetCloudcardSettlementPeriod" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
 	<!-- 后台页面部分 Request Mappings -->
 
 	<request-map uri="main">

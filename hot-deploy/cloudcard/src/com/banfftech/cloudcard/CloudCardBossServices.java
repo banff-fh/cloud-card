@@ -2279,4 +2279,110 @@ public class CloudCardBossServices {
 		return result;
 
 	}
+	
+	/**
+	 * 商家与商家之间协议结算时间
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> bizSetCloudcardSettlementPeriod(DispatchContext dctx, Map<String, Object> context){
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+		
+		String partyIdFrom = (String) context.get("partyIdFrom");
+		String partyIdTo = (String) context.get("partyIdTo");
+		Long week = (Long) context.get("week");
+		Long hour = (Long) context.get("hour");
+		GenericValue partyIdFromSettlementPeriod = null;
+		GenericValue partyIdToSettlementPeriod = null;
+		
+		try {
+			partyIdFromSettlementPeriod = delegator.findOne("CloudcardSettlementPeriod", false, UtilMisc.toMap("partyIdFrom", partyIdFrom, "partyIdTo", partyIdTo));
+			partyIdToSettlementPeriod = delegator.findOne("CloudcardSettlementPeriod", false, UtilMisc.toMap("partyIdFrom", partyIdTo, "partyIdTo", partyIdFrom));
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		if (UtilValidate.isEmpty(partyIdFromSettlementPeriod) && UtilValidate.isEmpty(partyIdToSettlementPeriod) ) {
+			try {
+				GenericValue cloudcardSettlementPeriod = delegator.makeValue("CloudcardSettlementPeriod", UtilMisc.toMap("partyIdFrom", partyIdFrom, "partyIdTo", partyIdTo,"status","N","week",week,"hour",hour));
+				cloudcardSettlementPeriod.create();
+			} catch (GenericEntityException e) {
+				Debug.logError(e.getMessage(), module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+			}
+		}else{
+			if(UtilValidate.isNotEmpty(partyIdFromSettlementPeriod)){
+				partyIdFromSettlementPeriod.put("week", week);
+				partyIdFromSettlementPeriod.put("hour", hour);
+				try {
+					partyIdFromSettlementPeriod.store();
+				} catch (GenericEntityException e) {
+					Debug.logError(e.getMessage(), module);
+					return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+				}
+			}
+			
+			if(UtilValidate.isNotEmpty(partyIdToSettlementPeriod)){
+				partyIdToSettlementPeriod.put("Week", week);
+				partyIdToSettlementPeriod.put("Hour", hour);
+				try {
+					partyIdToSettlementPeriod.store();
+				} catch (GenericEntityException e) {
+					Debug.logError(e.getMessage(), module);
+					return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+				}
+			}
+		}
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		return result;
+	}
+	
+	/**
+	 * 商家与商家之间协议结算时间
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> bizGetCloudcardSettlementPeriod(DispatchContext dctx, Map<String, Object> context){
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+		
+		String partyIdFrom = (String) context.get("partyIdFrom");
+		String partyIdTo = (String) context.get("partyIdTo");
+		
+		GenericValue partyIdFromSettlementPeriod = null;
+		GenericValue partyIdToSettlementPeriod = null;
+		try {
+			partyIdFromSettlementPeriod = delegator.findOne("CloudcardSettlementPeriod", true, UtilMisc.toMap("partyIdFrom", partyIdFrom, "partyIdTo", partyIdTo));
+			partyIdToSettlementPeriod = delegator.findOne("CloudcardSettlementPeriod", true, UtilMisc.toMap("partyIdFrom", partyIdTo, "partyIdTo", partyIdFrom));
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		long week = 0;
+		long hour = 0;
+		String status = "N";
+		if(UtilValidate.isNotEmpty(partyIdFromSettlementPeriod)){
+			week = partyIdFromSettlementPeriod.getLong("week");
+			hour = partyIdFromSettlementPeriod.getLong("hour");
+			status = "Y";
+		}else if(UtilValidate.isNotEmpty(partyIdToSettlementPeriod)){
+			week = partyIdToSettlementPeriod.getLong("week");
+			hour = partyIdToSettlementPeriod.getLong("hour");
+			status = "Y";
+		}
+		
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("week", week);
+		result.put("hour", hour);
+		result.put("status", status);
+		return result;
+	}
+	
 }

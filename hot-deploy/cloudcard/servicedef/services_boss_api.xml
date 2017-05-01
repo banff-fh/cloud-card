@@ -371,4 +371,22 @@
 		<attribute name="amount" type="String" mode="IN" optional="false"/>
  	</service> 	
  	
+ 	<service name="bizSetCloudcardSettlementPeriod" engine="java"
+            location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizSetCloudcardSettlementPeriod" auth="true">
+        <description>商家设定结算时间</description>
+		<attribute name="partyIdFrom" type="String" mode="IN" optional="false"/>
+		<attribute name="partyIdTo" type="String" mode="IN" optional="false"/>
+		<attribute name="week" type="Long" mode="IN" optional="false"/>
+		<attribute name="hour" type="Long" mode="IN" optional="false"/>
+ 	</service> 	
+ 	
+ 	<service name="bizGetCloudcardSettlementPeriod" engine="java"
+            location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizGetCloudcardSettlementPeriod" auth="true">
+        <description>商家查询结算时间</description>
+		<attribute name="partyIdFrom" type="String" mode="IN" optional="false"/>
+		<attribute name="partyIdTo" type="String" mode="IN" optional="false"/>
+		<attribute name="week" type="Long" mode="OUT" optional="false"/>
+		<attribute name="hour" type="Long" mode="OUT" optional="false"/>
+		<attribute name="status" type="String" mode="OUT" optional="false"/>
+ 	</service>
 </services>
