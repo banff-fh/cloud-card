@@ -1232,4 +1232,72 @@ public class CloudCardHelper {
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		return result;
 	}
+
+ 
+    /**
+     * 设置payment的扩展属性, 已经设置过，则更新属性值
+     * 
+     * @param delegator
+     *            实体引擎
+     * @param paymentId
+     *            paymentId
+     * @param attrName
+     *            属性名
+     * @param attrValue
+     *            属性值
+     * @throws GenericEntityException
+     */
+    public static void setPaymentAttr(Delegator delegator, String paymentId, String attrName, String attrValue) throws GenericEntityException {
+        GenericValue paymentAttr = delegator.makeValidValue("PaymentAttribute", UtilMisc.toMap("paymentId", paymentId, "attrName", attrName));
+        delegator.createOrStore(paymentAttr);
+    }
+
+    /**
+     * 获取指定payment的指定扩展属性值，属性不存在返回空字符串
+     * 
+     * @param delegator
+     *            实体引擎
+     * @param paymentId
+     *            paymentId
+     * @param attrName
+     *            属性名
+     * @return 返回属性的值，若不存在这个属性返回空串
+     * @throws GenericEntityException
+     */
+    public static String getPaymentAttr(Delegator delegator, String paymentId, String attrName) throws GenericEntityException {
+        GenericValue paymentAttr = delegator.findByPrimaryKey("PaymentAttribute", UtilMisc.toMap("paymentId", paymentId, "attrName", attrName));
+        if (null != paymentAttr && null != paymentAttr.getString("attrValue")) {
+            return paymentAttr.getString("attrValue");
+        }
+        return "";
+    }
+
+    /**
+     * 获取指定payment的指定扩展属性值并转换成int，属性不存在返回空字符串
+     * @param delegator
+     * @param paymentId
+     * @param attrName
+     * @return
+     * @throws GenericEntityException
+     */
+    public static int getPaymentAttrInt(Delegator delegator, String paymentId, String attrName) throws GenericEntityException {
+        return UtilMisc.toInteger(getPaymentAttr(delegator,paymentId,attrName));
+    }
+
+
+    /**
+     * 结算请求次数递增1
+     * 
+     * @param delegator
+     *            实体引擎
+     * @param paymentId
+     *            paymentId
+     * @throws GenericEntityException
+     */
+    public static int increaseSettlementReqCount(Delegator delegator, String paymentId) throws GenericEntityException {
+        int oldId = CloudCardHelper.getPaymentAttrInt(delegator, paymentId, "settlementReqCount");
+        CloudCardHelper.setPaymentAttr(delegator, paymentId, "settlementReqCount", String.valueOf(++oldId));
+        return oldId;
+    }
+
 }
