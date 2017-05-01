@@ -401,4 +401,77 @@
        </view-link>
       
     </view-entity>
+    
+    
+    
+    
+    
+    <view-entity entity-name="CloudCardNeedSettlementPaymentView" package-name="org.ofbiz.cloudcard.payment" title="待结算收款的流水">
+		<description>
+			待结算列表（收卡方需要对卖卡方发起结算请求的列表）
+				即 支付所用的云卡的
+		</description>
+		<member-entity entity-alias="P" entity-name="Payment"/>
+		<member-entity entity-alias="PM" entity-name="PaymentMethod"/>
+		<member-entity entity-alias="PA1" entity-name="PaymentAttribute"/>
+		<member-entity entity-alias="PA2" entity-name="PaymentAttribute"/>
+		<member-entity entity-alias="PA3" entity-name="PaymentAttribute"/>
+		<alias entity-alias="P" name="paymentId" />
+		<alias entity-alias="P" name="paymentMethodTypeId" />
+		<alias entity-alias="P" name="cardId" field="paymentMethodId" ><description>paymentMethodId即是云卡id</description></alias>
+		<alias entity-alias="P" name="partyIdFrom" />
+		<alias entity-alias="P" name="tradePartyId"  field="partyIdTo"><description>交易所在商家</description></alias>
+		<alias entity-alias="P" name="effectiveDate" />
+		<alias entity-alias="P" name="amount" />
+		<alias entity-alias="P" name="currencyUomId" />
+		<alias entity-alias="P" name="statusId" />
+		<alias entity-alias="P" name="comments" />
+		<alias entity-alias="PM" name="cardName"  field="description"/>
+		<alias entity-alias="PM" name="customerPartyId" field="partyId"><description>持卡人、客户</description></alias>
+		<alias entity-alias="PA1" name="settlementReqCount"  field="attrValue"><description>结算请求次数</description></alias>
+		<alias entity-alias="PA2" name="cardSellerId"  field="attrValue"><description>卖卡商家id</description></alias>
+		<alias entity-alias="PA3" name="cardSellerName"  field="attrValue"><description>卖卡商家名字</description></alias>
+		
+		<view-link entity-alias="P" rel-entity-alias="PM">
+			<key-map field-name="paymentMethodId" />
+			<entity-condition>
+				<condition-list>
+					<!-- 只查交易流水， paymentTypeId = GC_WITHDRAWAL -->
+					<condition-expr field-name="paymentTypeId" operator="equals" value="GC_WITHDRAWAL"/>
+					<condition-list combine="or">
+						<condition-expr field-name="statusId" operator="equals" value="PMNT_SENT"/>
+<!-- 						<condition-expr field-name="statusId" operator="equals" value="PMNT_P_NOT_RCV_SENT"/> -->
+						<condition-expr field-name="statusId" operator="equals" value="PMNT_P_NOT_SENT_RCV"/>
+					</condition-list>
+				</condition-list>
+			</entity-condition>
+		</view-link>
+		
+		<view-link entity-alias="P" rel-entity-alias="PA1">
+			<key-map field-name="paymentId" />
+			<entity-condition>
+				<condition-expr entity-alias="PA1" field-name="attrName" operator="equals" value="settlementReqCount"/>
+			</entity-condition>
+		</view-link>
+		
+		<view-link entity-alias="P" rel-entity-alias="PA2">
+			<key-map field-name="paymentId" />
+			<entity-condition>
+				<condition-expr entity-alias="PA2" field-name="attrName" operator="equals" value="cardSellerId"/>
+			</entity-condition>
+		</view-link>
+		
+		<view-link entity-alias="P" rel-entity-alias="PA3">
+			<key-map field-name="paymentId" />
+			<entity-condition>
+				<condition-expr entity-alias="PA3" field-name="attrName" operator="equals" value="cardSellerName"/>
+			</entity-condition>
+		</view-link>
+		
+		<relation type="one-nofk" rel-entity-name="PaymentMethod">
+			<key-map field-name="paymentMethodId" />
+		</relation>
+		
+	</view-entity>
+    
 </entitymodel>

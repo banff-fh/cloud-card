@@ -537,6 +537,14 @@
 	</request-map>	
 	
 	<!-- 收款方对付款方结算确认-->
+	<request-map uri="bizListNeedSettlement">
+		<event type="service" invoke="bizListNeedSettlement" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
+	
+	<!-- 收卡商家查询待结算列表-->
 	<request-map uri="settlementConfirmation">
 		<event type="service" invoke="settlementConfirmation" />
 		<response name="success" type="request" value="json" />
