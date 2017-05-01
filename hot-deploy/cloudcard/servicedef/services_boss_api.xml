@@ -358,6 +358,7 @@
  	<service name="settlementRequest" engine="java"
             location="com.banfftech.cloudcard.CloudCardBossServices" invoke="settlementRequest" auth="true">
         <description>付款方向收款方发起结算确认请求</description>
+        <attribute name="paymentId" type="String" mode="IN" optional="false"/>
 		<attribute name="payerPartyId" type="String" mode="IN" optional="false"/>
 		<attribute name="payeePartyId" type="String" mode="IN" optional="false"/>
 		<attribute name="amount" type="String" mode="IN" optional="false"/>
@@ -366,6 +367,7 @@
  	<service name="settlementConfirmation" engine="java"
             location="com.banfftech.cloudcard.CloudCardBossServices" invoke="settlementConfirmation" auth="true">
         <description>收款方对付款方结算确认</description>
+        <attribute name="paymentId" type="String" mode="IN" optional="false"/>
 		<attribute name="payerPartyId" type="String" mode="IN" optional="false"/>
 		<attribute name="payeePartyId" type="String" mode="IN" optional="false"/>
 		<attribute name="amount" type="String" mode="IN" optional="false"/>
