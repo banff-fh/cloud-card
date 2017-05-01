@@ -369,7 +369,27 @@
 		<attribute name="payerPartyId" type="String" mode="IN" optional="false"/>
 		<attribute name="payeePartyId" type="String" mode="IN" optional="false"/>
 		<attribute name="amount" type="String" mode="IN" optional="false"/>
- 	</service> 	
+ 	</service> 
+ 	
+ 	<service name="bizListNeedSettlement" engine="java"
+            location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="bizListNeedSettlement" auth="true">
+        <description>列出待结算的payment（需要收款的部分）</description>
+        <attribute mode="IN" name="organizationPartyId" type="String" optional="false"><description>店家partyI</description></attribute>
+        <attribute name="viewIndex" type="Integer" mode="IN" optional="true" default-value="0"><description>页码，0开始</description></attribute>
+		<attribute name="viewSize" type="Integer" mode="IN" optional="true" default-value="20"><description>页大小 </description></attribute>
+
+        <!-- 
+        [ 
+        	{
+        	 	paymentId: xxx, cardId: xxx, transDate: 1480494333000, cardSellerId: xxx, cardSellerName: xxx, 
+        			amount: xxx, reqCount: xx, tradePartyId:xxx, tradePartyName:xxx, statusId:1-待发起结算 2-对方已付款，待确认
+        	},
+        	 ...
+         ] -->
+        <attribute name="list" type="List" mode="OUT" optional="false"><description>待结算的payment列表</description></attribute>
+        <attribute name="listSize" type="Integer" mode="OUT" optional="true" default-value="0"><description>列表明细条数</description></attribute>
+        
+ 	</service>
  	
  	<service name="bizSetCloudcardSettlementPeriod" engine="java"
             location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizSetCloudcardSettlementPeriod" auth="true">

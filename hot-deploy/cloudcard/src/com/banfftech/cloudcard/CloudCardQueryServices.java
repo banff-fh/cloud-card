@@ -3,8 +3,6 @@ package com.banfftech.cloudcard;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -748,4 +746,105 @@ public class CloudCardQueryServices {
 		return results;
 	}
 
+
+    /**
+     * 查询待结算的payment列表
+     * 
+     * @param dctx
+     * @param context
+     * @return Map
+     */
+    public static Map<String, Object> bizListNeedSettlement(DispatchContext dctx, Map<String, Object> context) {
+        LocalDispatcher dispatcher = dctx.getDispatcher();
+        Delegator delegator = dispatcher.getDelegator();
+        Locale locale = (Locale) context.get("locale");
+        GenericValue userLogin = (GenericValue) context.get("userLogin");
+        String partyId = (String) userLogin.get("partyId");
+        String organizationPartyId = (String) context.get("organizationPartyId");
+        if (!CloudCardHelper.isManager(delegator, partyId, organizationPartyId)) {
+            Debug.logError("partyId: " + userLogin.getString("partyId") + " 不是商户：" + organizationPartyId + "的管理人员，不能进行账户流水查询操作", module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
+        }
+
+        Integer viewIndex = (Integer) context.get("viewIndex");
+        Integer viewSize = (Integer) context.get("viewSize");
+        viewIndex = (viewIndex == null || viewIndex < 0) ? 0 : viewIndex;
+        viewSize = (viewSize == null || viewSize == 0) ? 20 : viewSize;
+
+        int start = viewIndex.intValue() * viewSize.intValue();
+        int maxRows = viewSize.intValue() * (viewIndex.intValue() + 1);
+        int listSize = 0;
+
+        List<GenericValue> retList = FastList.newInstance();
+        EntityListIterator listIt = null;
+        try {
+
+            EntityCondition lookupConditions = EntityCondition.makeCondition(UtilMisc.toMap("tradePartyId", organizationPartyId));
+            listIt = delegator.find("CloudCardNeedSettlementPaymentView", lookupConditions, null, null, UtilMisc.toList("-effectiveDate"),
+                    new EntityFindOptions(true, EntityFindOptions.TYPE_SCROLL_INSENSITIVE, EntityFindOptions.CONCUR_READ_ONLY, -1, maxRows, false));
+            listSize = listIt.getResultsSizeAfterPartialList();
+            retList = listIt.getPartialList(start + 1, viewSize);
+
+        } catch (GenericEntityException e) {
+            Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+        } finally {
+            if (null != listIt) {
+                try {
+                    listIt.close();
+                } catch (GenericEntityException e) {
+                    Debug.logError(e.getMessage(), module);
+                }
+            }
+        }
+
+        Map<String, Object> result = ServiceUtil.returnSuccess();
+        result.put("list", packageNeedSettlementOutPut(delegator, retList));
+        result.put("listSize", listSize);
+        return result;
+    }
+
+    /**
+     * 包装待结算列表
+     *  目前 bizListNeedSettlement 服务输出时使用
+     * @param delegator 
+     * @param settlement
+     * @return
+     */
+    private static List<Map<String, Object>> packageNeedSettlementOutPut(Delegator delegator, List<GenericValue> settlementList) {
+        List<Map<String, Object>> list = FastList.newInstance();
+
+        for (GenericValue settlement : settlementList) {
+            Map<String, Object> settlementMap = FastMap.newInstance();
+            settlementMap.put("paymentId", settlement.getString("paymentId"));
+            settlementMap.put("cardId", settlement.getString("cardId"));
+            settlementMap.put("reqCount", settlement.getString("settlementReqCount")); // 催款次数
+            String tradePartyId = settlement.getString("tradePartyId");// 交易所发生店（收卡的店）
+            String tradePartyName = "";
+            try {
+                tradePartyName = delegator.findByPrimaryKeyCache("PartyGroup", UtilMisc.toMap("partyId", tradePartyId)).getString("groupName");
+            } catch (GenericEntityException e) {
+                //
+            }
+            settlementMap.put("tradePartyId", tradePartyId);
+            settlementMap.put("tradePartyName", tradePartyName);
+            settlementMap.put("cardSellerId", settlement.getString("cardSellerId")); // 卖卡商家id
+            settlementMap.put("cardSellerName", settlement.getString("cardSellerName")); // 卖卡商家名称
+            settlementMap.put("transDate", UtilDateTime.toCalendar(settlement.getTimestamp("effectiveDate")).getTimeInMillis()); // 交易发生时间戳
+            settlementMap.put("amount", settlement.getBigDecimal("amount")); // 交易金额
+
+            String statusId = settlement.getString("statusId");
+            if ("PMNT_SENT".equals(statusId)) {
+                statusId = "1";
+            }
+            if ("PMNT_P_NOT_SENT_RCV".equals(statusId)) {
+                statusId = "2";
+            }
+
+            settlementMap.put("statusId", statusId);// 1- 待发起结算请求
+                                                    // 2-付款方已付款，待收款方确认
+            list.add(settlementMap);
+        }
+        return list;
+    }
 }

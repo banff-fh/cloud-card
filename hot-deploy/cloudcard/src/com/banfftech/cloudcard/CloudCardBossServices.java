@@ -1037,6 +1037,7 @@ public class CloudCardBossServices {
      * @param dctx
      * @param context
      * @return
+     * @deprecated
      */
     public static Map<String, Object> bizDoSettlement(DispatchContext dctx, Map<String, Object> context) {
         LocalDispatcher dispatcher = dctx.getDispatcher();
@@ -1117,6 +1118,7 @@ public class CloudCardBossServices {
      * @param dctx
      * @param context
      * @return
+     * @deprecated
      */
     public static Map<String, Object> bizSettlementConfirm(DispatchContext dctx, Map<String, Object> context) {
         LocalDispatcher dispatcher = dctx.getDispatcher();
@@ -1234,6 +1236,7 @@ public class CloudCardBossServices {
      * @param dctx
      * @param context
      * @return
+     * @deprecated
      */
     public static Map<String, Object> bizGetUnconfirmedSettlementInfo(DispatchContext dctx, Map<String, Object> context) {
         LocalDispatcher dispatcher = dctx.getDispatcher();
@@ -1300,6 +1303,7 @@ public class CloudCardBossServices {
      * @param dctx
      * @param context
      * @return
+     * @deprecated
      */
     public static Map<String, Object> bizSettlementRequest(DispatchContext dctx, Map<String, Object> context) {
         //LocalDispatcher dispatcher = dctx.getDispatcher();
@@ -2279,7 +2283,7 @@ public class CloudCardBossServices {
 		return result;
 
 	}
-	
+
 	/**
 	 * 商家与商家之间协议结算时间
 	 * @param dctx
@@ -2384,5 +2388,5 @@ public class CloudCardBossServices {
 		result.put("status", status);
 		return result;
 	}
-	
+
 }
