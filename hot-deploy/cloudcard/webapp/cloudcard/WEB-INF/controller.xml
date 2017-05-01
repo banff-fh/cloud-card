@@ -522,9 +522,16 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 
-	<!-- 收款方发起结算请求-->
+	<!-- 收款方向付款方发起结算催款请求-->
 	<request-map uri="initiateSettlement">
 		<event type="service" invoke="initiateSettlement" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>	
+	
+	<!-- 付款方向收款方收款方发起结算确认请求-->
+	<request-map uri="settlementRequest">
+		<event type="service" invoke="settlementRequest" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>	
