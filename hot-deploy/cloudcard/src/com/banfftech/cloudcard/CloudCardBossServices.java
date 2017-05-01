@@ -2153,7 +2153,7 @@ public class CloudCardBossServices {
 		//发送消息并记录消息
 		try {
 			//消息内容
-			String noteInfo = partyGroup.getString("groupName") + "向你发起一笔" + amount + "的收款结算请求";
+			String noteInfo = partyGroup.getString("groupName") + "向你发起一笔" + amount + "元的跨店交易收款结算请求";
 			//极光推送消息
 			dispatcher.runSync("pushNotifOrMessage", UtilMisc.toMap("userLogin", userLogin, "appType", "biz", "content", noteInfo, "title", "发起结算请求", "sendType", "tag", "partyId", payerPartyId));
 			//系统记录消息
@@ -2203,9 +2203,59 @@ public class CloudCardBossServices {
 		//发送消息并记录消息
 		try {
 			//消息内容
-			String noteInfo = partyGroup.getString("groupName") + "向你发起一笔" + amount + "的付款结算请求";
+			String noteInfo = partyGroup.getString("groupName") + "向你发起一笔" + amount + "元的跨店交易付款结算请求";
 			//极光推送消息
 			dispatcher.runSync("pushNotifOrMessage", UtilMisc.toMap("userLogin", userLogin, "appType", "biz", "content", noteInfo, "title", "发起结算请求", "sendType", "tag", "partyId", payerPartyId));
+			//系统记录消息
+			dispatcher.runSync("saveMyNote", UtilMisc.toMap("partyId", payeePartyId, "noteName", "INITIATE_SETTLEMENT", "noteInfo" ,noteInfo));
+		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		return result;
+
+	}
+	
+	/**
+	 * 收款方对付款方结算确认
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> settlementConfirmation(DispatchContext dctx, Map<String, Object> context){
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+        GenericValue userLogin = (GenericValue) context.get("userLogin");
+
+		//付款方partyId
+		String payerPartyId = (String) context.get("payerPartyId");
+		//收款方partyId
+		String payeePartyId = (String) context.get("payeePartyId");
+		//收款金额
+		String amount = (String) context.get("amount");
+		
+		//发送通知的请求
+		GenericValue partyGroup = null;
+		try {
+			partyGroup = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", payerPartyId));
+		} catch (GenericEntityException e1) {
+			Debug.logError(e1.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		if(UtilValidate.isEmpty(partyGroup)){
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		//发送消息并记录消息
+		try {
+			//消息内容
+			String noteInfo = partyGroup.getString("groupName") + "已收到你一笔" + amount + "元的跨店交易结算款项请求并确认已结算";
+			//极光推送消息
+			dispatcher.runSync("pushNotifOrMessage", UtilMisc.toMap("userLogin", userLogin, "appType", "biz", "content", noteInfo, "title", "已确认结算", "sendType", "tag", "partyId", payerPartyId));
 			//系统记录消息
 			dispatcher.runSync("saveMyNote", UtilMisc.toMap("partyId", payeePartyId, "noteName", "INITIATE_SETTLEMENT", "noteInfo" ,noteInfo));
 		} catch (GenericServiceException e) {

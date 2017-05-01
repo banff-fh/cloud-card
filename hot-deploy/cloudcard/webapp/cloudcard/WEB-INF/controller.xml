@@ -536,8 +536,14 @@
 		<response name="error" type="request" value="json" />
 	</request-map>	
 	
+	<!-- 收款方对付款方结算确认-->
+	<request-map uri="settlementConfirmation">
+		<event type="service" invoke="settlementConfirmation" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>	
+	
 	<!-- 后台页面部分 Request Mappings -->
-
 
 	<request-map uri="main">
 		<security https="true" auth="true" />
