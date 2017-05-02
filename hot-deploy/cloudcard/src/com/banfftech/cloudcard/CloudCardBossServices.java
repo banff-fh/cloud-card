@@ -2406,11 +2406,19 @@ public class CloudCardBossServices {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
-		
+        GenericValue userLogin = (GenericValue) context.get("userLogin");
+
 		String partyIdFrom = (String) context.get("partyIdFrom");
 		String partyIdTo = (String) context.get("partyIdTo");
 		Long week = (Long) context.get("week");
 		Long hour = (Long) context.get("hour");
+		
+		if (!CloudCardHelper.isManager(delegator, userLogin.getString("partyId"), partyIdFrom)) {
+            // 若不是 system userLogin，则需要验证是否是本店的manager
+            Debug.logError("partyId: " + userLogin.getString("partyId") + " 不是商户：" + partyIdFrom + "的管理人员，不能进行账户流水查询操作", module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
+        }
+		
 		GenericValue partyIdFromSettlementPeriod = null;
 		GenericValue partyIdToSettlementPeriod = null;
 		
@@ -2467,9 +2475,16 @@ public class CloudCardBossServices {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
-		
+        GenericValue userLogin = (GenericValue) context.get("userLogin");
+
 		String partyIdFrom = (String) context.get("partyIdFrom");
 		String partyIdTo = (String) context.get("partyIdTo");
+		
+		if (!CloudCardHelper.isManager(delegator, userLogin.getString("partyId"), partyIdFrom)) {
+            // 若不是 system userLogin，则需要验证是否是本店的manager
+            Debug.logError("partyId: " + userLogin.getString("partyId") + " 不是商户：" + partyIdFrom + "的管理人员，不能进行账户流水查询操作", module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
+        }
 		
 		GenericValue partyIdFromSettlementPeriod = null;
 		GenericValue partyIdToSettlementPeriod = null;
