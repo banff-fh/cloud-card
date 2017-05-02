@@ -2356,7 +2356,23 @@ public class CloudCardBossServices {
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 		
+		Map<String,Object> settlementMap;
+		try {
+			settlementMap = dispatcher.runSync("bizListNeedSettlement", UtilMisc.toMap("userLogin", userLogin, "organizationPartyId", payeePartyId, "role", "payee"));
+		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		List<Object> retList = FastList.newInstance();
+		int listSize = 0;
+		if(UtilValidate.isNotEmpty(settlementMap.get("retList"))){
+			retList =  UtilGenerics.checkList(settlementMap.get("retList"));
+			listSize = (int) settlementMap.get("listSize");
+		}
 		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("list", retList);
+        result.put("listSize", listSize);
 		return result;
 
 	}

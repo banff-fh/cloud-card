@@ -371,6 +371,8 @@
 		<attribute name="payerPartyId" type="String" mode="IN" optional="false"/>
 		<attribute name="payeePartyId" type="String" mode="IN" optional="false"/>
 		<attribute name="amount" type="String" mode="IN" optional="false"/>
+		<attribute name="list" type="List" mode="OUT" optional="false"><description>待结算的payment列表</description></attribute>
+        <attribute name="listSize" type="Integer" mode="OUT" optional="true" default-value="0"><description>列表明细条数</description></attribute>
  	</service> 
  	
  	<service name="bizListNeedSettlement" engine="java"
