@@ -2144,6 +2144,12 @@ public class CloudCardBossServices {
 		//paymentId
 		String paymentId = (String) context.get("paymentId");
 		
+		if (!CloudCardHelper.isManager(delegator, userLogin.getString("partyId"), payeePartyId)) {
+            // 若不是 system userLogin，则需要验证是否是本店的manager
+            Debug.logError("partyId: " + userLogin.getString("partyId") + " 不是商户：" + payeePartyId + "的管理人员，不能进行账户流水查询操作", module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
+        }
+		
 		//修改payment的催款次数
 		int reqCount = 0;
 		try {
@@ -2205,6 +2211,12 @@ public class CloudCardBossServices {
 		String amount = (String) context.get("amount");
 		//paymentId
 		String paymentId = (String) context.get("paymentId");
+		
+		if (!CloudCardHelper.isManager(delegator, userLogin.getString("partyId"), payerPartyId)) {
+            // 若不是 system userLogin，则需要验证是否是本店的manager
+            Debug.logError("partyId: " + userLogin.getString("partyId") + " 不是商户：" + payerPartyId + "的管理人员，不能进行账户流水查询操作", module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
+        }
 		
 		//发送通知的请求
 		GenericValue partyGroup = null;
@@ -2272,6 +2284,13 @@ public class CloudCardBossServices {
 		String amount = (String) context.get("amount");
 		//paymentId
 		String paymentId = (String) context.get("paymentId");
+		
+		if (!CloudCardHelper.isManager(delegator, userLogin.getString("partyId"), payeePartyId)) {
+            // 若不是 system userLogin，则需要验证是否是本店的manager
+            Debug.logError("partyId: " + userLogin.getString("partyId") + " 不是商户：" + payeePartyId + "的管理人员，不能进行账户流水查询操作", module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
+        }
+		
 		//发送通知的请求
 		GenericValue partyGroup = null;
 		try {
