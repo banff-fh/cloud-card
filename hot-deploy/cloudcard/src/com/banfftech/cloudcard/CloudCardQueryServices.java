@@ -759,7 +759,7 @@ public class CloudCardQueryServices {
         Delegator delegator = dispatcher.getDelegator();
         Locale locale = (Locale) context.get("locale");
         GenericValue userLogin = (GenericValue) context.get("userLogin");
-        String role = (String) context.get("payee");
+        String role = (String) context.get("role");
         String partyId = (String) userLogin.get("partyId");
         String organizationPartyId = (String) context.get("organizationPartyId");
 
