@@ -2171,7 +2171,7 @@ public class CloudCardBossServices {
 			//消息内容
 			String noteInfo = partyGroup.getString("groupName") + "向你发起一笔" + amount + "元的跨店交易收款结算请求";
 			//极光推送消息
-			dispatcher.runSync("pushNotifOrMessage", UtilMisc.toMap("userLogin", userLogin, "appType", "biz", "content", noteInfo, "title", "发起结算请求", "sendType", "tag", "partyId", payerPartyId));
+			dispatcher.runSync("pushNotifOrMessage", UtilMisc.toMap("userLogin", userLogin, "appType", "biz", "content", noteInfo, "title", "发起结算请求", "sendType", "tag", "tag", payerPartyId));
 			//系统记录消息
 			dispatcher.runSync("saveMyNote", UtilMisc.toMap("partyId", payerPartyId, "noteName", "INITIATE_SETTLEMENT", "noteInfo" ,noteInfo));
 		} catch (GenericServiceException e) {
@@ -2239,7 +2239,7 @@ public class CloudCardBossServices {
 			//消息内容
 			String noteInfo = partyGroup.getString("groupName") + "向你发起一笔" + amount + "元的跨店交易付款结算请求";
 			//极光推送消息
-			dispatcher.runSync("pushNotifOrMessage", UtilMisc.toMap("userLogin", userLogin, "appType", "biz", "content", noteInfo, "title", "发起结算请求", "sendType", "tag", "partyId", payerPartyId));
+			dispatcher.runSync("pushNotifOrMessage", UtilMisc.toMap("userLogin", userLogin, "appType", "biz", "content", noteInfo, "title", "发起结算请求", "sendType", "tag", "tag", payerPartyId));
 			//系统记录消息
 			dispatcher.runSync("saveMyNote", UtilMisc.toMap("partyId", payeePartyId, "noteName", "INITIATE_SETTLEMENT", "noteInfo" ,noteInfo));
 		} catch (GenericServiceException e) {
@@ -2348,7 +2348,7 @@ public class CloudCardBossServices {
 			//消息内容
 			String noteInfo = partyGroup.getString("groupName") + "已收到你一笔" + amount + "元的跨店交易结算款项请求并确认已结算";
 			//极光推送消息
-			dispatcher.runSync("pushNotifOrMessage", UtilMisc.toMap("userLogin", userLogin, "appType", "biz", "content", noteInfo, "title", "已确认结算", "sendType", "tag", "partyId", payerPartyId));
+			dispatcher.runSync("pushNotifOrMessage", UtilMisc.toMap("userLogin", userLogin, "appType", "biz", "content", noteInfo, "title", "已确认结算", "sendType", "tag", "tag", payerPartyId));
 			//系统记录消息
 			dispatcher.runSync("saveMyNote", UtilMisc.toMap("partyId", payeePartyId, "noteName", "INITIATE_SETTLEMENT", "noteInfo" ,noteInfo));
 		} catch (GenericServiceException e) {
