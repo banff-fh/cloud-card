@@ -695,12 +695,12 @@ public class CloudCardCustServices {
 
             retMap.put("score", scoreAmount);
             retMap.put("userLevel", userLevel.getString("description"));
-            return retMap;
         } catch (GenericEntityException e) {
             Debug.logError(e.getMessage(), module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
         }
-
+        
+        return retMap;
     }
     
     /**
