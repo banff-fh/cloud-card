@@ -289,4 +289,8 @@
         <value xml:lang="en">Not our card, can not be query</value>
         <value xml:lang="zh">不是本店的卡，不能查询</value>
     </property>
+    <property key="CloudCardUnableToConfirmSettlement">
+        <value xml:lang="en">unable to confirm settlement</value>
+        <value xml:lang="zh">不能确认结算</value>
+    </property>
 </resource>

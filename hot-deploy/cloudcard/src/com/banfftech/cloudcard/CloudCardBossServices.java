@@ -2285,6 +2285,9 @@ public class CloudCardBossServices {
 		//paymentId
 		String paymentId = (String) context.get("paymentId");
 		
+		//检查payment状态
+		
+		
 		if (!CloudCardHelper.isManager(delegator, userLogin.getString("partyId"), payeePartyId)) {
             // 若不是 system userLogin，则需要验证是否是本店的manager
             Debug.logError("partyId: " + userLogin.getString("partyId") + " 不是商户：" + payeePartyId + "的管理人员，不能进行账户流水查询操作", module);
@@ -2326,7 +2329,12 @@ public class CloudCardBossServices {
         // 卖卡限额回冲
         Map<String, Object> createFinAccountAuthOutMap;
         try {
+        	//状态是PMNT_P_NOT_SENT_RCV才能确认结算
         	GenericValue payment = delegator.findByPrimaryKey("Payment", UtilMisc.toMap("paymentId", paymentId));
+        	if(!"PMNT_P_NOT_SENT_RCV".equals(payment.getString("statusId"))){
+                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUnableToConfirmSettlement", locale));
+        	}
+        	
         	if(UtilValidate.isEmpty(payment)){
                 return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
         	}
