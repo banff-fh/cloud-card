@@ -270,4 +270,10 @@
             location="com.banfftech.cloudcard.CloudCardServices" invoke="bizSettlementReqJob" auth="false">
             <description>结算定时任务请求</description>
     </service>
+    
+    <service name="userLogout" engine="java"
+            location="com.banfftech.cloudcard.CloudCardServices" invoke="userLogout" auth="false">
+            <description>退出登录</description>
+    </service>
+    
 </services>

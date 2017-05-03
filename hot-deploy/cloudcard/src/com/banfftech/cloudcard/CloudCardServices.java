@@ -11,7 +11,6 @@ import java.util.Random;
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
 import org.ofbiz.base.util.UtilFormatOut;
-import org.ofbiz.base.util.UtilGenerics;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilProperties;
 import org.ofbiz.base.util.UtilValidate;
@@ -2183,4 +2182,32 @@ public class CloudCardServices {
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		return result;
     }
+    
+    /**
+     * 退出登录
+     * 
+     * @param
+     * 
+     * @return
+     */
+    public static Map<String, Object> userLogout(DispatchContext dctx, Map<String, Object> context) {
+    	Delegator delegator = dctx.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+		GenericValue userLogin = (GenericValue) context.get("userLogin");
+		String partyId = userLogin.getString("partyId");
+		
+		try {
+			GenericValue partyIdentification = delegator.findByPrimaryKey("PartyIdentification", UtilMisc.toMap("partyId", partyId));
+			if(UtilValidate.isNotEmpty(partyIdentification)){
+				delegator.removeValue(partyIdentification);
+			}
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+    	Map<String, Object> result = ServiceUtil.returnSuccess();
+		return result;
+    }
+    
 }
