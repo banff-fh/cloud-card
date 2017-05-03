@@ -330,12 +330,14 @@ public class CloudCardQueryServices {
 			if("GC_DEPOSIT".equals(payment.getString("paymentTypeId"))){
 				//partyToLastName partyToFirstName
 				paymentMap.put("customerName", payment.get("partyToFirstName"));
+				paymentMap.put("partyFromGroupName", payment.get("partyFromGroupName"));
 				paymentMap.put("typeDesc", "充值");
 				paymentMap.put("type", "1");
 				paymentsList.add(paymentMap);
 			}else if ("GC_WITHDRAWAL".equals(payment.getString("paymentTypeId"))){
 				//partyFromLastName  partyFromFirstName
 				paymentMap.put("customerName", payment.get("partyFromFirstName"));
+				paymentMap.put("partyFromGroupName", payment.get("partyFromGroupName"));
 				paymentMap.put("typeDesc", "支付");
 				paymentMap.put("type", "2");
 				paymentsList.add(paymentMap);
