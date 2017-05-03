@@ -350,12 +350,7 @@ public class CloudCardQueryServices {
             }  
         }
 		
-		Map<String, Object> paymentsMap = FastMap.newInstance();
 		List<Map<String, Object>> paymentsList = FastList.newInstance();
-		int oldYear = 2000;
-		int oldMonth = 01;
-		boolean isNew = false;
-		List<Object> yearAndMonthPaymentList = FastList.newInstance();
 		for(GenericValue payment : payments){
 			Map<String, Object> paymentMap = FastMap.newInstance();
 			paymentMap.put("amount", payment.get("amount"));
@@ -373,36 +368,11 @@ public class CloudCardQueryServices {
 				paymentMap.put("type", "2");
 				paymentsList.add(paymentMap);
 			}
-			
-			int year = UtilDateTime.getYear(payment.getTimestamp("effectiveDate"), TimeZone.getTimeZone("GMT+:08:00"), locale);
-			int month = UtilDateTime.getMonth(payment.getTimestamp("effectiveDate"), TimeZone.getTimeZone("GMT+:08:00"), locale) + 1;
-			if(!isNew){
-				oldYear = year;
-				oldMonth = month;
-				isNew = true;
-			}
-			if(oldYear == year && oldMonth == month){
-				paymentsMap.put("dateTime", String.valueOf(year) +"年"+ String.valueOf(month)+"月");
-				paymentsMap.put("paymentsList", paymentsList);
-				if(!yearAndMonthPaymentList.contains(paymentsMap)){
-					yearAndMonthPaymentList.add(0, paymentsMap);
-				}else{
-					yearAndMonthPaymentList.set(0, paymentsMap);
-				}
-				
-			}else{
-				paymentsList.clear();
-				paymentsMap.clear();
-				paymentsMap.put("dateTime", String.valueOf(year) +"年"+ String.valueOf(month)+"月");
-				paymentsMap.put("paymentsList", paymentsList);
-				yearAndMonthPaymentList.set(0, paymentsMap);
-			}
-			oldYear = year;
-			oldMonth = month;
+						
 		}
 		
 		Map<String, Object> result = ServiceUtil.returnSuccess();
-		result.put("yearAndMonthPaymentList", yearAndMonthPaymentList);
+		result.put("paymentsList", paymentsList);
 		result.put("totalPage", totalPage);
 
 		return result;
