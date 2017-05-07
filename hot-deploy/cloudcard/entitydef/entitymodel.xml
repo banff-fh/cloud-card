@@ -95,7 +95,7 @@
         <view-link entity-alias="PCMP" rel-entity-alias="TN">
             <key-map field-name="contactMechId"/>
             <entity-condition>
-                <condition-expr field-name="contactMechPurposeTypeId" operator="equals" value="AS_USER_LOGIN_ID"/>
+                <condition-expr entity-alias="PCMP" field-name="contactMechPurposeTypeId" operator="equals" value="AS_USER_LOGIN_ID"/>
             </entity-condition>
         </view-link>
         <view-link entity-alias="PCMP" rel-entity-alias="PTY">
@@ -198,11 +198,11 @@
 			<entity-condition>
 				<condition-list>
 					<!-- 只查交易流水， paymentTypeId = GC_WITHDRAWAL -->
-					<condition-expr field-name="paymentTypeId" operator="equals" value="GC_WITHDRAWAL"/>
+					<condition-expr entity-alias="P" field-name="paymentTypeId" operator="equals" value="GC_WITHDRAWAL"/>
 					<condition-list combine="or">
-						<condition-expr field-name="statusId" operator="equals" value="PMNT_SENT"/>
-						<condition-expr field-name="statusId" operator="equals" value="PMNT_P_NOT_RCV_SENT"/>
-						<condition-expr field-name="statusId" operator="equals" value="PMNT_P_NOT_SENT_RCV"/>
+						<condition-expr entity-alias="P" field-name="statusId" operator="equals" value="PMNT_SENT"/>
+						<condition-expr entity-alias="P" field-name="statusId" operator="equals" value="PMNT_P_NOT_RCV_SENT"/>
+						<condition-expr entity-alias="P" field-name="statusId" operator="equals" value="PMNT_P_NOT_SENT_RCV"/>
 					</condition-list>
 				</condition-list>
 			</entity-condition>
@@ -444,11 +444,11 @@
 			<entity-condition>
 				<condition-list>
 					<!-- 只查交易流水， paymentTypeId = GC_WITHDRAWAL -->
-					<condition-expr field-name="paymentTypeId" operator="equals" value="GC_WITHDRAWAL"/>
+					<condition-expr entity-alias="P" field-name="paymentTypeId" operator="equals" value="GC_WITHDRAWAL"/>
 					<condition-list combine="or">
-						<condition-expr field-name="statusId" operator="equals" value="PMNT_SENT"/>
+						<condition-expr entity-alias="P" field-name="statusId" operator="equals" value="PMNT_SENT"/>
 <!-- 						<condition-expr field-name="statusId" operator="equals" value="PMNT_P_NOT_RCV_SENT"/> -->
-						<condition-expr field-name="statusId" operator="equals" value="PMNT_P_NOT_SENT_RCV"/>
+						<condition-expr entity-alias="P" field-name="statusId" operator="equals" value="PMNT_P_NOT_SENT_RCV"/>
 					</condition-list>
 				</condition-list>
 			</entity-condition>
@@ -480,5 +480,68 @@
 		</relation>
 		
 	</view-entity>
+	
+	<view-entity entity-name="CloudCardPaymentView"
+      package-name="org.ofbiz.cloudcard.payment"
+      title="云卡交易记录">
+
+		<member-entity entity-alias="PY" entity-name="Payment"/>
+		<member-entity entity-alias="PM" entity-name="PaymentMethod"/>
+			
+		<member-entity entity-alias="FPNV" entity-name="PartyNameView"/>
+		<member-entity entity-alias="TPNV" entity-name="PartyNameView"/>
+		
+		<member-entity entity-alias="FA" entity-name="FinAccount"/>
+		<member-entity entity-alias="FAR" entity-name="FinAccountRole"/>
+		
+		<member-entity entity-alias="PG" entity-name="PartyGroup"/>
+		
+		<alias-all entity-alias="PY"/>
+		<alias name="partyFromFirstName" entity-alias="FPNV" field="firstName"/>
+		<alias name="partyFromLastName" entity-alias="FPNV" field="lastName"/>
+		<alias name="partyFromGroupName" entity-alias="FPNV" field="groupName"/>
+		<alias name="partyToFirstName" entity-alias="TPNV" field="firstName"/>
+		<alias name="partyToLastName" entity-alias="TPNV" field="lastName"/>
+		<alias name="partyToGroupName" entity-alias="TPNV" field="groupName"/>
+		
+		<alias name="cardCode" entity-alias="FA" field="finAccountCode"/>
+		<alias name="distributorPartyId" entity-alias="FAR" field="partyId" />
+		<alias name="distributorPartyName" entity-alias="PG" field="groupName" />
+
+		<view-link entity-alias="PY" rel-entity-alias="PM">
+			<key-map field-name="paymentMethodId" />
+			<entity-condition>
+				<condition-list combine="or"> <!-- 限制只查这两种payment -->
+					<condition-expr field-name="paymentTypeId" entity-alias="PY" value="GC_DEPOSIT"/>
+					<condition-expr field-name="paymentTypeId" entity-alias="PY" value="GC_WITHDRAWAL"/>
+				</condition-list>
+			</entity-condition>
+		</view-link>
+		<view-link entity-alias="PM" rel-entity-alias="FA">
+			<key-map field-name="finAccountId" rel-field-name="finAccountId" />
+			<entity-condition>
+				<condition-expr entity-alias="FA" field-name="finAccountTypeId" operator="equals" value="GIFTCERT_ACCOUNT"/>
+			</entity-condition>
+		</view-link>
+		<view-link entity-alias="FA" rel-entity-alias="FAR">
+			<key-map field-name="finAccountId" rel-field-name="finAccountId" />
+			<entity-condition>
+				<condition-expr entity-alias="FAR" field-name="roleTypeId" operator="equals" value="DISTRIBUTOR"/>
+			</entity-condition>
+		</view-link>
+		<view-link entity-alias="FAR" rel-entity-alias="PG">
+			<key-map field-name="partyId" rel-field-name="partyId" />
+		</view-link>
+
+		<view-link entity-alias="PY" rel-entity-alias="FPNV">
+		  <key-map field-name="partyIdFrom" rel-field-name="partyId"/>
+		</view-link>
+		<view-link entity-alias="PY" rel-entity-alias="TPNV">
+		  <key-map field-name="partyIdTo" rel-field-name="partyId"/>
+		</view-link>
+		
+		
+	</view-entity>
+	
 
 </entitymodel>
