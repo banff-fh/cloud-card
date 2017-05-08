@@ -60,6 +60,10 @@ public class CloudCardQueryServices {
         Locale locale = (Locale) context.get("locale");
         String storeId = (String) context.get("storeId");
         String partyId = (String) context.get("partyId");
+        //B端根据卡金额筛选用户卡
+        String type = (String) context.get("type");
+        String amount = (String) context.get("amount");
+
         if(UtilValidate.isEmpty(partyId)){
         	GenericValue userLogin = (GenericValue) context.get("userLogin");
             partyId = (String) userLogin.get("partyId");
@@ -78,6 +82,9 @@ public class CloudCardQueryServices {
         EntityListIterator listIt = null;
         try {
             EntityCondition lookupConditions = CloudCardInfoUtil.createLookupMyStoreCardCondition(delegator, partyId, storeId);
+            if("biz".equals(type)){
+            	lookupConditions.makeCondition("actualBalance", EntityOperator.GREATER_THAN_EQUAL_TO, amount);
+            }
             listIt = delegator.find("CloudCardInfo", lookupConditions, null, null, UtilMisc.toList("-fromDate"),
                     new EntityFindOptions(true, EntityFindOptions.TYPE_SCROLL_INSENSITIVE, EntityFindOptions.CONCUR_READ_ONLY, -1, maxRows, false));
             listSize = listIt.getResultsSizeAfterPartialList();
