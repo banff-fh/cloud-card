@@ -82,11 +82,14 @@ public class CloudCardQueryServices {
         EntityListIterator listIt = null;
         try {
             EntityCondition createLookupMyStoreCardConditions = CloudCardInfoUtil.createLookupMyStoreCardCondition(delegator, partyId, storeId);
-            EntityCondition amountCond = null;
+            EntityCondition lookupConditions = null;;
             if("biz".equals(type)){
-            	amountCond = EntityCondition.makeCondition("actualBalance", EntityOperator.GREATER_THAN_EQUAL_TO, amount);
+            	EntityCondition amountCond = EntityCondition.makeCondition("actualBalance", EntityOperator.GREATER_THAN_EQUAL_TO, amount);
+                lookupConditions = EntityCondition.makeCondition(createLookupMyStoreCardConditions,amountCond);
+            }else{
+            	lookupConditions = createLookupMyStoreCardConditions;
             }
-            EntityCondition lookupConditions = EntityCondition.makeCondition(createLookupMyStoreCardConditions,amountCond);
+            
             listIt = delegator.find("CloudCardInfo", lookupConditions, null, null, UtilMisc.toList("-fromDate"),
                     new EntityFindOptions(true, EntityFindOptions.TYPE_SCROLL_INSENSITIVE, EntityFindOptions.CONCUR_READ_ONLY, -1, maxRows, false));
             listSize = listIt.getResultsSizeAfterPartialList();
