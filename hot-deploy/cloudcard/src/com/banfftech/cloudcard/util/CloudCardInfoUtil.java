@@ -43,7 +43,7 @@ public class CloudCardInfoUtil {
      * @return 返回EntityCondition对象
      * @throws GenericEntityException
      */
-    public static EntityCondition createLookupMyStoreCardCondition(Delegator delegator, String partyId, String storeId) throws GenericEntityException {
+    public static EntityCondition createLookupMyStoreCardCondition(Delegator delegator, String partyId, String storeId, String type, String amount) throws GenericEntityException {
         EntityCondition lookupConditions = EntityCondition.makeCondition(UtilMisc.toMap("partyId", partyId, "statusId", "FNACT_ACTIVE"));
         if (UtilValidate.isNotEmpty(storeId)) {
             EntityCondition storeCond = EntityCondition.makeCondition("distributorPartyId", storeId);
@@ -52,7 +52,13 @@ public class CloudCardInfoUtil {
                 // 存在圈主，且不是自己的情况，
                 storeCond = EntityCondition.makeCondition(EntityOperator.OR, storeCond, EntityCondition.makeCondition("distributorPartyId", groupOwnerId));
             }
-            lookupConditions = EntityCondition.makeCondition(lookupConditions, storeCond);
+            
+            EntityCondition amountCond = null;
+            if("biz".equals(type)){
+            	amountCond = EntityCondition.makeCondition("actualBalance", EntityOperator.GREATER_THAN_EQUAL_TO, amount);
+            }
+            
+            lookupConditions = EntityCondition.makeCondition(lookupConditions, storeCond, amountCond);
         }
         lookupConditions = EntityCondition.makeCondition(lookupConditions, EntityUtil.getFilterByDateExpr());
         return lookupConditions;

@@ -1492,7 +1492,7 @@ public class CloudCardBossServices {
 		try {
 		context.put("partyId",partyId );
 		context.put("type", "biz");
-		context.put("amount", "amount");
+		context.put("amount", amount);
 		result = CloudCardQueryServices.myCloudCards(dctx, context);
 		} catch (Exception e) {
 			Debug.logError(e.getMessage(), module);
