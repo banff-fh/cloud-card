@@ -1446,7 +1446,7 @@ public class CloudCardBossServices {
 		
 		String teleNumber = (String) context.get("teleNumber");
 		String qrCode = (String) context.get("qrCode");
-		String amount = (String) context.get("amount");
+		BigDecimal amount = (BigDecimal) context.get("amount");
 		
 		context.put("amount", amount);
         String partyId = null;
@@ -1492,7 +1492,6 @@ public class CloudCardBossServices {
 		try {
 		context.put("partyId",partyId );
 		context.put("type", "biz");
-		context.put("amount", amount);
 		result = CloudCardQueryServices.myCloudCards(dctx, context);
 		} catch (Exception e) {
 			Debug.logError(e.getMessage(), module);

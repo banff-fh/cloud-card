@@ -247,7 +247,7 @@
 		<attribute name="viewSize" type="Integer" mode="IN" optional="true" default-value="20"/>
 		<attribute name="teleNumber" type="String" mode="INOUT" optional="true"><description>顾客电话号码</description></attribute>
 		<attribute name="qrCode" type="String" mode="INOUT" optional="true"><description>顾客付款码</description></attribute>
-		<attribute name="amount" type="String" mode="INOUT" optional="true"><description>消费金额</description></attribute>
+		<attribute name="amount" type="BigDecimal" mode="INOUT" optional="true"><description>消费金额</description></attribute>
 		<attribute name="listSize" type="Integer" mode="OUT" optional="false"/>
 		<attribute name="cloudCardList" type="List" mode="OUT" optional="false"/>
 	</service>
