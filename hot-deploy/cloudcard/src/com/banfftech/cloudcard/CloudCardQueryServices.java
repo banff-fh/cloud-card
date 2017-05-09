@@ -63,6 +63,9 @@ public class CloudCardQueryServices {
         //B端根据卡金额筛选用户卡
         String type = (String) context.get("type");
         BigDecimal amount = (BigDecimal) context.get("amount");
+        if(UtilValidate.isEmpty(amount)){
+        	amount = new BigDecimal(0);
+        }
 
         if(UtilValidate.isEmpty(partyId)){
         	GenericValue userLogin = (GenericValue) context.get("userLogin");
