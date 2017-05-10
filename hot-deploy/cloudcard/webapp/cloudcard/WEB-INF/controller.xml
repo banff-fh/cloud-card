@@ -455,6 +455,14 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 
+	<!-- 我的历史消息接口-->
+	<request-map uri="listMyHistoryNote">
+		<!--<security https="true" auth="false" />-->
+		<event type="service" invoke="listMyHistoryNote" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+
 	<!-- 标记消息已读接口-->
 	<request-map uri="readMyNote">
 		<!--<security https="true" auth="false" />-->

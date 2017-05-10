@@ -286,6 +286,13 @@
         <attribute name="partyNotes" type="List" mode="OUT" optional="false"><description>消息列表</description></attribute>
 	</service>
 	
+	<service name="listMyHistoryNote" engine="java"
+            location="com.banfftech.cloudcard.CloudCardBossServices" invoke="listMyHistoryNote" auth="true">
+        <description>我的历史消息</description>
+        <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家partyId</description></attribute>
+        <attribute name="partyNotes" type="List" mode="OUT" optional="false"><description>消息列表</description></attribute>
+	</service>
+	
 	<service name="readMyNote" engine="java"
             location="com.banfftech.cloudcard.CloudCardBossServices" invoke="readMyNote" auth="true">
         <description>已读消息标记</description>

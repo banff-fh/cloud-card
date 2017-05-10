@@ -1714,6 +1714,30 @@ public class CloudCardBossServices {
 	}
 	
 	/**
+	 * 获取历史消息
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> listMyHistoryNote(DispatchContext dctx, Map<String, Object> context) {
+		Delegator delegator = dctx.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+
+		String organizationPartyId = (String) context.get("organizationPartyId");
+		List<GenericValue> partyNotes = FastList.newInstance();
+		try {
+			partyNotes = delegator.findList("PartyNoteView2", EntityCondition.makeCondition(UtilMisc.toMap("partyId", organizationPartyId, "removed",  "N")),null, UtilMisc.toList("-noteDateTime"), null, false);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("partyNotes", partyNotes);
+		return result;
+	}
+	
+	
+	/**
 	 * 标记消息为已读
 	 * @param dctx
 	 * @param context
