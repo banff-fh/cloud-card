@@ -1214,6 +1214,7 @@ public class CloudCardHelper {
 		String noteId = delegator.getNextSeqId("NoteData");
 		try {
 			noteData.set("noteId", noteId);
+			noteData.set("paymentId", context.get("paymentId"));
 			noteData.put("noteInfo",context.get("noteInfo"));
 			noteData.put("noteName",context.get("noteName"));
 			noteData.put("noteDateTime",UtilDateTime.nowTimestamp());

@@ -2180,7 +2180,7 @@ public class CloudCardBossServices {
 			//极光推送消息
 			dispatcher.runSync("pushNotifOrMessage", UtilMisc.toMap("userLogin", userLogin, "appType", "biz", "content", noteInfo, "title", "发起结算请求", "sendType", "tag", "tag", payerPartyId));
 			//系统记录消息
-			dispatcher.runSync("saveMyNote", UtilMisc.toMap("partyId", payerPartyId, "noteName", "INITIATE_SETTLEMENT", "noteInfo" ,noteInfo));
+			dispatcher.runSync("saveMyNote", UtilMisc.toMap("partyId", payerPartyId, "paymentId", paymentId, "noteName", "INITIATE_SETTLEMENT", "noteInfo" ,noteInfo));
 		} catch (GenericServiceException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
@@ -2254,7 +2254,7 @@ public class CloudCardBossServices {
 			//极光推送消息
 			dispatcher.runSync("pushNotifOrMessage", UtilMisc.toMap("userLogin", userLogin, "appType", "biz", "content", noteInfo, "title", "发起结算请求", "sendType", "tag", "tag", payerPartyId));
 			//系统记录消息
-			dispatcher.runSync("saveMyNote", UtilMisc.toMap("partyId", payeePartyId, "noteName", "INITIATE_SETTLEMENT", "noteInfo" ,noteInfo));
+			dispatcher.runSync("saveMyNote", UtilMisc.toMap("partyId", payeePartyId, "paymentId", paymentId, "noteName", "INITIATE_SETTLEMENT", "noteInfo" ,noteInfo));
 		} catch (GenericServiceException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
@@ -2378,7 +2378,7 @@ public class CloudCardBossServices {
 			//极光推送消息
 			dispatcher.runSync("pushNotifOrMessage", UtilMisc.toMap("userLogin", userLogin, "appType", "biz", "content", noteInfo, "title", "已确认结算", "sendType", "tag", "tag", payerPartyId));
 			//系统记录消息
-			dispatcher.runSync("saveMyNote", UtilMisc.toMap("partyId", payeePartyId, "noteName", "INITIATE_SETTLEMENT", "noteInfo" ,noteInfo));
+			dispatcher.runSync("saveMyNote", UtilMisc.toMap("partyId", payeePartyId, "paymentId", paymentId, "noteName", "INITIATE_SETTLEMENT", "noteInfo" ,noteInfo));
 		} catch (GenericServiceException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));

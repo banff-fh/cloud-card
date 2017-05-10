@@ -246,6 +246,7 @@
         invoke="saveMyNote" location="com.banfftech.cloudcard.CloudCardHelper" auth="false">
         <description>记录app推送消息</description>
         <attribute mode="IN" name="partyId" type="String" optional="false"><description>partyId</description></attribute>
+		<attribute mode="IN" name="paymentId" type="String" optional="false"><description>paymentId</description></attribute>
 		<attribute mode="IN" name="noteName" type="String" optional="false"><description>信息名称</description></attribute>
 		<attribute mode="IN" name="noteInfo" type="String" optional="false"><description>信息</description></attribute>
     </service>
