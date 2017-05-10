@@ -1703,7 +1703,7 @@ public class CloudCardBossServices {
 		String organizationPartyId = (String) context.get("organizationPartyId");
 		List<GenericValue> partyNotes = FastList.newInstance();
 		try {
-			partyNotes = delegator.findList("PartyNoteView2", EntityCondition.makeCondition(UtilMisc.toMap("partyId", organizationPartyId, "removed",  "N")),null, UtilMisc.toList("-noteDateTime"), null, false);
+			partyNotes = delegator.findList("PartyNoteView2", EntityCondition.makeCondition(UtilMisc.toMap("partyId", organizationPartyId, "isViewed",  "N")),null, UtilMisc.toList("-noteDateTime"), null, false);
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
@@ -2384,6 +2384,19 @@ public class CloudCardBossServices {
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 		
+		//清除该payment消息
+		try {
+			List<GenericValue> partyNotes = delegator.findByAnd("partyNote", UtilMisc.toMap("paymentId", paymentId));
+			for(GenericValue partyNote : partyNotes){
+				partyNote.set("isViewed", "Y");
+				partyNote.store();
+			}
+		} catch (GenericEntityException e1) {
+			Debug.logError(e1.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		//返回待结算的payment
 		Map<String,Object> settlementMap;
 		try {
 			settlementMap = dispatcher.runSync("bizListNeedSettlement", UtilMisc.toMap("userLogin", userLogin, "organizationPartyId", payeePartyId, "role", "payee"));

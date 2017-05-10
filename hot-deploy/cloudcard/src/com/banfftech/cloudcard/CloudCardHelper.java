@@ -1214,7 +1214,6 @@ public class CloudCardHelper {
 		String noteId = delegator.getNextSeqId("NoteData");
 		try {
 			noteData.set("noteId", noteId);
-			noteData.set("paymentId", context.get("paymentId"));
 			noteData.put("noteInfo",context.get("noteInfo"));
 			noteData.put("noteName",context.get("noteName"));
 			noteData.put("noteDateTime",UtilDateTime.nowTimestamp());
@@ -1222,6 +1221,7 @@ public class CloudCardHelper {
 
 			GenericValue partyNote = delegator.makeValue("PartyNote");
 			partyNote.put("partyId", context.get("partyId"));
+			partyNote.put("paymentId", context.get("paymentId"));
 			partyNote.put("noteId", noteId);
 			partyNote.put("removed", "N");
 			partyNote.put("isViewed", "N");
