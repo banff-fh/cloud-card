@@ -2386,7 +2386,7 @@ public class CloudCardBossServices {
 		
 		//清除该payment消息
 		try {
-			List<GenericValue> partyNotes = delegator.findByAnd("partyNote", UtilMisc.toMap("paymentId", paymentId));
+			List<GenericValue> partyNotes = delegator.findByAnd("PartyNote", UtilMisc.toMap("paymentId", paymentId));
 			for(GenericValue partyNote : partyNotes){
 				partyNote.set("isViewed", "Y");
 				partyNote.store();
