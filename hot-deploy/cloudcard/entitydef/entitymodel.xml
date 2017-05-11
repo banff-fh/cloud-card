@@ -548,15 +548,20 @@
         package-name="org.ofbiz.party.contact"
         title="Party and Contact Mech/Postal Address View Entity">
         <member-entity entity-alias="PTY" entity-name="Party"/>
+        <member-entity entity-alias="PTYG" entity-name="PartyGroup"/>
         <member-entity entity-alias="PCM" entity-name="PartyContactMech"/>
         <member-entity entity-alias="CM" entity-name="ContactMech"/>
         <member-entity entity-alias="PA" entity-name="PostalAddress"/>
         <alias entity-alias="CM" name="contactMechId"/>
         <alias entity-alias="PTY" name="partyId"/>
         <alias entity-alias="PTY" name="statusId"/>
+        <alias entity-alias="PTYG" name="groupName"/>
         <alias entity-alias="PA" name="city"/>
         <alias entity-alias="PA" name="countyGeoId"/>
         <view-link entity-alias="PTY" rel-entity-alias="PCM">
+            <key-map field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PTY" rel-entity-alias="PTYG">
             <key-map field-name="partyId"/>
         </view-link>
         <view-link entity-alias="PCM" rel-entity-alias="CM">
@@ -570,6 +575,9 @@
             <key-map field-name="contactMechId"/>
         </relation>
         <relation type="one-nofk" rel-entity-name="Party">
+            <key-map field-name="partyId"/>
+        </relation>
+        <relation type="one-nofk" rel-entity-name="PartyGroup">
             <key-map field-name="partyId"/>
         </relation>
         <relation type="one-nofk" rel-entity-name="ContactMech">

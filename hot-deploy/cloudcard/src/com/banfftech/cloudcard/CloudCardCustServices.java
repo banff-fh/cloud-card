@@ -916,16 +916,25 @@ public class CloudCardCustServices {
 		Locale locale = (Locale) context.get("locale");
 		String geoTypeId = (String) context.get("geoTypeId");
     	String geoId = (String) context.get("geoId");
+    	String storeName = (String) context.get("storeName");
 		
     	EntityCondition lookupConditions = null;
+    	EntityCondition geoIdConditions = null;
     	//如果是市
     	if("CITY".equals(geoTypeId)){
-    		lookupConditions = EntityCondition.makeCondition("city", EntityOperator.EQUALS, geoId);
+    		geoIdConditions = EntityCondition.makeCondition("city", EntityOperator.EQUALS, geoId);
         //如果是区
     	}else if("COUNTY".equals(geoTypeId)){
-    		lookupConditions = EntityCondition.makeCondition("countyGeoId", EntityOperator.EQUALS, geoId);
+    		geoIdConditions = EntityCondition.makeCondition("countyGeoId", EntityOperator.EQUALS, geoId);
     	}
     	
+    	//如果有店名，根据店名查询
+    	if(UtilValidate.isNotEmpty(storeName)){
+    		EntityCondition storeNameCond = EntityCondition.makeCondition("groupName", EntityOperator.LIKE, "%" + storeName + "%");
+    		lookupConditions = EntityCondition.makeCondition(EntityOperator.AND, geoIdConditions, storeNameCond);
+    	}else{
+    		lookupConditions = geoIdConditions;
+    	}
     	List<GenericValue> cloudcardGeoList = FastList.newInstance();
     	try {
     		cloudcardGeoList = delegator.findList("CloudcardPartyAndPostalAddress", lookupConditions, UtilMisc.toSet("partyId"), null, null, true);
@@ -933,6 +942,7 @@ public class CloudCardCustServices {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
+    	
     	//店铺集合
 		List<Map<String,Object>> storeList = FastList.newInstance();
     	//获取店铺信息

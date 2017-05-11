@@ -249,6 +249,7 @@
 		<description>根据geoId名获取库胖店家列表</description>
 		<attribute name="geoId" type="String" mode="IN" optional="false"><description>城市geoId</description></attribute>
 		<attribute name="geoTypeId" type="String" mode="IN" optional="false"><description>城市geoTypeId</description></attribute>
+		<attribute name="storeName" type="String" mode="IN" optional="false"><description>店名</description></attribute>
 		<attribute name="storeList" type="List" mode="OUT" optional="false"><description>店铺列表</description></attribute>
 	</service>
 	
