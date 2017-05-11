@@ -833,8 +833,14 @@ public class CloudCardCustServices {
 		String cityName = (String) context.get("cityName");
 		
 		List<GenericValue> cityList = FastList.newInstance();
+		
+		//geo查询条件
+		EntityCondition geoNameCond = EntityCondition.makeCondition("geoName", EntityOperator.LIKE, "%" + cityName + "%");
+		EntityCondition geoTypeIdCond = EntityCondition.makeCondition("geoTypeId", EntityOperator.EQUALS, "CITY");
+		EntityCondition lookupConditions = EntityCondition.makeCondition(EntityOperator.AND, geoNameCond, geoTypeIdCond);
+		
 		try {
-			cityList = delegator.findList("Geo", EntityCondition.makeCondition("geoName", EntityOperator.LIKE, "%" + cityName + "%"), UtilMisc.toSet("geoId", "geoTypeId", "geoName"), null, null, true );
+			cityList = delegator.findList("Geo", lookupConditions, UtilMisc.toSet("geoId", "geoTypeId", "geoName"), null, null, true );
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
