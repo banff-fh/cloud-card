@@ -819,4 +819,30 @@ public class CloudCardCustServices {
         return result;
     }
     
+    /**
+     * 获取城市列表（模糊查询）
+     * 
+     * @param dctx
+     * @param context
+     * @return
+     */
+    public static Map<String, Object> getCityOrAreaByCityName(DispatchContext dctx, Map<String, Object> context){
+    	LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+		String cityName = (String) context.get("cityName");
+		
+		List<GenericValue> cityList = FastList.newInstance();
+		try {
+			cityList = delegator.findList("Geo", EntityCondition.makeCondition("geoName", EntityOperator.LIKE, "%" + cityName + "%"), UtilMisc.toSet("geoId", "geoName"), null, null, true );
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+    	Map<String, Object> result = ServiceUtil.returnSuccess();
+    	result.put("cityList", cityList);
+    	return result;
+    }
+    
+    
 }

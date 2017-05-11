@@ -544,5 +544,39 @@
 		
 	</view-entity>
 	
-
+	<view-entity entity-name="CloudcardPartyAndPostalAddress"
+        package-name="org.ofbiz.party.contact"
+        title="Party and Contact Mech/Postal Address View Entity">
+        <member-entity entity-alias="PTY" entity-name="Party"/>
+        <member-entity entity-alias="PCM" entity-name="PartyContactMech"/>
+        <member-entity entity-alias="CM" entity-name="ContactMech"/>
+        <member-entity entity-alias="PA" entity-name="PostalAddress"/>
+        <alias entity-alias="CM" name="contactMechId"/>
+        <alias entity-alias="PTY" name="partyId"/>
+        <alias entity-alias="PTY" name="statusId"/>
+        <alias entity-alias="PA" name="countryGeoId"/>
+        <alias entity-alias="PA" name="countyGeoId"/>
+        <view-link entity-alias="PTY" rel-entity-alias="PCM">
+            <key-map field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PCM" rel-entity-alias="CM">
+            <key-map field-name="contactMechId"/>
+        </view-link>
+        <view-link entity-alias="CM" rel-entity-alias="PA">
+            <key-map field-name="contactMechId"/>
+        </view-link>
+        <relation type="many" rel-entity-name="PartyContactMech">
+            <key-map field-name="partyId"/>
+            <key-map field-name="contactMechId"/>
+        </relation>
+        <relation type="one-nofk" rel-entity-name="Party">
+            <key-map field-name="partyId"/>
+        </relation>
+        <relation type="one-nofk" rel-entity-name="ContactMech">
+            <key-map field-name="contactMechId"/>
+        </relation>
+        <relation type="one-nofk" rel-entity-name="PostalAddress">
+            <key-map field-name="contactMechId"/>
+        </relation>
+    </view-entity>
 </entitymodel>

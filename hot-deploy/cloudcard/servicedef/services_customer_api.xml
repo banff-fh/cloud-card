@@ -226,4 +226,12 @@
 		<description>C端修改个人信息</description>
 		<attribute name="userName" type="String" mode="IN" optional="false"><description>用户姓名</description></attribute>
 	</service>
+	
+	<service name="getCityOrAreaByCityName" engine="java"
+		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="getCityOrAreaByCityName" auth="false">
+		<description>根据城市名获取城市列表</description>
+		<attribute name="cityName" type="String" mode="IN" optional="false"><description>城市名</description></attribute>
+		<attribute name="cityList" type="List" mode="OUT" optional="false"><description>城市列表</description></attribute>
+	</service>
+	
 </services>

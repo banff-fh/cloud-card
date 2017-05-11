@@ -580,6 +580,13 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 	
+	<!-- 根据城市名获取城市列表 -->
+	<request-map uri="getCityOrAreaByCityName">
+		<event type="service" invoke="getCityOrAreaByCityName" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
 	<!-- 后台页面部分 Request Mappings -->
 
 	<request-map uri="main">
