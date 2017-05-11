@@ -1978,9 +1978,14 @@ public class CloudCardBossServices {
         	cloudCardInfoSet.add("description");
         	cloudCardInfoSet.add("lastName");
         	finAccountList = delegator.findList("CloudCardInfo",cloudCardInfoEntityCondition, cloudCardInfoSet, UtilMisc.toList("-actualBalance"), null, true);
+        	
+        	//查询电话号码
         	for(GenericValue finAccount : finAccountList){
-        		GenericValue partyAndTelecomNumber = delegator.findByPrimaryKeyCache("PartyAndTelecomNumber", UtilMisc.toMap("partyId", finAccount.getString("partyId")));
-        		finAccount.put("contactNumber",  partyAndTelecomNumber.getString("contactNumber"));
+        		List<GenericValue> partyAndTelecomNumbers = delegator.findByAndCache("PartyAndTelecomNumber", UtilMisc.toMap("partyId",UtilMisc.toMap("partyId", finAccount.getString("ownerPartyId"))));
+            	if(UtilValidate.isNotEmpty(partyAndTelecomNumbers)){
+            		GenericValue partyAndTelecomNumber = partyAndTelecomNumbers.get(0);
+            		finAccount.put("teleNumber",  partyAndTelecomNumber.getString("contactNumber"));
+            	}
         	}
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
