@@ -56,6 +56,8 @@ public class CloudCardCustServices {
         double latitude = Double.parseDouble(UtilFormatOut.checkNull((String) context.get("latitude"), "0.00"));
         String storeName = (String) context.get("storeName");
         String region = (String) context.get("region");
+        String geoId = null;
+        String geoTypeId = null;
 		List<GenericValue> countyList = FastList.newInstance();
 		double exp = 10e-10;
         // 经度最大是180° 最小是-180° 纬度最大是90° 最小是-90°
@@ -121,6 +123,8 @@ public class CloudCardCustServices {
             			String cityId = null;
             			if(UtilValidate.isNotEmpty(geoList)){
             				cityId = geoList.get(0).getString("geoId");
+            				geoId = cityId;
+            				geoTypeId = "CITY";
             				Map<String, Object> cityMap = dispatcher.runSync("getProvinceOrCityOrArea", UtilMisc.toMap("userLogin",userLogin,"geoAssocTypeId", "CITY_COUNTY","cityId",cityId));
             				if(UtilValidate.isNotEmpty(cityMap)){
             					countyList = UtilGenerics.checkList(cityMap.get("countyList"));
@@ -184,6 +188,8 @@ public class CloudCardCustServices {
 		result.put("longitude", String.valueOf(longitude));
 		result.put("latitude",String.valueOf(latitude));
 		result.put("region",region);
+		result.put("geoId",geoId);
+		result.put("geoTypeId",geoTypeId);
 		result.put("countyList",countyList);
 		result.put("storeList", storeList);
 		return result;
