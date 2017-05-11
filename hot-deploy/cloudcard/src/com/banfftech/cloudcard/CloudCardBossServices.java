@@ -6,6 +6,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 import org.ofbiz.base.util.Debug;
@@ -35,6 +36,7 @@ import com.banfftech.cloudcard.sms.SmsServices;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
+import javolution.util.FastSet;
 
 /**
  * 库胖卡商家相关的服务
@@ -1967,7 +1969,14 @@ public class CloudCardBossServices {
         	
         	EntityCondition cloudCardInfoEntityCondition = EntityCondition.makeCondition(EntityOperator.AND,
                     EntityCondition.makeCondition(UtilMisc.toMap("distributorPartyId", organizationPartyId)),thruDateEntityCondition);
-        	finAccountList = delegator.findList("CloudCardInfo",cloudCardInfoEntityCondition, UtilMisc.toSet("cardNumber","actualBalance","ownerPartyId","paymentMethodId","description"), UtilMisc.toList("-actualBalance"), null, true);
+        	Set<String> cloudCardInfoSet = FastSet.newInstance();
+        	cloudCardInfoSet.add("cardNumber");
+        	cloudCardInfoSet.add("actualBalance");
+        	cloudCardInfoSet.add("ownerPartyId");
+        	cloudCardInfoSet.add("paymentMethodId");
+        	cloudCardInfoSet.add("description");
+        	cloudCardInfoSet.add("lastName");
+        	finAccountList = delegator.findList("CloudCardInfo",cloudCardInfoEntityCondition, cloudCardInfoSet, UtilMisc.toList("-actualBalance"), null, true);
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
