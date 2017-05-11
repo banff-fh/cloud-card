@@ -554,7 +554,7 @@
         <alias entity-alias="CM" name="contactMechId"/>
         <alias entity-alias="PTY" name="partyId"/>
         <alias entity-alias="PTY" name="statusId"/>
-        <alias entity-alias="PA" name="countryGeoId"/>
+        <alias entity-alias="PA" name="city"/>
         <alias entity-alias="PA" name="countyGeoId"/>
         <view-link entity-alias="PTY" rel-entity-alias="PCM">
             <key-map field-name="partyId"/>

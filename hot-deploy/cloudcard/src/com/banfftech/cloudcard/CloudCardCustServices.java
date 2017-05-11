@@ -871,4 +871,59 @@ public class CloudCardCustServices {
     	return result;
     }
     
+    /**
+     * 根据geoId查询店家列表
+     * 
+     * @param dctx
+     * @param context
+     * @return
+     */
+    public static Map<String, Object> getCloudcardStoreByGeoId(DispatchContext dctx, Map<String, Object> context){
+    	LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+		String geoTypeId = (String) context.get("geoTypeId");
+    	String geoId = (String) context.get("geoId");
+		
+    	EntityCondition lookupConditions = null;
+    	//如果是市
+    	if("CITY".equals(geoTypeId)){
+    		lookupConditions = EntityCondition.makeCondition("city", EntityOperator.EQUALS, geoId);
+        //如果是区
+    	}else if("COUNTY".equals(geoTypeId)){
+    		lookupConditions = EntityCondition.makeCondition("countyGeoId", EntityOperator.EQUALS, geoId);
+    	}
+    	
+    	List<GenericValue> cloudcardGeoList = FastList.newInstance();
+    	try {
+    		cloudcardGeoList = delegator.findList("CloudcardPartyAndPostalAddress", lookupConditions, UtilMisc.toSet("partyId"), null, null, true);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+    	//店铺集合
+		List<Map<String,Object>> storeList = FastList.newInstance();
+    	//获取店铺信息
+    	for(GenericValue cloudcardGeo : cloudcardGeoList){
+    		context.put("storeId", cloudcardGeo.getString("partyId"));
+			Map<String,Object> stroeInfo = userGetStoreInfo(dctx, context);
+			Map<String, Object> storeMap = FastMap.newInstance();
+			storeMap.put("storeName",stroeInfo.get("storeName"));
+			storeMap.put("address",stroeInfo.get("storeAddress"));
+			storeMap.put("telNum",stroeInfo.get("storeTeleNumber"));
+			storeMap.put("storeId",stroeInfo.get("storeId"));
+			//storeMap.put("isGroupOwner",CloudCardHelper.bool2YN(isGroupOwner));
+			storeMap.put("isHasCard",stroeInfo.get("isHasCard"));
+			if (UtilValidate.isNotEmpty(stroeInfo.get("longitude")) && UtilValidate.isNotEmpty(stroeInfo.get("latitude"))) {
+				storeMap.put("location", "["+stroeInfo.get("longitude")+","+stroeInfo.get("latitude")+"]");
+			} 
+			storeList.add(storeMap);
+    	}
+		
+    	Map<String, Object> result = ServiceUtil.returnSuccess();
+    	result.put("storeList", storeList);
+    	return result;
+    }
+    
+    
 }

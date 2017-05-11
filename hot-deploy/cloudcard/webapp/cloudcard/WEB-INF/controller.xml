@@ -594,6 +594,13 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 	
+	<!-- 根据geoId查询店家信息 -->
+	<request-map uri="getCloudcardStoreByGeoId">
+		<event type="service" invoke="getCloudcardStoreByGeoId" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
 	<!-- 后台页面部分 Request Mappings -->
 
 	<request-map uri="main">
