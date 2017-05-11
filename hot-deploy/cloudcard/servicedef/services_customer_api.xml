@@ -234,4 +234,11 @@
 		<attribute name="cityList" type="List" mode="OUT" optional="false"><description>城市列表</description></attribute>
 	</service>
 	
+	<service name="getCityOrAreaByGeoId" engine="java"
+		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="getCityOrAreaByGeoId" auth="false">
+		<description>根据城市geoId名获取下级城市列表</description>
+		<attribute name="geoId" type="String" mode="IN" optional="false"><description>城市geoId</description></attribute>
+		<attribute name="cityList" type="List" mode="OUT" optional="false"><description>城市列表</description></attribute>
+	</service>
+	
 </services>

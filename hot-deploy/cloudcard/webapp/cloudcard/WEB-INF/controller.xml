@@ -587,6 +587,13 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 	
+	<!-- 根据geoId获取下级城市列表 -->
+	<request-map uri="getCityOrAreaByGeoId">
+		<event type="service" invoke="getCityOrAreaByGeoId" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
 	<!-- 后台页面部分 Request Mappings -->
 
 	<request-map uri="main">
