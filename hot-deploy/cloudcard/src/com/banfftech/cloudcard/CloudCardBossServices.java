@@ -1961,7 +1961,13 @@ public class CloudCardBossServices {
 	    Delegator delegator = dispatcher.getDelegator();
 	    Locale locale = (Locale) context.get("locale");
 	    String organizationPartyId = (String) context.get("organizationPartyId");
-
+        GenericValue userLogin = (GenericValue) context.get("userLogin");
+	    if (!CloudCardHelper.isManager(delegator, userLogin.getString("partyId"), organizationPartyId)) {
+            // 若不是 system userLogin，则需要验证是否是本店的manager
+            Debug.logError("partyId: " + userLogin.getString("partyId") + " 不是商户：" + organizationPartyId + "的管理人员，不能进行账户流水查询操作", module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
+        }
+	    
 	    List<Map<String, Object>> finAccounts;
         try {
         	//有可能存在授权的卡
