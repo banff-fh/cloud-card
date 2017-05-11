@@ -1979,7 +1979,7 @@ public class CloudCardBossServices {
         	cloudCardInfoSet.add("lastName");
         	finAccountList = delegator.findList("CloudCardInfo",cloudCardInfoEntityCondition, cloudCardInfoSet, UtilMisc.toList("-actualBalance"), null, true);
         	for(GenericValue finAccount : finAccountList){
-        		GenericValue partyAndTelecomNumber = delegator.findOne("PartyAndTelecomNumber", true, UtilMisc.toMap("partyId", finAccount.getString("partyId")));
+        		GenericValue partyAndTelecomNumber = delegator.findByPrimaryKeyCache("PartyAndTelecomNumber", UtilMisc.toMap("partyId", finAccount.getString("partyId")));
         		finAccount.put("contactNumber",  partyAndTelecomNumber.getString("contactNumber"));
         	}
 		} catch (GenericEntityException e) {
