@@ -1974,9 +1974,14 @@ public class CloudCardBossServices {
         	cloudCardInfoSet.add("actualBalance");
         	cloudCardInfoSet.add("ownerPartyId");
         	cloudCardInfoSet.add("paymentMethodId");
+        	cloudCardInfoSet.add("paymentMethodId");
         	cloudCardInfoSet.add("description");
         	cloudCardInfoSet.add("lastName");
         	finAccountList = delegator.findList("CloudCardInfo",cloudCardInfoEntityCondition, cloudCardInfoSet, UtilMisc.toList("-actualBalance"), null, true);
+        	for(GenericValue finAccount : finAccountList){
+        		GenericValue partyAndTelecomNumber = delegator.findOne("PartyAndTelecomNumber", true, UtilMisc.toMap("partyId", finAccount.getString("partyId")));
+        		finAccount.put("contactNumber",  partyAndTelecomNumber.getString("contactNumber"));
+        	}
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
