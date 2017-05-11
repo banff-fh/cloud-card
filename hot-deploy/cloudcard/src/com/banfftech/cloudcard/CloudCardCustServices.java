@@ -834,7 +834,7 @@ public class CloudCardCustServices {
 		
 		List<GenericValue> cityList = FastList.newInstance();
 		try {
-			cityList = delegator.findList("Geo", EntityCondition.makeCondition("geoName", EntityOperator.LIKE, "%" + cityName + "%"), UtilMisc.toSet("geoId", "geoName"), null, null, true );
+			cityList = delegator.findList("Geo", EntityCondition.makeCondition("geoName", EntityOperator.LIKE, "%" + cityName + "%"), UtilMisc.toSet("geoId", "geoTypeId", "geoName"), null, null, true );
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
