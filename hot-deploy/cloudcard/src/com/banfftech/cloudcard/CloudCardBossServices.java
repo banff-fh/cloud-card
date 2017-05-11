@@ -1961,8 +1961,8 @@ public class CloudCardBossServices {
 	    Delegator delegator = dispatcher.getDelegator();
 	    Locale locale = (Locale) context.get("locale");
 	    String organizationPartyId = (String) context.get("organizationPartyId");
-        
-        List<GenericValue> finAccountList;
+
+	    List<Map<String, Object>> finAccounts;
         try {
         	//有可能存在授权的卡
         	EntityCondition thruDateEntityCondition = EntityCondition.makeCondition(EntityOperator.OR,EntityCondition.makeCondition("thruDate", EntityOperator.GREATER_THAN, UtilDateTime.nowTimestamp()),EntityCondition.makeCondition("thruDate", EntityOperator.EQUALS, null));
@@ -1974,18 +1974,29 @@ public class CloudCardBossServices {
         	cloudCardInfoSet.add("actualBalance");
         	cloudCardInfoSet.add("ownerPartyId");
         	cloudCardInfoSet.add("paymentMethodId");
-        	cloudCardInfoSet.add("paymentMethodId");
         	cloudCardInfoSet.add("description");
         	cloudCardInfoSet.add("lastName");
-        	finAccountList = delegator.findList("CloudCardInfo",cloudCardInfoEntityCondition, cloudCardInfoSet, UtilMisc.toList("-actualBalance"), null, true);
+        	 List<GenericValue> finAccountList = delegator.findList("CloudCardInfo",cloudCardInfoEntityCondition, cloudCardInfoSet, UtilMisc.toList("-actualBalance"), null, false);
         	
         	//查询电话号码
+        	finAccounts = FastList.newInstance();
+        	Map<String, Object> finAccountMap = null;
         	for(GenericValue finAccount : finAccountList){
-        		List<GenericValue> partyAndTelecomNumbers = delegator.findByAndCache("PartyAndTelecomNumber", UtilMisc.toMap("partyId",UtilMisc.toMap("partyId", finAccount.getString("ownerPartyId"))));
-            	if(UtilValidate.isNotEmpty(partyAndTelecomNumbers)){
+        		finAccountMap = FastMap.newInstance();
+        		String partyId = finAccount.getString("ownerPartyId");
+        		List<GenericValue> partyAndTelecomNumbers = delegator.findByAndCache("PartyAndTelecomNumber", UtilMisc.toMap("partyId", partyId, "partyTypeId", "PERSON"));
+        		finAccountMap.put("cardNumber", finAccount.getString("cardNumber"));
+        		finAccountMap.put("actualBalance", finAccount.getBigDecimal("actualBalance"));
+        		finAccountMap.put("ownerPartyId", finAccount.getString("ownerPartyId"));
+        		finAccountMap.put("paymentMethodId", finAccount.getString("paymentMethodId"));
+        		finAccountMap.put("description", finAccount.getString("description"));
+        		finAccountMap.put("lastName", finAccount.getString("lastName"));
+        		if(UtilValidate.isNotEmpty(partyAndTelecomNumbers)){
             		GenericValue partyAndTelecomNumber = partyAndTelecomNumbers.get(0);
-            		finAccount.put("teleNumber",  partyAndTelecomNumber.getString("contactNumber"));
+            		String contactNumber = partyAndTelecomNumber.getString("contactNumber");
+            		finAccountMap.put("teleNumber", contactNumber);
             	}
+        		finAccounts.add(finAccountMap);
         	}
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
@@ -1993,7 +2004,7 @@ public class CloudCardBossServices {
 		}
         
 		Map<String, Object> result = ServiceUtil.returnSuccess();
-		result.put("finAccountList", finAccountList);
+		result.put("finAccountList", finAccounts);
 		return result;
 	}
 	
