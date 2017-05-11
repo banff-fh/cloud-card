@@ -2047,6 +2047,7 @@ public class CloudCardServices {
 					Map<String,Object> provinceMap = FastMap.newInstance();
 					provinceMap.put("provinceGeoId", provinceGv.getString("geoId"));
 					provinceMap.put("provinceName", provinceGv.getString("geoName"));
+					provinceMap.put("geoType", provinceGv.getString("PROVINCE_CITY"));
 					provinceList.add(provinceMap);
 				}
 				result.put("provinceList", provinceList);// 省列表
@@ -2060,6 +2061,7 @@ public class CloudCardServices {
 					Map<String, Object> cityMap = FastMap.newInstance();
 					cityMap.put("cityGeoId", cityGv.getString("geoId"));
 					cityMap.put("cityName", cityGv.getString("geoName"));
+					cityMap.put("geoType", "CITY_COUNTY");
 					cityList.add(cityMap);
 				}
 				result.put("cityList", cityList);// 市列表
@@ -2072,6 +2074,7 @@ public class CloudCardServices {
 					Map<String, Object> countyMap = FastMap.newInstance();
 					countyMap.put("countyGeoId", countyGv.getString("geoId"));
 					countyMap.put("countyName", countyGv.getString("geoName"));
+					countyMap.put("geoType", "COUNTY");
 					countyList.add(countyMap);
 				}
 				result.put("countyList", countyList);// 县列表
