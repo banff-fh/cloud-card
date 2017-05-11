@@ -867,6 +867,7 @@ public class CloudCardCustServices {
     	LocalDispatcher dispatcher = dctx.getDispatcher();
 		Locale locale = (Locale) context.get("locale");
     	String geoId = (String) context.get("geoId");
+    	String geoTypeId = (String) context.get("geoTypeId");
 		List<GenericValue> cities = FastList.newInstance();
 		try {
 			Map<String, Object> cityMap = dispatcher.runSync("getProvinceOrCityOrArea", UtilMisc.toMap("geoAssocTypeId", "CITY_COUNTY","cityId",geoId));
@@ -881,11 +882,13 @@ public class CloudCardCustServices {
 		//城市列表
 		List<Map<String, Object>> cityList = FastList.newInstance();
 		Map<String, Object> cityMap = FastMap.newInstance();
-		//增加一个固定的county(全城)
-		cityMap.put("countyGeoId", geoId);
-		cityMap.put("countyName", "全城");
-		cityMap.put("geoType", "CITY");
-		cityList.add(cityMap);
+		if("CITY".equals(geoTypeId)){
+			//增加一个固定的county(全城)
+			cityMap.put("countyGeoId", geoId);
+			cityMap.put("countyName", "全城");
+			cityMap.put("geoType", "CITY");
+			cityList.add(cityMap);
+		}
 		
 		for(Map city : cities){
 			cityMap = FastMap.newInstance();
@@ -894,8 +897,6 @@ public class CloudCardCustServices {
 			cityMap.put("geoType", city.get("geoType"));
 			cityList.add(cityMap);
 		}
-		
-		
 		
     	Map<String, Object> result = ServiceUtil.returnSuccess();
     	result.put("cityList", cityList);
