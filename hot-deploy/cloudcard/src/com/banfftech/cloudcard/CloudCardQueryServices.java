@@ -235,9 +235,6 @@ public class CloudCardQueryServices {
 				paymentMap.put("type", "2");
 				paymentsList.add(paymentMap);
 			}
-			
-			int year = UtilDateTime.getYear(payment.getTimestamp("effectiveDate"), TimeZone.getTimeZone("GMT+:08:00"), locale);
-			int month = UtilDateTime.getMonth(payment.getTimestamp("effectiveDate"), TimeZone.getTimeZone("GMT+:08:00"), locale) + 1;
 		}
 		
 		Map<String, Object> result = ServiceUtil.returnSuccess();
