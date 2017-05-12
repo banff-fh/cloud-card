@@ -147,5 +147,32 @@ public class CloudCardLevelScoreUtil {
 
         return retMap;
     }
+    
+    /**
+     * 获取店铺信用等级
+     * 
+     * @param delegator
+     * @param userPartyId
+     * @return
+     * @throws GenericEntityException
+     */
+    public static GenericValue getBizLevel(Delegator delegator, String storeId) throws GenericEntityException {
+        EntityCondition dateCond = EntityUtil.getFilterByDateExpr();
+        EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toMap("partyId", storeId,"partyClassificationTypeId","STORE_LEVEL_CLASSIFI"));
+        GenericValue partyClassification = EntityUtil.getFirst(
+                delegator.findList("PartyClassificationAndPartyClassificationGroup", EntityCondition.makeCondition(cond, dateCond), null, UtilMisc.toList("-fromDate"), null, true));
+
+        if (null == partyClassification) {
+            // 如果没有，则返回 最初级
+            Map<String, Object> partyClassificationtMap = FastMap.newInstance();
+            partyClassificationtMap.put("partyId", storeId);
+            partyClassificationtMap.put("partyClassificationGroupId", "LEVEL_5");
+            partyClassificationtMap.put("fromDate", UtilDateTime.nowTimestamp());
+            partyClassification = delegator.makeValue("PartyClassification", partyClassificationtMap);
+            partyClassification.create();
+        }
+
+        return partyClassification;
+    }
 
 }

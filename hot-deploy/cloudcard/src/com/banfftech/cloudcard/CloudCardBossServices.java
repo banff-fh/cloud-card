@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilDateTime;
@@ -33,6 +32,7 @@ import com.auth0.jwt.JWTExpiredException;
 import com.auth0.jwt.JWTVerifier;
 import com.banfftech.cloudcard.constant.CloudCardConstant;
 import com.banfftech.cloudcard.sms.SmsServices;
+import com.banfftech.cloudcard.util.CloudCardLevelScoreUtil;
 
 import javolution.util.FastList;
 import javolution.util.FastMap;
@@ -2035,8 +2035,6 @@ public class CloudCardBossServices {
 		// 分页相关
         Integer viewIndex =  (Integer) context.get("viewIndex");
         Integer viewSize  = (Integer) context.get("viewSize");
-		
-      
         
         List<GenericValue> finAccountAndRoles;
     	try {
@@ -2126,13 +2124,7 @@ public class CloudCardBossServices {
             }  
         }
 
-		Map<String, Object> paymentsMap = FastMap.newInstance();
-		
 		List<Map<String,Object>> paymentsList = FastList.newInstance();
-		int oldYear = 2000;
-		int oldMonth = 01;
-		boolean isNew = false;
-		List<Object> yearAndMonthPaymentList = FastList.newInstance();
 		for(GenericValue payment : payments){
 			Map<String, Object> paymentMap = FastMap.newInstance();
 			paymentMap.put("amount", payment.get("amount"));
@@ -2148,38 +2140,11 @@ public class CloudCardBossServices {
 				paymentMap.put("type", "2");
 				paymentsList.add(paymentMap);
 			}
-			
-			int year = UtilDateTime.getYear(payment.getTimestamp("effectiveDate"), TimeZone.getTimeZone("GMT+:08:00"), locale);
-			int month = UtilDateTime.getMonth(payment.getTimestamp("effectiveDate"), TimeZone.getTimeZone("GMT+:08:00"), locale) + 1;
-			if(!isNew){
-				oldYear = year;
-				oldMonth = month;
-				isNew = true;
-			}
-			if(oldYear == year && oldMonth == month){
-				paymentsMap.put("dateTime", String.valueOf(year) +"年"+ String.valueOf(month)+"月");
-				paymentsMap.put("paymentsList", paymentsList);
-				if(!yearAndMonthPaymentList.contains(paymentsMap)){
-					yearAndMonthPaymentList.add(0, paymentsMap);
-				}else{
-					yearAndMonthPaymentList.set(0, paymentsMap);
-				}
-				
-			}else{
-				paymentsList.clear();
-				paymentsMap.clear();
-				paymentsMap.put("dateTime", String.valueOf(year) +"年"+ String.valueOf(month)+"月");
-				paymentsMap.put("paymentsList", paymentsList);
-				yearAndMonthPaymentList.set(0, paymentsMap);
-			}
-			oldYear = year;
-			oldMonth = month;
 		}
 		
 		Map<String, Object> result = ServiceUtil.returnSuccess();
-		result.put("yearAndMonthPaymentList", yearAndMonthPaymentList);
+		result.put("paymentsList", paymentsList);
 		result.put("totalPage", totalPage);
-
 		return result;
 	}
 	
@@ -2597,5 +2562,40 @@ public class CloudCardBossServices {
 		result.put("status", status);
 		return result;
 	}
-
+	
+	/**
+	 * 我的信用
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> bizGetMyStorelevel(DispatchContext dctx, Map<String, Object> context){
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+		String storeId = (String) context.get("storeId");
+		
+		GenericValue userLogin = (GenericValue) context.get("userLogin");
+        
+        // 数据权限检查: 登录用户是否是本店的管理员
+        if (!CloudCardHelper.isManager(delegator, userLogin.getString("partyId"), storeId)) {
+            Debug.logError("partyId: " + userLogin.getString("partyId") + " 不是商户：" + storeId + "的管理人员，不能操作", module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
+        }
+        
+        String storeLevel = null;
+        try {
+			GenericValue level = CloudCardLevelScoreUtil.getBizLevel(delegator, storeId);
+			if(UtilValidate.isNotEmpty(level)){
+				storeLevel = level.getString("partyClassificationGroupId");
+			}
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+        
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+			result.put("storeLevel", storeLevel);
+		return result;
+	}
 }

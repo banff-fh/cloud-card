@@ -348,7 +348,7 @@
 	    <attribute name="ownerPartyId" type="String" mode="IN" optional="false"/>
 	   	<attribute name="cardId" type="String" mode="IN" optional="false"/>
 		<attribute name="type" type="String" mode="IN" optional="true"/>
-		<attribute name="yearAndMonthPaymentList" type="List" mode="OUT" optional="false"/>
+		<attribute name="paymentsList" type="List" mode="OUT" optional="false"/>
 		<attribute name="totalPage" type="Integer" mode="OUT" optional="false"/>
  	</service>
  	
@@ -426,5 +426,12 @@
 		<attribute name="week" type="Long" mode="OUT" optional="false"/>
 		<attribute name="hour" type="Long" mode="OUT" optional="false"/>
 		<attribute name="status" type="String" mode="OUT" optional="false"/>
+ 	</service>
+ 	
+ 	<service name="bizGetMyStorelevel" engine="java"
+            location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizGetMyStorelevel" auth="true">
+        <description>我的信用</description>
+		<attribute name="storeId" type="String" mode="IN" optional="false"/>
+		<attribute name="storeLevel" type="String" mode="OUT" optional="false"/>
  	</service>
 </services>

@@ -601,6 +601,13 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 	
+	<!-- 我的信用等级 -->
+	<request-map uri="bizGetMyStorelevel">
+		<event type="service" invoke="bizGetMyStorelevel" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
 	<!-- 后台页面部分 Request Mappings -->
 
 	<request-map uri="main">
