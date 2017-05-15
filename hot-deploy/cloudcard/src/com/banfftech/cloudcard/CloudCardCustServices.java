@@ -959,6 +959,8 @@ public class CloudCardCustServices {
 			if (UtilValidate.isNotEmpty(stroeInfo.get("longitude")) && UtilValidate.isNotEmpty(stroeInfo.get("latitude"))) {
 				storeMap.put("location", "["+stroeInfo.get("longitude")+","+stroeInfo.get("latitude")+"]");
 			} 
+			String storeImg = EntityUtilProperties.getPropertyValue("cloudcard","cardImg." + cloudcardGeo.getString("partyId"),delegator);
+			storeMap.put("storeImg",storeImg);
 			storeList.add(storeMap);
     	}
 		
