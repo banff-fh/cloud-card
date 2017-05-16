@@ -1991,7 +1991,7 @@ public class CloudCardBossServices {
         		finAccountMap = FastMap.newInstance();
         		String partyId = finAccount.getString("ownerPartyId");
         		List<GenericValue> partyAndTelecomNumbers = delegator.findByAndCache("PartyAndTelecomNumber", UtilMisc.toMap("partyId", partyId, "partyTypeId", "PERSON"));
-        		finAccountMap.put("cardNumber", finAccount.getString("cardNumber").replaceAll("(\\d{3})\\d{4}(\\d{4})","$1****$2"));
+        		finAccountMap.put("cardNumber", finAccount.getString("cardNumber"));
         		finAccountMap.put("actualBalance", finAccount.getBigDecimal("actualBalance"));
         		finAccountMap.put("ownerPartyId", finAccount.getString("ownerPartyId"));
         		finAccountMap.put("paymentMethodId", finAccount.getString("paymentMethodId"));
@@ -2000,7 +2000,7 @@ public class CloudCardBossServices {
         		if(UtilValidate.isNotEmpty(partyAndTelecomNumbers)){
             		GenericValue partyAndTelecomNumber = partyAndTelecomNumbers.get(0);
             		String contactNumber = partyAndTelecomNumber.getString("contactNumber");
-            		finAccountMap.put("teleNumber", contactNumber);
+            		finAccountMap.put("teleNumber", contactNumber.replaceAll("(\\d{3})\\d{4}(\\d{4})","$1****$2"));
             	}
         		finAccounts.add(finAccountMap);
         	}
