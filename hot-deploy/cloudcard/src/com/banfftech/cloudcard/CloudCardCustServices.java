@@ -152,7 +152,9 @@ public class CloudCardCustServices {
 		if(!"0".equalsIgnoreCase(lbsResult.get("total").toString())){
 			JSONArray jsonArray = JSONObject.parseArray(lbsResult.get("contents").toString());
 			for(int i = 0 ;i<jsonArray.size();i++){
-				
+				if("Y".equalsIgnoreCase(jsonArray.getJSONObject(i).getObject("isRemoved",String.class))){
+					continue;
+				}
 				try {
 				
 					boolean isGroupOwner = CloudCardHelper.isStoreGroupOwner(delegator,jsonArray.getJSONObject(i).getObject("storeId", String.class), true);
