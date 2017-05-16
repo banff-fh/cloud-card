@@ -152,17 +152,21 @@ public class CloudCardCustServices {
 		if(!"0".equalsIgnoreCase(lbsResult.get("total").toString())){
 			JSONArray jsonArray = JSONObject.parseArray(lbsResult.get("contents").toString());
 			for(int i = 0 ;i<jsonArray.size();i++){
+				//判断店家是否存在
 				if("Y".equalsIgnoreCase(jsonArray.getJSONObject(i).getObject("isRemoved",String.class))){
 					continue;
 				}
 				try {
-				
 					boolean isGroupOwner = CloudCardHelper.isStoreGroupOwner(delegator,jsonArray.getJSONObject(i).getObject("storeId", String.class), true);
-					
 					context.put("storeId", jsonArray.getJSONObject(i).getObject("storeId",String.class));
 					//获取店铺信息
 					Map<String,Object> stroeInfo = userGetStoreInfo(dctx, context);
-						
+					
+					//如果店铺状态为PARTY_DISABLED则跳出循环
+					if("PARTY_DISABLED".equals(stroeInfo.get("statusId"))){
+						continue;
+			        }
+					
 					Map<String, Object> storeMap = FastMap.newInstance();
 					storeMap.put("storeName",stroeInfo.get("storeName"));
 					storeMap.put("address",stroeInfo.get("storeAddress"));
@@ -211,6 +215,7 @@ public class CloudCardCustServices {
 		
 		String storeId = (String) context.get("storeId");
 		String storeName = null;
+        String statusId = "PARTY_DISABLED";
 		String storeImg = null;
 		String storeAddress = null;
 		String storeTeleNumber = null;
@@ -222,6 +227,7 @@ public class CloudCardCustServices {
 		Map<String,Object> cardAndStoreInfoMap = CloudCardHelper.getCardAndStoreInfo(dctx, context);
 		if(UtilValidate.isNotEmpty(cardAndStoreInfoMap)){
 			storeName = (String) cardAndStoreInfoMap.get("storeName");
+			statusId = (String) cardAndStoreInfoMap.get("statusId");
 			List<Object> cloudCardList  = UtilGenerics.checkList(cardAndStoreInfoMap.get("cloudCardList")) ;
 			if(cloudCardList.size() <= 0 ){
 				isHasCard = CloudCardConstant.IS_N;
@@ -268,6 +274,7 @@ public class CloudCardCustServices {
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("storeId", storeId);
 		result.put("storeName", storeName);
+		result.put("statusId", statusId);
 		result.put("storeImg", storeImg);
 		result.put("storeAddress", storeAddress);
 		result.put("storeTeleNumber", storeTeleNumber);
@@ -930,12 +937,15 @@ public class CloudCardCustServices {
     		geoIdConditions = EntityCondition.makeCondition("countyGeoId", EntityOperator.EQUALS, geoId);
     	}
     	
+    	EntityCondition statusIdCond = EntityCondition.makeCondition("statusId", EntityOperator.EQUALS, "PARTY_ENABLED");
+		EntityCondition geoAndstatusCond = EntityCondition.makeCondition(EntityOperator.AND, geoIdConditions, statusIdCond);
+		
     	//如果有店名，根据店名查询
     	if(UtilValidate.isNotEmpty(storeName)){
-    		EntityCondition storeNameCond = EntityCondition.makeCondition("groupName", EntityOperator.LIKE, "%" + storeName + "%");
-    		lookupConditions = EntityCondition.makeCondition(EntityOperator.AND, geoIdConditions, storeNameCond);
+    		EntityCondition  storeNameCond = EntityCondition.makeCondition("groupName", EntityOperator.LIKE, "%" + storeName + "%");
+    		lookupConditions = EntityCondition.makeCondition(EntityOperator.AND, geoAndstatusCond, storeNameCond);
     	}else{
-    		lookupConditions = geoIdConditions;
+    		lookupConditions = geoAndstatusCond;
     	}
     	List<GenericValue> cloudcardGeoList = FastList.newInstance();
     	try {

@@ -733,7 +733,7 @@ public class CloudCardHelper {
         lookupFields.put("partyIdentificationTypeId", "STORE_QR_CODE");
         GenericValue partyIdentification = EntityUtil.getFirst(delegator.findByAnd("PartyIdentification", lookupFields));
         if (UtilValidate.isNotEmpty(partyIdentification)) {
-            partyGroup = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", partyIdentification.getString("partyId")));
+            partyGroup = delegator.findByPrimaryKey("PartyAndGroup", UtilMisc.toMap("partyId", partyIdentification.getString("partyId")));
         }
         return partyGroup;
     }
@@ -750,7 +750,7 @@ public class CloudCardHelper {
     public static GenericValue getPartyGroupByStoreId(String storeId, Delegator delegator) throws GenericEntityException {
         GenericValue partyGroup = null;
         if (UtilValidate.isNotEmpty(storeId)) {
-            partyGroup = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", storeId));
+            partyGroup = delegator.findByPrimaryKey("PartyAndGroup", UtilMisc.toMap("partyId", storeId));
         }
         return partyGroup;
     }
@@ -1069,6 +1069,7 @@ public class CloudCardHelper {
         String storeTeleNumber = "";
         String longitude = "";
         String latitude = "";
+        String statusId = "PARTY_DISABLED";
         try {
             if (UtilValidate.isNotEmpty(qrCode)) {
                 partyGroup = CloudCardHelper.getPartyGroupByQRcode(qrCode, delegator);
@@ -1079,7 +1080,7 @@ public class CloudCardHelper {
             Debug.logError(e.getMessage(), module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
         }
-
+        
         if (UtilValidate.isEmpty(partyGroup) && UtilValidate.isNotEmpty(qrCode)) {
             Debug.logWarning("商户qrCode:" + qrCode + "不存在", module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardOrganizationPartyNotFound", locale));
@@ -1089,6 +1090,7 @@ public class CloudCardHelper {
         }
 
         storeId = partyGroup.getString("partyId");
+        statusId = partyGroup.getString("statusId");
         String groupName = partyGroup.getString("groupName");
         String groupOwnerId = null;
 
@@ -1135,6 +1137,7 @@ public class CloudCardHelper {
         }
 
         result.put("storeId", storeId);
+        result.put("statusId", statusId);
         result.put("groupOwnerId", groupOwnerId);
         result.put("storeName", groupName);
         result.put("storeAddress", storeAddress);
