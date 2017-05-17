@@ -73,7 +73,10 @@ public class SmsServices {
 		}else if(smsType.equals(CloudCardConstant.USER_PAY_SMS_TYPE)){
 			BigDecimal amount = (BigDecimal) context.get("amount");
 			String storeName = (String) context.get("storeName");
-			smsParamString = "{storeName:'"+storeName+"',amount:'"+amount+"'}";
+			BigDecimal cardBalance = (BigDecimal) context.get("cardBalance");
+			String cardCode = (String) context.get("cardCode");
+			
+			smsParamString = "{storeName:'"+storeName+"',amount:'"+amount+"',cardCode:'"+cardCode+"',cardBalance:'"+cardBalance+"'}";
 			smsType = "sms.smsUserPayTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_PAY_CAPTCHA_SMS_TYPE)){
 			String amount = (String) context.get("amount");

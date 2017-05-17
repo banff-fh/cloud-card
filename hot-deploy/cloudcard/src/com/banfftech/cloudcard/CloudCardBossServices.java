@@ -1582,6 +1582,8 @@ public class CloudCardBossServices {
 		context.put("phone", teleNumber);
 		context.put("storeName", partyGroup.getString("groupName"));
 		context.put("amount", amount);
+		context.put("cardCode", cardCode.substring(cardCode.length()-4,cardCode.length()));
+		context.put("cardBalance", cloudCardWithdrawOut.get("cardBalance"));
 		SmsServices.sendMessage(dctx, context);
 		
 		//修改验证码状态
