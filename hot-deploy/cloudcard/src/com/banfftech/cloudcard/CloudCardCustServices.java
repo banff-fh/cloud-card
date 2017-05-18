@@ -109,6 +109,8 @@ public class CloudCardCustServices {
         }else{
     		params.put("location", longitude + "," + latitude);
     		params.put("radius", radius);
+    		params.put("page_index","0");
+    		params.put("page_size","50");
         	lbsResult = JSONObject.parseObject(BaiduLBSUtil.nearby(params));
         	
         	String geocoder = BaiduLBSUtil.geocoder(UtilMisc.toMap("ak", ak, "location", latitude + "," + longitude, "output", "json", "callback", "showLocation"));
