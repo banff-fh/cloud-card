@@ -1674,20 +1674,23 @@ public class CloudCardBossServices {
 		if(UtilValidate.isEmpty(partyGroup)){
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+		//卡号
+		String cardCode = (String) cloudCardMap.get("cardCode");
 		
 		//发送充值短信
 		context.put("smsType", CloudCardConstant.USER_RECHARGE_SMS_TYPE);
 		context.put("phone", teleNumber);
 		context.put("storeName", partyGroup.getString("groupName"));
 		context.put("amount", amount);
+		context.put("cardCode", cardCode.substring(cardCode.length()-4,cardCode.length()));
+		context.put("cardBalance", rechargeCloudCardOutMap.get("actualBalance"));
 		SmsServices.sendMessage(dctx, context);
 		
 		//3、返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("teleNumber", teleNumber);
 		result.put("cardName", cloudCardMap.get("cardName"));
-		result.put("cardCode", cloudCardMap.get("cardCode"));
+		result.put("cardCode", cardCode);
 		result.put("amount", amount);
 		result.put("cardBalance", rechargeCloudCardOutMap.get("actualBalance"));
 		result.put("customerPartyId", customerMap.getString("partyId"));

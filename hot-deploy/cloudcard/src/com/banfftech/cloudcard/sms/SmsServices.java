@@ -86,7 +86,10 @@ public class SmsServices {
 		}else if(smsType.equals(CloudCardConstant.USER_RECHARGE_SMS_TYPE)){
 			BigDecimal amount = (BigDecimal) context.get("amount");
 			String storeName = (String) context.get("storeName");
-			smsParamString = "{storeName:'"+storeName+"',amount:'"+amount+"'}";
+			String cardCode = (String) context.get("cardCode");
+			BigDecimal cardBalance = (BigDecimal) context.get("cardBalance");
+
+			smsParamString = "{storeName:'"+storeName+"',cardCode:'"+ cardCode+"',cardBalance:'"+cardBalance+"',amount:'"+amount+"'}";
 			smsType = "sms.smsUserRechargeTemplateCode";
 		}
 		//初始化短信发送配置文件
