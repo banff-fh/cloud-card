@@ -26,9 +26,6 @@
 	<classpathentry kind="lib" path="framework/base/lib/hamcrest-all-1.2.jar"/>
 	<classpathentry kind="lib" path="framework/base/lib/fop-1.0.jar"/>
 	<classpathentry kind="lib" path="framework/base/lib/freemarker-2.3.19.jar"/>
-	<classpathentry kind="lib" path="framework/base/lib/httpclient-4.1.1.jar"/>
-	<classpathentry kind="lib" path="framework/base/lib/httpclient-cache-4.1.1.jar"/>
-	<classpathentry kind="lib" path="framework/base/lib/httpcore-4.1.jar"/>
 	<classpathentry kind="lib" path="framework/base/lib/httpmime-4.1.1.jar"/>
 	<classpathentry kind="lib" path="framework/base/lib/httpunit-1.7.jar"/>
 	<classpathentry kind="lib" path="framework/base/lib/ical4j-1.0-rc2.jar"/>
@@ -215,5 +212,19 @@
 	<classpathentry excluding="org/enhydra/|org/ofbiz/" kind="src" path="specialpurpose/shark/src"/>
 	<classpathentry kind="src" path="specialpurpose/webpos/src"/>
 	<classpathentry kind="src" path="specialpurpose/workflow/src"/>
+	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/alipay-sdk-java20161121110022.jar"/>
+	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/aliyun-sdk-oss-2.5.0.jar"/>
+	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/fastjson-1.2.21.jar"/>
+	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/gson-2.2.4.jar"/>
+	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/java-jwt-2.2.1.jar"/>
+	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/jiguang-common-0.1.6.jar"/>
+	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/jpush-client-3.2.11.jar"/>
+	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/log4j-1.2.17.jar"/>
+	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/slf4j-api-1.7.7.jar"/>
+	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/slf4j-log4j12-1.7.7.jar"/>
+	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/taobao-sdk-java-auto_1455552377940-20160607.jar"/>
+	<classpathentry kind="lib" path="framework/base/lib/httpclient-4.4.1.jar"/>
+	<classpathentry kind="lib" path="framework/base/lib/httpclient-cache-4.4.1.jar"/>
+	<classpathentry kind="lib" path="framework/base/lib/httpcore-4.4.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

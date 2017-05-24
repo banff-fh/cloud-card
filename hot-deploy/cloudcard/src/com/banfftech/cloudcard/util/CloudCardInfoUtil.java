@@ -139,6 +139,13 @@ public class CloudCardInfoUtil {
 		} catch (GenericEntityException e) {
 			 Debug.logError(e.getMessage(), module);
 		}
+		
+		// 获取店铺联系方式
+        Map<String, Object> geoAndContactMechInfoMap = CloudCardHelper.getGeoAndContactMechInfoByStoreId(delegator, null, distributorPartyId);
+        if (UtilValidate.isNotEmpty(geoAndContactMechInfoMap)) {
+            cloudCardMap.put("cloudCardMap", geoAndContactMechInfoMap.get("storeAddress"));
+            cloudCardMap.put("storeTeleNumber", geoAndContactMechInfoMap.get("storeTeleNumber"));
+        }
 
         return cloudCardMap;
     }
