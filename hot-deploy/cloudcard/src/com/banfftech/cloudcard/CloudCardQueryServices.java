@@ -360,13 +360,14 @@ public class CloudCardQueryServices {
 			Map<String, Object> paymentMap = FastMap.newInstance();
 			paymentMap.put("amount", payment.get("amount"));
 			paymentMap.put("transDate", UtilDateTime.toCalendar(payment.getTimestamp("effectiveDate")).getTimeInMillis());
+			String cardCode = payment.getString("cardCode");
 			if("GC_DEPOSIT".equals(payment.getString("paymentTypeId"))){
 				//partyToLastName partyToFirstName
 				paymentMap.put("customerName", payment.get("partyToFirstName"));
 				paymentMap.put("tradePartyName", payment.get("partyFromGroupName"));
 				paymentMap.put("typeDesc", "充值");
 				paymentMap.put("type", "1");
-				paymentMap.put("cardCode", payment.getString("cardCode"));
+				paymentMap.put("cardCode", cardCode.substring(cardCode.length()-4,cardCode.length()));
                 paymentMap.put("cardSellerName", payment.getString("distributorPartyName"));
 				paymentsList.add(paymentMap);
 			}else if ("GC_WITHDRAWAL".equals(payment.getString("paymentTypeId"))){
@@ -375,7 +376,7 @@ public class CloudCardQueryServices {
 				paymentMap.put("tradePartyName", payment.get("partyToGroupName"));
 				paymentMap.put("typeDesc", "支付");
 				paymentMap.put("type", "2");
-				paymentMap.put("cardCode", payment.getString("cardCode"));
+				paymentMap.put("cardCode", cardCode.substring(cardCode.length()-4,cardCode.length()));
 				paymentMap.put("cardSellerName", payment.getString("distributorPartyName"));
 				paymentsList.add(paymentMap);
 			}
