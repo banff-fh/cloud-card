@@ -37,7 +37,7 @@
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsUserPayVCTemplateCode" systemPropertyValue="SMS_60695186" description="消费验证短信平台模版号"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsUserPayTemplateCode" systemPropertyValue="SMS_60870114" description="消费通知短信平台模版号"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsUserRechargeTemplateCode" systemPropertyValue="SMS_60790512" description="充值通知短信平台模版号"/>
-    <SystemProperty systemResourceId="cloudcard" systemPropertyId="userPurchaseCardTemplateCode" systemPropertyValue="SMS_68520007" description="充值通知短信平台模版号"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsUserPurchaseCardTemplateCode" systemPropertyValue="SMS_68520007" description="充值通知短信平台模版号"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.url" systemPropertyValue="http://gw.api.taobao.com/router/rest" description="短信平台请求地址"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.validTime" systemPropertyValue="900" description="短信使用有效时间"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="token.expirationTime" systemPropertyValue="1296000" description="token的有效时间"/>

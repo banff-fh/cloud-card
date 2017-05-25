@@ -97,7 +97,7 @@ public class SmsServices {
 			BigDecimal cardBalance = (BigDecimal) context.get("cardBalance");
 
 			smsParamString = "{storeName:'"+storeName+"',cardCode:'"+ cardCode+"',cardBalance:'"+cardBalance+"'}";
-			smsType = "sms.userPurchaseCardTemplateCode";
+			smsType = "sms.smsUserPurchaseCardTemplateCode";
 		}
 		//初始化短信发送配置文件
 		getSmsProperty(delegator,smsType);
