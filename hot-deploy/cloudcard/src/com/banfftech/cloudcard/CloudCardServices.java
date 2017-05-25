@@ -463,6 +463,7 @@ public class CloudCardServices {
 		
 		//开卡成功后发送开卡短信通知
 		if(UtilValidate.isNotEmpty(teleNumber)){
+			cardCode = (String) context.get("cardCode");
 			context.put("smsType", CloudCardConstant.USER_PURCHASE_CARD_SMS_TYPE);
 			context.put("phone", teleNumber);
 			context.put("storeName", partyGroup.getString("groupName"));
