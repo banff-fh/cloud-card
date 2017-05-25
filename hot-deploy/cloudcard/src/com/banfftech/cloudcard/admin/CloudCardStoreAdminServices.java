@@ -118,7 +118,7 @@ public class CloudCardStoreAdminServices {
                 return createUpdatePartyTelecomNumberMap;
             }
             
-            Map<String, Object> createPartyContactMechPurposeMap = dispatcher.runSync("createPartyContactMechPurpose", UtilMisc.toMap("userLogin", userLogin, "contactMechId", createUpdatePartyTelecomNumberMap.get("contactMechMap"), "contactMechPurposeTypeId", "STORE_TELNUM"));
+            Map<String, Object> createPartyContactMechPurposeMap = dispatcher.runSync("createPartyContactMechPurpose", UtilMisc.toMap("userLogin", userLogin, "contactMechId", createUpdatePartyTelecomNumberMap.get("contactMechId"), "contactMechPurposeTypeId", "STORE_TELNUM"));
             if (!ServiceUtil.isSuccess(createPartyContactMechPurposeMap)) {
                 return createPartyContactMechPurposeMap;
             }
