@@ -31,6 +31,7 @@ import com.auth0.jwt.JWTExpiredException;
 import com.auth0.jwt.JWTVerifier;
 import com.banfftech.cloudcard.constant.CloudCardConstant;
 import com.banfftech.cloudcard.jpush.JPushServices;
+import com.banfftech.cloudcard.sms.SmsServices;
 import com.banfftech.cloudcard.util.CloudCardInfoUtil;
 
 import javolution.util.FastList;
@@ -325,6 +326,9 @@ public class CloudCardServices {
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
 		}
 		
+		// 传入的organizationPartyId必须是一个存在的partyGroup
+		GenericValue partyGroup = null;
+		
 		//如果cardCode不存在,则创建一个
 		if(UtilValidate.isEmpty(cardCode)){
 			//根据teleNumber查找用户，不存在则创建 
@@ -335,8 +339,7 @@ public class CloudCardServices {
 			}		
 			String customerPartyId = (String) getOrCreateCustomerOut.get("customerPartyId");
 			
-			// 传入的organizationPartyId必须是一个存在的partyGroup
-			GenericValue partyGroup;
+			
 			try {
 				partyGroup = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", organizationPartyId));
 			} catch (GenericEntityException e) {
@@ -458,6 +461,15 @@ public class CloudCardServices {
 			return rechargeCloudCardOutMap;
 		}
 		
+		//开卡成功后发送开卡短信通知
+		if(UtilValidate.isNotEmpty(teleNumber)){
+			context.put("smsType", CloudCardConstant.USER_PURCHASE_CARD_SMS_TYPE);
+			context.put("phone", teleNumber);
+			context.put("storeName", partyGroup.getString("groupName"));
+			context.put("cardCode", cardCode.substring(cardCode.length()-4,cardCode.length()));
+			context.put("cardBalance", rechargeCloudCardOutMap.get("actualBalance"));
+			SmsServices.sendMessage(dctx, context);
+		}
 		
 		//3、返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
