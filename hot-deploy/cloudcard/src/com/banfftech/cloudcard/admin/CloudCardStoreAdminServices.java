@@ -53,6 +53,7 @@ public class CloudCardStoreAdminServices {
 
         String storeName = (String) context.get("storeName"); // 商家名
         String description = (String) context.get("description"); // 描述
+        String storeTeleNumber = (String) context.get("storeTeleNumber"); //店家联系方式
         String storeOwnerName = (String) context.get("storeOwnerName"); // 店主名
         String storeOwnerTeleNumber = (String) context.get("storeOwnerTeleNumber"); // 店主电话
         String geoCountry = (String) context.get("geoCountry"); // 国家GeoId
@@ -110,7 +111,18 @@ public class CloudCardStoreAdminServices {
             if (!ServiceUtil.isSuccess(createPartyRoleOutMap)) {
                 return createPartyRoleOutMap;
             }
-
+            
+            //创建店家联系电话
+            Map<String, Object> createUpdatePartyTelecomNumberMap = dispatcher.runSync("createUpdatePartyTelecomNumber", UtilMisc.toMap("partyId", cloudCardStroreId, "contactNumber", storeTeleNumber));
+            if (!ServiceUtil.isSuccess(createUpdatePartyTelecomNumberMap)) {
+                return createUpdatePartyTelecomNumberMap;
+            }
+            
+            Map<String, Object> createPartyContactMechPurposeMap = dispatcher.runSync("createPartyContactMechPurpose", UtilMisc.toMap("contactMechId", createUpdatePartyTelecomNumberMap.get("contactMechMap"), "contactMechPurposeTypeId", "STORE_TELNUM"));
+            if (!ServiceUtil.isSuccess(createPartyContactMechPurposeMap)) {
+                return createPartyContactMechPurposeMap;
+            }
+            
             // 创建店主
             if (newManager) {
                 if (UtilValidate.isEmpty(storeOwnerPartyId)) {

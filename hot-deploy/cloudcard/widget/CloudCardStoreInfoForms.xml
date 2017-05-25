@@ -177,6 +177,7 @@ under the License.
         
         <field name="description" title="描述" ><text size="60" maxlength="250"/></field>
         
+        <field name="storeTeleNumber" title="店家联系电话" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="10" maxlength="20"/></field>
 
         <field position="1" name="storeOwnerName" title="店长姓名" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="40" maxlength="60"/></field>
         <field position="2" name="storeOwnerTeleNumber" title="店长手机" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="40" maxlength="60"/></field>
