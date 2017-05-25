@@ -113,12 +113,12 @@ public class CloudCardStoreAdminServices {
             }
             
             //创建店家联系电话
-            Map<String, Object> createUpdatePartyTelecomNumberMap = dispatcher.runSync("createUpdatePartyTelecomNumber", UtilMisc.toMap("partyId", cloudCardStroreId, "contactNumber", storeTeleNumber));
+            Map<String, Object> createUpdatePartyTelecomNumberMap = dispatcher.runSync("createUpdatePartyTelecomNumber", UtilMisc.toMap("userLogin", userLogin, "partyId", cloudCardStroreId, "contactNumber", storeTeleNumber));
             if (!ServiceUtil.isSuccess(createUpdatePartyTelecomNumberMap)) {
                 return createUpdatePartyTelecomNumberMap;
             }
             
-            Map<String, Object> createPartyContactMechPurposeMap = dispatcher.runSync("createPartyContactMechPurpose", UtilMisc.toMap("contactMechId", createUpdatePartyTelecomNumberMap.get("contactMechMap"), "contactMechPurposeTypeId", "STORE_TELNUM"));
+            Map<String, Object> createPartyContactMechPurposeMap = dispatcher.runSync("createPartyContactMechPurpose", UtilMisc.toMap("userLogin", userLogin, "contactMechId", createUpdatePartyTelecomNumberMap.get("contactMechMap"), "contactMechPurposeTypeId", "STORE_TELNUM"));
             if (!ServiceUtil.isSuccess(createPartyContactMechPurposeMap)) {
                 return createPartyContactMechPurposeMap;
             }
