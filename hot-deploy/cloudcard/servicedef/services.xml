@@ -155,6 +155,7 @@
 		<attribute name="tag" type="String" mode="IN" optional="true"><description>发送到那个标签</description></attribute>
 		<attribute name="extras" type="Map" mode="IN" optional="true"><description>推送的extrasMap</description></attribute>
 	
+		<attribute name="storeName" type="String" mode="IN" optional="true"><description>店名</description></attribute>
 		<attribute name="cardId" type="String" mode="IN" optional="true"><description>卡Id</description></attribute>
 		<attribute name="amount" type="BigDecimal" mode="IN" optional="true"><description>金额</description></attribute>
 		<attribute name="cardBalance" type="BigDecimal" mode="IN" optional="true"><description>余额</description></attribute>
