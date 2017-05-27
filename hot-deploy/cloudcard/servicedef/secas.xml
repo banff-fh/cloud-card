@@ -57,7 +57,7 @@ under the License.
         <set field-name="sendType" value="one"/>
         <set field-name="content" value="充值成功" />
         <set field-name="partyId" env-name="customerPartyId" />
-        <set field-name="message" value='{"type":"recharge","cardId":"${cardId}","amount":"${amount}","cardBalance":"${cardBalance}","storeName":"${storeName}}' />
+        <set field-name="message" value='{"type":"recharge","cardId":"${cardId}","amount":"${amount}","cardBalance":"${cardBalance}","storeName":"${storeName}"}' />
         <action service="pushNotifOrMessage"  mode="async"/>
     </eca>
 
