@@ -608,6 +608,20 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 	
+	<!-- 上传用户头像 -->
+	<request-map uri="userUploadAvatar">
+		<event type="service" invoke="userUploadAvatar" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
+	<!-- 删除用户头像 -->
+	<request-map uri="userDelAvatar">
+		<event type="service" invoke="userDelAvatar" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
 	<!-- 后台页面部分 Request Mappings -->
 
 	<request-map uri="main">

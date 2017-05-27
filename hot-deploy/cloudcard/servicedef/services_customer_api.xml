@@ -254,5 +254,20 @@
 		<attribute name="storeName" type="String" mode="IN" optional="true"><description>店名</description></attribute>
 		<attribute name="storeList" type="List" mode="OUT" optional="false"><description>店铺列表</description></attribute>
 	</service>
+	<service name="userUploadAvatar" engine="java"
+            location="com.banfftech.cloudcard.CloudCardCustServices" invoke="userUploadAvatar" auth="true">
+        <description>用户上传头像</description>
+        <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家partyId</description></attribute>
+        <attribute mode="IN" name="uploadedFile" type="java.nio.ByteBuffer" optional="false"><description>文件流</description></attribute>
+		<attribute mode="IN" name="_uploadedFile_fileName" type="String" optional="false"><description>文件名</description></attribute>
+		<attribute mode="IN" name="_uploadedFile_contentType" type="String" optional="false"><description>文件mime类型</description></attribute>
+	</service>
 	
+	<service name="userDelAvatar" engine="java"
+            location="com.banfftech.cloudcard.CloudCardCustServices" invoke="userDelAvatar" auth="true">
+        <description>用户删除头像</description>
+        <attribute mode="IN" name="contentId" type="String" optional="false"><description>contentId</description></attribute>
+        <attribute name="ossUrl" type="String" mode="OUT" optional="false"><description>oss路径</description></attribute>
+        <attribute name="userInfoImgList" type="List" mode="OUT" optional="false"><description>图片信息</description></attribute>
+ 	</service>
 </services>

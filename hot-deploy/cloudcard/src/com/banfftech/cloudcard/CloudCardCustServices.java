@@ -1,6 +1,7 @@
 package com.banfftech.cloudcard;
 
 import java.math.BigDecimal;
+import java.nio.ByteBuffer;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -983,5 +984,126 @@ public class CloudCardCustServices {
     	return result;
     }
     
+    /**
+	 * 用户上传头像
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> userUploadAvatar(DispatchContext dctx, Map<String, Object> context) {
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+        //Delegator delegator = dctx.getDelegator();
+        Locale locale = (Locale) context.get("locale");
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		
+		GenericValue userLogin = (GenericValue) context.get("userLogin");
+		String partyId = userLogin.getString("partyId");
+		ByteBuffer imageDataBytes = (ByteBuffer) context.get("uploadedFile");// 文件流，必输
+        String fileName = (String) context.get("_uploadedFile_fileName");// 文件名，必输
+        String contentType = (String) context.get("_uploadedFile_contentType");// 文件mime类型，必输
+        
+        
+		try {
+			//上传oss
+			Map<String, Object> uploadMap = dispatcher.runSync("upload", UtilMisc.toMap("userLogin",userLogin,"uploadedFile", imageDataBytes, "_uploadedFile_fileName", fileName, "_uploadedFile_contentType", contentType));
+            if (!ServiceUtil.isSuccess(uploadMap)) {
+                return uploadMap;
+            }
+	        String key = (String) uploadMap.get("key");
+	        
+			 // 1.CREATE DATA RESOURCE
+			Map<String, Object> createDataResourceMap = UtilMisc.toMap("userLogin", userLogin, "partyId", partyId,
+					"dataResourceTypeId", "URL_RESOURCE", "dataCategoryId", "PERSONAL", "dataResourceName", key,
+					"mimeTypeId", contentType, "isPublic", "Y", "dataTemplateTypeId", "NONE", "statusId", "CTNT_PUBLISHED",
+					"objectInfo", key);
+			Map<String, Object> serviceResultByDataResource = dispatcher.runSync("createDataResource",createDataResourceMap);
+			if (!ServiceUtil.isSuccess(serviceResultByDataResource)) {
+	            return serviceResultByDataResource;
+	        }
+			String dataResourceId = (String) serviceResultByDataResource.get("dataResourceId");
+	
+			// 2.CREATE CONTENT  type=ACTIVITY_PICTURE
+			Map<String, Object> createContentMap = UtilMisc.toMap("userLogin", userLogin, "contentTypeId",
+					"ACTIVITY_PICTURE", "mimeTypeId", contentType, "dataResourceId", dataResourceId, "partyId", partyId);
+			Map<String, Object> serviceResultByCreateContentMap = dispatcher.runSync("createContent", createContentMap);
+            if (!ServiceUtil.isSuccess(serviceResultByCreateContentMap)) {
+                return serviceResultByCreateContentMap;
+            }
+			String contentId = (String) serviceResultByCreateContentMap.get("contentId");
+	
+			// 3.CREATE PARTY CONTENT type=AVATAR_IMG
+			Map<String, Object> createPartyContentMap = UtilMisc.toMap("userLogin", userLogin, "partyId", partyId, "partyContentTypeId", "AVATAR_IMG", "contentId", contentId);
+			Map<String, Object> serviceResultByCreatePartyContentMap = dispatcher.runSync("createPartyContent",createPartyContentMap);
+            if (!ServiceUtil.isSuccess(serviceResultByCreatePartyContentMap)) {
+                return serviceResultByCreatePartyContentMap;
+            }
+			
+		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		return result;
+	}
     
+	/**
+	 * 用户删除头像
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> userDelAvatar(DispatchContext dctx, Map<String, Object> context){
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+	    Delegator delegator = dctx.getDelegator();
+	    Locale locale = (Locale) context.get("locale");
+        GenericValue userLogin = (GenericValue) context.get("userLogin");
+	    String partyId = userLogin.getString("partyId");
+        String contentId = (String) context.get("contentId");
+        
+        try {
+        	List<GenericValue> partyContents= delegator.findByAnd("PartyContent", UtilMisc.toMap("contentId", contentId,"partyId",partyId));
+        	if(UtilValidate.isEmpty(partyContents)){
+    			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardPictureDoesNotExist", locale));
+        	}
+        	GenericValue content = delegator.findByPrimaryKey("Content", UtilMisc.toMap("contentId", contentId));
+        	String dataResourceId = content.getString("dataResourceId");
+			GenericValue dataResource = delegator.findByPrimaryKey("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
+        	
+			String key = dataResource.getString("objectInfo");
+			if(UtilValidate.isEmpty(key)){
+    			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardPictureDoesNotExist", locale));
+			}
+			
+			//删除oss文件
+        	dispatcher.runSync("delFile", UtilMisc.toMap("userLogin", userLogin,"key", key));
+        	
+        	//修改content状态
+			content.put("statusId", "CTNT_DEACTIVATED");
+			content.store();
+			
+        	//修改dataResource状态
+			dataResource.put("statusId", "CTNT_DEACTIVATED");
+			dataResource.store();
+			
+		} catch (Exception e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+        
+        //获取店家商铺详细信息
+        List<GenericValue> storeInfoImgList = FastList.newInstance();
+        try {
+        	storeInfoImgList = delegator.findByAnd("PartyContentAndDataResourceDetail", UtilMisc.toMap("partyId", partyId,"partyContentTypeId", "AVATAR_IMG","contentTypeId","ACTIVITY_PICTURE","statusId","CTNT_IN_PROGRESS"));
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+        
+        //获取oss访问地址
+        String ossUrl = EntityUtilProperties.getPropertyValue("cloudcard","oss.url","http://kupang.oss-cn-shanghai.aliyuncs.com/",delegator);
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("storeInfoImgList", storeInfoImgList);
+		result.put("ossUrl", ossUrl);
+		return result;
+	}
 }
