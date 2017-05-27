@@ -36,7 +36,7 @@
 		<attribute name="teleNumber" type="String" mode="IN" optional="true"><description>客户手机号码</description></attribute>
 		<attribute name="cardCode" type="String" mode="IN" optional="true"><description>卡二维码、条码等唯一标识数据</description></attribute>
 		<attribute name="amount" type="BigDecimal" mode="INOUT" optional="false"><description>充值金额</description></attribute>
-
+ 		<attribute name="storeName" type="String" mode="OUT" optional="false"><description>店名</description></attribute>
 		<attribute name="cardId" type="String" mode="OUT" optional="false"><description>卡Id</description></attribute>
 		<attribute name="customerPartyId" type="String" mode="OUT" optional="false"><description>客户partyId</description></attribute>
 		<attribute name="cardBalance" type="BigDecimal" mode="OUT" optional="false"><description>可用余额</description></attribute>
@@ -48,7 +48,7 @@
 		<attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>商家partyId</description></attribute>
 		<attribute name="cardCode" type="String" mode="IN" optional="false"><description>卡二维码、条码等唯一标识数据</description></attribute>
 		<attribute name="amount" type="BigDecimal" mode="INOUT" optional="false"><description>支付金额</description></attribute>
-
+ 		<attribute name="storeName" type="String" mode="OUT" optional="false"><description>店名</description></attribute>
 		<attribute name="cardId" type="String" mode="OUT" optional="true"><description>卡Id</description></attribute>
 		<attribute name="cardBalance" type="BigDecimal" mode="OUT" optional="false"><description>可用余额</description></attribute>
 		<attribute name="customerPartyId" type="String" mode="OUT" optional="false"><description>客户partyId</description></attribute>

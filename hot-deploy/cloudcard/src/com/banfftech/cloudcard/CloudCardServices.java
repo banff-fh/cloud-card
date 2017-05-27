@@ -475,6 +475,7 @@ public class CloudCardServices {
 		//3、返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("amount", amount);
+		result.put("storeName", partyGroup.getString("groupName"));
 		result.put("cardBalance", rechargeCloudCardOutMap.get("actualBalance"));
 		result.put("customerPartyId", customerPartyId);
 		result.put("cardId", cardId);
@@ -1354,10 +1355,23 @@ public class CloudCardServices {
                 return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
             }
         }
+        
+        //查找商家名称
+        String groupName = "";
+		try {
+			 GenericValue pg = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", organizationPartyId));
+			 if(UtilValidate.isNotEmpty(pg)){
+				 groupName = pg.getString("groupName");
+			 }
+		} catch (GenericEntityException e) {
+		    Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
 
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("amount", amount);
+		result.put("storeName", groupName);
 		//只是显示一下余额，不用再去数据库查询了直接减掉
 		result.put("cardBalance", cardBalance.subtract(amount).setScale(CloudCardHelper.decimals, CloudCardHelper.rounding)); 
 		result.put("customerPartyId", customerPartyId);
