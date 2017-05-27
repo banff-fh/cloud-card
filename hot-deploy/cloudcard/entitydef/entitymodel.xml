@@ -371,6 +371,7 @@
         <alias entity-alias="CNT" name="contentTypeId" field="contentTypeId"/>
         <alias entity-alias="DRC" name="dataResourceName" field="dataResourceName"/>
         <alias entity-alias="DRC" name="objectInfo" field="objectInfo"/>
+        <alias entity-alias="DRC" name="lastModifiedDate" field="lastModifiedDate"/>
         
         <view-link entity-alias="PCT" rel-entity-alias="CNT">
             <key-map field-name="contentId"/>

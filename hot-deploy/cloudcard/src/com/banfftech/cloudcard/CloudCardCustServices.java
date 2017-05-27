@@ -754,7 +754,7 @@ public class CloudCardCustServices {
         	//获取用户头像
         	avaterList = FastList.newInstance();
             try {
-            	avaterList = delegator.findByAnd("PartyContentAndDataResourceDetail", UtilMisc.toMap("partyId", partyId,"partyContentTypeId", "AVATAR_IMG","contentTypeId","ACTIVITY_PICTURE","statusId","CTNT_IN_PROGRESS"));
+            	avaterList = delegator.findByAnd("PartyContentAndDataResourceDetail", UtilMisc.toMap("partyId", partyId,"partyContentTypeId", "AVATAR_IMG","contentTypeId","ACTIVITY_PICTURE","statusId","CTNT_IN_PROGRESS"),UtilMisc.toList("-lastModifiedDate"));
     		} catch (GenericEntityException e) {
     			Debug.logError(e.getMessage(), module);
                 return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
