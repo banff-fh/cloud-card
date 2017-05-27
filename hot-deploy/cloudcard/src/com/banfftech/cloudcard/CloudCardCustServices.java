@@ -766,10 +766,13 @@ public class CloudCardCustServices {
 		}
         
         //获取oss访问地址
-        String ossUrl = EntityUtilProperties.getPropertyValue("cloudcard","oss.url","http://kupang.oss-cn-shanghai.aliyuncs.com/",delegator);
+        String avaterUrl = "";
+        if(UtilValidate.isNotEmpty(avaterList)){
+            String ossUrl = EntityUtilProperties.getPropertyValue("cloudcard","oss.url","http://kupang.oss-cn-shanghai.aliyuncs.com/",delegator);
+            avaterUrl = ossUrl + avaterList.get(0).getString("objectInfo");
+        }
         Map<String, Object> result = ServiceUtil.returnSuccess();
-        result.put("ossUrl", ossUrl);
-        result.put("avaterList", avaterList);
+        result.put("avaterUrl", avaterUrl);
         result.put("userName", userName);
         result.put("teleNumber", teleNumber);
         return result;
