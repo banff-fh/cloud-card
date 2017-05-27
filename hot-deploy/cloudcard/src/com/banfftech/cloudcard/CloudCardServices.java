@@ -472,10 +472,23 @@ public class CloudCardServices {
 			SmsServices.sendMessage(dctx, context);
 		}
 		
+		//查找商家名称
+		//查找商家名称
+        String groupName = "";
+		try {
+			 GenericValue pg = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", organizationPartyId));
+			 if(UtilValidate.isNotEmpty(pg)){
+				 groupName = pg.getString("groupName");
+			 }
+		} catch (GenericEntityException e) {
+		    Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
 		//3、返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("amount", amount);
-		result.put("storeName", partyGroup.getString("groupName"));
+		result.put("storeName", groupName);
 		result.put("cardBalance", rechargeCloudCardOutMap.get("actualBalance"));
 		result.put("customerPartyId", customerPartyId);
 		result.put("cardId", cardId);
