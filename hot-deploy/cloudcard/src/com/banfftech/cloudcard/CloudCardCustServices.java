@@ -737,6 +737,8 @@ public class CloudCardCustServices {
         String partyId = userLogin.getString("partyId");
         String userName = "";
         String teleNumber = "";
+        //获取用户头像
+        List<GenericValue> avaterList = null;
         try {
         	GenericValue person = delegator.findByPrimaryKeyCache("Person", UtilMisc.toMap("partyId", partyId));
         	if(UtilValidate.isNotEmpty(person)){
@@ -749,11 +751,25 @@ public class CloudCardCustServices {
         		teleNumber = partyAndTelecomNumber.getString("contactNumber");
         	}
         	
+        	//获取用户头像
+        	avaterList = FastList.newInstance();
+            try {
+            	avaterList = delegator.findByAnd("PartyContentAndDataResourceDetail", UtilMisc.toMap("partyId", partyId,"partyContentTypeId", "AVATAR_IMG","contentTypeId","ACTIVITY_PICTURE","statusId","CTNT_IN_PROGRESS"));
+    		} catch (GenericEntityException e) {
+    			Debug.logError(e.getMessage(), module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+    		}
+        	
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
+        
+        //获取oss访问地址
+        String ossUrl = EntityUtilProperties.getPropertyValue("cloudcard","oss.url","http://kupang.oss-cn-shanghai.aliyuncs.com/",delegator);
         Map<String, Object> result = ServiceUtil.returnSuccess();
+        result.put("ossUrl", ossUrl);
+        result.put("avaterList", avaterList);
         result.put("userName", userName);
         result.put("teleNumber", teleNumber);
         return result;
