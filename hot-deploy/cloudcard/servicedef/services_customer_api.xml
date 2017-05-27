@@ -224,6 +224,7 @@
 		<attribute name="userName" type="String" mode="OUT" optional="false"><description>名字</description></attribute>
 		<attribute name="teleNumber" type="String" mode="OUT" optional="false"><description>电话号码</description></attribute>
 		<attribute name="avaterUrl" type="String" mode="OUT" optional="false"><description>用户头像地址</description></attribute>
+		<attribute name="contentId" type="String" mode="OUT" optional="false"><description>图片资源ID</description></attribute>		
 	</service>
 	
 	<service name="updateUesrInfo" engine="java"
