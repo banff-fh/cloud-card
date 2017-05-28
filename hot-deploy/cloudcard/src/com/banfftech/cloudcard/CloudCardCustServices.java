@@ -1029,7 +1029,6 @@ public class CloudCardCustServices {
         if (null == systemUserLogin) {
             try {
                 systemUserLogin = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
-                result.put("systemUserLogin", systemUserLogin);
             } catch (GenericEntityException e1) {
                 Debug.logError(e1.getMessage(), module);
                 return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
