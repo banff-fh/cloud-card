@@ -105,6 +105,8 @@ public class CloudCardLevelScoreUtil {
             partyClassificationtMap.put("fromDate", UtilDateTime.nowTimestamp());
             partyClassification = delegator.makeValue("PartyClassification", partyClassificationtMap);
             partyClassification.create();
+            partyClassification = EntityUtil.getFirst(
+                    delegator.findList("PartyClassificationAndPartyClassificationGroup", EntityCondition.makeCondition(cond, dateCond), null, UtilMisc.toList("-fromDate"), null, true));
         }
 
         return partyClassification;
