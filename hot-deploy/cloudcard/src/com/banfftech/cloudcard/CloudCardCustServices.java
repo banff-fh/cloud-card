@@ -1014,7 +1014,7 @@ public class CloudCardCustServices {
 	 */
 	public static Map<String, Object> userUploadAvatar(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
-        //Delegator delegator = dctx.getDelegator();
+        Delegator delegator = dctx.getDelegator();
         Locale locale = (Locale) context.get("locale");
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		
@@ -1024,6 +1024,17 @@ public class CloudCardCustServices {
         String fileName = (String) context.get("_uploadedFile_fileName");// 文件名，必输
         String contentType = (String) context.get("_uploadedFile_contentType");// 文件mime类型，必输
         
+        // system账户
+        GenericValue systemUserLogin = (GenericValue) context.get("systemUserLogin");
+        if (null == systemUserLogin) {
+            try {
+                systemUserLogin = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+                result.put("systemUserLogin", systemUserLogin);
+            } catch (GenericEntityException e1) {
+                Debug.logError(e1.getMessage(), module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+            }
+        }
         
 		try {
 			//上传oss
@@ -1034,7 +1045,7 @@ public class CloudCardCustServices {
 	        String key = (String) uploadMap.get("key");
 	        
 			 // 1.CREATE DATA RESOURCE
-			Map<String, Object> createDataResourceMap = UtilMisc.toMap("userLogin", userLogin, "partyId", partyId,
+			Map<String, Object> createDataResourceMap = UtilMisc.toMap("userLogin", systemUserLogin, "partyId", partyId,
 					"dataResourceTypeId", "URL_RESOURCE", "dataCategoryId", "PERSONAL", "dataResourceName", key,
 					"mimeTypeId", contentType, "isPublic", "Y", "dataTemplateTypeId", "NONE", "statusId", "CTNT_PUBLISHED",
 					"objectInfo", key);
@@ -1045,7 +1056,7 @@ public class CloudCardCustServices {
 			String dataResourceId = (String) serviceResultByDataResource.get("dataResourceId");
 	
 			// 2.CREATE CONTENT  type=ACTIVITY_PICTURE
-			Map<String, Object> createContentMap = UtilMisc.toMap("userLogin", userLogin, "contentTypeId",
+			Map<String, Object> createContentMap = UtilMisc.toMap("userLogin", systemUserLogin, "contentTypeId",
 					"ACTIVITY_PICTURE", "mimeTypeId", contentType, "dataResourceId", dataResourceId, "partyId", partyId);
 			Map<String, Object> serviceResultByCreateContentMap = dispatcher.runSync("createContent", createContentMap);
             if (!ServiceUtil.isSuccess(serviceResultByCreateContentMap)) {
@@ -1054,7 +1065,7 @@ public class CloudCardCustServices {
 			String contentId = (String) serviceResultByCreateContentMap.get("contentId");
 	
 			// 3.CREATE PARTY CONTENT type=AVATAR_IMG
-			Map<String, Object> createPartyContentMap = UtilMisc.toMap("userLogin", userLogin, "partyId", partyId, "partyContentTypeId", "AVATAR_IMG", "contentId", contentId);
+			Map<String, Object> createPartyContentMap = UtilMisc.toMap("userLogin", systemUserLogin, "partyId", partyId, "partyContentTypeId", "AVATAR_IMG", "contentId", contentId);
 			Map<String, Object> serviceResultByCreatePartyContentMap = dispatcher.runSync("createPartyContent",createPartyContentMap);
             if (!ServiceUtil.isSuccess(serviceResultByCreatePartyContentMap)) {
                 return serviceResultByCreatePartyContentMap;
