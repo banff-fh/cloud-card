@@ -18,11 +18,11 @@ specific language governing permissions and limitations
 under the License.
 -->
 
-<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
-    
+
     <!-- 开店申请 查询条件表单-->
-    <form name="FindCreateStoreApply" type="single" target="findCreateStoreApply" title="" 
+    <form name="FindCreateStoreApply" type="single" target="findCreateStoreApply" title=""
         header-row-style="header-row" default-table-style="basic-table" >
 
         <field name="surveyResponseId" title="${uiLabelMap.createStoreApplyId}"><text-find /></field>
@@ -38,13 +38,13 @@ under the License.
                 </entity-options>
             </drop-down>
         </field>
-        
+
         <field name="noConditionFind"><hidden value="Y"/></field>
         <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="smallSubmit">
             <submit button-type="button"/>
         </field>
     </form>
-    
+
     <!-- 开店申请 查询结果列表-->
     <form name="ListCreateStoreApply" list-name="listIt" target="" title="" type="list"  paginate-target="findCreateStoreApply" odd-row-style="alternate-row" default-table-style="basic-table hover-bar" header-row-style="header-row-2">
         <actions>
@@ -69,7 +69,7 @@ under the License.
         <field name="statusId" title="${uiLabelMap.statusId}" sort-field="true"><display-entity entity-name="StatusItem"/></field>
 
         <field name="responseDate" sort-field="true"  title="${uiLabelMap.createStoreApplyDate}" ><display type="date-time"/></field>
-        
+
         <field name="doApplyAccepted"><display/></field>
         <field name="doApplyAccepted" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext" use-when="${groovy: statusId == 'SRS_CREATED'}" >
             <hyperlink target="doApplyAccepted" description="${uiLabelMap.doApplyAccepted}" also-hidden="false" target-type="intra-app">
@@ -79,17 +79,17 @@ under the License.
 
         <field name="doApplyRejected"><display/></field>
         <field name="doApplyRejected" title="${uiLabelMap.CommonEmptyHeader}" widget-style="buttontext" use-when="${groovy: statusId == 'SRS_CREATED'}" >
-            <hyperlink target="doApplyRejected" description="${uiLabelMap.doApplyRejected}" also-hidden="false" target-type="intra-app" 
-            request-confirmation="true" 
+            <hyperlink target="doApplyRejected" description="${uiLabelMap.doApplyRejected}" also-hidden="false" target-type="intra-app"
+            request-confirmation="true"
             confirmation-message="${uiLabelMap.PlzConfirmRejectApply}">
                 <parameter param-name="surveyResponseId" />
             </hyperlink>
         </field>
         <on-event-update-area event-type="paginate" area-id="search-results" area-target="ListCreateStoreApplySearchResults"/>
     </form>
-    
+
     <!-- 圈子查询 查询条件表单 -->
-    <form name="FindCloudCardGroup" type="single" target="findCloudCardGroup" title="" 
+    <form name="FindCloudCardGroup" type="single" target="findCloudCardGroup" title=""
         header-row-style="header-row" default-table-style="basic-table" >
 
         <field name="partyIdFrom" title="${uiLabelMap.FindGroupPartyId}"><text-find /></field>
@@ -126,11 +126,11 @@ under the License.
         <field name="fromDate" sort-field="true"  title="${uiLabelMap.FindGroupFromDate}" ><display type="date-time"/></field>
         <on-event-update-area event-type="paginate" area-id="search-results" area-target="ListCloudCardGroupSearchResults"/>
     </form>
-	
+
 
 
      <!--商家查询 查询条件表单 -->
-    <form name="FindCloudCardStore" type="single" target="findCloudCardStore" title="" 
+    <form name="FindCloudCardStore" type="single" target="findCloudCardStore" title=""
         header-row-style="header-row" default-table-style="basic-table" >
 
         <field name="partyId" title="${uiLabelMap.LookupStoreId}"><text-find/></field>
@@ -168,15 +168,15 @@ under the License.
     <!-- 商家新增、修改 -->
     <form name="EditCloudCardStore" type="single" target="updateCloudCardStore"
          header-row-style="header-row" default-table-style="basic-table">
-        
+
         <alt-target use-when="partyId==null" target="createCloudCardStore"/>
 
         <field position="1" use-when="partyId!=null" name="partyId" title="${uiLabelMap.LookupStoreId}" tooltip="不可修改"><display/></field>
-       
+
         <field name="storeName" title="${uiLabelMap.LookupStoreName}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="40" maxlength="60"/></field>
-        
+
         <field name="description" title="描述" ><text size="60" maxlength="250"/></field>
-        
+
         <field name="storeTeleNumber" title="店家联系电话" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="15" maxlength="20"/></field>
 
         <field position="1" name="storeOwnerName" title="店长姓名" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="40" maxlength="60"/></field>
@@ -204,19 +204,20 @@ under the License.
         <field position="1" name="geoCounty" title="${uiLabelMap.CommonCounty}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
             <drop-down allow-empty="false"/>
         </field>
-        <field name="postalCode" title="邮编"><text size="40" maxlength="60"/></field> 
+        <field name="postalCode" title="邮编"><text size="40" maxlength="60"/></field>
         <field name="address1" title="详细地址1" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="60" maxlength="250"/></field>
-        <field name="address2" title="详细地址2"><text size="60" maxlength="250"/></field> 
-        <field position="1" name="longitude" title="经度" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="40" maxlength="60"/></field> 
+        <field name="address2" title="详细地址2"><text size="60" maxlength="250"/></field>
+        <field position="1" name="longitude" title="经度" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="40" maxlength="60"/></field>
         <field position="2" name="latitude" title="纬度" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="40" maxlength="60"/></field>
         <field name="baiduMap" title=" " widget-style="baiDuMap"><container/></field>
-        
-      
-        
+        <!-- 支付宝&&微信账号 -->
+        <field name="aliPayAccount" title="店家支付宝账号" tooltip="店家支付宝账号"><text size="15" maxlength="30"/></field>
+        <field name="wxPayAccount" title="店家微信账号" tooltip="店家微信账号"><text size="15" maxlength="30"/></field>
+
         <field name="allowCrossStorePay"
            title="跨店"
            tooltip="是否允许跨店消费">
-            <drop-down no-current-selected-key="N"> 
+            <drop-down no-current-selected-key="N">
                 <option key="Y" description="${uiLabelMap.CommonY}"/>
                 <option key="N" description="${uiLabelMap.CommonN}"/>
             </drop-down>
@@ -236,8 +237,8 @@ under the License.
 
         <field name="submitButton" title="${uiLabelMap.CommonAdd}" use-when="partyId==null" widget-style="smallSubmit"><submit button-type="button"/></field>
         <field name="submitButton" title="${uiLabelMap.CommonSave}" use-when="partyId!=null" widget-style="smallSubmit"><submit button-type="button"/></field>
-        
-       
+
+
 
     </form>
 </forms>
