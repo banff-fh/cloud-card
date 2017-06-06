@@ -4,7 +4,7 @@
     <description>cloudCard Admin page Services</description>
     <vendor></vendor>
     <version>1.0</version>
-  
+
     <service name="createCloudCardStore" engine="java"
         invoke="createCloudCardStore" location="com.banfftech.cloudcard.admin.CloudCardStoreAdminServices" auth="true">
         <description>创建云卡商家</description>
@@ -22,10 +22,12 @@
 		<attribute mode="IN" name="postalCode" type="String" optional="true"><description>邮编</description></attribute>
 		<attribute mode="IN" name="longitude" type="String" optional="true"><description>经度</description></attribute>
 		<attribute mode="IN" name="latitude" type="String" optional="true"><description>纬度</description></attribute>
+		<attribute mode="IN" name="aliPayAccount" type="String" optional="true"><description>店家支付宝账号</description></attribute>
+		<attribute mode="IN" name="wxPayAccount" type="String" optional="true"><description>店家微信账号</description></attribute>
 		<attribute mode="IN" name="allowCrossStorePay" type="String" optional="false"><description>是否允许本店卡跨店付款 Y/N</description></attribute>
 		<attribute mode="IN" name="level" type="String" optional="false"><description>信用等级</description></attribute>
 		<attribute mode="IN" name="creditLimit" type="BigDecimal" optional="false"><description>卖卡限额</description></attribute>
-		
+
 		<attribute mode="OUT" name="storeId" type="String" optional="true"><description>返回的storeId</description></attribute>
     </service>
 </services>
