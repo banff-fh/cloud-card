@@ -97,7 +97,7 @@
 		<attribute name="newCardId" type="String" mode="OUT" optional="false"><description>转让后新产生的卡id</description></attribute>
 		<attribute name="cardBalance" type="BigDecimal" mode="OUT" optional="false"><description>卡内余额</description></attribute>
 	</service>
-	
+
 	<service name="userStoreListLBS" engine="java"
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="userStoreListLBS" auth="false">
 		<description>查找圈子</description>
@@ -128,7 +128,7 @@
 		<attribute name="storeInfoImgList" type="List" mode="OUT" optional="true"><description>店铺图片信息</description></attribute>
 		<attribute name="storeCode" type="String" mode="OUT" optional="true"><description>店铺二维码信息</description></attribute>
 	</service>
-	
+
 	<service name="userGetGroupInfo" engine="java"
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="userGetGroupInfo" auth="false">
 		<description>查看圈子简要信息</description>
@@ -136,7 +136,7 @@
 		<attribute name="groupName" type="String" mode="OUT" optional="true"><description>店名</description></attribute>
 		<attribute name="storeList" type="List" mode="OUT" optional="true"><description>店铺详细信息</description></attribute>
 	</service>
-	
+
 	<service name="purchaseCard" engine="java"
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="purchaseCard" auth="true">
 		<description>购买卡</description>
@@ -153,9 +153,9 @@
 		<attribute name="timestamp" type="String" mode="OUT" optional="true"><description>时间</description></attribute>
 		<attribute name="sign" type="String" mode="OUT" optional="true"><description>签名</description></attribute>
 		<!-- 支付宝返回结果 -->
-		<attribute name="payInfo" type="String" mode="OUT" optional="true"><description>签名</description></attribute>	
+		<attribute name="payInfo" type="String" mode="OUT" optional="true"><description>签名</description></attribute>
 	</service>
-	
+
 	<service name="userScanCodeGetCardAndStoreInfo" engine="java"
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="userScanCodeGetCardAndStoreInfo" auth="true">
 		<description>C端扫码获取商家信息和卡列表</description>
@@ -169,9 +169,10 @@
 		<attribute name="latitude" type="String" mode="OUT" optional="false"><description>纬度</description></attribute>
 		<attribute name="canBuyStoreCard" type="String" mode="OUT" optional="false"><description>能否再买本店卡 Y/N</description></attribute>
 		<attribute name="canBuyGroupCard" type="String" mode="OUT" optional="false"><description>能否再买圈主店的卡 Y/N</description></attribute>
+		<attribute name="statusId" type="String" mode="OUT" optional="false"><description>店铺状态ID</description></attribute>
 		<attribute name="cloudCardList" type="List" mode="OUT" optional="false"><description>卡列表</description></attribute>
 	</service>
-	
+
 	<service name="getStoreInfoByCardId" engine="java"
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="getStoreInfoByCardId" auth="true">
 		<description>C端扫码获取商家信息</description>
@@ -180,14 +181,14 @@
 		<attribute name="storeId" type="String" mode="OUT" optional="false"><description>商家ID</description></attribute>
 		<attribute name="storeName" type="String" mode="OUT" optional="false"><description>商家名称</description></attribute>
 	</service>
-	
+
 	<service name="getPaymentQRCode" engine="java"
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="getPaymentQRCode" auth="true">
 		<description>C端获取二维码</description>
 		<attribute name="qrCode" type="String" mode="OUT" optional="false"><description>二维码</description></attribute>
 		<attribute name="refreshTime" type="Long" mode="OUT" optional="false"><description>刷新时间</description></attribute>
 	</service>
-	
+
 	<service name="getCardAndStoreInfoByStoreId" engine="java"
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="getCardAndStoreInfoByStoreId" auth="false">
 		<description>C端根据店铺Id获取商户信息和卡列表</description>
@@ -203,7 +204,7 @@
 		<attribute name="statusId" type="String" mode="OUT" optional="false"><description>店铺状态ID</description></attribute>
 		<attribute name="cloudCardList" type="List" mode="OUT" optional="false"><description>卡列表</description></attribute>
 	</service>
-	
+
 	<service name="getCardAndStoreInfoByStoreName" engine="java"
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="getCardAndStoreInfoByStoreName" auth="false">
 		<description>C端根据店铺名称获取商户信息和卡列表</description>
@@ -217,29 +218,29 @@
 		<attribute name="userLevel" type="String" mode="OUT" optional="false"><description>积分</description></attribute>
 		<attribute name="score" type="BigDecimal" mode="OUT" optional="false"><description>会员等级</description></attribute>
 	</service>
-	
+
 	<service name="getUesrInfo" engine="java"
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="getUesrInfo" auth="true">
 		<description>C端获取个人信息</description>
 		<attribute name="userName" type="String" mode="OUT" optional="false"><description>名字</description></attribute>
 		<attribute name="teleNumber" type="String" mode="OUT" optional="false"><description>电话号码</description></attribute>
 		<attribute name="avaterUrl" type="String" mode="OUT" optional="false"><description>用户头像地址</description></attribute>
-		<attribute name="contentId" type="String" mode="OUT" optional="false"><description>图片资源ID</description></attribute>		
+		<attribute name="contentId" type="String" mode="OUT" optional="false"><description>图片资源ID</description></attribute>
 	</service>
-	
+
 	<service name="updateUesrInfo" engine="java"
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="updateUesrInfo" auth="true">
 		<description>C端修改个人信息</description>
 		<attribute name="userName" type="String" mode="IN" optional="false"><description>用户姓名</description></attribute>
 	</service>
-	
+
 	<service name="getCityOrAreaByCityName" engine="java"
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="getCityOrAreaByCityName" auth="false">
 		<description>根据城市名获取城市列表</description>
 		<attribute name="cityName" type="String" mode="IN" optional="false"><description>城市名</description></attribute>
 		<attribute name="cityList" type="List" mode="OUT" optional="false"><description>城市列表</description></attribute>
 	</service>
-	
+
 	<service name="getCityOrAreaByGeoId" engine="java"
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="getCityOrAreaByGeoId" auth="false">
 		<description>根据城市geoId名获取下级城市列表</description>
@@ -247,7 +248,7 @@
 		<attribute name="geoTypeId" type="String" mode="IN" optional="false"><description>城市geoTypeId</description></attribute>
 		<attribute name="cityList" type="List" mode="OUT" optional="false"><description>城市列表</description></attribute>
 	</service>
-	
+
 	<service name="getCloudcardStoreByGeoId" engine="java"
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="getCloudcardStoreByGeoId" auth="false">
 		<description>根据geoId名获取库胖店家列表</description>
@@ -263,7 +264,7 @@
 		<attribute mode="IN" name="_uploadedFile_fileName" type="String" optional="false"><description>文件名</description></attribute>
 		<attribute mode="IN" name="_uploadedFile_contentType" type="String" optional="false"><description>文件mime类型</description></attribute>
 	</service>
-	
+
 	<service name="userDelAvatar" engine="java"
             location="com.banfftech.cloudcard.CloudCardCustServices" invoke="userDelAvatar" auth="true">
         <description>用户删除头像</description>
