@@ -212,7 +212,6 @@
 	<classpathentry excluding="org/enhydra/|org/ofbiz/" kind="src" path="specialpurpose/shark/src"/>
 	<classpathentry kind="src" path="specialpurpose/webpos/src"/>
 	<classpathentry kind="src" path="specialpurpose/workflow/src"/>
-	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/alipay-sdk-java20161121110022.jar"/>
 	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/aliyun-sdk-oss-2.5.0.jar"/>
 	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/fastjson-1.2.21.jar"/>
 	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/gson-2.2.4.jar"/>
@@ -226,5 +225,7 @@
 	<classpathentry kind="lib" path="framework/base/lib/httpclient-4.4.1.jar"/>
 	<classpathentry kind="lib" path="framework/base/lib/httpclient-cache-4.4.1.jar"/>
 	<classpathentry kind="lib" path="framework/base/lib/httpcore-4.4.1.jar"/>
+	<classpathentry exported="true" kind="con" path="GROOVY_DSL_SUPPORT"/>
+	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/alipay-sdk-java20170607114101.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

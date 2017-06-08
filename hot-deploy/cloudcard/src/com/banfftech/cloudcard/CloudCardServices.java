@@ -359,7 +359,12 @@ public class CloudCardServices {
 		String toTeleNumber = null;
 		List<GenericValue> toPartyAndTelecomNumbers;
 		try {
-			toPartyAndTelecomNumbers = delegator.findByAnd("PartyAndTelecomNumber", UtilMisc.toMap("partyId",cardAuthorizeInfo.get("toPartyId"),"statusId","PARTY_ENABLED"));
+			EntityCondition partyIdCond = EntityCondition.makeCondition("partyId", cardAuthorizeInfo.get("toPartyId"));
+			EntityCondition leadAssignedCond = EntityCondition.makeCondition("statusId", "LEAD_ASSIGNED");
+			EntityCondition partyEnabledCond = EntityCondition.makeCondition("statusId", "PARTY_ENABLED");
+			EntityCondition statusIdCond = EntityCondition.makeCondition(leadAssignedCond, EntityOperator.OR, partyEnabledCond);
+			EntityCondition telNumCond = EntityCondition.makeCondition(partyIdCond, EntityOperator.AND, statusIdCond);
+			toPartyAndTelecomNumbers = delegator.findList("PartyAndTelecomNumber", telNumCond, null, null, null, true);
 			if(UtilValidate.isNotEmpty(toPartyAndTelecomNumbers)){
 	    		GenericValue partyAndTelecomNumber = toPartyAndTelecomNumbers.get(0);
 	    		toTeleNumber = partyAndTelecomNumber.getString("contactNumber");
