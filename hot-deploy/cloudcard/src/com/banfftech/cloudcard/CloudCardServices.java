@@ -359,7 +359,7 @@ public class CloudCardServices {
 		String toTeleNumber = null;
 		List<GenericValue> toPartyAndTelecomNumbers;
 		try {
-			toPartyAndTelecomNumbers = delegator.findByAnd("PartyAndTelecomNumber", UtilMisc.toMap("partyId",cardAuthorizeInfo.get("toPartyId"),"statusId","PARTY_ENABLED","statusId", "LEAD_ASSIGNED"));
+			toPartyAndTelecomNumbers = delegator.findByAnd("PartyAndTelecomNumber", UtilMisc.toMap("partyId",cardAuthorizeInfo.get("toPartyId"),"statusId","PARTY_ENABLED"));
 			if(UtilValidate.isNotEmpty(toPartyAndTelecomNumbers)){
 	    		GenericValue partyAndTelecomNumber = toPartyAndTelecomNumbers.get(0);
 	    		toTeleNumber = partyAndTelecomNumber.getString("contactNumber");
