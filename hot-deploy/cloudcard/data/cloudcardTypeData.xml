@@ -3,15 +3,15 @@
 
 	<StatusItem description="已创建" sequenceId="12" statusCode="CREATED" statusId="FNACT_CREATED" statusTypeId="FINACCT_STATUS"/>
 	<StatusItem description="已导出准备制卡" sequenceId="13" statusCode="PUBLISHED" statusId="FNACT_PUBLISHED" statusTypeId="FINACCT_STATUS"/>
-	
+
 	<StatusValidChange condition="" statusId="FNACT_CREATED" statusIdTo="FNACT_PUBLISHED" transitionName="制卡"/>
 	<StatusValidChange condition="" statusId="FNACT_PUBLISHED" statusIdTo="FNACT_ACTIVE" transitionName="激活卡"/>
-	
-	<!-- 
+
+	<!--
 		跨店消费的时候，payment状态为PMNT_SENT，
 		平台在结算的时候
 			PMNT_SENT 修改成 PMNT_P_NOT_RCV_SENT 或 PMNT_P_NOT_SENT_RCV，
-			PMNT_P_NOT_RCV_SENT 或  PMNT_P_NOT_SENT_RCV 改成 PMNT_CONFIRMED 
+			PMNT_P_NOT_RCV_SENT 或  PMNT_P_NOT_SENT_RCV 改成 PMNT_CONFIRMED
 	-->
 	<StatusItem description="平台未收已付" sequenceId="61" statusCode="PLAT_NOT_RCV_SENT" statusId="PMNT_P_NOT_RCV_SENT" statusTypeId="PMNT_STATUS"/>
 	<StatusItem description="平台已收未付" sequenceId="62" statusCode="PLAT_NOT_SENT_RCV" statusId="PMNT_P_NOT_SENT_RCV" statusTypeId="PMNT_STATUS"/>
@@ -19,15 +19,15 @@
 	<StatusValidChange condition="" statusId="PMNT_P_NOT_RCV_SENT" statusIdTo="PMNT_CONFIRMED" transitionName="结算收款"/>
 	<StatusValidChange condition="" statusId="PMNT_SENT" statusIdTo="PMNT_P_NOT_RCV_SENT" transitionName="结算付款"/>
 	<StatusValidChange condition="" statusId="PMNT_P_NOT_SENT_RCV" statusIdTo="PMNT_CONFIRMED" transitionName="结算付款"/>
-	
-	
 
 
-	
+
+
+
 	<ContactMechPurposeType contactMechPurposeTypeId="AS_USER_LOGIN_ID" description="可用作登录标识"/>
 	<ContactMechTypePurpose contactMechPurposeTypeId="AS_USER_LOGIN_ID" contactMechTypeId="TELECOM_NUMBER"/>
-	
-	
+
+
 	<SystemProperty systemResourceId="cloudcard" systemPropertyId="cardImg.10011" systemPropertyValue="123" description="卡图片地址"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.appkey" systemPropertyValue="xxxx" description="短信平台appkey"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.intervalTime" systemPropertyValue="60" description="第二次与第一次短信发送间隔时间"/>
@@ -37,7 +37,10 @@
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsUserPayVCTemplateCode" systemPropertyValue="SMS_60695186" description="消费验证短信平台模版号"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsUserPayTemplateCode" systemPropertyValue="SMS_60870114" description="消费通知短信平台模版号"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsUserRechargeTemplateCode" systemPropertyValue="SMS_60790512" description="充值通知短信平台模版号"/>
-    <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsUserPurchaseCardTemplateCode" systemPropertyValue="SMS_68520007" description="充值通知短信平台模版号"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsUserPurchaseCardTemplateCode" systemPropertyValue="SMS_68520007" description="开卡通知短信平台模版号"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsUserCreateCardAuthShortTimeTemplateCode" systemPropertyValue="SMS_70385445" description="短时间卡授权通知短信平台模版号"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsUserCreateCardAuthLongTimeTemplateCode" systemPropertyValue="SMS_70285441" description="长时间卡授权通知短信平台模版号"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsUserRevokeCardAuthTemplateCode" systemPropertyValue="SMS_70310404" description="解除卡授权通知短信平台模版号"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.url" systemPropertyValue="http://gw.api.taobao.com/router/rest" description="短信平台请求地址"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.validTime" systemPropertyValue="900" description="短信使用有效时间"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="token.expirationTime" systemPropertyValue="1296000" description="token的有效时间"/>
@@ -56,24 +59,24 @@
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="app.ios.biz.version" systemPropertyValue="1.0" description="商户app苹果版本号"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="app.ios.user.update" systemPropertyValue="0" description="用户app苹果版是否强制更新"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="app.ios.user.version" systemPropertyValue="1.0" description="用户app苹果版本号"/>
-    
+
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="weixin.key" systemPropertyValue="xxxxxx" description="商户平台和开发平台约定的API密钥，在商户平台设置"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="weixin.notifyUrl" systemPropertyValue="xxxxx" description="微信回调地址"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="weixin.wxAppID" systemPropertyValue="xxxxx" description="应用从官方网站申请到的合法appId"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="weixin.wxPartnerid" systemPropertyValue="xxxxx" description="商户号"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="weixin.wxURL" systemPropertyValue="xxxxx" description="接口链接"/>
-    
+
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="aliPay.partner" systemPropertyValue="xxxxxx" description="商户号"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="aliPay.publicKey" systemPropertyValue="xxxxx" description="支付宝公钥"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="aliPay.signType" systemPropertyValue="xxxxx" description="签名方式"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="aliPay.notifyUrl" systemPropertyValue="xxxxx" description="支付回调地址"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="aliPay.seller" systemPropertyValue="xxxxx" description="商户对应支付宝帐号"/>
-	
+
 	<PartyIdentificationType partyIdentificationTypeId="JPUSH_ANDROID_BIZ" description="极光推送安卓商家" />
 	<PartyIdentificationType partyIdentificationTypeId="JPUSH_ANDROID_USER" description="极光推送安卓用户" />
 	<PartyIdentificationType partyIdentificationTypeId="JPUSH_IOS_BIZ" description="极光推送苹果商家" />
 	<PartyIdentificationType partyIdentificationTypeId="JPUSH_IOS_USER" description="极光推送苹果用户" />
-	
+
 	<PartyIdentificationType partyIdentificationTypeId="STORE_QR_CODE" description="商家的二维码" /><!-- 主要用于客户扫码付款 -->
 
 	<RoleType roleTypeId="OLD_CARD_OWNER" hasTable="N" description="以前的卡主"/><!-- 转让卡的时候，用finAccountRole来记录前一个卡主 -->
@@ -92,7 +95,7 @@
 	<StatusValidChange statusId="SRS_CREATED" statusIdTo="SRS_CANCELED" transitionName="取消"/>
 
 	<Survey surveyId="SURV_CC_STORE_INFO" surveyName="库胖商家信息收集" description="商家线上申请开店时收集信息用" submitCaption="申请开通" isAnonymous="Y" allowMultiple="Y" allowUpdate="N" />
-	
+
 	<SurveyQuestion surveyQuestionId="SQ_CC_STORE_NAME" surveyQuestionCategoryId="SQC_CC_STORE_INFO" surveyQuestionTypeId="TEXT_SHORT" description="店名" question="店名"/>
 	<SurveyQuestion surveyQuestionId="SQ_CC_STORE_ADDR" surveyQuestionCategoryId="SQC_CC_STORE_INFO" surveyQuestionTypeId="TEXT_LONG" description="商铺地址" question="商铺地址"/>
 	<SurveyQuestion surveyQuestionId="SQ_CC_S_OWNER_TEL" surveyQuestionCategoryId="SQC_CC_STORE_INFO" surveyQuestionTypeId="TEXT_SHORT" description="店主手机号" question="店主手机号"/>
@@ -100,7 +103,7 @@
 	<SurveyQuestion surveyQuestionId="SQ_CC_STORE_DESC" surveyQuestionCategoryId="SQC_CC_STORE_INFO" surveyQuestionTypeId="TEXTAREA" description="商铺简介" question="商铺简介"/>
 	<SurveyQuestion surveyQuestionId="SQ_CC_S_LONGITUDE" surveyQuestionCategoryId="SQC_CC_STORE_INFO" surveyQuestionTypeId="TEXT_SHORT" description="店铺位置经度" question="店铺位置经度"/>
 	<SurveyQuestion surveyQuestionId="SQ_CC_S_LATITUDE" surveyQuestionCategoryId="SQC_CC_STORE_INFO" surveyQuestionTypeId="TEXT_SHORT" description="店铺位置纬度" question="店铺位置纬度"/>
-	
+
 	<SurveyQuestionAppl surveyId="SURV_CC_STORE_INFO" surveyQuestionId="SQ_CC_STORE_NAME" fromDate="2016-02-14 13:14:00" requiredField="Y" sequenceNum="1"/>
 	<SurveyQuestionAppl surveyId="SURV_CC_STORE_INFO" surveyQuestionId="SQ_CC_STORE_ADDR" fromDate="2016-02-14 13:14:00" requiredField="Y" sequenceNum="2"/>
 	<SurveyQuestionAppl surveyId="SURV_CC_STORE_INFO" surveyQuestionId="SQ_CC_S_OWNER_TEL" fromDate="2016-02-14 13:14:00" requiredField="Y" sequenceNum="3"/>
@@ -124,15 +127,15 @@
 	<SystemProperty systemResourceId="cloudcard" systemPropertyId="baiduMap.radius" systemPropertyValue="2000" description="百度地图检索半径"/>
 	<SystemProperty systemResourceId="cloudcard" systemPropertyId="baiduMap.CoordType" systemPropertyValue="3" description="百度地图坐标系"/>
 	<SystemProperty systemResourceId="cloudcard" systemPropertyId="baiduMap.q" systemPropertyValue="" description="百度地图检索关键字"/>
-	
+
 	<DataSource dataSourceId="GEOPT_BAIDU" dataSourceTypeId="GEOPOINT_SUPPLIER" description="baidu as  GeoPoint supplier"/>
-	
+
 	<!-- 店家地址和联系方式 -->
 	<ContactMechPurposeType contactMechPurposeTypeId="STORE_ADDRESS" description="商家联系地址"/>
     <ContactMechPurposeType contactMechPurposeTypeId="STORE_TELNUM" description="商家联系电话"/>
     <ContactMechTypePurpose contactMechPurposeTypeId="STORE_ADDRESS" contactMechTypeId="POSTAL_ADDRESS"/>
-    <ContactMechTypePurpose contactMechPurposeTypeId="STORE_TELNUM" contactMechTypeId="TELECOM_NUMBER"/> 
-    
+    <ContactMechTypePurpose contactMechPurposeTypeId="STORE_TELNUM" contactMechTypeId="TELECOM_NUMBER"/>
+
     <!-- 二维码 -->
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="qrCode.expirationTime" systemPropertyValue="120" description="qrCode的有效时间"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="qrCode.issuer" systemPropertyValue="cloudcard" description="qrCode的issuer"/>
@@ -141,7 +144,7 @@
     <!-- 支付宝和微信支付的paymentMethodTypeId -->
     <PaymentMethodType description="支付宝" paymentMethodTypeId="EXT_ALIPAY"/>
     <PaymentMethodType description="微信支付" paymentMethodTypeId="EXT_WXPAY"/>
-    
+
     <!-- 积分等级相关 -->
     <FinAccountType description="云卡积分账户" finAccountTypeId="CC_SCORE_ACCOUNT" replenishEnumId="FARP_MANUAL" hasTable="N" isRefundable="N" parentTypeId="DEPOSIT_ACCOUNT"/>
     <PartyClassificationType description="会员等级" hasTable="N" parentTypeId="" partyClassificationTypeId="LEVEL_CLASSIFICATION"/>
@@ -164,15 +167,15 @@
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="oss.accessKeyId" systemPropertyValue="xx" description="oss的accessKeyId"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="oss.accessKeySecret" systemPropertyValue="xx" description="oss的accessKeySecret"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="oss.bucketName" systemPropertyValue="xx" description="oss的bucketName"/>
-    
+
     <!-- ContentType库胖图片类型 -->
     <ContentType contentTypeId="ACTIVITY_PICTURE" hasTable="N" description="库胖图片类型" />
-  	
+
   	<!-- PartyContentType库胖商家图片类型 -->
   	<PartyContentType partyContentTypeId="STORE_IMG" description="商家图片PartyContentType"/>
   	<PartyContentType partyContentTypeId="AVATAR_IMG" description="头像图片PartyContentType"/>
   	<!-- 结算请求定时任务 -->
   	<TemporalExpression tempExprId="EVERY_HOURS" tempExprTypeId="FREQUENCY" description="每小时" date1="2000-01-03 17:00:00.000" integer1="10" integer2="1"/>
 	<JobSandbox jobId="bizSettlementReqJob" jobName="bizSettlementReqJob" runTime="2015-03-01 00:00:00.000" serviceName="bizSettlementReqJob" poolId="pool" runAsUser="system" tempExprId="EVERY_HOURS" maxRecurrenceCount="-1"/>
-	
+
 </entity-engine-xml>

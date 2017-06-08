@@ -49,7 +49,7 @@ public class SmsServices {
 	private static String secret = null;
 	private static String smsFreeSignName = null;
 	private static String smsTemplateCode = null;
-	
+
 	public static void getSmsProperty(Delegator delegator,String smsType){
 		url = EntityUtilProperties.getPropertyValue("cloudcard","sms.url",delegator);
 		appkey = EntityUtilProperties.getPropertyValue("cloudcard","sms.appkey",delegator);
@@ -75,7 +75,7 @@ public class SmsServices {
 			String storeName = (String) context.get("storeName");
 			BigDecimal cardBalance = (BigDecimal) context.get("cardBalance");
 			String cardCode = (String) context.get("cardCode");
-			
+
 			smsParamString = "{storeName:'"+storeName+"',amount:'"+amount+"',cardCode:'"+cardCode+"',cardBalance:'"+cardBalance+"'}";
 			smsType = "sms.smsUserPayTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_PAY_CAPTCHA_SMS_TYPE)){
@@ -98,6 +98,27 @@ public class SmsServices {
 
 			smsParamString = "{storeName:'"+storeName+"',cardCode:'"+ cardCode+"',cardBalance:'"+cardBalance+"'}";
 			smsType = "sms.smsUserPurchaseCardTemplateCode";
+		}else if(smsType.equals(CloudCardConstant.USER_CREATE_CARD_AUTH_TYPE)){
+			String authType = (String) context.get("authType");
+			String storeName = (String) context.get("storeName");
+			String teleNumber = (String) context.get("teleNumber");
+			String date = (String) context.get("date");
+			BigDecimal cardBalance = (BigDecimal) context.get("amount");
+
+			if("1".equals(authType)){
+				smsParamString = "{storeName:'" + storeName + "',teleNumber:'" + teleNumber + "',cardBalance:'" + cardBalance + "',date:'" + date + "'}";
+				smsType = "sms.smsUserCreateCardAuthShortTimeTemplateCode";
+			}else if("2".equals(authType)){
+				smsParamString = "{storeName:'"+storeName+ "',teleNumber:'" + teleNumber + "',cardBalance:'"+ cardBalance + "'}";
+				smsType = "sms.smsUserCreateCardAuthLongTimeTemplateCode";
+			}
+		}else if(smsType.equals(CloudCardConstant.USER_REVOKE_CARD_AUTH_TYPE)){
+			String teleNumber = (String) context.get("teleNumber");
+			String storeName = (String) context.get("storeName");
+			String cardCode = (String) context.get("cardCode");
+
+			smsParamString = "{teleNumber:'"+teleNumber+"',storeName:'"+ storeName+"',cardCode:'"+cardCode+"'}";
+			smsType = "sms.smsUserRevokeCardAuthTemplateCode";
 		}
 		//初始化短信发送配置文件
 		getSmsProperty(delegator,smsType);
@@ -123,7 +144,7 @@ public class SmsServices {
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		return result;
 	}
-	
+
 	/**
 	 * 获取登录验证码
 	 * @param dctx
@@ -136,7 +157,7 @@ public class SmsServices {
 		Locale locale = (Locale) context.get("locale");
 		String teleNumber = (String) context.get("teleNumber");
 		String userType = (String) context.get("userType");
-		
+
 		GenericValue customer;
 		try {
 			customer = CloudCardHelper.getUserByTeleNumber(delegator, teleNumber);
@@ -144,18 +165,18 @@ public class SmsServices {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		if(UtilValidate.isEmpty(customer) && userType =="biz" ){
 			Debug.logInfo("The user tel:[" + teleNumber + "] does not exist, can not get verfiy code", module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardUserNotExistError", locale));
 		}
-		
+
 		context.put("smsType", CloudCardConstant.LOGIN_SMS_TYPE);
 		context.put("isValid", "N");
 		Map<String, Object> result = getSMSCaptcha(dctx, context);
 		return result;
 	}
-	
+
 	/**
 	 * 用户app登录接口
 	 * @param dctx
@@ -166,7 +187,7 @@ public class SmsServices {
 		context.put("appType", "user");
 		return appLogin(dctx,context);
 	}
-	
+
 	/**
 	 * 商户app登录接口
 	 * @param dctx
@@ -177,7 +198,7 @@ public class SmsServices {
 		context.put("appType", "biz");
 		return appLogin(dctx,context);
 	}
-	
+
 	/**
 	 * 手机app登录
 	 * @param dctx
@@ -217,11 +238,11 @@ public class SmsServices {
 		}else{
 			organizationList = CloudCardHelper.getOrganizationPartyId(delegator, customerMap.get("customerPartyId").toString());
 		}
-		
+
 		if(UtilValidate.isNotEmpty(organizationList)){
 			result.put("organizationPartyId", organizationList.get(0));
 		}
-		
+
 		//判断商户app登录权限
 		if("biz".equals(appType)){
 			if(null == result.get("organizationPartyId")){
@@ -229,8 +250,8 @@ public class SmsServices {
 				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardBizLoginIsNotManager", locale));
 			}
 		}
-		
-		
+
+
 		//查找用户验证码是否存在
 		EntityConditionList<EntityCondition> captchaConditions = EntityCondition
 				.makeCondition(EntityCondition.makeCondition("teleNumber", EntityOperator.EQUALS, teleNumber),EntityUtil.getFilterByDateExpr(),EntityCondition.makeCondition("isValid", EntityOperator.EQUALS, "N"),EntityCondition.makeCondition("smsType", EntityOperator.EQUALS, CloudCardConstant.LOGIN_SMS_TYPE));
@@ -242,21 +263,21 @@ public class SmsServices {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		if(UtilValidate.isEmpty(smsList)){
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardCaptchaNotExistError", locale));
 		}else{
 			GenericValue sms = smsList.get(0);
-			
+
 			if(sms.get("captcha").equals(captcha)){
 				//有效时间
 				long expirationTime = Long.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","token.expirationTime","172800L",delegator));
 				String iss = EntityUtilProperties.getPropertyValue("cloudcard","token.issuer",delegator);
 				String tokenSecret = EntityUtilProperties.getPropertyValue("cloudcard","token.secret",delegator);
 				//开始时间
-				final long iat = System.currentTimeMillis() / 1000L; // issued at claim 
+				final long iat = System.currentTimeMillis() / 1000L; // issued at claim
 				//Token到期时间
-				final long exp = iat + expirationTime; 
+				final long exp = iat + expirationTime;
 				//生成Token
 				final JWTSigner signer = new JWTSigner(tokenSecret);
 				final HashMap<String, Object> claims = new HashMap<String, Object>();
@@ -286,7 +307,7 @@ public class SmsServices {
 
 		return result;
 	}
-	
+
 	public static  Map<String, Object> getSMSCaptcha(DispatchContext dctx, Map<String, Object> context){
 		java.sql.Timestamp nowTimestamp  = UtilDateTime.nowTimestamp();
 		LocalDispatcher dispatcher = dctx.getDispatcher();
@@ -295,34 +316,34 @@ public class SmsServices {
 		String teleNumber = (String) context.get("teleNumber");
 		String isValid = (String) context.get("isValid");
 		String smsType = (String) context.get("smsType");
-		
+
 		//校验电话号码是否非法
-		Pattern p = Pattern.compile("^((13[0-9])|(15[^4,\\D])|(14[57])|(17[0])|(17[3])|(17[5])|(17[6])|(17[7])|(18[0,0-9]))\\d{8}$");  
-		Matcher m = p.matcher(teleNumber);  
+		Pattern p = Pattern.compile("^((13[0-9])|(15[^4,\\D])|(14[57])|(17[0])|(17[3])|(17[5])|(17[6])|(17[7])|(18[0,0-9]))\\d{8}$");
+		Matcher m = p.matcher(teleNumber);
 		if(!m.matches()){
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardTelNumIllegal", locale));
 		}
-		
+
 		EntityCondition captchaCondition = EntityCondition.makeCondition(
 						EntityCondition.makeCondition("teleNumber", EntityOperator.EQUALS, teleNumber),
 						EntityUtil.getFilterByDateExpr(),
 						EntityCondition.makeCondition("isValid", EntityOperator.EQUALS,"N"),EntityCondition.makeCondition("smsType", EntityOperator.EQUALS,smsType));
-		
+
 		GenericValue sms = null;
 		try {
-			sms = EntityUtil.getFirst( 
+			sms = EntityUtil.getFirst(
 					delegator.findList("SmsValidateCode", captchaCondition, null,UtilMisc.toList("-" + ModelEntity.CREATE_STAMP_FIELD), null, false)
 					);
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardGetCAPTCHAFailedError", locale));
 		}
-		
-		
+
+
 		int validTime = Integer.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","sms.validTime","900",delegator));
 		int intervalTime = Integer.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","sms.intervalTime","60",delegator));
-		
-		
+
+
 		boolean sendSMS = false;
 		if(UtilValidate.isEmpty(sms)){
 			sendSMS = true;
@@ -341,7 +362,7 @@ public class SmsServices {
 				sendSMS = true;
 			}
 		}
-		
+
 		if(sendSMS){
 			//生成验证码
 			String captcha = UtilFormatOut.padString(String.valueOf(Math.round((Math.random()*10e6))), 6, false, '0');
@@ -365,8 +386,8 @@ public class SmsServices {
 			context.put("validTime", validTime/60);
 			SmsServices.sendMessage(dctx, context);
 		}
-		
+
 		return ServiceUtil.returnSuccess();
 	}
-	
+
 }

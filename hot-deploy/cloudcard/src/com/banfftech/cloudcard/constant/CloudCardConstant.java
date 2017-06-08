@@ -99,22 +99,22 @@ public class CloudCardConstant {
      * 付款渠道： 支付宝 {@value}
      */
     public static final String PAY_CHANNEL_ALIPAY = "aliPay";
-    
+
     /**
      * 付款码前缀 {@value}
      */
     public static final String CODE_PREFIX_PAY_ = "user_pay_";
-    
+
     /**
      * 积分账户的账户类型 {@value}
      */
     public static final String FANT_SCORE = "CC_SCORE_ACCOUNT";
-    
+
     /**
      * 发送登录短信验证码{@value}
      */
     public static final String LOGIN_SMS_TYPE = "Login";
-    
+
     /**
      * 发送用户消费短信验证码{@value}
      */
@@ -124,14 +124,24 @@ public class CloudCardConstant {
      * 发送用户消费通知短信{@value}
      */
     public static final String USER_PAY_SMS_TYPE = "userPay";
-    
+
     /**
      * 发送用户充值通知短信{@value}
      */
     public static final String USER_RECHARGE_SMS_TYPE = "userRecharge";
-    
+
     /**
      * 发送用户开卡成功通知短信{@value}
      */
     public static final String USER_PURCHASE_CARD_SMS_TYPE = "userPurchaseCard";
+
+    /**
+     * 发送用户成功授权通知短信{@value}
+     */
+    public static final String USER_CREATE_CARD_AUTH_TYPE = "userCreateCardAuth";
+
+    /**
+     * 发送用户成功解除授权通知短信{@value}
+     */
+    public static final String USER_REVOKE_CARD_AUTH_TYPE = "userRevokeCardAuth";
 }
