@@ -216,10 +216,25 @@ public class CloudCardServices {
 			date = year + "年" + month + "月" + day + "日";
 	    }
 
+	    //获取卡主人电话号码
+  		String ownTeleNumber = null;
+  		List<GenericValue> partyAndTelecomNumbers;
+  		try {
+  			partyAndTelecomNumbers = delegator.findByAnd("PartyAndTelecomNumber", UtilMisc.toMap("partyId",userLogin.getString("partyId"),"statusId","PARTY_ENABLED","statusId", "LEAD_ASSIGNED"));
+  			if(UtilValidate.isNotEmpty(partyAndTelecomNumbers)){
+  	    		GenericValue partyAndTelecomNumber = partyAndTelecomNumbers.get(0);
+  	    		ownTeleNumber = partyAndTelecomNumber.getString("contactNumber");
+  	    	}
+  		} catch (GenericEntityException e) {
+  			Debug.logError(e.getMessage(), module);
+  			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+  		}
+
 	    context.put("smsType", CloudCardConstant.USER_CREATE_CARD_AUTH_TYPE);
+	    context.put("phone", teleNumber);
 	    context.put("date", date);
 	    context.put("authType", authType);
-	    context.put("teleNumber", teleNumber);
+	    context.put("teleNumber", ownTeleNumber);
 		context.put("storeName", storeName);
 		context.put("amount", amount);
 		SmsServices.sendMessage(dctx, context);
@@ -326,13 +341,28 @@ public class CloudCardServices {
 		String cardCodeTmp = cloudCard.getString("finAccountCode");
 		String cardCode = cardCodeTmp.substring(cardCodeTmp.length()-4,cardCodeTmp.length());
 
-		String teleNumber = null;
+		//获取卡主人电话号码
+		String ownTeleNumber = null;
 		List<GenericValue> partyAndTelecomNumbers;
 		try {
 			partyAndTelecomNumbers = delegator.findByAnd("PartyAndTelecomNumber", UtilMisc.toMap("partyId",userLogin.getString("partyId"),"statusId","PARTY_ENABLED","statusId", "LEAD_ASSIGNED"));
 			if(UtilValidate.isNotEmpty(partyAndTelecomNumbers)){
 	    		GenericValue partyAndTelecomNumber = partyAndTelecomNumbers.get(0);
-	    		teleNumber = partyAndTelecomNumber.getString("contactNumber");
+	    		ownTeleNumber = partyAndTelecomNumber.getString("contactNumber");
+	    	}
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+
+		//获取被授权人电话号码
+		String toTeleNumber = null;
+		List<GenericValue> toPartyAndTelecomNumbers;
+		try {
+			toPartyAndTelecomNumbers = delegator.findByAnd("PartyAndTelecomNumber", UtilMisc.toMap("partyId",cardAuthorizeInfo.get("toPartyId"),"statusId","PARTY_ENABLED","statusId", "LEAD_ASSIGNED"));
+			if(UtilValidate.isNotEmpty(toPartyAndTelecomNumbers)){
+	    		GenericValue partyAndTelecomNumber = toPartyAndTelecomNumbers.get(0);
+	    		toTeleNumber = partyAndTelecomNumber.getString("contactNumber");
 	    	}
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
@@ -340,7 +370,8 @@ public class CloudCardServices {
 		}
 
 		context.put("smsType", CloudCardConstant.USER_REVOKE_CARD_AUTH_TYPE);
-	    context.put("teleNumber", teleNumber);
+		context.put("phone", toTeleNumber);
+	    context.put("teleNumber", ownTeleNumber);
 		context.put("storeName", storeName);
 		context.put("cardCode", cardCode);
 		SmsServices.sendMessage(dctx, context);
