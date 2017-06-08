@@ -210,9 +210,9 @@ public class CloudCardServices {
 	    if(UtilValidate.isEmpty(thruDate)){
 	    	authType = "2";
 	    }else{
-	    	int year = thruDate.getYear();
-	    	int month = thruDate.getMonth()+1;
-	    	int day = thruDate.getDate();
+			int year = thruDate.getYear() + 1900;
+			int month = thruDate.getMonth() + 1;
+			int day = thruDate.getDate();
 			date = year + "年" + month + "月" + day + "日";
 	    }
 
@@ -322,12 +322,27 @@ public class CloudCardServices {
 		}
 
 		//授权短信通知
-		String teleNumber = (String) context.get("teleNumber");
 		String storeName = cloudCard.getString("distributorPartyName");
+		String cardCodeTmp = cloudCard.getString("finAccountCode");
+		String cardCode = cardCodeTmp.substring(cardCodeTmp.length()-4,cardCodeTmp.length());
+
+		String teleNumber = null;
+		List<GenericValue> partyAndTelecomNumbers;
+		try {
+			partyAndTelecomNumbers = delegator.findByAnd("PartyAndTelecomNumber", UtilMisc.toMap("partyId",userLogin.getString("partyId"),"statusId","PARTY_ENABLED","statusId", "LEAD_ASSIGNED"));
+			if(UtilValidate.isNotEmpty(partyAndTelecomNumbers)){
+	    		GenericValue partyAndTelecomNumber = partyAndTelecomNumbers.get(0);
+	    		teleNumber = partyAndTelecomNumber.getString("contactNumber");
+	    	}
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+
 		context.put("smsType", CloudCardConstant.USER_REVOKE_CARD_AUTH_TYPE);
 	    context.put("teleNumber", teleNumber);
 		context.put("storeName", storeName);
-		context.put("cardCode", "");
+		context.put("cardCode", cardCode);
 		SmsServices.sendMessage(dctx, context);
 
 		// 返回结果

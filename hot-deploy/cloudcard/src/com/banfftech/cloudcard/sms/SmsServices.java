@@ -106,10 +106,10 @@ public class SmsServices {
 			BigDecimal cardBalance = (BigDecimal) context.get("amount");
 
 			if("1".equals(authType)){
-				smsParamString = "{storeName:'" + storeName + "',teleNumber:'" + teleNumber + "',cardBalance:'" + cardBalance + "',date:'" + date + "'}";
+				smsParamString = "{teleNumber:'" + teleNumber + "',storeName:'" + storeName + "',cardBalance:'" + cardBalance + "',date:'" + date + "'}";
 				smsType = "sms.smsUserCreateCardAuthShortTimeTemplateCode";
 			}else if("2".equals(authType)){
-				smsParamString = "{storeName:'"+storeName+ "',teleNumber:'" + teleNumber + "',cardBalance:'"+ cardBalance + "'}";
+				smsParamString = "{teleNumber:'"+teleNumber+ "',storeName:'" + storeName + "',cardBalance:'"+ cardBalance + "'}";
 				smsType = "sms.smsUserCreateCardAuthLongTimeTemplateCode";
 			}
 		}else if(smsType.equals(CloudCardConstant.USER_REVOKE_CARD_AUTH_TYPE)){
