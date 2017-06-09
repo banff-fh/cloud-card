@@ -210,9 +210,22 @@ public class CloudCardServices {
 	    if(UtilValidate.isEmpty(thruDate)){
 	    	authType = "2";
 	    }else if(UtilValidate.isEmpty(days) && UtilValidate.isNotEmpty(fromDate) && UtilValidate.isNotEmpty(thruDate)){
-	    	context.put("startTime", fromDate);
-	    	context.put("endTime", thruDate);
+	    	//授权类型
 	    	authType = "3";
+	    	//开始时间
+	    	Timestamp fromDateTemp = UtilDateTime.adjustTimestamp(fromDate, Calendar.SECOND, 2);
+	    	int startYear = fromDateTemp.getYear() + 1900;
+			int startMonth = fromDateTemp.getMonth() + 1;
+			int startDay = fromDateTemp.getDate();
+			String startTime = startYear + "年" + startMonth + "月" + startDay + "日";
+	    	context.put("startTime", startTime);
+	    	//结束时间
+	    	Timestamp thruDateTemp = UtilDateTime.getDayEnd(thruDate, 1L);
+	    	int endYear = fromDateTemp.getYear() + 1900;
+			int endMonth = fromDateTemp.getMonth() + 1;
+			int endDay = fromDateTemp.getDate();
+			String endTime = endYear + "年" + endYear + "月" + endDay + "日";
+	    	context.put("endTime", endTime);
 	    }else{
 			int year = thruDate.getYear() + 1900;
 			int month = thruDate.getMonth() + 1;
