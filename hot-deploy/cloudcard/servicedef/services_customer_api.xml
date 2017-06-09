@@ -82,7 +82,7 @@
 		location="com.banfftech.cloudcard.CloudCardServices" invoke="modifyCardOwnerInputValidate" auth="true">
 		<description>云卡转让服务入参验证</description>
 		<attribute name="cardId" type="String" mode="IN" optional="false"><description>要转出的卡Id</description></attribute>
-		<attribute name="teleNumber" type="String" mode="IN" optional="false"><description>转让到手机号码</description></attribute>
+		<attribute name="teleNumber" type="String" mode="INOUT" optional="false"><description>转让到手机号码</description></attribute>
 		<attribute name="cloudCard" type="GenericValue" mode="OUT" optional="false"><description>要转出的卡实体对象</description></attribute>
 		<attribute name="customerPartyId" type="String" mode="OUT" optional="false"><description>转让到客户partyId</description></attribute>
 	</service>

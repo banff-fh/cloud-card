@@ -2069,6 +2069,7 @@ public class CloudCardServices {
 		Map<String, Object> ret = ServiceUtil.returnSuccess();
 		ret.put("cloudCard", cloudCard);
 		ret.put("customerPartyId", customerPartyId);
+		ret.put("teleNumber", teleNumber);
 		if(Debug.infoOn()){
 			Debug.logInfo("modifyCardOwnerInputValidate return Success:" + ret, module);
 		}
@@ -2159,7 +2160,7 @@ public class CloudCardServices {
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 
-		//获取被授权人电话号码
+		//获取原卡主人电话号码
 		String teleNumber = null;
 		List<GenericValue> partyAndTelecomNumbers;
 		try {
@@ -2180,7 +2181,7 @@ public class CloudCardServices {
 
 		//转卡短信通知
 		context.put("smsType", CloudCardConstant.USER_MODIFY_CARD_OWNER_TYPE);
-	    context.put("phone", teleNumber);
+	    context.put("phone", context.get(teleNumber));
 	    context.put("teleNumber", teleNumber);
 		context.put("storeName", cloudCard.getString("distributorPartyName"));
 		context.put("cardBalance", cardBalance);
