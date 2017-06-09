@@ -209,11 +209,16 @@ public class CloudCardServices {
 	    String date = "";
 	    if(UtilValidate.isEmpty(thruDate)){
 	    	authType = "2";
+	    }else if(UtilValidate.isEmpty(days) && UtilValidate.isNotEmpty(fromDate) && UtilValidate.isNotEmpty(thruDate)){
+	    	context.put("startTime", fromDate);
+	    	context.put("endTime", thruDate);
+	    	authType = "3";
 	    }else{
 			int year = thruDate.getYear() + 1900;
 			int month = thruDate.getMonth() + 1;
 			int day = thruDate.getDate();
 			date = year + "年" + month + "月" + day + "日";
+		    context.put("date", date);
 	    }
 
 	    //获取卡主人电话号码
@@ -232,7 +237,6 @@ public class CloudCardServices {
 
 	    context.put("smsType", CloudCardConstant.USER_CREATE_CARD_AUTH_TYPE);
 	    context.put("phone", teleNumber);
-	    context.put("date", date);
 	    context.put("authType", authType);
 	    context.put("teleNumber", ownTeleNumber);
 		context.put("storeName", storeName);

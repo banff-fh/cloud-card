@@ -102,15 +102,20 @@ public class SmsServices {
 			String authType = (String) context.get("authType");
 			String storeName = (String) context.get("storeName");
 			String teleNumber = (String) context.get("teleNumber");
-			String date = (String) context.get("date");
 			BigDecimal cardBalance = (BigDecimal) context.get("amount");
 
 			if("1".equals(authType)){
+				String date = (String) context.get("date");
 				smsParamString = "{teleNumber:'" + teleNumber + "',storeName:'" + storeName + "',cardBalance:'" + cardBalance + "',date:'" + date + "'}";
 				smsType = "sms.smsUserCreateCardAuthShortTimeTemplateCode";
 			}else if("2".equals(authType)){
 				smsParamString = "{teleNumber:'"+teleNumber+ "',storeName:'" + storeName + "',cardBalance:'"+ cardBalance + "'}";
 				smsType = "sms.smsUserCreateCardAuthLongTimeTemplateCode";
+			}else if("3".equals(authType)){
+				String startTime = (String) context.get("startTime");
+				String endTime = (String) context.get("endTime");
+				smsParamString = "{teleNumber:'"+teleNumber+ "',storeName:'" + storeName + "',cardBalance:'"+ cardBalance + "',startTime:'"+ startTime + "',endTime:'"+ endTime + "'}";
+				smsType = "sms.smsUserCreateCardAuthTimeIntervalTemplateCode";
 			}
 		}else if(smsType.equals(CloudCardConstant.USER_REVOKE_CARD_AUTH_TYPE)){
 			String teleNumber = (String) context.get("teleNumber");
