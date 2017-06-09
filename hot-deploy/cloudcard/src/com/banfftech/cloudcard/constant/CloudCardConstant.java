@@ -144,4 +144,9 @@ public class CloudCardConstant {
      * 发送用户成功解除授权通知短信{@value}
      */
     public static final String USER_REVOKE_CARD_AUTH_TYPE = "userRevokeCardAuth";
+
+    /**
+     * 发送用户转卡通知短信{@value}
+     */
+    public static final String USER_MODIFY_CARD_OWNER_TYPE = "userModifyCardOwner";
 }

@@ -42,6 +42,7 @@
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsUserCreateCardAuthLongTimeTemplateCode" systemPropertyValue="SMS_70285441" description="长时间卡授权通知短信平台模版号"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsUserCreateCardAuthTimeIntervalTemplateCode" systemPropertyValue="SMS_70465132" description="时间区间卡授权通知短信平台模版号"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsUserRevokeCardAuthTemplateCode" systemPropertyValue="SMS_70310404" description="解除卡授权通知短信平台模版号"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsModifyCardOwnerTemplateCode" systemPropertyValue="SMS_70525187" description="转卡通知短信平台模版号"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.url" systemPropertyValue="http://gw.api.taobao.com/router/rest" description="短信平台请求地址"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.validTime" systemPropertyValue="900" description="短信使用有效时间"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="token.expirationTime" systemPropertyValue="1296000" description="token的有效时间"/>

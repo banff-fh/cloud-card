@@ -2159,6 +2159,33 @@ public class CloudCardServices {
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 
+		//获取被授权人电话号码
+		String teleNumber = null;
+		List<GenericValue> partyAndTelecomNumbers;
+		try {
+			EntityCondition partyIdCond = EntityCondition.makeCondition("partyId", oldOwner);
+			EntityCondition leadAssignedCond = EntityCondition.makeCondition("statusId", "LEAD_ASSIGNED");
+			EntityCondition partyEnabledCond = EntityCondition.makeCondition("statusId", "PARTY_ENABLED");
+			EntityCondition statusIdCond = EntityCondition.makeCondition(leadAssignedCond, EntityOperator.OR, partyEnabledCond);
+			EntityCondition telNumCond = EntityCondition.makeCondition(partyIdCond, EntityOperator.AND, statusIdCond);
+			partyAndTelecomNumbers = delegator.findList("PartyAndTelecomNumber", telNumCond, null, null, null, true);
+			if(UtilValidate.isNotEmpty(partyAndTelecomNumbers)){
+	    		GenericValue partyAndTelecomNumber = partyAndTelecomNumbers.get(0);
+	    		teleNumber = partyAndTelecomNumber.getString("contactNumber");
+	    	}
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+
+		//转卡短信通知
+		context.put("smsType", CloudCardConstant.USER_MODIFY_CARD_OWNER_TYPE);
+	    context.put("phone", teleNumber);
+	    context.put("teleNumber", teleNumber);
+		context.put("storeName", cloudCard.getString("distributorPartyName"));
+		context.put("cardBalance", cardBalance);
+		SmsServices.sendMessage(dctx, context);
+
 		// 服务返回成功
 		Map<String, Object> retMap = ServiceUtil.returnSuccess();
 		retMap.put("newCardId", newCardId);

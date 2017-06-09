@@ -124,6 +124,13 @@ public class SmsServices {
 
 			smsParamString = "{teleNumber:'"+teleNumber+"',storeName:'"+ storeName+"',cardCode:'"+cardCode+"'}";
 			smsType = "sms.smsUserRevokeCardAuthTemplateCode";
+		}else if(smsType.equals(CloudCardConstant.USER_MODIFY_CARD_OWNER_TYPE)){
+			String teleNumber = (String) context.get("teleNumber");
+			String storeName = (String) context.get("storeName");
+			BigDecimal cardBalance = (BigDecimal) context.get("cardBalance");
+
+			smsParamString = "{teleNumber:'"+teleNumber+"',storeName:'"+ storeName+"',cardBalance:'"+cardBalance+"'}";
+			smsType = "sms.smsModifyCardOwnerTemplateCode";
 		}
 		//初始化短信发送配置文件
 		getSmsProperty(delegator,smsType);
