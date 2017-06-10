@@ -221,10 +221,10 @@ public class CloudCardServices {
 	    	context.put("startTime", startTime);
 	    	//结束时间
 	    	Timestamp thruDateTemp = UtilDateTime.getDayEnd(thruDate, 1L);
-	    	int endYear = fromDateTemp.getYear() + 1900;
-			int endMonth = fromDateTemp.getMonth() + 1;
-			int endDay = fromDateTemp.getDate();
-			String endTime = endYear + "年" + endYear + "月" + endDay + "日";
+	    	int endYear = thruDate.getYear() + 1900;
+			int endMonth = thruDate.getMonth() + 1;
+			int endDay = thruDate.getDate();
+			String endTime = endYear + "年" + endMonth + "月" + endDay + "日";
 	    	context.put("endTime", endTime);
 	    }else{
 			int year = thruDate.getYear() + 1900;
