@@ -21,6 +21,7 @@ import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
+import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
@@ -227,7 +228,18 @@ public class WeiXinPayServices {
                             transferMap.put("remark", "来自库胖卡的收益");
 							boolean isSuccess = PayUtil.transfer(delegator, transferMap);
 
-                    		//如果转账成功
+							//如果转账成功,设置Payment状态为PMNT_CONFIRMED
+							if(isSuccess){
+								Map<String, Object> setPaymentStatusOutMap;
+					            try {
+					                setPaymentStatusOutMap = dispatcher.runSync("setPaymentStatus",
+					                        UtilMisc.toMap("userLogin", systemUserLogin, "locale", null, "paymentId", paymentId, "statusId", "PMNT_CONFIRMED"));
+					            } catch (GenericServiceException e1) {
+					                Debug.logError(e1, module);
+					            }
+							}else{
+
+							}
 
 						} else {
 							// 支付失败

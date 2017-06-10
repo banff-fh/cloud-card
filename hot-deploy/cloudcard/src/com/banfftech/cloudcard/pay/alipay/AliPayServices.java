@@ -5,7 +5,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
@@ -13,14 +12,14 @@ import java.util.Random;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.ofbiz.base.util.Debug;
 import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericValue;
-import org.ofbiz.entity.condition.EntityCondition;
-import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
+import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
@@ -41,6 +40,8 @@ import javolution.util.FastMap;
 import net.sf.json.JSONObject;
 
 public class AliPayServices {
+
+	public static final String module = AliPayServices.class.getName();
 
 	/**
 	 * 预支付订单
@@ -160,7 +161,18 @@ public class AliPayServices {
                             transferMap.put("remark", "来自库胖卡"+ notice.getBody() +"的收益");
 							boolean isSuccess = PayUtil.transfer(delegator, transferMap);
 
-                    		//如果转账成功
+                    		//如果转账成功,设置Payment状态为PMNT_CONFIRMED
+							if(isSuccess){
+								Map<String, Object> setPaymentStatusOutMap;
+					            try {
+					                setPaymentStatusOutMap = dispatcher.runSync("setPaymentStatus",
+					                        UtilMisc.toMap("userLogin", systemUserLogin, "locale", null, "paymentId", paymentId, "statusId", "PMNT_CONFIRMED"));
+					            } catch (GenericServiceException e1) {
+					                Debug.logError(e1, module);
+					            }
+							}else{
+
+							}
 
                         } else {
 
