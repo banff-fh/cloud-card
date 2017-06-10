@@ -1,5 +1,7 @@
 package com.banfftech.cloudcard.pay.util;
 
+import java.util.Map;
+
 import org.ofbiz.base.util.Debug;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.util.EntityUtilProperties;
@@ -24,7 +26,7 @@ public class PayUtil {
 	private static String CHARSET = "utf-8";
 	private static String SIGN_TYPE = "RSA";
 
-	public static void getSmsProperty(Delegator delegator,String smsType){
+	public static void getSmsProperty(Delegator delegator){
 		URL = EntityUtilProperties.getPropertyValue("cloudcard","aliPay.url","https://openapi.alipay.com/gateway.do",delegator);
 		APP_KUPANG_ID = EntityUtilProperties.getPropertyValue("cloudcard","aliPay.kupangAppID",delegator);
 		APP_KUPANG_TRANSFER_PRIVATE_KEY = EntityUtilProperties.getPropertyValue("cloudcard.properties", "aliPay.rsa_kupang_transfer_private",delegator);
@@ -35,16 +37,19 @@ public class PayUtil {
 	/**
 	 * 买卡或充值转账到商户个人账户
 	 */
-	public static boolean transfer(String orderId,String payeeAccount,String total_amount, String payerRealName,String payeeRealName,String remark) throws AlipayApiException {
-		AlipayFundTransToaccountTransferModel model = new AlipayFundTransToaccountTransferModel();
-		model.setOutBizNo(orderId);// 生成订单号
+	public static boolean transfer(Delegator delegator,Map<String,Object> transferMap) throws AlipayApiException {
+		AlipayFundTransToaccountTransferModel model = new AlipayFundTransToaccountTransferModel();;
+		model.setOutBizNo(transferMap.get("orderId").toString());// 生成订单号
 		model.setPayeeType("ALIPAY_LOGONID");// 固定值
-		model.setPayeeAccount(payeeAccount);// 转账收款账户
-		model.setAmount(total_amount);//收款金额
-		model.setPayerRealName(payerRealName);// 账户真实名称
-		model.setPayeeRealName(payeeRealName); //收款方真是姓名
-		model.setRemark(remark);
+		model.setPayeeAccount(transferMap.get("payeeAccount").toString());// 转账收款账户
+		model.setAmount(transferMap.get("totalAmount").toString());//转账金额
+		model.setPayerRealName(transferMap.get("payerRealName").toString());// 账户真实名称
+		model.setPayeeRealName(transferMap.get("payeeRealName").toString()); //收款方真是姓名
+		model.setRemark(transferMap.get("remark").toString());
 
+		//获取支付应用初始值
+		getSmsProperty(delegator);
+		//开始转账
 		AlipayFundTransToaccountTransferResponse response = transferToResponse(model);
 		String result = response.getBody();
 		//转账信息
@@ -68,7 +73,6 @@ public class PayUtil {
 
 	public static AlipayFundTransToaccountTransferResponse transferToResponse(
 			AlipayFundTransToaccountTransferModel model) throws AlipayApiException {
-
 		AlipayClient alipayClient = new DefaultAlipayClient(URL, APP_KUPANG_ID, APP_KUPANG_TRANSFER_PRIVATE_KEY, FORMAT, CHARSET,
 				APP_KUPANG_TRANSFER_PUBLIC_KEY, SIGN_TYPE);
 		AlipayFundTransToaccountTransferRequest request = new AlipayFundTransToaccountTransferRequest();

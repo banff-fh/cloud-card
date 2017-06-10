@@ -133,7 +133,14 @@ public class AliPayServices {
                             }
 
                             //立即将钱打给商家
-							boolean isSuccess = PayUtil.transfer(paymentId,"18614055178","0.1","宁波区快微贝网络技术有限公司","苏本坤","转账");
+                            Map<String,Object> transferMap = FastMap.newInstance();
+                            transferMap.put("orderId", paymentId);
+                            transferMap.put("payeeAccount","18614055178");
+                            transferMap.put("totalAmount", "0.1");
+                            transferMap.put("payerRealName", "宁波区快微贝网络技术有限公司");
+                            transferMap.put("payeeRealName", "苏本坤");
+                            transferMap.put("remark", "转账");
+							boolean isSuccess = PayUtil.transfer(delegator, transferMap);
 
                     		//如果转账成功
 
