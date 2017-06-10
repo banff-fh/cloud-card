@@ -35,10 +35,18 @@ public class PayUtil {
 	/**
 	 * 买卡或充值转账到商户个人账户
 	 */
-	public static boolean transfer(AlipayFundTransToaccountTransferModel model) throws AlipayApiException {
+	public static boolean transfer(String orderId,String payeeAccount,String total_amount, String payerRealName,String payeeRealName,String remark) throws AlipayApiException {
+		AlipayFundTransToaccountTransferModel model = new AlipayFundTransToaccountTransferModel();
+		model.setOutBizNo(orderId);// 生成订单号
+		model.setPayeeType("ALIPAY_LOGONID");// 固定值
+		model.setPayeeAccount(payeeAccount);// 转账收款账户
+		model.setAmount(total_amount);//收款金额
+		model.setPayerRealName(payerRealName);// 账户真实名称
+		model.setPayeeRealName(payeeRealName); //收款方真是姓名
+		model.setRemark(remark);
+
 		AlipayFundTransToaccountTransferResponse response = transferToResponse(model);
 		String result = response.getBody();
-		System.out.println("transfer result>" + result);
 		//转账信息
 		Debug.logInfo("单笔转账到个人账户转账信息：", result);
 		if (response.isSuccess()) {

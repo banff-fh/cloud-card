@@ -31,6 +31,7 @@ import com.banfftech.cloudcard.pay.alipay.bean.AlipayNotification;
 import com.banfftech.cloudcard.pay.alipay.util.AlipayNotify;
 import com.banfftech.cloudcard.pay.alipay.util.RequestUtils;
 import com.banfftech.cloudcard.pay.alipay.util.StringUtils;
+import com.banfftech.cloudcard.pay.util.PayUtil;
 
 import javolution.util.FastMap;
 import net.sf.json.JSONObject;
@@ -39,7 +40,7 @@ public class AliPayServices {
 
 	/**
 	 * 预支付订单
-	 * 
+	 *
 	 * @param dctx
 	 * @param context
 	 * @return
@@ -59,7 +60,7 @@ public class AliPayServices {
 		String receiptPaymentId = (String) context.get("receiptPaymentId");
 		String storeId = (String) context.get("storeId");
 		String cardId = (String) context.get("cardId");
-		
+
 		String orderInfo = getOrderInfo(partner, seller, subject, body, totalFee, receiptPaymentId, notifyUrl,receiptPaymentId,cardId, storeId);
 		String sign = StringUtils.sign(orderInfo, rsaPrivate, signType);
 
@@ -80,7 +81,7 @@ public class AliPayServices {
 
 	/**
 	 * 异步接受支付宝支付结果 支付宝服务器调用
-	 * 
+	 *
 	 * @param request
 	 * @param response
 	 */
@@ -130,9 +131,14 @@ public class AliPayServices {
                             if (!ServiceUtil.isSuccess(rechargeCloudCardDepositOutMap)) {
                                 // TODO 平台入账 不成功 发起退款
                             }
-                            
+
+                            //立即将钱打给商家
+							boolean isSuccess = PayUtil.transfer(paymentId,"18614055178","0.1","宁波区快微贝网络技术有限公司","苏本坤","转账");
+
+                    		//如果转账成功
+
                         } else {
-                            
+
                         }
                     }
                 }
@@ -154,19 +160,19 @@ public class AliPayServices {
 			e1.printStackTrace();
 		}
 	}
-	
+
 	public static Map<String, Object> orderPayQuery(Delegator delegator, Map<String, Object> context) {
 		String outTradeNo = (String) context.get("outTradeNo");
 		String tradeNo = (String) context.get("transactionId");
 		String qRsa_private = EntityUtilProperties.getPropertyValue("cloudcard.properties", "aliPay.qRsa_private",delegator);
 		String qRsa_public= EntityUtilProperties.getPropertyValue("cloudcard.properties", "aliPay.qRsa_public",delegator);
 		String qRsa_AppId = EntityUtilProperties.getPropertyValue("cloudcard.properties", "aliPay.qRsa_appId",delegator);
-		
+
 		AlipayClient alipayClient = new DefaultAlipayClient("https://openapi.alipay.com/gateway.do", qRsa_AppId, qRsa_private, "json", "GBK", qRsa_public, "RSA");
 		AlipayTradeQueryRequest request = new AlipayTradeQueryRequest();
-		
+
 		//request.setBizContent("{" + "\"out_trade_no\":\""+outTradeNo.trim()+"\"}");
-		
+
 		// 判断商家交易流水是否为空，为空给空空字符串
 		if (UtilValidate.isEmpty(outTradeNo)) {
 			outTradeNo = "";
@@ -199,13 +205,13 @@ public class AliPayServices {
 			JSONObject jsonObject = JSONObject.fromObject(response.getBody()).getJSONObject("alipay_trade_query_response");
 			orderPayMap.put("tradeState", response.getSubMsg());
 		}
-		
+
 		return orderPayMap;
 	}
-	
+
 	/**
 	 * 支付宝退款服务
-	 * 
+	 *
 	 * @param dctx
 	 * @param context
 	 * @return
@@ -214,10 +220,10 @@ public class AliPayServices {
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		return result;
 	}
-	
+
 	/**
 	 * get the out_trade_no for an order. 获取外部订单号
-	 * 
+	 *
 	 */
 	public static String getOutTradeNo() {
 		SimpleDateFormat format = new SimpleDateFormat("MMddHHmmss", Locale.getDefault());
@@ -232,7 +238,7 @@ public class AliPayServices {
 
 	/**
 	 * get the sign type we use. 获取签名方式
-	 * 
+	 *
 	 */
 	private static String getSignType() {
 		return "sign_type=\"RSA\"";
@@ -240,7 +246,7 @@ public class AliPayServices {
 
 	/**
 	 * create the order info. 创建订单信息 由服务器生成
-	 * @param storeId 
+	 * @param storeId
 	 */
 	private static String getOrderInfo(String partner, String seller, String subject, String body, String price,
 			String out_trade_no, String notifyUrl,String receiptPaymentId,String cardId, String storeId) {
@@ -287,7 +293,7 @@ public class AliPayServices {
 
 		// 支付宝处理完请求后，当前页面跳转到商户指定页面的路径，可空
 		orderInfo += "&return_url=\"m.alipay.com\"";
-		
+
 		//回调返回
         orderInfo += "&passback_params=" + "\"" + receiptPaymentId + "," + cardId + "," + storeId + "\"";
 
