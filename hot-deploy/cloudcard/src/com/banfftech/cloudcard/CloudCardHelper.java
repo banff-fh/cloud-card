@@ -1324,7 +1324,7 @@ public class CloudCardHelper {
 		EntityCondition partyAttributeCond = EntityCondition.makeCondition(partyIdCond, EntityOperator.AND, attCond);
 		List<GenericValue> partyAttributes;
 		try {
-			partyAttributes = delegator.findList("PartyAttribute", partyAttributeCond, null, null, null, true);
+			partyAttributes = delegator.findList("PartyAttribute", partyAttributeCond, null, null, null, false);
 			for(GenericValue partyAttribute : partyAttributes){
 				if("aliPayAccount".equals(partyAttribute.getString("attrName"))){
 					payAccount = partyAttribute.getString("attrValue");

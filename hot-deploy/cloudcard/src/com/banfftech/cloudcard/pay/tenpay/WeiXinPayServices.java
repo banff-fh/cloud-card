@@ -24,17 +24,19 @@ import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
+import com.banfftech.cloudcard.CloudCardHelper;
 import com.banfftech.cloudcard.pay.tenpay.util.HttpUtil;
 import com.banfftech.cloudcard.pay.tenpay.util.TenpayUtil;
 import com.banfftech.cloudcard.pay.tenpay.util.XMLUtil;
+import com.banfftech.cloudcard.pay.util.PayUtil;
 
 import javolution.util.FastMap;
 
 public class WeiXinPayServices {
 	public static final String resourceError = "cloudcardErrorUiLabels";
 	public static final String  module = WeiXinPayServices.class.getName();
-	
-	
+
+
 
 	// 获取商品信息
 	public static String getProduct(Delegator delegator, Map<String, Object> context) {
@@ -84,7 +86,7 @@ public class WeiXinPayServices {
 
 	/**
 	 * 预支付订单
-	 * 
+	 *
 	 * @param dctx
 	 * @param context
 	 * @return
@@ -99,7 +101,7 @@ public class WeiXinPayServices {
 		String wxURL = EntityUtilProperties.getPropertyValue("cloudcard", "weixin.wxURL", delegator);
 		String appKey = EntityUtilProperties.getPropertyValue("cloudcard", "weixin.key", delegator);
 		String notifyUrl = EntityUtilProperties.getPropertyValue("cloudcard", "weixin.notifyUrl", delegator);
-		
+
 		context.put("wxAppID", wxAppID);
 		context.put("wxPartnerid", wxPartnerid);
 		context.put("wxURL", wxURL);
@@ -127,7 +129,7 @@ public class WeiXinPayServices {
 		String prepayid = prepayOrderMap.get("prepay_id");
 		String timestamp = String.valueOf(System.currentTimeMillis()/1000);
 //TenpayUtil.getCurrTime();
-		
+
 		SortedMap<String, Object> parameterMap = new TreeMap<String, Object>();
 		parameterMap.put("appid", wxAppID);
 		parameterMap.put("noncestr", noncestr);
@@ -148,7 +150,7 @@ public class WeiXinPayServices {
 
 		return results;
 	}
-	
+
 	/**
 	 * 微信支付回调接口
 	 * @param request
@@ -188,28 +190,59 @@ public class WeiXinPayServices {
                             cardId = arr[1];
                             storeId = arr[2];
                         }
+                        GenericValue payment = delegator.findByPrimaryKey("Payment", UtilMisc.toMap("paymentId", paymentId));
+						if ("PMNT_RECEIVED".equals(payment.getString("statusId"))) {
 
-				         GenericValue systemUserLogin = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
-                         Map<String, Object> rechargeCloudCardDepositOutMap = dispatcher.runSync("rechargeCloudCardDeposit", UtilMisc.toMap("userLogin",
-                                 systemUserLogin, "cardId", cardId, "receiptPaymentId", paymentId, "organizationPartyId", storeId));
+							GenericValue systemUserLogin = delegator.findByPrimaryKeyCache("UserLogin",
+									UtilMisc.toMap("userLoginId", "system"));
+							Map<String, Object> rechargeCloudCardDepositOutMap = dispatcher.runSync(
+									"rechargeCloudCardDeposit", UtilMisc.toMap("userLogin", systemUserLogin, "cardId",
+											cardId, "receiptPaymentId", paymentId, "organizationPartyId", storeId));
 
-                         if (!ServiceUtil.isSuccess(rechargeCloudCardDepositOutMap)) {
-                             // TODO 平台入账 不成功 发起退款
-                         }
-				         
-				     }else{
-				         //支付失败
-				         
-				     }
-				    
-				    
+							if (!ServiceUtil.isSuccess(rechargeCloudCardDepositOutMap)) {
+								// TODO 平台入账 不成功 发起退款
+							}
+
+							//查找店家支付宝账号和支付宝姓名
+                            String payeeAccount = null;
+                            String payeeRealName = null;
+                            Map<String,Object> aliPayMap =  CloudCardHelper.getStoreAliPayInfo(delegator, storeId);
+                            if(UtilValidate.isNotEmpty(aliPayMap)){
+                            	payeeAccount = aliPayMap.get("payAccount").toString();
+                            	payeeRealName = aliPayMap.get("payName").toString();
+                            }
+                            //查找转账折扣率
+                    		double discount = Double.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","transfer.discount","1",delegator));
+//                    		//计算转账金额
+//                            double price  = notice.getPrice();
+//                            double amount = price * discount;
+//
+//                            //立即将钱打给商家
+//                            Map<String,Object> transferMap = FastMap.newInstance();
+//                            transferMap.put("orderId", paymentId);
+//                            transferMap.put("payeeAccount", payeeAccount);
+//                            transferMap.put("totalAmount", String.valueOf(amount));
+//                            transferMap.put("payerRealName", "宁波区快微贝网络技术有限公司");
+//                            transferMap.put("payeeRealName", payeeRealName);
+//                            transferMap.put("remark", "来自库胖卡"+ notice.getBody() +"的收益");
+//							boolean isSuccess = PayUtil.transfer(delegator, transferMap);
+
+                    		//如果转账成功
+
+						} else {
+							// 支付失败
+
+						}
+
+					}
+
 					SortedMap<String,Object> sort=new TreeMap<String,Object>();
 					sort.put("return_code", "SUCCESS");
 					sort.put("return_msg", "OK");
 					wxReturn = XMLUtil.toXml(sort);
 				} else {
 					// 支付失败
-					
+
 					SortedMap<String,Object> sort=new TreeMap<String,Object>();
 					sort.put("return_code", "FAIL");
 					sort.put("return_msg", "签名失败");
@@ -220,7 +253,7 @@ public class WeiXinPayServices {
 		} catch (Exception e) {
 		    Debug.logError(e.getMessage(), module);
 		}
-		
+
 		//返回给微信
 		try {
 			response.setHeader("content-type", "text/xml;charset=UTF-8");
@@ -230,7 +263,7 @@ public class WeiXinPayServices {
 		    Debug.logError(e.getMessage(), module);
 		}
 	}
-	
+
 	/**
 	 * 微信订单查询接口
 	 * @param delegator
@@ -247,11 +280,11 @@ public class WeiXinPayServices {
 		params.put("appid", wxAppID);
 		params.put("mch_id", wxPartnerid);
 		params.put("nonce_str", TenpayUtil.getNonceStr(32)); // 生成随机串
-		
+
 		if(UtilValidate.isNotEmpty(outTradeNo)){
 			params.put("out_trade_no", outTradeNo);
 		}
-		
+
 		if(UtilValidate.isNotEmpty(tradeNo)){
 			params.put("transaction_id", tradeNo);
 		}
@@ -280,7 +313,7 @@ public class WeiXinPayServices {
 				orderPayMap.put("timeEnd", orders.get("time_end"));
 				orderPayMap.put("tradeState", orders.get("trade_state"));
 			}
-			
+
 			if("FAIL".equals(orders.get("result_code"))){
 				orderPayMap = ServiceUtil.returnSuccess();
 				if("ORDERNOTEXIST".equals(orders.get("err_code"))){
@@ -297,7 +330,7 @@ public class WeiXinPayServices {
 
 	/**
 	 * 验证微信支付返回结果
-	 * 
+	 *
 	 * @param map
 	 * @return
 	 */
@@ -317,5 +350,5 @@ public class WeiXinPayServices {
 			return false;
 		}
 	}
-	
+
 }
