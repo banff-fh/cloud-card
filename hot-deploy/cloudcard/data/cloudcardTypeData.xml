@@ -73,6 +73,10 @@
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="aliPay.signType" systemPropertyValue="xxxxx" description="签名方式"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="aliPay.notifyUrl" systemPropertyValue="xxxxx" description="支付回调地址"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="aliPay.seller" systemPropertyValue="xxxxx" description="商户对应支付宝帐号"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="aliPay.kupangAppID" systemPropertyValue="xxxxx" description="应用对应支付宝ID"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="aliPay.url" systemPropertyValue="https://openapi.alipay.com/gateway.do" description="支付宝网关URL"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="aliPay.kupangPublicKey" systemPropertyValue="xxxxx" description="支付宝应用公钥"/>
+
 
 	<PartyIdentificationType partyIdentificationTypeId="JPUSH_ANDROID_BIZ" description="极光推送安卓商家" />
 	<PartyIdentificationType partyIdentificationTypeId="JPUSH_ANDROID_USER" description="极光推送安卓用户" />
