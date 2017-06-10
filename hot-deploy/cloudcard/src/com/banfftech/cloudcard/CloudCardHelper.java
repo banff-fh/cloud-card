@@ -48,7 +48,7 @@ public class CloudCardHelper {
 
     /**
      * 判断当前partyId是否为organizationPartyId的管理人员
-     * 
+     *
      * @param delegator
      * @param userLogin
      * @param organizationPartyId
@@ -64,7 +64,7 @@ public class CloudCardHelper {
 
     /**
      * 获取partyId所管理的商家organizationPartyId列表
-     * 
+     *
      * @param delegator
      * @param userLogin
      * @param organizationPartyId
@@ -94,7 +94,7 @@ public class CloudCardHelper {
     /**
      * 根据电话号码检查是否有关联的注册用户，有则返回customerPartyId 和 customerUserLoginId 没有则
      * 创建一个用户与电话号码关联，并返回新创建的 customerPartyId 和 customerUserLoginId
-     * 
+     *
      * @param dctx
      * @param context
      * @return
@@ -229,7 +229,7 @@ public class CloudCardHelper {
 
     /**
      * 为FinAccount创建GiftCard
-     * 
+     *
      * @param dctx
      * @param context
      * @return
@@ -302,7 +302,7 @@ public class CloudCardHelper {
 
     /**
      * 获取商家用于扣减开卡限额的金融账户
-     * 
+     *
      * @param delegator
      * @param ownerPartyId
      *            商家partyId
@@ -314,7 +314,7 @@ public class CloudCardHelper {
 
     /**
      * 获取商家用于扣减开卡限额的金融账户
-     * 
+     *
      * @param delegator
      * @param ownerPartyId
      *            商家partyId
@@ -327,7 +327,7 @@ public class CloudCardHelper {
 
     /**
      * 获取商家用于收款的金融账户
-     * 
+     *
      * @param delegator
      * @param ownerPartyId
      *            商家partyId
@@ -339,7 +339,7 @@ public class CloudCardHelper {
 
     /**
      * 获取商家用于收款的金融账户
-     * 
+     *
      * @param delegator
      * @param ownerPartyId
      *            商家partyId
@@ -352,7 +352,7 @@ public class CloudCardHelper {
 
     /**
      * 获取商家用于平台对账结算的金融账户
-     * 
+     *
      * @param delegator
      * @param ownerPartyId
      * @return
@@ -363,7 +363,7 @@ public class CloudCardHelper {
 
     /**
      * 获取商家用于平台对账结算的金融账户
-     * 
+     *
      * @param delegator
      * @param ownerPartyId
      * @param useCache
@@ -375,7 +375,7 @@ public class CloudCardHelper {
 
     /**
      * 获取用户积分账户
-     * 
+     *
      * @param delegator
      * @param ownerPartyId
      * @param useCache
@@ -387,7 +387,7 @@ public class CloudCardHelper {
 
     /**
      * 根据ownerPartyId和 finAccountTypeId获取商家的金融账户
-     * 
+     *
      * @param delegator
      * @param ownerPartyId
      * @param finAccountTypeId
@@ -411,7 +411,7 @@ public class CloudCardHelper {
 
     /**
      * 根据二维码查询卡信息
-     * 
+     *
      * @param cardCode
      *            二维码信息
      * @param delegator
@@ -424,7 +424,7 @@ public class CloudCardHelper {
 
     /**
      * 根据二维码查询卡信息
-     * 
+     *
      * @param cardCode
      *            二维码信息
      * @param filterByDate
@@ -475,7 +475,7 @@ public class CloudCardHelper {
 
     /**
      * 根据卡ID查询卡信息
-     * 
+     *
      * @param cardId
      *            云卡的卡id （paymentMethodId）
      * @param delegator
@@ -491,7 +491,7 @@ public class CloudCardHelper {
 
     /**
      * 生成卡云卡号
-     * 
+     *
      * @param delegator
      * @return 卡号（二维码）
      * @throws GenericEntityException
@@ -532,7 +532,7 @@ public class CloudCardHelper {
     /**
      * 获取账户授权信息 通过查询FinAccountRole中 有效期内的， 且 roleTypeId=SHAREHOLDER
      * 的记录，来判断此卡当前是否处于被授权其他用户使用的状态
-     * 
+     *
      * @param cloudCard
      * @param delegator
      * @return
@@ -571,7 +571,7 @@ public class CloudCardHelper {
 
     /**
      * 获取卡授权金额 建议用 getCloudCardBalance 方法获取卡余额，包括授权卡与被授权的卡
-     * 
+     *
      * @param finAccountId
      * @param delegator
      * @return
@@ -603,7 +603,7 @@ public class CloudCardHelper {
      * <p>
      * 如果授权给别人了，取自己的availableBalance，否则取actualBalance
      * </p>
-     * 
+     *
      * <pre>
      * * 为什么不一直取 availableBalance？
      *     因为卡授权给别人到期后 availableBalance不会自动恢复，除非有finAccountAuth的修改触发了计算更新availableBalance的ECA，
@@ -613,7 +613,7 @@ public class CloudCardHelper {
      * 如果此卡是别人授权给我的，取授权金额，在授权未过期的情况下，授权金额余额可以用
      * actualBalance.subtract(availableBalance)得到
      * </p>
-     * 
+     *
      * @param finAccountId
      * @param isAuthorized
      * @return
@@ -675,7 +675,7 @@ public class CloudCardHelper {
 
     /**
      * 从 PartyIdentification 获取店家的二维码，如果没有则生成一个
-     * 
+     *
      * @param organizationPartyId
      *            店家partyId
      * @param delegator
@@ -701,7 +701,7 @@ public class CloudCardHelper {
 
     /**
      * 从 PartyIdentification 获取店家的二维码，如果没有则生成一个
-     * 
+     *
      * @param organizationPartyId
      *            店家partyId
      * @param delegator
@@ -719,7 +719,7 @@ public class CloudCardHelper {
 
     /**
      * 根据商家二维码获取商家partyGroup实体
-     * 
+     *
      * @param qrCode
      *            商家二维码
      * @param delegator
@@ -740,7 +740,7 @@ public class CloudCardHelper {
 
     /**
      * 根据商家店铺Id获取商家partyGroup实体
-     * 
+     *
      * @param qrCode
      *            商家店铺Id
      * @param delegator
@@ -757,7 +757,7 @@ public class CloudCardHelper {
 
     /**
      * 根据商家二维码获取商家partyGroup实体
-     * 
+     *
      * @param qrCode
      *            商家二维码
      * @param delegator
@@ -775,7 +775,7 @@ public class CloudCardHelper {
 
     /**
      * 通过手机号码查询用户
-     * 
+     *
      * @param delegator
      * @param teleNumber
      * @return 返回的是TelecomNumberAndUserLogin实体，其中包含 partyId 和 userLoginId
@@ -789,7 +789,7 @@ public class CloudCardHelper {
 
     /**
      * 根据店铺id获取圈子与店铺的关系（partyRelationship）实体
-     * 
+     *
      * @param delegator
      *            实体引擎代理对象
      * @param storeId
@@ -815,7 +815,7 @@ public class CloudCardHelper {
 
     /**
      * 判断店铺是否为圈子的圈主
-     * 
+     *
      * @param delegator
      * @param storeId
      * @param useCache
@@ -829,7 +829,7 @@ public class CloudCardHelper {
 
     /**
      * 判断传入的 partyRelationship 是否为 圈子-->圈主 关系
-     * 
+     *
      * @param partyRelationship
      * @return
      */
@@ -839,7 +839,7 @@ public class CloudCardHelper {
 
     /**
      * 判断传入的 圈子关系 partyRelationship 是否为冻结状态
-     * 
+     *
      * @param partyRelationship
      * @return
      */
@@ -849,7 +849,7 @@ public class CloudCardHelper {
 
     /**
      * 从传入的 partyRelationship 实体获取 圈子的groupId
-     * 
+     *
      * @param partyRelationship
      * @return
      */
@@ -862,7 +862,7 @@ public class CloudCardHelper {
 
     /**
      * 根据店铺id获取圈子id
-     * 
+     *
      * @param delegator
      *            实体引擎代理对象
      * @param storeId
@@ -878,7 +878,7 @@ public class CloudCardHelper {
 
     /**
      * 根据店铺id获取圈子对应的的PartyGroup实体
-     * 
+     *
      * @param delegator
      *            实体引擎代理对象
      * @param storeId
@@ -903,7 +903,7 @@ public class CloudCardHelper {
 
     /**
      * 通过 圈子id 查询圈子与商家的 partyRelationship 列表(包括圈主关系)
-     * 
+     *
      * @param delegator
      * @param groupId
      * @param useCache
@@ -925,7 +925,7 @@ public class CloudCardHelper {
 
     /**
      * 从 圈子与商家的 partyRelationship 列表 中 筛选出 普通圈友
-     * 
+     *
      * @param allStoreGroupRelationships
      * @return
      */
@@ -935,7 +935,7 @@ public class CloudCardHelper {
 
     /**
      * 通过 圈子id 查询圈子的成员id列表（列表中包含 圈主id 圈友id）
-     * 
+     *
      * @param delegator
      * @param groupId
      * @param useCache
@@ -949,7 +949,7 @@ public class CloudCardHelper {
 
     /**
      * 通过 店铺id 查询其所在圈子的圈友 id列表
-     * 
+     *
      * @param delegator
      * @param storeId
      * @param useCache
@@ -963,7 +963,7 @@ public class CloudCardHelper {
 
     /**
      * 通过圈内任意店id 获取 圈主店 的圈子关系实体
-     * 
+     *
      * @param delegator
      * @param storeId
      * @param useCache
@@ -994,7 +994,7 @@ public class CloudCardHelper {
 
     /**
      * 通过圈内任意店id 获取 圈主店 的id
-     * 
+     *
      * @param delegator
      * @param storeId
      * @param useCache
@@ -1011,7 +1011,7 @@ public class CloudCardHelper {
 
     /**
      * 获取商家的未结算金额
-     * 
+     *
      * @param delegator
      * @param storeId
      * @return 没有结算金额的情况会返回 ZERO
@@ -1024,7 +1024,7 @@ public class CloudCardHelper {
 
     /**
      * 从商家结算账户中获取商家的未结算金额
-     * 
+     *
      * @param settlementAccount
      *            商家结算账户实体
      * @return
@@ -1042,7 +1042,7 @@ public class CloudCardHelper {
 
     /**
      * 将boolean 类型的值用 Y / N 来表示
-     * 
+     *
      * @param boolValue
      * @return
      */
@@ -1052,9 +1052,9 @@ public class CloudCardHelper {
 
     /**
      * 根据卡号或店铺二维码获取卡信息和店铺信息
-     * 
+     *
      * @param
-     * 
+     *
      * @return
      */
     public static Map<String, Object> getCardAndStoreInfo(DispatchContext dctx, Map<String, Object> context) {
@@ -1080,7 +1080,7 @@ public class CloudCardHelper {
             Debug.logError(e.getMessage(), module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
         }
-        
+
         if (UtilValidate.isEmpty(partyGroup) && UtilValidate.isNotEmpty(qrCode)) {
             Debug.logWarning("商户qrCode:" + qrCode + "不存在", module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardOrganizationPartyNotFound", locale));
@@ -1105,7 +1105,7 @@ public class CloudCardHelper {
 				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,"CloudCardInternalServiceError", locale));
 			}
 		}
-       
+
         // 有本店卡？
         boolean hasStoreCard = false;
         // 有圈主店的卡？
@@ -1152,9 +1152,9 @@ public class CloudCardHelper {
 
     /**
      * 根据店铺ID查询店铺geo和联系方式
-     * 
+     *
      * @param
-     * 
+     *
      * @return
      */
     public static Map<String, Object> getGeoAndContactMechInfoByStoreId(Delegator delegator, Locale locale, String storeId) {
@@ -1203,12 +1203,12 @@ public class CloudCardHelper {
         result.put("latitude", latitude);
         return result;
     }
-    
+
     /**
      * 记录app推送消息
-     * 
+     *
      * @param
-     * 
+     *
      * @return
      */
     public static Map<String, Object> saveMyNote(DispatchContext dctx, Map<String, Object> context) {
@@ -1237,10 +1237,10 @@ public class CloudCardHelper {
 		return result;
 	}
 
- 
+
     /**
      * 设置payment的扩展属性, 已经设置过，则更新属性值
-     * 
+     *
      * @param delegator
      *            实体引擎
      * @param paymentId
@@ -1258,7 +1258,7 @@ public class CloudCardHelper {
 
     /**
      * 获取指定payment的指定扩展属性值，属性不存在返回空字符串
-     * 
+     *
      * @param delegator
      *            实体引擎
      * @param paymentId
@@ -1291,7 +1291,7 @@ public class CloudCardHelper {
 
     /**
      * 结算请求次数递增1
-     * 
+     *
      * @param delegator
      *            实体引擎
      * @param paymentId
@@ -1302,6 +1302,44 @@ public class CloudCardHelper {
         int oldId = CloudCardHelper.getPaymentAttrInt(delegator, paymentId, "settlementReqCount");
         CloudCardHelper.setPaymentAttr(delegator, paymentId, "settlementReqCount", String.valueOf(++oldId));
         return oldId;
+    }
+
+    /**
+     * 获取店家支付宝账号信息
+     *
+     * @param delegator
+     *            实体引擎
+     * @param storeId
+     *            storeId
+     * @throws GenericEntityException
+     */
+    public static Map<String, Object> getStoreAliPayInfo(Delegator delegator, String storeId){
+        String payAccount = null;
+        String payName = null;
+
+        EntityCondition partyIdCond = EntityCondition.makeCondition("partyId", storeId);
+		EntityCondition aliAccountCond = EntityCondition.makeCondition("attrName", "aliPayAccount");
+		EntityCondition aliNameCond = EntityCondition.makeCondition("attrName", "aliPayName");
+		EntityCondition attCond = EntityCondition.makeCondition(aliAccountCond, EntityOperator.OR, aliNameCond);
+		EntityCondition partyAttributeCond = EntityCondition.makeCondition(partyIdCond, EntityOperator.AND, attCond);
+		List<GenericValue> partyAttributes;
+		try {
+			partyAttributes = delegator.findList("PartyAttribute", partyAttributeCond, null, null, null, true);
+			for(GenericValue partyAttribute : partyAttributes){
+				if("aliPayAccount".equals(partyAttribute.getString("attrName"))){
+					payAccount = partyAttribute.getString("attrValue");
+				}else if("aliPayName".equals(partyAttribute.getString("attrName"))){
+					payName = partyAttribute.getString("attrValue");
+				}
+			}
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+		}
+
+		Map<String, Object> aliPayMap = FastMap.newInstance();
+		aliPayMap.put("payAccount", payAccount);
+		aliPayMap.put("payName", payName);
+		return aliPayMap;
     }
 
 }

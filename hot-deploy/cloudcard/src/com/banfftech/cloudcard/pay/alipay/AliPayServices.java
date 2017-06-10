@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
@@ -16,6 +17,8 @@ import org.ofbiz.base.util.UtilMisc;
 import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.condition.EntityCondition;
+import org.ofbiz.entity.condition.EntityOperator;
 import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.LocalDispatcher;
@@ -27,6 +30,7 @@ import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.request.AlipayTradeQueryRequest;
 import com.alipay.api.response.AlipayTradeQueryResponse;
+import com.banfftech.cloudcard.CloudCardHelper;
 import com.banfftech.cloudcard.pay.alipay.bean.AlipayNotification;
 import com.banfftech.cloudcard.pay.alipay.util.AlipayNotify;
 import com.banfftech.cloudcard.pay.alipay.util.RequestUtils;
@@ -132,14 +136,25 @@ public class AliPayServices {
                                 // TODO 平台入账 不成功 发起退款
                             }
 
+                        	//查找店家支付宝账号和支付宝姓名
+                            String payeeAccount = null;
+                            String payeeRealName = null;
+                            Map<String,Object> aliPayMap =  CloudCardHelper.getStoreAliPayInfo(delegator, storeId);
+                            if(UtilValidate.isNotEmpty(aliPayMap)){
+                            	payeeAccount = aliPayMap.get("payAccount").toString();
+                            	payeeRealName = aliPayMap.get("payName").toString();
+                            }
+                            //查找转账折扣率
+                    		double discount = Double.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","transfer.discount","1",delegator));
+
                             //立即将钱打给商家
                             Map<String,Object> transferMap = FastMap.newInstance();
                             transferMap.put("orderId", paymentId);
-                            transferMap.put("payeeAccount","18614055178");
+                            transferMap.put("payeeAccount", payeeAccount);
                             transferMap.put("totalAmount", "0.1");
                             transferMap.put("payerRealName", "宁波区快微贝网络技术有限公司");
-                            transferMap.put("payeeRealName", "苏本坤");
-                            transferMap.put("remark", "转账");
+                            transferMap.put("payeeRealName", payeeRealName);
+                            transferMap.put("remark", "来自库胖卡的收益");
 							boolean isSuccess = PayUtil.transfer(delegator, transferMap);
 
                     		//如果转账成功

@@ -77,6 +77,8 @@
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="aliPay.url" systemPropertyValue="https://openapi.alipay.com/gateway.do" description="支付宝网关URL"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="aliPay.kupangPublicKey" systemPropertyValue="xxxxx" description="支付宝应用公钥"/>
 
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="transfer.discount" systemPropertyValue="1" description="转账折扣"/>
+
 
 	<PartyIdentificationType partyIdentificationTypeId="JPUSH_ANDROID_BIZ" description="极光推送安卓商家" />
 	<PartyIdentificationType partyIdentificationTypeId="JPUSH_ANDROID_USER" description="极光推送安卓用户" />
