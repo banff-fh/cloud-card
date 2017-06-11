@@ -457,7 +457,7 @@ public class CloudCardServices {
 
 			//判断用户是否在本店有没有卡
 			try {
-				List<GenericValue> cloudCardInfoList = delegator.findByAnd("", UtilMisc.toMap("partyId", customerPartyId, "distributorPartyId", partyGroup.getString("partyId")));
+				List<GenericValue> cloudCardInfoList = delegator.findByAnd("CloudCardInfo", UtilMisc.toMap("partyId", customerPartyId, "distributorPartyId", partyGroup.getString("partyId")));
 				if(UtilValidate.isNotEmpty(cloudCardInfoList) || cloudCardInfoList.size() > 0){
 					return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUsersHaveCardsInOurStore", locale));
 				}
