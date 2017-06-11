@@ -443,7 +443,6 @@ public class CloudCardServices {
 			}
 			String customerPartyId = (String) getOrCreateCustomerOut.get("customerPartyId");
 
-
 			try {
 				partyGroup = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", organizationPartyId));
 			} catch (GenericEntityException e) {
@@ -454,6 +453,17 @@ public class CloudCardServices {
 				Debug.logWarning("商户："+organizationPartyId + "不存在", module);
 				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,
 						"CloudCardOrganizationPartyNotFound", UtilMisc.toMap("organizationPartyId", organizationPartyId), locale));
+			}
+
+			//判断用户是否在本店有没有卡
+			try {
+				List<GenericValue> cloudCardInfoList = delegator.findByAnd("", UtilMisc.toMap("partyId", customerPartyId, "distributorPartyId", partyGroup.getString("partyId")));
+				if(UtilValidate.isNotEmpty(cloudCardInfoList) || cloudCardInfoList.size() > 0){
+					return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUsersHaveCardsInOurStore", locale));
+				}
+			} catch (GenericEntityException e1) {
+				Debug.logError(e1, module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 			}
 
 			//生成的卡号
