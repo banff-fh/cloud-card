@@ -457,10 +457,15 @@ public class CloudCardServices {
 
 			//判断用户是否在本店有没有卡
 			try {
-				List<GenericValue> cloudCardInfoList = delegator.findByAnd("CloudCardInfo", UtilMisc.toMap("partyId", customerPartyId, "distributorPartyId", partyGroup.getString("partyId")));
+
+	        	EntityCondition thruDateEntityCondition = EntityCondition.makeCondition(EntityOperator.OR,EntityCondition.makeCondition("thruDate", EntityOperator.GREATER_THAN, UtilDateTime.nowTimestamp()),EntityCondition.makeCondition("thruDate", EntityOperator.EQUALS, null));
+	        	EntityCondition cloudCardInfoEntityCondition = EntityCondition.makeCondition(EntityOperator.AND,
+	                    EntityCondition.makeCondition(UtilMisc.toMap("partyId", customerPartyId, "distributorPartyId", partyGroup.getString("partyId"))),thruDateEntityCondition);
+				List<GenericValue> cloudCardInfoList = delegator.findList("CloudCardInfo", cloudCardInfoEntityCondition, null, null, null, false);
 				if(UtilValidate.isNotEmpty(cloudCardInfoList) || cloudCardInfoList.size() > 0){
 					return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUsersHaveCardsInOurStore", locale));
 				}
+
 			} catch (GenericEntityException e1) {
 				Debug.logError(e1, module);
 				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
