@@ -467,7 +467,7 @@ public class CloudCardServices {
 				if(UtilValidate.isNotEmpty(cloudCardInfoList) || cloudCardInfoList.size() > 0){
 					String oldCardCode = null;
 					for (GenericValue cloudCardInfo : cloudCardInfoList){
-						oldCardCode = cloudCardInfo.getString("finAccountCode");
+						oldCardCode = cloudCardInfo.getString("cardNumber");
 						if(UtilValidate.isNotEmpty(oldCardCode) && !oldCardCode.startsWith(CloudCardConstant.AUTH_CARD_CODE_PREFIX)){
 							return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUsersHaveCardsInOurStore", locale));
 						}
