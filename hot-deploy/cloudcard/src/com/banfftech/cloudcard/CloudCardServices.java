@@ -462,10 +462,17 @@ public class CloudCardServices {
 	        	EntityCondition cloudCardInfoEntityCondition = EntityCondition.makeCondition(EntityOperator.AND,
 	                    EntityCondition.makeCondition(UtilMisc.toMap("partyId", customerPartyId, "distributorPartyId", partyGroup.getString("partyId"))),thruDateEntityCondition);
 				List<GenericValue> cloudCardInfoList = delegator.findList("CloudCardInfo", cloudCardInfoEntityCondition, null, null, null, false);
-				if(UtilValidate.isNotEmpty(cloudCardInfoList) || cloudCardInfoList.size() > 0){
-					return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUsersHaveCardsInOurStore", locale));
-				}
 
+				//如果该用户存在本店授权卡，也可以继续购买本店的卡
+				if(UtilValidate.isNotEmpty(cloudCardInfoList) || cloudCardInfoList.size() > 0){
+					String oldCardCode = null;
+					for (GenericValue cloudCardInfo : cloudCardInfoList){
+						oldCardCode = cloudCardInfo.getString("finAccountCode");
+						if(UtilValidate.isNotEmpty(oldCardCode) && !oldCardCode.startsWith(CloudCardConstant.AUTH_CARD_CODE_PREFIX)){
+							return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUsersHaveCardsInOurStore", locale));
+						}
+					}
+				}
 			} catch (GenericEntityException e1) {
 				Debug.logError(e1, module);
 				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
