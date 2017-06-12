@@ -155,7 +155,7 @@ public class AliPayServices {
                             Map<String,Object> transferMap = FastMap.newInstance();
                             transferMap.put("orderId", paymentId);
                             transferMap.put("payeeAccount", payeeAccount);
-                            transferMap.put("totalAmount", String.valueOf(amount));
+                            transferMap.put("totalAmount", String.format("%.2f", amount));
                             transferMap.put("payerRealName", "宁波区快微贝网络技术有限公司");
                             transferMap.put("payeeRealName", payeeRealName);
                             transferMap.put("remark", "来自库胖卡"+ notice.getBody() +"的收益");

@@ -215,14 +215,14 @@ public class WeiXinPayServices {
                             //查找转账折扣率
                     		double discount = Double.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","transfer.discount","1",delegator));
                     		//计算转账金额
-                            double price  = Double.parseDouble(map.get("total_fee").toString()) / 10;
+                            double price  = Double.parseDouble(map.get("total_fee").toString()) / 100;
                             double amount = price * discount;
 
                             //立即将钱打给商家
                             Map<String,Object> transferMap = FastMap.newInstance();
                             transferMap.put("orderId", paymentId);
                             transferMap.put("payeeAccount", payeeAccount);
-                            transferMap.put("totalAmount", String.valueOf(amount));
+                            transferMap.put("totalAmount", String.format("%.2f", amount));
                             transferMap.put("payerRealName", "宁波区快微贝网络技术有限公司");
                             transferMap.put("payeeRealName", payeeRealName);
                             transferMap.put("remark", "来自库胖卡的收益");
