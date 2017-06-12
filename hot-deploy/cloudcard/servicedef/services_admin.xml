@@ -22,8 +22,10 @@
 		<attribute mode="IN" name="postalCode" type="String" optional="true"><description>邮编</description></attribute>
 		<attribute mode="IN" name="longitude" type="String" optional="true"><description>经度</description></attribute>
 		<attribute mode="IN" name="latitude" type="String" optional="true"><description>纬度</description></attribute>
-		<attribute mode="IN" name="aliPayAccount" type="String" optional="true"><description>店家支付宝账号</description></attribute>
+		<attribute mode="IN" name="aliPayAccount" type="String" optional="false"><description>店家支付宝账号</description></attribute>
+		<attribute mode="IN" name="aliPayName" type="String" optional="false"><description>店家支付宝姓名</description></attribute>
 		<attribute mode="IN" name="wxPayAccount" type="String" optional="true"><description>店家微信账号</description></attribute>
+		<attribute mode="IN" name="wxPayName" type="String" optional="true"><description>店家微信姓名</description></attribute>
 		<attribute mode="IN" name="allowCrossStorePay" type="String" optional="false"><description>是否允许本店卡跨店付款 Y/N</description></attribute>
 		<attribute mode="IN" name="level" type="String" optional="false"><description>信用等级</description></attribute>
 		<attribute mode="IN" name="creditLimit" type="BigDecimal" optional="false"><description>卖卡限额</description></attribute>

@@ -211,8 +211,10 @@ under the License.
         <field position="2" name="latitude" title="纬度" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="40" maxlength="60"/></field>
         <field name="baiduMap" title=" " widget-style="baiDuMap"><container/></field>
         <!-- 支付宝&&微信账号 -->
-        <field name="aliPayAccount" title="店家支付宝账号" tooltip="店家支付宝账号"><text size="20" maxlength="30"/></field>
+        <field name="aliPayAccount" title="店家支付宝账号" tooltip="店家支付宝账号" widget-style="required"><text size="20" maxlength="30"/></field>
+        <field name="aliPayName" title="店家支付宝姓名" tooltip="店家支付宝姓名" widget-style="required"><text size="20" maxlength="30"/></field>
         <field name="wxPayAccount" title="店家微信账号" tooltip="店家微信账号"><text size="20" maxlength="30"/></field>
+        <field name="wxPayName" title="店家微信姓名" tooltip="店家微信姓名"><text size="20" maxlength="30"/></field>
 
         <field name="allowCrossStorePay"
            title="跨店"
