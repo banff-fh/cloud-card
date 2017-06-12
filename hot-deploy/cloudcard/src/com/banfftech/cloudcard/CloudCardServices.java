@@ -2203,7 +2203,7 @@ public class CloudCardServices {
 
 		//转卡短信通知
 		context.put("smsType", CloudCardConstant.USER_MODIFY_CARD_OWNER_TYPE);
-	    context.put("phone", context.get(teleNumber));
+	    context.put("phone", context.get("teleNumber"));
 	    context.put("teleNumber", teleNumber);
 		context.put("storeName", cloudCard.getString("distributorPartyName"));
 		context.put("cardBalance", cardBalance);
