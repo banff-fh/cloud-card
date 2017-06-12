@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/site-conf.xsd">
-	<!-- The controller elements that are common to all OFBiz components can 
-		be found in the following xml file. A component can override the elements 
+	<!-- The controller elements that are common to all OFBiz components can
+		be found in the following xml file. A component can override the elements
 		found in the common-controller.xml file. -->
 	<include location="component://common/webcommon/WEB-INF/common-controller.xml" />
 
@@ -13,7 +13,7 @@
 		<event name="checkTokenLogin" type="java" path="com.banfftech.cloudcard.common.CloudCardLoginWorker" invoke="checkTokenLogin"/>
 	</preprocessor>
 	<!-- Events to run on every request after all other processing (chains exempt) -->
-	<!-- <postprocessor> <event name="test" type="java" path="org.ofbiz.webapp.event.TestEvent" 
+	<!-- <postprocessor> <event name="test" type="java" path="org.ofbiz.webapp.event.TestEvent"
 		invoke="test"/> </postprocessor> -->
 
     <request-map uri="json">
@@ -21,14 +21,14 @@
         <event type="java" path="com.banfftech.cloudcard.common.CommonEvents" invoke="jsonResponseForCloudCard"/>
         <response name="success" type="none"/>
     </request-map>
-    
+
     <!-- APP接口 -->
     <!--
     	 所有的接口请求中都配置 <security https="false" auth="false"/>
     	https 交给 前置的 nginx 等 代理/负载均衡 去进行处理
     	auth 如果为true，没登录情况下，ofbiz控制器会跳转到登录页面，所以这里api都置为 false，鉴权机制采用后面的 event 调用服务时，服务定义auth = true
      -->
-    
+
 
     <!-- 开卡充值统一接口 -->
 	<request-map uri="activateCloudCardAndRecharge">
@@ -37,7 +37,7 @@
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
-    
+
     <!-- 卡授权接口 -->
 	<request-map uri="createCardAuth">
 		<security https="false" auth="false" />
@@ -45,7 +45,7 @@
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
-    
+
     <!-- 解除卡授权接口 -->
 	<request-map uri="revokeCardAuth">
 		<security https="false" auth="false" />
@@ -61,7 +61,7 @@
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
-    
+
      <!-- 用户卡列表接口 -->
     <request-map uri="myCloudCards">
     	<security https="false" auth="false" />
@@ -69,7 +69,7 @@
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
-    
+
     <!-- 查询商家交易记录 -->
     <request-map uri="getBizPayment">
 		<security https="false" auth="false" />
@@ -77,7 +77,7 @@
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
-    
+
     <!-- 查询用户交易记录 -->
     <request-map uri="getUserPayment">
 		<security https="false" auth="false" />
@@ -101,7 +101,7 @@
         <response name="success" type="request" value="json"/>
         <response name="error" type="request" value="json"/>
     </request-map>
-    
+
     <!-- 验证码发送申请 -->
     <request-map uri="getLoginCaptcha">
 		<security https="false" auth="false" />
@@ -125,7 +125,7 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 检查app版本 -->
 	<request-map uri="checkAppVersion">
 		<security https="false" auth="false" />
@@ -133,7 +133,7 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 注册设备regId -->
 	<request-map uri="regJpushRegId">
 		<security https="false" auth="false" />
@@ -141,7 +141,7 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 退出登录删除regId -->
 	<request-map uri="removeJpushRegId">
 		<security https="false" auth="false" />
@@ -165,7 +165,7 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 用户转让云卡 -->
 	<request-map uri="modifyCardOwner">
 		<security https="false" auth="false" />
@@ -173,21 +173,21 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 支付宝回调通知 -->
     <request-map uri="aliPayNotify">
     	<security https="false" auth="false" />
         <event type="java" path="com.banfftech.cloudcard.pay.PayServices" invoke="aliPayNotify"></event>
         <response name="success" type="none"/>
     </request-map>
-	
+
 	<!-- 微信回调通知 -->
     <request-map uri="wxPayNotify">
         <security https="false" auth="false" />
         <event type="java" path="com.banfftech.cloudcard.pay.PayServices" invoke="wxPayNotify"></event>
         <response name="success" type="none"/>
     </request-map>
-	
+
 	<!-- 支付宝或微信预支付订单 -->
 	<request-map uri="uniformOrder">
 		<security https="false" auth="false" />
@@ -195,8 +195,8 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
-	
+
+
 	<!-- 商户 开店申请接口 -->
 	<request-map uri="bizCreateApply">
 		<security https="false" auth="false" />
@@ -244,7 +244,7 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 商户 圈主解散圈子 接口 -->
 	<request-map uri="bizDissolveGroup">
 		<security https="false" auth="false"/>
@@ -324,7 +324,7 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 圈子信息 -->
 	<request-map uri="userGetGroupInfo">
 		<security https="false" auth="false"/>
@@ -340,7 +340,7 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 查找附件的店 -->
 	<request-map uri="userStoreListLBS">
 		<!--<security https="true" auth="false" />-->
@@ -348,7 +348,7 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 用户扫码获取商家信息和卡列表 -->
 	<request-map uri="userScanCodeGetCardAndStoreInfo">
 		<!--<security https="true" auth="false" />-->
@@ -356,7 +356,7 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 通过卡号获取店铺信息 -->
 	<request-map uri="getStoreInfoByCardId">
 		<!--<security https="true" auth="false" />-->
@@ -364,7 +364,7 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 用户获取付款码-->
 	<request-map uri="getPaymentQRCode">
 		<!--<security https="true" auth="false" />-->
@@ -380,7 +380,7 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- C端根据店铺Id获取商户信息和卡列表-->
 	<request-map uri="getCardAndStoreInfoByStoreId">
 		<!--<security https="true" auth="false" />-->
@@ -388,7 +388,7 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- C端根据店铺名获取商户信息和卡列表-->
 	<request-map uri="getCardAndStoreInfoByStoreName">
 		<!--<security https="true" auth="false" />-->
@@ -396,9 +396,9 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
-	
-	
+
+
+
 	<!-- C端获取用户自己的积分和会员等级-->
 	<request-map uri="getUserLevelAndScore">
 		<security https="false" auth="false"/>
@@ -406,7 +406,7 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 获取地市级-->
 	<request-map uri="getProvinceOrCityOrArea">
 		<!--<security https="true" auth="false" />-->
@@ -414,7 +414,7 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 无卡消费发送验证码-->
 	<request-map uri="getPayCaptchaOfUser">
 		<!--<security https="true" auth="false" />-->
@@ -422,7 +422,7 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 无卡消费获取用户卡-->
 	<request-map uri="getCloudcardsOfUser">
 		<!--<security https="true" auth="false" />-->
@@ -430,7 +430,7 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 无卡消费收款-->
 	<request-map uri="bizByTeleNumberWithdraw">
 		<!--<security https="true" auth="false" />-->
@@ -438,7 +438,7 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 无卡消费充值-->
 	<request-map uri="bizByTeleNumberRecharge">
 		<!--<security https="true" auth="false" />-->
@@ -446,7 +446,7 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 我的消息接口-->
 	<request-map uri="listMyNote">
 		<!--<security https="true" auth="false" />-->
@@ -478,34 +478,34 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 上传图片 -->
 	<request-map uri="uploadPictureWall">
 		<event type="java" path="com.banfftech.cloudcard.util.UtilFileUpload" invoke="uploadPictureWall"></event>
 		<response name="success" type="none"/>
 	</request-map>
-	
+
 	<!-- 商家删除图片 -->
 	<request-map uri="bizDeleteStoreInfoImg">
 		<event type="service" invoke="bizDeleteStoreInfoImg" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 商家删除图片 -->
 	<request-map uri="getUesrInfo">
 		<event type="service" invoke="getUesrInfo" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 用户获取个人信息 -->
 	<request-map uri="updateUesrInfo">
 		<event type="service" invoke="updateUesrInfo" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 商家获取已开卡列表 -->
 	<request-map uri="getCloudCardByBiz">
 		<event type="service" invoke="getCloudCardByBiz" />
@@ -522,7 +522,7 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 商家获取卡消费详情-->
 	<request-map uri="getUserPaymentBybiz">
 		<event type="service" invoke="getUserPaymentBybiz" />
@@ -535,100 +535,100 @@
 		<event type="service" invoke="initiateSettlement" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
-	</request-map>	
-	
+	</request-map>
+
 	<!-- 付款方向收款方收款方发起结算确认请求-->
 	<request-map uri="settlementRequest">
 		<event type="service" invoke="settlementRequest" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
-	</request-map>	
-	
+	</request-map>
+
 	<!-- 收款方对付款方结算确认-->
 	<request-map uri="bizListNeedSettlement">
 		<event type="service" invoke="bizListNeedSettlement" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
-	
+
+
 	<!-- 收卡商家查询待结算列表-->
 	<request-map uri="settlementConfirmation">
 		<event type="service" invoke="settlementConfirmation" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
-	</request-map>	
-	
+	</request-map>
+
 	<!-- 商家设置结算时间-->
 	<request-map uri="bizSetCloudcardSettlementPeriod">
 		<event type="service" invoke="bizSetCloudcardSettlementPeriod" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 商家查询结算时间-->
 	<request-map uri="bizGetCloudcardSettlementPeriod">
 		<event type="service" invoke="bizGetCloudcardSettlementPeriod" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 商家查询结算时间-->
 	<request-map uri="userLogout">
 		<event type="service" invoke="userLogout" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 根据城市名获取城市列表 -->
 	<request-map uri="getCityOrAreaByCityName">
 		<event type="service" invoke="getCityOrAreaByCityName" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 根据geoId获取下级城市列表 -->
 	<request-map uri="getCityOrAreaByGeoId">
 		<event type="service" invoke="getCityOrAreaByGeoId" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 根据geoId查询店家信息 -->
 	<request-map uri="getCloudcardStoreByGeoId">
 		<event type="service" invoke="getCloudcardStoreByGeoId" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 我的信用等级 -->
 	<request-map uri="bizGetMyStorelevel">
 		<event type="service" invoke="bizGetMyStorelevel" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 上传用户头像 -->
 	<request-map uri="userUploadAvatar">
 		<event type="service" invoke="userUploadAvatar" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 删除用户头像 -->
 	<request-map uri="userDelAvatar">
 		<event type="service" invoke="userDelAvatar" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-	
+
 	<!-- 后台页面部分 Request Mappings -->
 
 	<request-map uri="main">
 		<security https="true" auth="true" />
 		<response name="success" type="view" value="main" />
 	</request-map>
-	
+
 	<!-- 查询开店申请 -->
 	<request-map uri="findCreateStoreApply">
 		<security https="true" auth="true" />
@@ -679,34 +679,34 @@
 		</response>
 		<response name="error" type="request-redirect-noparam" value="createCard"></response>
 	</request-map>
-	
+
 	<!-- 查询商家 已生成的卡-->
 	<request-map uri="findCard">
 		<security https="true" auth="true" />
 		<response name="success" type="view" value="findCard" />
 		<response name="error" type="view" value="findCard" />
 	</request-map>
-	
+
 	<!-- 商家创建卡页面 -->
 	<request-map uri="createCard">
 		<security https="true" auth="true" />
 		<response name="success" type="view" value="createCard" />
 	</request-map>
-	
+
     <!-- 导出卡 -->
 	<request-map uri="exportCardExcel">
 		<event type="java" path="com.banfftech.cloudcard.CloudCardQueryServices" invoke="exportCardExcel"></event>
 		<response name="success" type="none"/>
 		<response name="error" type="request-redirect-noparam" value="findCard"/>
 	</request-map>
-	
+
     <!-- 商家结算页面 -->
 	<request-map uri="settlement">
 		<security https="true" auth="true" />
 		<response name="success" type="view" value="settlement" />
 		<response name="error" type="view" value="settlement" />
 	</request-map>
-	
+
 	<!-- 进行结算 -->
 	<request-map uri="doSettlement">
 		<security https="true" auth="true" />
@@ -721,14 +721,14 @@
 		<response name="success" type="view" value="crossStorePayment" />
 		<response name="error" type="view" value="crossStorePayment" />
 	</request-map>
-	
+
 	<!-- 结算历史记录 -->
 	<request-map uri="settlementHistory">
 		<security https="true" auth="true" />
 		<response name="success" type="view" value="settlementHistory" />
 		<response name="error" type="view" value="settlementHistory" />
 	</request-map>
-	
+
 
 	<request-map uri="LookupCloudCardSeller">
 		<security auth="true" https="true"/>
@@ -753,7 +753,7 @@
 	<view-map name="settlement" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#settlement" />
 	<view-map name="crossStorePayment" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#crossStorePayment" />
 	<view-map name="settlementHistory" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#settlementHistory" />
-	
+
 	<view-map name="LookupCustomerName" type="screen" page="component://party/widget/partymgr/LookupScreens.xml#LookupCustomerName"/>
 	<view-map name="LookupCloudCardSeller" type="screen" page="component://cloudcard/widget/CloudCardScreens.xml#LookupCloudCardSeller"/>
 
