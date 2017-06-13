@@ -248,6 +248,19 @@
 		<attribute name="status" type="String" mode="OUT" optional="false"><description>短信发送状态</description></attribute>
 	</service>
 
+	<service name="activateCloudCardAndRechargeByTelNumber" engine="java"
+		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="activateCloudCardAndRechargeByTelNumber" auth="true">
+		<description>无卡开卡接口</description>
+		<attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家Id（自己的商家id）</description></attribute>
+		<attribute name="teleNumber" type="String" mode="IN" optional="false"><description>顾客电话号码</description></attribute>
+		<attribute name="captcha" type="String" mode="IN" optional="false"><description>验证码</description></attribute>
+		<attribute name="amount" type="BigDecimal" mode="INOUT" optional="false"><description>充值金额</description></attribute>
+ 		<attribute name="storeName" type="String" mode="OUT" optional="false"><description>店名</description></attribute>
+		<attribute name="cardId" type="String" mode="OUT" optional="false"><description>卡Id</description></attribute>
+		<attribute name="customerPartyId" type="String" mode="OUT" optional="false"><description>客户partyId</description></attribute>
+		<attribute name="cardBalance" type="BigDecimal" mode="OUT" optional="false"><description>可用余额</description></attribute>
+	</service>
+
 	<service name="getPayCaptchaOfUser" engine="java"
 		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="getPayCaptchaOfUser" auth="true">
 		<description>无卡消费短信通知C端</description>

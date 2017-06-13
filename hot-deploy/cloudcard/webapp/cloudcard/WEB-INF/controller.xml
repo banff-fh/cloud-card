@@ -636,6 +636,15 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 
+	<!-- 无卡开卡接口 -->
+	<request-map uri="activateCloudCardAndRechargeByTelNumber">
+		<event type="service" invoke="activateCloudCardAndRechargeByTelNumber" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+
+
+
 	<!-- 后台页面部分 Request Mappings -->
 
 	<request-map uri="main">

@@ -1579,6 +1579,60 @@ public class CloudCardBossServices {
 		return result;
 	}
 
+	public static Map<String, Object> activateCloudCardAndRechargeByTelNumber(DispatchContext dctx, Map<String, Object> context){
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dctx.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+
+		String teleNumber = (String) context.get("teleNumber");
+		BigDecimal amount = (BigDecimal) context.get("amount");
+		String captcha = (String) context.get("captcha");
+		//判断验证码是否正确
+		EntityCondition captchaCondition = EntityCondition.makeCondition(
+				EntityCondition.makeCondition("teleNumber", EntityOperator.EQUALS, teleNumber),
+				EntityUtil.getFilterByDateExpr(),
+				EntityCondition.makeCondition("isValid", EntityOperator.EQUALS,"N"),EntityCondition.makeCondition("smsType", EntityOperator.EQUALS,CloudCardConstant.USER_PURCHASE_CARD_CAPTCHA_SMS_TYPE));
+
+		GenericValue sms = null;
+		try {
+			sms = EntityUtil.getFirst(
+					delegator.findList("SmsValidateCode", captchaCondition, null,UtilMisc.toList("-" + ModelEntity.CREATE_STAMP_FIELD), null, false)
+					);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardGetCAPTCHAFailedError", locale));
+		}
+
+		if(UtilValidate.isEmpty(sms)){
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardGetCAPTCHAFailedError", locale));
+		}
+
+		if(!captcha.equalsIgnoreCase(sms.getString("captcha"))){
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardCaptchaCheckFailedError", locale));
+		}
+		Map<String, Object> activateCloudCardAndRechargeOut = FastMap.newInstance();
+		try {
+			activateCloudCardAndRechargeOut = dispatcher.runSync("activateCloudCardAndRecharge", context);
+		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+
+		if(UtilValidate.isEmpty(activateCloudCardAndRechargeOut)){
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+
+		//返回结果
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("amount", activateCloudCardAndRechargeOut.get("amount"));
+		result.put("storeName", activateCloudCardAndRechargeOut.get("storeName"));
+		result.put("cardBalance", activateCloudCardAndRechargeOut.get("cardBalance"));
+		result.put("customerPartyId", activateCloudCardAndRechargeOut.get("customerPartyId"));
+		result.put("cardId", activateCloudCardAndRechargeOut.get("cardId"));
+
+		return result;
+	}
+
 	/**
 	 * 无卡消费收款
 	 * @param dctx
