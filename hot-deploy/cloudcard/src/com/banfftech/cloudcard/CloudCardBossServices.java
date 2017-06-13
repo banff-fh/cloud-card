@@ -1583,10 +1583,12 @@ public class CloudCardBossServices {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dctx.getDelegator();
 		Locale locale = (Locale) context.get("locale");
-
+		String organizationPartyId = (String) context.get("organizationPartyId");
 		String teleNumber = (String) context.get("teleNumber");
 		BigDecimal amount = (BigDecimal) context.get("amount");
 		String captcha = (String) context.get("captcha");
+		GenericValue userLogin = (GenericValue) context.get("userLogin");
+
 		//判断验证码是否正确
 		EntityCondition captchaCondition = EntityCondition.makeCondition(
 				EntityCondition.makeCondition("teleNumber", EntityOperator.EQUALS, teleNumber),
@@ -1610,9 +1612,11 @@ public class CloudCardBossServices {
 		if(!captcha.equalsIgnoreCase(sms.getString("captcha"))){
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardCaptchaCheckFailedError", locale));
 		}
+
 		Map<String, Object> activateCloudCardAndRechargeOut = FastMap.newInstance();
 		try {
-			activateCloudCardAndRechargeOut = dispatcher.runSync("activateCloudCardAndRecharge", context);
+			activateCloudCardAndRechargeOut = dispatcher.runSync("activateCloudCardAndRecharge",
+					UtilMisc.toMap("userLogin", userLogin, "organizationPartyId", organizationPartyId, "teleNumber", teleNumber, "amount", amount));
 		} catch (GenericServiceException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
