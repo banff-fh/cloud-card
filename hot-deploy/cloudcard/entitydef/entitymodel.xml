@@ -77,8 +77,8 @@
 			<key-map field-name="paymentMethodId" />
 		</relation>
     </view-entity>
-	
-	
+
+
 	<view-entity entity-name="TelecomNumberAndUserLogin"
         package-name="org.ofbiz.party.contact"
         title="根据会员电话号码查询userlogin">
@@ -111,11 +111,11 @@
             <key-map field-name="userLoginId"/>
         </relation>
     </view-entity>
-    
+
     <entity entity-name="SmsValidateCode" package-name="org.ofbiz.cloudcard.sms" title="短信验证码">
 		<description>短信验证码，过期的 且 isValid=Y 的数据都可以清理</description>
 		<field name="teleNumber" type="id"></field>
-		<field name="smsType" type="id"></field>
+		<field name="smsType" type="short-varchar"></field>
 		<field name="captcha" type="id"></field>
 		<field name="isValid" type="id"></field>
 		<field name="fromDate" type="date-time"></field>
@@ -124,21 +124,21 @@
       	<prim-key field="captcha"/>
 	    <prim-key field="fromDate"/>
 	</entity>
-	
-	
+
+
 	<view-entity entity-name="CreateStoreApplyView" package-name="org.ofbiz.content.survey"
             title="云卡开店申请视图">
       <member-entity entity-alias="SR" entity-name="SurveyResponse"/>
       <member-entity entity-alias="SRAN" entity-name="SurveyResponseAnswer"/>
       <member-entity entity-alias="SRAT" entity-name="SurveyResponseAnswer"/>
       <member-entity entity-alias="SRAA" entity-name="SurveyResponseAnswer"/>
-      
+
       <alias-all entity-alias="SR"/>
-      
+
       <alias entity-alias="SRAN" name="storeName"  field="textResponse"/>
       <alias entity-alias="SRAT" name="teleNumber" field="textResponse"/>
       <alias entity-alias="SRAA" name="address" field="textResponse"/>
-      
+
       <view-link entity-alias="SR" rel-entity-alias="SRAN">
         <key-map field-name="surveyResponseId"/>
         <entity-condition>
@@ -167,8 +167,8 @@
           <key-map field-name="surveyResponseId"/>
       </relation>
     </view-entity>
-	
-	
+
+
 	<!-- 废弃 -->
 	<view-entity entity-name="CloudCardCrossStorePaymentView" package-name="org.ofbiz.cloudcard.payment" title="跨店流水">
 		<description>
@@ -192,7 +192,7 @@
 		<alias entity-alias="PM" name="cardName"  field="description"/>
 		<alias entity-alias="PM" name="customerPartyId" field="partyId"><description>持卡人、客户</description></alias>
 		<alias entity-alias="FAR" name="distributorPartyId" field="partyId"><description>发行卡的商家</description></alias>
-		
+
 		<view-link entity-alias="P" rel-entity-alias="PM">
 			<key-map field-name="paymentMethodId" />
 			<entity-condition>
@@ -207,11 +207,11 @@
 				</condition-list>
 			</entity-condition>
 		</view-link>
-		
+
 		<view-link entity-alias="PM" rel-entity-alias="FA">
 			<key-map field-name="finAccountId" />
 		</view-link>
-		
+
 		<view-link entity-alias="FA" rel-entity-alias="FAR">
 			<key-map field-name="finAccountId" rel-field-name="finAccountId" />
 			<entity-condition>
@@ -228,15 +228,15 @@
 			<key-map field-name="finAccountId" />
 		</relation>
 	</view-entity>
-	
-	
+
+
 	<!-- 废弃 -->
 	<view-entity entity-name="CloudCardPlatformAccountReceivableView" package-name="org.ofbiz.cloudcard.payment" title="平台对商家应收金额统计视图">
 		<description>
 			用于查询平台对各个商家应收金额
 		</description>
 		<member-entity entity-alias="AR" entity-name="CloudCardCrossStorePaymentView"/>
-		
+
 		<alias entity-alias="AR" name="partyId" field="distributorPartyId" group-by="true"></alias>
 		<alias entity-alias="AR" name="arAmount" function="sum" >
 			<description>平台应从商家收取金额</description>
@@ -253,16 +253,16 @@
 				<condition-expr entity-alias="AR" field-name="statusId" operator="equals" value="PMNT_P_NOT_RCV_SENT"/>
 			</condition-list>
 		</entity-condition>
-		
+
 	</view-entity>
-	
+
 	<!-- 废弃 -->
 	<view-entity entity-name="CloudCardPlatformAccountPayableView" package-name="org.ofbiz.cloudcard.payment" title="平台对商家应付金额统计视图">
 		<description>
 			用于查询平台对各个商家应付金额
 		</description>
 		<member-entity entity-alias="AP" entity-name="CloudCardCrossStorePaymentView"/>
-		
+
 		<alias entity-alias="AP" name="partyId" field="tradePartyId" group-by="true"></alias>
 		<alias entity-alias="AP" name="apAmount" function="sum" >
 			<description>平台应付商家金额</description>
@@ -279,10 +279,10 @@
 				<condition-expr entity-alias="AP" field-name="statusId" operator="equals" value="PMNT_P_NOT_SENT_RCV"/>
 			</condition-list>
 		</entity-condition>
-		
+
 	</view-entity>
-	
-	
+
+
 	<!-- 废弃 -->
 	<view-entity entity-name="CloudCardPlatformArApView" package-name="org.ofbiz.cloudcard.payment" title="平台对商家应收应付金额统计视图">
 		<description>
@@ -295,7 +295,7 @@
 
 		<alias entity-alias="PG" name="partyId" />
 		<alias entity-alias="PG" name="groupName" />
-		
+
 		<alias entity-alias="AR" name="arAmount" >
 			<complex-alias operator="">
 				<complex-alias-field entity-alias="AR"  field="arAmount" default-value="0"/>
@@ -306,7 +306,7 @@
 				<complex-alias-field entity-alias="AR"  field="arCount" default-value="0"/>
 			</complex-alias>
 		</alias>
-		
+
 		<alias entity-alias="AP" name="apAmount" >
 			<complex-alias operator="">
 				<complex-alias-field entity-alias="AP"  field="apAmount" default-value="0"/>
@@ -331,24 +331,24 @@
 				<condition-expr entity-alias="PR" field-name="roleTypeId" operator="equals" value="DISTRIBUTOR"/>
 			</entity-condition>
 		</view-link>
-		
+
 		<view-link entity-alias="PG" rel-entity-alias="AR" rel-optional="true">
 			<key-map field-name="partyId" />
 		</view-link>
-		
+
 		<view-link entity-alias="PG" rel-entity-alias="AP" rel-optional="true">
 			<key-map field-name="partyId" />
 		</view-link>
-		
+
 	</view-entity>
-	
+
 	<!-- 扩展app消息状态 -->
 	<extend-entity entity-name="PartyNote">
 		<field name="isViewed" type="indicator" />
 		<field name="removed" type="indicator" />
 		<field name="paymentId" type="id" />
 	</extend-entity>
-	
+
 	<view-entity entity-name="PartyNoteView2" package-name="org.ofbiz.cloudcard.note">
 		<member-entity entity-alias="PN" entity-name="PartyNote" />
 		<member-entity entity-alias="ND" entity-name="NoteData" />
@@ -358,12 +358,12 @@
 			<key-map field-name="noteId" />
 		</view-link>
 	</view-entity>
-	
+
 	<view-entity entity-name="PartyContentAndDataResourceDetail" package-name="org.ofbiz.content.content" title="Party Content Detail View Entity">
         <member-entity entity-alias="PCT" entity-name="PartyContent"/>
         <member-entity entity-alias="CNT" entity-name="Content"/>
         <member-entity entity-alias="DRC" entity-name="DataResource"/>
-        
+
         <alias entity-alias="PCT" name="partyId" field="partyId"/>
         <alias entity-alias="PCT" name="partyContentTypeId" field="partyContentTypeId"/>
         <alias entity-alias="CNT" name="statusId" field="statusId"/>
@@ -372,36 +372,36 @@
         <alias entity-alias="DRC" name="dataResourceName" field="dataResourceName"/>
         <alias entity-alias="DRC" name="objectInfo" field="objectInfo"/>
         <alias entity-alias="DRC" name="lastModifiedDate" field="lastModifiedDate"/>
-        
+
         <view-link entity-alias="PCT" rel-entity-alias="CNT">
             <key-map field-name="contentId"/>
         </view-link>
-        
+
         <view-link entity-alias="CNT" rel-entity-alias="DRC">
             <key-map field-name="dataResourceId"/>
         </view-link>
-        
+
         <relation type="one-nofk" rel-entity-name="ContentType">
             <key-map field-name="contentTypeId"/>
         </relation>
     </view-entity>
-    
+
     <!-- 获取PartyClassificationAndPartyClassificationGroup -->
    	<view-entity entity-name="PartyClassificationAndPartyClassificationGroup" package-name="org.ofbiz.party" title="Party Classification View Entity">
        <member-entity entity-alias="PC" entity-name="PartyClassification"/>
        <member-entity entity-alias="PCG" entity-name="PartyClassificationGroup"/>
-       
+
        <alias entity-alias="PC" name="partyId" field="partyId"/>
        <alias entity-alias="PC" name="fromDate" field="fromDate"/>
        <alias entity-alias="PC" name="thruDate" field="thruDate"/>
        <alias entity-alias="PCG" name="description" field="description"/>
        <alias entity-alias="PCG" name="partyClassificationTypeId" field="partyClassificationTypeId"/>
        <alias entity-alias="PCG" name="partyClassificationGroupId" field="partyClassificationGroupId"/>
-       
+
        <view-link entity-alias="PCG" rel-entity-alias="PC">
            <key-map field-name="partyClassificationGroupId"/>
        </view-link>
-      
+
     </view-entity>
 
     <entity entity-name="CloudcardSettlementPeriod" package-name="org.ofbiz.accounting" title="商家之间结算时间 ">
@@ -414,7 +414,7 @@
       	<prim-key field="partyIdTo"/>
       	<prim-key field="partyIdFrom"/>
 	</entity>
-  
+
     <view-entity entity-name="CloudCardNeedSettlementPaymentView" package-name="org.ofbiz.cloudcard.payment" title="待结算收款的流水">
 		<description>
 			待结算列表（收卡方需要对卖卡方发起结算请求的列表）
@@ -440,7 +440,7 @@
 		<alias entity-alias="PA1" name="settlementReqCount"  field="attrValue"><description>结算请求次数</description></alias>
 		<alias entity-alias="PA2" name="cardSellerId"  field="attrValue"><description>卖卡商家id</description></alias>
 		<alias entity-alias="PA3" name="cardSellerName"  field="attrValue"><description>卖卡商家名字</description></alias>
-		
+
 		<view-link entity-alias="P" rel-entity-alias="PM">
 			<key-map field-name="paymentMethodId" />
 			<entity-condition>
@@ -455,49 +455,49 @@
 				</condition-list>
 			</entity-condition>
 		</view-link>
-		
+
 		<view-link entity-alias="P" rel-entity-alias="PA1">
 			<key-map field-name="paymentId" />
 			<entity-condition>
 				<condition-expr entity-alias="PA1" field-name="attrName" operator="equals" value="settlementReqCount"/>
 			</entity-condition>
 		</view-link>
-		
+
 		<view-link entity-alias="P" rel-entity-alias="PA2">
 			<key-map field-name="paymentId" />
 			<entity-condition>
 				<condition-expr entity-alias="PA2" field-name="attrName" operator="equals" value="cardSellerId"/>
 			</entity-condition>
 		</view-link>
-		
+
 		<view-link entity-alias="P" rel-entity-alias="PA3">
 			<key-map field-name="paymentId" />
 			<entity-condition>
 				<condition-expr entity-alias="PA3" field-name="attrName" operator="equals" value="cardSellerName"/>
 			</entity-condition>
 		</view-link>
-		
+
 		<relation type="one-nofk" rel-entity-name="PaymentMethod">
 			<key-map field-name="paymentMethodId" />
 		</relation>
-		
+
 	</view-entity>
-	
+
 	<view-entity entity-name="CloudCardPaymentView"
       package-name="org.ofbiz.cloudcard.payment"
       title="云卡交易记录">
 
 		<member-entity entity-alias="PY" entity-name="Payment"/>
 		<member-entity entity-alias="PM" entity-name="PaymentMethod"/>
-			
+
 		<member-entity entity-alias="FPNV" entity-name="PartyNameView"/>
 		<member-entity entity-alias="TPNV" entity-name="PartyNameView"/>
-		
+
 		<member-entity entity-alias="FA" entity-name="FinAccount"/>
 		<member-entity entity-alias="FAR" entity-name="FinAccountRole"/>
-		
+
 		<member-entity entity-alias="PG" entity-name="PartyGroup"/>
-		
+
 		<alias-all entity-alias="PY"/>
 		<alias name="partyFromFirstName" entity-alias="FPNV" field="firstName"/>
 		<alias name="partyFromLastName" entity-alias="FPNV" field="lastName"/>
@@ -505,7 +505,7 @@
 		<alias name="partyToFirstName" entity-alias="TPNV" field="firstName"/>
 		<alias name="partyToLastName" entity-alias="TPNV" field="lastName"/>
 		<alias name="partyToGroupName" entity-alias="TPNV" field="groupName"/>
-		
+
 		<alias name="cardCode" entity-alias="FA" field="finAccountCode"/>
 		<alias name="distributorPartyId" entity-alias="FAR" field="partyId" />
 		<alias name="distributorPartyName" entity-alias="PG" field="groupName" />
@@ -541,10 +541,10 @@
 		<view-link entity-alias="PY" rel-entity-alias="TPNV">
 		  <key-map field-name="partyIdTo" rel-field-name="partyId"/>
 		</view-link>
-		
-		
+
+
 	</view-entity>
-	
+
 	<view-entity entity-name="CloudcardPartyAndPostalAddress"
         package-name="org.ofbiz.party.contact"
         title="Party and Contact Mech/Postal Address View Entity">
