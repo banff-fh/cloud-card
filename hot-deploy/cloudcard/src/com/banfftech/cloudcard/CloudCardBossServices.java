@@ -1626,15 +1626,16 @@ public class CloudCardBossServices {
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 
-		//返回结果
-		Map<String, Object> result = ServiceUtil.returnSuccess();
-		result.put("amount", activateCloudCardAndRechargeOut.get("amount"));
-		result.put("storeName", activateCloudCardAndRechargeOut.get("storeName"));
-		result.put("cardBalance", activateCloudCardAndRechargeOut.get("cardBalance"));
-		result.put("customerPartyId", activateCloudCardAndRechargeOut.get("customerPartyId"));
-		result.put("cardId", activateCloudCardAndRechargeOut.get("cardId"));
+		//修改验证码状态
+		sms.set("isValid", "Y");
+		try {
+			sms.store();
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
 
-		return result;
+		return activateCloudCardAndRechargeOut;
 	}
 
 	/**
