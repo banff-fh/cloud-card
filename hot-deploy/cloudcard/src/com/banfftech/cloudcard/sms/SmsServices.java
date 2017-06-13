@@ -137,9 +137,11 @@ public class SmsServices {
 			smsParamString = "{teleNumber:'"+teleNumber+"',storeName:'"+ storeName+"',cardBalance:'"+cardBalance+"'}";
 			smsType = "sms.smsModifyCardOwnerTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_PURCHASE_CARD_CAPTCHA_SMS_TYPE)){
-			BigDecimal amount = (BigDecimal) context.get("amount");
-			Integer validTime = (Integer) context.get("validTime");
-			smsParamString = "{money:'"+amount+"',verfiyCode:'"+captcha+"',time:'"+validTime+"'}";
+			String verfiyCode = (String) context.get("captcha");
+			Integer time = (Integer) context.get("validTime");
+			BigDecimal money = (BigDecimal) context.get("amount");
+
+			smsParamString = "{money:'"+money+"',verfiyCode:'"+ verfiyCode+"',time:'"+time+"'}";
 			smsType = "sms.smsUserPurchaseCardVCTemplateCode";
 		}
 		//初始化短信发送配置文件
