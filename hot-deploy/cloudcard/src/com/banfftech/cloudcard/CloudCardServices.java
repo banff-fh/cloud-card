@@ -2125,6 +2125,28 @@ public class CloudCardServices {
 			}
 		}
 
+		//判断用户是否在本店有没有卡
+		try {
+        	EntityCondition thruDateEntityCondition = EntityCondition.makeCondition(EntityOperator.OR,EntityCondition.makeCondition("thruDate", EntityOperator.GREATER_THAN, UtilDateTime.nowTimestamp()),EntityCondition.makeCondition("thruDate", EntityOperator.EQUALS, null));
+        	EntityCondition cloudCardInfoEntityCondition = EntityCondition.makeCondition(EntityOperator.AND,
+                    EntityCondition.makeCondition(UtilMisc.toMap("partyId", customerPartyId, "distributorPartyId", cloudCard.getString("distributorPartyId"))),thruDateEntityCondition);
+			List<GenericValue> cloudCardInfoList = delegator.findList("CloudCardInfo", cloudCardInfoEntityCondition, null, null, null, false);
+
+			//如果该用户存在本店授权卡，也可以继续接收本店的卡
+			if(UtilValidate.isNotEmpty(cloudCardInfoList) || cloudCardInfoList.size() > 0){
+				String oldCardCode = null;
+				for (GenericValue cloudCardInfo : cloudCardInfoList){
+					oldCardCode = cloudCardInfo.getString("cardNumber");
+					if(UtilValidate.isNotEmpty(oldCardCode) && !oldCardCode.startsWith(CloudCardConstant.AUTH_CARD_CODE_PREFIX)){
+						return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUsersHaveCardsInOurStore", locale));
+					}
+				}
+			}
+		} catch (GenericEntityException e1) {
+			Debug.logError(e1, module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+
 		//1、为原卡主创建一个FinAccountRole记录
 		String oldOwner = cloudCard.getString("ownerPartyId");
 		String finAccountId = cloudCard.getString("finAccountId");
