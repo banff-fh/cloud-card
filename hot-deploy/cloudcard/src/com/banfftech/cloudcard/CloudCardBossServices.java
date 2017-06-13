@@ -1433,7 +1433,7 @@ public class CloudCardBossServices {
 
 		String teleNumber = (String) context.get("teleNumber");
 		BigDecimal amount = (BigDecimal) context.get("amount");
-		String smsType = CloudCardConstant.USER_PURCHASE_CARD_CAPTCHA_SMS_TYPE;
+		String smsType = CloudCardConstant.USER_RECHARGE_CAPTCHA_SMS_TYPE;
 		context.put("smsType", smsType);
 		context.put("amount", amount);
 		context.put("isValid", "N");
@@ -1746,7 +1746,7 @@ public class CloudCardBossServices {
 		EntityCondition captchaCondition = EntityCondition.makeCondition(
 				EntityCondition.makeCondition("teleNumber", EntityOperator.EQUALS, teleNumber),
 				EntityUtil.getFilterByDateExpr(),
-				EntityCondition.makeCondition("isValid", EntityOperator.EQUALS,"N"),EntityCondition.makeCondition("smsType", EntityOperator.EQUALS,CloudCardConstant.USER_PURCHASE_CARD_CAPTCHA_SMS_TYPE));
+				EntityCondition.makeCondition("isValid", EntityOperator.EQUALS,"N"),EntityCondition.makeCondition("smsType", EntityOperator.EQUALS,CloudCardConstant.USER_RECHARGE_CAPTCHA_SMS_TYPE));
 
 		GenericValue sms = null;
 		try {
