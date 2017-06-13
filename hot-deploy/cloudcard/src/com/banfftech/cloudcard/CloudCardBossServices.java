@@ -1406,27 +1406,12 @@ public class CloudCardBossServices {
      * @return
      */
 	public static Map<String, Object> getPurchaseCardCaptchaOfUser(DispatchContext dctx,Map<String, Object> context) {
-		Delegator delegator = dctx.getDelegator();
-		Locale locale = (Locale) context.get("locale");
-
 		String teleNumber = (String) context.get("teleNumber");
 		String amount = (String) context.get("amount");
 		String smsType = CloudCardConstant.USER_PURCHASE_CARD_CAPTCHA_SMS_TYPE;
 		context.put("smsType", smsType);
 		context.put("amount", amount);
 		context.put("isValid", "N");
-
-		GenericValue customer;
-		try {
-			customer = CloudCardHelper.getUserByTeleNumber(delegator, teleNumber);
-		} catch (GenericEntityException e) {
-			Debug.logError(e.getMessage(), module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-		}
-
-		if(UtilValidate.isEmpty(customer)){
-			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserNotExistError", locale));
-		}
 
 		Map<String, Object> result = SmsServices.getSMSCaptcha(dctx, context);
 		result.put("teleNumber", teleNumber);
