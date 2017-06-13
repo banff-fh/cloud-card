@@ -1407,7 +1407,7 @@ public class CloudCardBossServices {
      */
 	public static Map<String, Object> getPurchaseCardCaptchaOfUser(DispatchContext dctx,Map<String, Object> context) {
 		String teleNumber = (String) context.get("teleNumber");
-		String amount = (String) context.get("amount");
+		BigDecimal amount = (BigDecimal) context.get("amount");
 		String smsType = CloudCardConstant.USER_PURCHASE_CARD_CAPTCHA_SMS_TYPE;
 		context.put("smsType", smsType);
 		context.put("amount", amount);
