@@ -1740,7 +1740,7 @@ public class CloudCardBossServices {
 		String teleNumber = (String) context.get("teleNumber");
 		String organizationPartyId = (String) context.get("organizationPartyId");
 		BigDecimal amount = (BigDecimal) context.get("amount");
-		String captcha = (String) context.get("");
+		String captcha = (String) context.get("captcha");
 
 		//判断验证码是否正确
 		EntityCondition captchaCondition = EntityCondition.makeCondition(
