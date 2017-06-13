@@ -83,11 +83,6 @@ public class SmsServices {
 			Integer validTime = (Integer) context.get("validTime");
 			smsParamString = "{money:'"+amount+"',verfiyCode:'"+captcha+"',time:'"+validTime+"'}";
 			smsType = "sms.smsUserPayVCTemplateCode";
-		}else if(smsType.equals(CloudCardConstant.USER_PURCHASE_CARD_CAPTCHA_SMS_TYPE)){
-			BigDecimal amount = (BigDecimal) context.get("amount");
-			Integer validTime = (Integer) context.get("validTime");
-			smsParamString = "{money:'"+amount+"',verfiyCode:'"+captcha+"',time:'"+validTime+"'}";
-			smsType = "sms.smsUserPurchaseCardVCTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_RECHARGE_CAPTCHA_SMS_TYPE)){
 			BigDecimal amount = (BigDecimal) context.get("amount");
 			Integer validTime = (Integer) context.get("validTime");
@@ -141,6 +136,11 @@ public class SmsServices {
 
 			smsParamString = "{teleNumber:'"+teleNumber+"',storeName:'"+ storeName+"',cardBalance:'"+cardBalance+"'}";
 			smsType = "sms.smsModifyCardOwnerTemplateCode";
+		}else if(smsType.equals(CloudCardConstant.USER_PURCHASE_CARD_CAPTCHA_SMS_TYPE)){
+			BigDecimal amount = (BigDecimal) context.get("amount");
+			Integer validTime = (Integer) context.get("validTime");
+			smsParamString = "{money:'"+amount+"',verfiyCode:'"+captcha+"',time:'"+validTime+"'}";
+			smsType = "sms.smsUserPurchaseCardVCTemplateCode";
 		}
 		//初始化短信发送配置文件
 		getSmsProperty(delegator,smsType);
