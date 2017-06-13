@@ -1612,7 +1612,7 @@ public class CloudCardBossServices {
 		}
 
 		//暂时写死
-		if("Users have cards in our store".equalsIgnoreCase(activateCloudCardAndRechargeOut.get("errorMessage").toString())){
+		if(UtilValidate.isNotEmpty(activateCloudCardAndRechargeOut.get("errorMessage").toString()) && "Users have cards in our store".equalsIgnoreCase(activateCloudCardAndRechargeOut.get("errorMessage").toString())){
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUsersHaveCardsInOurStore", locale));
 		}
 
