@@ -1626,7 +1626,8 @@ public class CloudCardBossServices {
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 
-		if(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUsersHaveCardsInOurStore", locale).equalsIgnoreCase(activateCloudCardAndRechargeOut.get("errorMessage").toString())){
+		//暂时写死
+		if("Users have cards in our store".equalsIgnoreCase(activateCloudCardAndRechargeOut.get("errorMessage").toString())){
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUsersHaveCardsInOurStore", locale));
 		}
 
