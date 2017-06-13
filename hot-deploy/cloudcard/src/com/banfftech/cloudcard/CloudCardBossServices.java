@@ -40,7 +40,7 @@ import javolution.util.FastSet;
 
 /**
  * 库胖卡商家相关的服务
- * 
+ *
  * @author ChenYu
  *
  */
@@ -51,7 +51,7 @@ public class CloudCardBossServices {
 
     /**
      * 商户开通申请 通过搜集的信息创建一个SurveyResponse 与 SurveyResponseAnswer
-     * 
+     *
      * @param dctx
      * @param context
      * @return
@@ -144,7 +144,7 @@ public class CloudCardBossServices {
 
     /**
      * 商户创建圈子 创建个partyGroup，并用partyRelationship 关联 商家与这个代表圈子的partyGroup
-     * 
+     *
      * @param dctx
      * @param context
      * @return
@@ -227,7 +227,7 @@ public class CloudCardBossServices {
 
     /**
      * 向某B端用戶发起邀请，邀请其加入某个圈子
-     * 
+     *
      * <pre>
      * 以下情况 <strong>均无法</strong> 邀请：
      *   1、自己不在圈子里，
@@ -237,7 +237,7 @@ public class CloudCardBossServices {
      *   5、被邀请的用户是本店的另一个管理员（一个店可能有多个管理员）
      *   6、被邀请的店铺已经在某个圈子里了
      * </pre>
-     * 
+     *
      * @param dctx
      * @param context
      * @return
@@ -373,7 +373,7 @@ public class CloudCardBossServices {
 
     /**
      * B端 接收或拒绝 加入圈子的邀请
-     * 
+     *
      * @param dctx
      * @param context
      * @return
@@ -491,19 +491,19 @@ public class CloudCardBossServices {
 
     /**
      * B端 退出圈子/ 圈主踢出圈友 接口
-     * 
+     *
      * <pre>
      *      场景1：圈友主动发起退出圈子请求
      *      场景2：圈主发起踢出圈友的请求
      * </pre>
-     * 
+     *
      * <pre>
-     *      如果是圈主踢出圈友的场景，此圈友必须是冻结状态 且 没有未结算的金额。 
+     *      如果是圈主踢出圈友的场景，此圈友必须是冻结状态 且 没有未结算的金额。
      *          即 圈主踢出圈友时， 必须先对该圈友进行冻结（接口 圈主冻结/解冻 圈友）， 然后结清未结算金额，否则调用此接口会直接提示错误。
-     * 
+     *
      *      如果圈友主动发起退出操作的场景， 若有未结算金额时，也会给出错误提示。
      * </pre>
-     * 
+     *
      * @param dctx
      * @param context
      * @return
@@ -624,7 +624,7 @@ public class CloudCardBossServices {
 
     /**
      * B端 圈主冻结/解冻圈友 接口
-     * 
+     *
      * @param dctx
      * @param context
      * @return
@@ -705,7 +705,7 @@ public class CloudCardBossServices {
 
     /**
      * B端 圈主解散圈子 接口
-     * 
+     *
      * @param dctx
      * @param context
      * @return
@@ -791,7 +791,7 @@ public class CloudCardBossServices {
 
     /**
      * 我的圈子
-     * 
+     *
      * @param dctx
      * @param context
      * @return
@@ -938,7 +938,7 @@ public class CloudCardBossServices {
             // 收益总额，因为跨店消费的圈主给圈友的打折而产生的收益总额，
             BigDecimal income = CloudCardHelper.ZERO;
 
-            
+
             result.put("crossStoreAmount", crossStoreAmount);
             result.put("presellAmount", presellAmount);
             result.put("totalConsumptionAmount", totalConsumptionAmount);
@@ -955,7 +955,7 @@ public class CloudCardBossServices {
 
     /**
      * B端 查看店铺简要信息 接口
-     * 
+     *
      * @param dctx
      * @param context
      * @return
@@ -1036,7 +1036,7 @@ public class CloudCardBossServices {
 
     /**
      * 发起结算
-     * 
+     *
      * @param dctx
      * @param context
      * @return
@@ -1117,7 +1117,7 @@ public class CloudCardBossServices {
 
     /**
      * 结算确认/拒绝
-     * 
+     *
      * @param dctx
      * @param context
      * @return
@@ -1235,7 +1235,7 @@ public class CloudCardBossServices {
 
     /**
      * 获取待确认结算信息
-     * 
+     *
      * @param dctx
      * @param context
      * @return
@@ -1292,7 +1292,7 @@ public class CloudCardBossServices {
 
     /**
      * TODO
-     * 
+     *
      * <pre>
           <service name="bizSettlementRequest" engine="java"
             location="com.banfftech.cloudcard.CloudCardBossServices" invoke=
@@ -1302,7 +1302,7 @@ public class CloudCardBossServices {
     "IN" optional="false"><description>店家Id（自己的商家id）</description></attribute>
           </service>
      * </pre>
-     * 
+     *
      * @param dctx
      * @param context
      * @return
@@ -1326,7 +1326,7 @@ public class CloudCardBossServices {
 
     /**
      * 参数检查
-     * 
+     *
      * @param dctx
      * @param context
      * @return
@@ -1397,25 +1397,25 @@ public class CloudCardBossServices {
         // 返回结果
         return result;
     }
-    
+
     /**
-     * 获取用户消费验证码
-     * 
+     * 获取无卡开卡验证码
+     *
      * @param dctx
      * @param context
      * @return
      */
-	public static Map<String, Object> getPayCaptchaOfUser(DispatchContext dctx,Map<String, Object> context) {
+	public static Map<String, Object> getPurchaseCardCaptchaOfUser(DispatchContext dctx,Map<String, Object> context) {
 		Delegator delegator = dctx.getDelegator();
 		Locale locale = (Locale) context.get("locale");
-		
+
 		String teleNumber = (String) context.get("teleNumber");
 		String amount = (String) context.get("amount");
-		String smsType = CloudCardConstant.USER_PAY_CAPTCHA_SMS_TYPE;
+		String smsType = CloudCardConstant.USER_PURCHASE_CARD_CAPTCHA_SMS_TYPE;
 		context.put("smsType", smsType);
 		context.put("amount", amount);
 		context.put("isValid", "N");
-		
+
 		GenericValue customer;
 		try {
 			customer = CloudCardHelper.getUserByTeleNumber(delegator, teleNumber);
@@ -1423,21 +1423,95 @@ public class CloudCardBossServices {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		if(UtilValidate.isEmpty(customer)){
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserNotExistError", locale));
 		}
-		
+
 		Map<String, Object> result = SmsServices.getSMSCaptcha(dctx, context);
 		result.put("teleNumber", teleNumber);
 		result.put("amount", amount);
 		result.put("status", "Y");
 		return result;
 	}
-	
+
+	/**
+     * 获取无卡充值验证码
+     *
+     * @param dctx
+     * @param context
+     * @return
+     */
+	public static Map<String, Object> getRechargeCaptchaOfUser(DispatchContext dctx,Map<String, Object> context) {
+		Delegator delegator = dctx.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+
+		String teleNumber = (String) context.get("teleNumber");
+		String amount = (String) context.get("amount");
+		String smsType = CloudCardConstant.USER_PURCHASE_CARD_CAPTCHA_SMS_TYPE;
+		context.put("smsType", smsType);
+		context.put("amount", amount);
+		context.put("isValid", "N");
+
+		GenericValue customer;
+		try {
+			customer = CloudCardHelper.getUserByTeleNumber(delegator, teleNumber);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+
+		if(UtilValidate.isEmpty(customer)){
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserNotExistError", locale));
+		}
+
+		Map<String, Object> result = SmsServices.getSMSCaptcha(dctx, context);
+		result.put("teleNumber", teleNumber);
+		result.put("amount", amount);
+		result.put("status", "Y");
+		return result;
+	}
+
+    /**
+     * 获取用户消费验证码
+     *
+     * @param dctx
+     * @param context
+     * @return
+     */
+	public static Map<String, Object> getPayCaptchaOfUser(DispatchContext dctx,Map<String, Object> context) {
+		Delegator delegator = dctx.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+
+		String teleNumber = (String) context.get("teleNumber");
+		String amount = (String) context.get("amount");
+		String smsType = CloudCardConstant.USER_PAY_CAPTCHA_SMS_TYPE;
+		context.put("smsType", smsType);
+		context.put("amount", amount);
+		context.put("isValid", "N");
+
+		GenericValue customer;
+		try {
+			customer = CloudCardHelper.getUserByTeleNumber(delegator, teleNumber);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+
+		if(UtilValidate.isEmpty(customer)){
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserNotExistError", locale));
+		}
+
+		Map<String, Object> result = SmsServices.getSMSCaptcha(dctx, context);
+		result.put("teleNumber", teleNumber);
+		result.put("amount", amount);
+		result.put("status", "Y");
+		return result;
+	}
+
 	/**
      * 根据电话号码获取用户卡包
-     * 
+     *
      * @param dctx
      * @param context
      * @return
@@ -1445,11 +1519,11 @@ public class CloudCardBossServices {
 	public static Map<String, Object> getCloudcardsOfUser(DispatchContext dctx,Map<String, Object> context) {
 		Delegator delegator = dctx.getDelegator();
 		Locale locale = (Locale) context.get("locale");
-		
+
 		String teleNumber = (String) context.get("teleNumber");
 		String qrCode = (String) context.get("qrCode");
 		BigDecimal amount = (BigDecimal) context.get("amount");
-		
+
 		context.put("amount", amount);
         String partyId = null;
 		 // 如果扫的码 cardCode字段是 个用户付款码，则根据付款码进行自动找卡
@@ -1478,18 +1552,18 @@ public class CloudCardBossServices {
 				Debug.logError(e.getMessage(), module);
 				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 			}
-			
+
 			if(UtilValidate.isEmpty(customer)){
 				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserNotExistError", locale));
 			}
-			
+
 			partyId = customer.getString("partyId");
 		}
-        
+
         if(UtilValidate.isEmpty(partyId)){
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserNotExistError", locale));
         }
-        
+
         Map<String, Object> result = FastMap.newInstance();
 		try {
 		context.put("partyId",partyId );
@@ -1499,12 +1573,12 @@ public class CloudCardBossServices {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		result.put("teleNumber", teleNumber);
 		result.put("amount", amount);
 		return result;
 	}
-	
+
 	/**
 	 * 无卡消费收款
 	 * @param dctx
@@ -1517,14 +1591,14 @@ public class CloudCardBossServices {
 		Delegator delegator = dctx.getDelegator();
 		GenericValue userLogin = (GenericValue) context.get("userLogin");
 		Locale locale = (Locale) context.get("locale");
-		
+
 		String teleNumber = (String) context.get("teleNumber");
 		String cardId = (String) context.get("cardId");
 		String organizationPartyId = (String) context.get("organizationPartyId");
 		String captcha = (String) context.get("captcha");
 		BigDecimal amount = (BigDecimal) context.get("amount");
 		String cardCode = (String) context.get("cardCode");
-		
+
 		EntityCondition captchaCondition = EntityCondition.makeCondition(
 				EntityCondition.makeCondition("teleNumber", EntityOperator.EQUALS, teleNumber),
 				EntityUtil.getFilterByDateExpr(),
@@ -1532,29 +1606,29 @@ public class CloudCardBossServices {
 
 		GenericValue sms = null;
 		try {
-			sms = EntityUtil.getFirst( 
+			sms = EntityUtil.getFirst(
 					delegator.findList("SmsValidateCode", captchaCondition, null,UtilMisc.toList("-" + ModelEntity.CREATE_STAMP_FIELD), null, false)
 					);
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardGetCAPTCHAFailedError", locale));
 		}
-		
+
 		if(UtilValidate.isEmpty(sms)){
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardGetCAPTCHAFailedError", locale));
 		}
-		
+
 		if(!captcha.equalsIgnoreCase(sms.getString("captcha"))){
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardCaptchaCheckFailedError", locale));
 		}
-		
+
 		// 数据权限检查，先放这里
 		if( !CloudCardHelper.isManager(delegator, userLogin.getString("partyId"), organizationPartyId)){
 			Debug.logWarning("partyId: " + userLogin.getString("partyId") + " 不是商户："+organizationPartyId + "的管理人员，不能对用户卡进行扫码消费", module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
 		}
 
-		
+
 		// 调用内部 云卡支付服务
 		Map<String, Object> cloudCardWithdrawOut;
 		try {
@@ -1565,7 +1639,7 @@ public class CloudCardBossServices {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		GenericValue partyGroup = null;
 		try {
 			partyGroup = CloudCardHelper.getPartyGroupByStoreId(organizationPartyId,delegator);
@@ -1573,11 +1647,11 @@ public class CloudCardBossServices {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		if(UtilValidate.isEmpty(partyGroup)){
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		context.put("smsType", CloudCardConstant.USER_PAY_SMS_TYPE);
 		context.put("phone", teleNumber);
 		context.put("storeName", partyGroup.getString("groupName"));
@@ -1585,7 +1659,7 @@ public class CloudCardBossServices {
 		context.put("cardCode", cardCode.substring(cardCode.length()-4,cardCode.length()));
 		context.put("cardBalance", cloudCardWithdrawOut.get("cardBalance"));
 		SmsServices.sendMessage(dctx, context);
-		
+
 		//修改验证码状态
 		sms.set("isValid", "Y");
 		try {
@@ -1594,12 +1668,12 @@ public class CloudCardBossServices {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		cloudCardWithdrawOut.put("cardCode", cardCode);
 		cloudCardWithdrawOut.put("teleNumber", teleNumber);
 		return cloudCardWithdrawOut;
 	}
-	
+
 	/**
 	 * 无卡消费充值
 	 * @param dctx
@@ -1611,7 +1685,7 @@ public class CloudCardBossServices {
 		Delegator delegator = dctx.getDelegator();
 		GenericValue userLogin = (GenericValue) context.get("userLogin");
 		Locale locale = (Locale) context.get("locale");
-		
+
 		String teleNumber = (String) context.get("teleNumber");
 		String organizationPartyId = (String) context.get("organizationPartyId");
 		BigDecimal amount = (BigDecimal) context.get("amount");
@@ -1623,21 +1697,21 @@ public class CloudCardBossServices {
 			Debug.logError(e1.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
         if (UtilValidate.isEmpty(customerMap)) {
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserNotExistError", locale));
         }
-		
+
 		// 数据权限检查，先放这里
 		if( !CloudCardHelper.isManager(delegator, userLogin.getString("partyId"), organizationPartyId)){
 			Debug.logWarning("partyId: " + userLogin.getString("partyId") + " 不是商户："+organizationPartyId + "的管理人员，不能对用户卡进行无卡消费", module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
 		}
-	
+
 		context.put("storeId", organizationPartyId);
 		context.put("partyId", customerMap.getString("partyId"));
 		Map<String, Object> cloudcardsMap = CloudCardQueryServices.myCloudCards(dctx, context);
-		
+
 		//查询该用户在本店的卡
 		List<Object> cloudcardList = UtilGenerics.checkList(cloudcardsMap.get("cloudCardList"));
 		if(UtilValidate.isEmpty(cloudcardList)){
@@ -1651,7 +1725,7 @@ public class CloudCardBossServices {
 		try {
 			rechargeCloudCardOutMap = dispatcher.runSync("rechargeCloudCard",
 					UtilMisc.toMap("userLogin", userLogin, "locale",locale,
-							"organizationPartyId", organizationPartyId, 
+							"organizationPartyId", organizationPartyId,
 							"cardId", cloudCardMap.get("cardId"),
 							"amount", amount));
 		} catch (GenericServiceException e) {
@@ -1661,7 +1735,7 @@ public class CloudCardBossServices {
 		if (!ServiceUtil.isSuccess(rechargeCloudCardOutMap)) {
 			return rechargeCloudCardOutMap;
 		}
-		
+
 		//查询店铺名称
 		GenericValue partyGroup = null;
 		try {
@@ -1670,13 +1744,13 @@ public class CloudCardBossServices {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		if(UtilValidate.isEmpty(partyGroup)){
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 		//卡号
 		String cardCode = (String) cloudCardMap.get("cardCode");
-		
+
 		//发送充值短信
 		context.put("smsType", CloudCardConstant.USER_RECHARGE_SMS_TYPE);
 		context.put("phone", teleNumber);
@@ -1685,7 +1759,7 @@ public class CloudCardBossServices {
 		context.put("cardCode", cardCode.substring(cardCode.length()-4,cardCode.length()));
 		context.put("cardBalance", rechargeCloudCardOutMap.get("actualBalance"));
 		SmsServices.sendMessage(dctx, context);
-		
+
 		//3、返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("teleNumber", teleNumber);
@@ -1696,7 +1770,7 @@ public class CloudCardBossServices {
 		result.put("customerPartyId", customerMap.getString("partyId"));
 		return result;
 	}
-	
+
 	/**
 	 * 我的消息列表
 	 * @param dctx
@@ -1719,7 +1793,7 @@ public class CloudCardBossServices {
 		result.put("partyNotes", partyNotes);
 		return result;
 	}
-	
+
 	/**
 	 * 获取历史消息
 	 * @param dctx
@@ -1742,8 +1816,8 @@ public class CloudCardBossServices {
 		result.put("partyNotes", partyNotes);
 		return result;
 	}
-	
-	
+
+
 	/**
 	 * 标记消息为已读
 	 * @param dctx
@@ -1758,7 +1832,7 @@ public class CloudCardBossServices {
 
 		String organizationPartyId = (String) context.get("organizationPartyId");
 		String noteId = (String) context.get("noteId");
-		
+
 		GenericValue partyNote;
 		try {
 			partyNote = delegator.findByPrimaryKey("PartyNote",  UtilMisc.toMap("partyId", organizationPartyId, "noteId", noteId));
@@ -1768,7 +1842,7 @@ public class CloudCardBossServices {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		Map<String, Object> listMyNoteMap = null;
 		try {
@@ -1786,7 +1860,7 @@ public class CloudCardBossServices {
 		result.put("isViewed", "Y");
 		return result;
 	}
-	
+
 	/**
 	 * 标记消息为已删除
 	 * @param dctx
@@ -1801,7 +1875,7 @@ public class CloudCardBossServices {
 
 		String organizationPartyId = (String) context.get("organizationPartyId");
 		String noteId = (String) context.get("noteId");
-		
+
 		GenericValue partyNote;
 		try {
 			partyNote = delegator.findByPrimaryKey("PartyNote",  UtilMisc.toMap("partyId", organizationPartyId, "noteId", noteId));
@@ -1811,7 +1885,7 @@ public class CloudCardBossServices {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		Map<String, Object> listMyNoteMap = null;
 		try {
@@ -1829,7 +1903,7 @@ public class CloudCardBossServices {
 		result.put("removed", "Y");
 		return result;
 	}
-	
+
 	/**
 	 * 商家上传图片
 	 * @param dctx
@@ -1841,15 +1915,15 @@ public class CloudCardBossServices {
         //Delegator delegator = dctx.getDelegator();
         Locale locale = (Locale) context.get("locale");
 		Map<String, Object> result = ServiceUtil.returnSuccess();
-		
+
         String organizationPartyId = (String) context.get("organizationPartyId");
 		GenericValue userLogin = (GenericValue) context.get("userLogin");
 
 		ByteBuffer imageDataBytes = (ByteBuffer) context.get("uploadedFile");// 文件流，必输
         String fileName = (String) context.get("_uploadedFile_fileName");// 文件名，必输
         String contentType = (String) context.get("_uploadedFile_contentType");// 文件mime类型，必输
-        
-        
+
+
 		try {
 			//上传oss
 			Map<String, Object> uploadMap = dispatcher.runSync("upload", UtilMisc.toMap("userLogin",userLogin,"uploadedFile", imageDataBytes, "_uploadedFile_fileName", fileName, "_uploadedFile_contentType", contentType));
@@ -1857,7 +1931,7 @@ public class CloudCardBossServices {
                 return uploadMap;
             }
 	        String key = (String) uploadMap.get("key");
-	        
+
 			 // 1.CREATE DATA RESOURCE
 			Map<String, Object> createDataResourceMap = UtilMisc.toMap("userLogin", userLogin, "partyId", organizationPartyId,
 					"dataResourceTypeId", "URL_RESOURCE", "dataCategoryId", "PERSONAL", "dataResourceName", key,
@@ -1868,7 +1942,7 @@ public class CloudCardBossServices {
 	            return serviceResultByDataResource;
 	        }
 			String dataResourceId = (String) serviceResultByDataResource.get("dataResourceId");
-	
+
 			// 2.CREATE CONTENT  type=ACTIVITY_PICTURE
 			Map<String, Object> createContentMap = UtilMisc.toMap("userLogin", userLogin, "contentTypeId",
 					"ACTIVITY_PICTURE", "mimeTypeId", contentType, "dataResourceId", dataResourceId, "partyId", organizationPartyId);
@@ -1877,22 +1951,22 @@ public class CloudCardBossServices {
                 return serviceResultByCreateContentMap;
             }
 			String contentId = (String) serviceResultByCreateContentMap.get("contentId");
-	
+
 			// 3.CREATE PARTY CONTENT type=STORE_IMG
 			Map<String, Object> createPartyContentMap = UtilMisc.toMap("userLogin", userLogin, "partyId", organizationPartyId, "partyContentTypeId", "STORE_IMG", "contentId", contentId);
 			Map<String, Object> serviceResultByCreatePartyContentMap = dispatcher.runSync("createPartyContent",createPartyContentMap);
             if (!ServiceUtil.isSuccess(serviceResultByCreatePartyContentMap)) {
                 return serviceResultByCreatePartyContentMap;
             }
-			
+
 		} catch (GenericServiceException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		return result;
 	}
-	
+
 	/**
 	 * 商家删除图片
 	 * @param dctx
@@ -1904,10 +1978,10 @@ public class CloudCardBossServices {
 	    Delegator delegator = dctx.getDelegator();
 	    Locale locale = (Locale) context.get("locale");
         GenericValue userLogin = (GenericValue) context.get("userLogin");
-	    
+
         String organizationPartyId = (String) context.get("organizationPartyId");
         String contentId = (String) context.get("contentId");
-        
+
         try {
         	List<GenericValue> partyContents= delegator.findByAnd("PartyContent", UtilMisc.toMap("contentId", contentId,"partyId",organizationPartyId));
         	if(UtilValidate.isEmpty(partyContents)){
@@ -1916,28 +1990,28 @@ public class CloudCardBossServices {
         	GenericValue content = delegator.findByPrimaryKey("Content", UtilMisc.toMap("contentId", contentId));
         	String dataResourceId = content.getString("dataResourceId");
 			GenericValue dataResource = delegator.findByPrimaryKey("DataResource", UtilMisc.toMap("dataResourceId", dataResourceId));
-        	
+
 			String key = dataResource.getString("objectInfo");
 			if(UtilValidate.isEmpty(key)){
     			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardPictureDoesNotExist", locale));
 			}
-			
+
 			//删除oss文件
         	dispatcher.runSync("delFile", UtilMisc.toMap("userLogin", userLogin,"key", key));
-        	
+
         	//修改content状态
 			content.put("statusId", "CTNT_DEACTIVATED");
 			content.store();
-			
+
         	//修改dataResource状态
 			dataResource.put("statusId", "CTNT_DEACTIVATED");
 			dataResource.store();
-			
+
 		} catch (Exception e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-        
+
         //获取店家商铺详细信息
         List<GenericValue> storeInfoImgList = FastList.newInstance();
         try {
@@ -1946,7 +2020,7 @@ public class CloudCardBossServices {
 			Debug.logError(e.getMessage(), module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-        
+
         //获取oss访问地址
         String ossUrl = EntityUtilProperties.getPropertyValue("cloudcard","oss.url","http://kupang.oss-cn-shanghai.aliyuncs.com/",delegator);
 		Map<String, Object> result = ServiceUtil.returnSuccess();
@@ -1954,7 +2028,7 @@ public class CloudCardBossServices {
 		result.put("ossUrl", ossUrl);
 		return result;
 	}
-	
+
 	/**
 	 * 商家获取已开的卡
 	 * @param dctx
@@ -1972,12 +2046,12 @@ public class CloudCardBossServices {
             Debug.logError("partyId: " + userLogin.getString("partyId") + " 不是商户：" + organizationPartyId + "的管理人员，不能进行账户流水查询操作", module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
         }
-	    
+
 	    List<Map<String, Object>> finAccounts;
         try {
         	//有可能存在授权的卡
         	EntityCondition thruDateEntityCondition = EntityCondition.makeCondition(EntityOperator.OR,EntityCondition.makeCondition("thruDate", EntityOperator.GREATER_THAN, UtilDateTime.nowTimestamp()),EntityCondition.makeCondition("thruDate", EntityOperator.EQUALS, null));
-        	
+
         	EntityCondition cloudCardInfoEntityCondition = EntityCondition.makeCondition(EntityOperator.AND,
                     EntityCondition.makeCondition(UtilMisc.toMap("distributorPartyId", organizationPartyId)),thruDateEntityCondition);
         	Set<String> cloudCardInfoSet = FastSet.newInstance();
@@ -1988,7 +2062,7 @@ public class CloudCardBossServices {
         	cloudCardInfoSet.add("description");
         	cloudCardInfoSet.add("lastName");
         	 List<GenericValue> finAccountList = delegator.findList("CloudCardInfo",cloudCardInfoEntityCondition, cloudCardInfoSet, UtilMisc.toList("-actualBalance"), null, false);
-        	
+
         	//查询电话号码
         	finAccounts = FastList.newInstance();
         	Map<String, Object> finAccountMap = null;
@@ -2013,13 +2087,13 @@ public class CloudCardBossServices {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-        
+
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("finAccountList", finAccounts);
 		return result;
 	}
-	
-	
+
+
 	/**
 	 * 商家获取用户消费列表
 	 * @param dctx
@@ -2030,7 +2104,7 @@ public class CloudCardBossServices {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
-		
+
 		String organizationPartyId = (String) context.get("organizationPartyId");
 		String partyId = (String) context.get("ownerPartyId");
 		String type = (String) context.get("type");
@@ -2040,18 +2114,18 @@ public class CloudCardBossServices {
 		// 分页相关
         Integer viewIndex =  (Integer) context.get("viewIndex");
         Integer viewSize  = (Integer) context.get("viewSize");
-        
+
         List<GenericValue> finAccountAndRoles;
     	try {
             GenericValue encryptedGiftCard = delegator.makeValue("FinAccount", UtilMisc.toMap("finAccountCode", cardNumber));
     		delegator.encryptFields(encryptedGiftCard);
-    		finAccountAndRoles = delegator.findList("CloudCardInfo",EntityCondition.makeCondition(UtilMisc.toMap("distributorPartyId", organizationPartyId, "finAccountCode", 
+    		finAccountAndRoles = delegator.findList("CloudCardInfo",EntityCondition.makeCondition(UtilMisc.toMap("distributorPartyId", organizationPartyId, "finAccountCode",
     				encryptedGiftCard.getString("finAccountCode"))), UtilMisc.toSet("finAccountCode","finAccountId","ownerPartyId"), null, null, true);
 		} catch (GenericEntityException e1) {
 			Debug.logError(e1.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-        
+
     	if(UtilValidate.isEmpty(finAccountAndRoles)){
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardNotOurCardCanNotBeQuery", locale));
     	}
@@ -2061,21 +2135,21 @@ public class CloudCardBossServices {
 
 		Timestamp thruDate =(Timestamp)context.get("thruTime");
 		thruDate =  UtilDateTime.getDayStart(thruDate, 1);
-		
+
         EntityCondition timeConditions = EntityCondition.makeCondition("effectiveDate", EntityOperator.BETWEEN, UtilMisc.toList(fromDate, thruDate));*/
-        
+
         EntityCondition paymentConditions = null;
         if("1".equals(type)){
         	/*EntityCondition depositConditions = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdTo", partyId));
         	paymentConditions = EntityCondition.makeCondition(EntityOperator.AND, depositConditions, timeConditions);*/
-        	
+
         	paymentConditions = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdTo", partyId));
 
 
 		}else if("2".equals(type)){
 			/*EntityCondition withDrawalCondition = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdFrom", partyId));
         	paymentConditions = EntityCondition.makeCondition(EntityOperator.AND, withDrawalCondition, timeConditions);*/
-			
+
 			paymentConditions = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdFrom", partyId));
 
 
@@ -2084,7 +2158,7 @@ public class CloudCardBossServices {
 	        EntityCondition withDrawalCond = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdFrom", partyId));
 			EntityCondition allConditions = EntityCondition.makeCondition(EntityOperator.OR, depositCond, withDrawalCond);
 	        paymentConditions = EntityCondition.makeCondition(EntityOperator.AND, allConditions, timeConditions);*/
-			
+
 			EntityCondition depositCond = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_DEPOSIT", "partyIdTo", partyId));
 	        EntityCondition withDrawalCond = EntityCondition.makeCondition(UtilMisc.toMap("paymentTypeId", "GC_WITHDRAWAL", "partyIdFrom", partyId));
 			paymentConditions = EntityCondition.makeCondition(EntityOperator.OR, depositCond, withDrawalCond);
@@ -2097,7 +2171,7 @@ public class CloudCardBossServices {
         //每页显示条数
         int number =  (viewSize  == null || viewSize  == 0) ? 20 : viewSize ;
         // 每页的开始记录 第一页为1 第二页为number +1
-        int lowIndex = viewIndex * number + 1;  
+        int lowIndex = viewIndex * number + 1;
         //总页数
         int totalPage = 0;
         int listSize = 0;
@@ -2108,7 +2182,7 @@ public class CloudCardBossServices {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		List<GenericValue> payments = FastList.newInstance();
 		try {
 			payments = eli.getPartialList(lowIndex, number);
@@ -2118,15 +2192,15 @@ public class CloudCardBossServices {
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-		}finally {  
-            try {  
-                if (eli != null) {  
-                    eli.close();  
-                    eli = null;  
-                }  
-            } catch (GenericEntityException e) {  
-                Debug.logError(e.getMessage(), module);  
-            }  
+		}finally {
+            try {
+                if (eli != null) {
+                    eli.close();
+                    eli = null;
+                }
+            } catch (GenericEntityException e) {
+                Debug.logError(e.getMessage(), module);
+            }
         }
 
 		List<Map<String,Object>> paymentsList = FastList.newInstance();
@@ -2146,14 +2220,14 @@ public class CloudCardBossServices {
 				paymentsList.add(paymentMap);
 			}
 		}
-		
+
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("paymentsList", paymentsList);
 		result.put("totalPage", totalPage);
 		return result;
 	}
-	
-	
+
+
 	/**
 	 * 收款方向付款方发起结算请求
 	 * @param dctx
@@ -2174,13 +2248,13 @@ public class CloudCardBossServices {
 		String amount = (String) context.get("amount");
 		//paymentId
 		String paymentId = (String) context.get("paymentId");
-		
+
 		if (!CloudCardHelper.isManager(delegator, userLogin.getString("partyId"), payeePartyId)) {
             // 若不是 system userLogin，则需要验证是否是本店的manager
             Debug.logError("partyId: " + userLogin.getString("partyId") + " 不是商户：" + payeePartyId + "的管理人员，不能进行账户流水查询操作", module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
         }
-		
+
 		//修改payment的催款次数
 		int reqCount = 0;
 		try {
@@ -2189,7 +2263,7 @@ public class CloudCardBossServices {
 			Debug.logError(e2.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		//发送通知的请求
 		GenericValue partyGroup = null;
 		try {
@@ -2198,11 +2272,11 @@ public class CloudCardBossServices {
 			Debug.logError(e1.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		if(UtilValidate.isEmpty(partyGroup)){
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		//发送消息并记录消息
 		try {
 			//消息内容
@@ -2215,13 +2289,13 @@ public class CloudCardBossServices {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("reqCount", reqCount);
 		return result;
 
 	}
-	
+
 	/**
 	 * 付款方向收款方发起结算请求
 	 * @param dctx
@@ -2242,13 +2316,13 @@ public class CloudCardBossServices {
 		String amount = (String) context.get("amount");
 		//paymentId
 		String paymentId = (String) context.get("paymentId");
-		
+
 		if (!CloudCardHelper.isManager(delegator, userLogin.getString("partyId"), payerPartyId)) {
             // 若不是 system userLogin，则需要验证是否是本店的manager
             Debug.logError("partyId: " + userLogin.getString("partyId") + " 不是商户：" + payerPartyId + "的管理人员，不能进行账户流水查询操作", module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
         }
-		
+
 		//发送通知的请求
 		GenericValue partyGroup = null;
 		try {
@@ -2257,7 +2331,7 @@ public class CloudCardBossServices {
 			Debug.logError(e1.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		if(UtilValidate.isEmpty(partyGroup)){
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
@@ -2265,7 +2339,7 @@ public class CloudCardBossServices {
 		// 改为 PMNT_P_NOT_SENT_RCV
 		EntityCondition sentCond = EntityCondition.makeCondition(UtilMisc.toMap("statusId", "PMNT_SENT", "paymentId",paymentId));
 		try {
-			delegator.storeByCondition("Payment", UtilMisc.toMap("statusId", "PMNT_P_NOT_SENT_RCV"), 
+			delegator.storeByCondition("Payment", UtilMisc.toMap("statusId", "PMNT_P_NOT_SENT_RCV"),
 					EntityCondition.makeCondition(
 								// 状态条件：PMNT_SENT 更新为 PMNT_P_NOT_SENT_RCV
 								sentCond
@@ -2275,8 +2349,8 @@ public class CloudCardBossServices {
 			Debug.logError(e1.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
-		
+
+
 		//发送消息并记录消息
 		try {
 			//消息内容
@@ -2289,12 +2363,12 @@ public class CloudCardBossServices {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		return result;
 
 	}
-	
+
 	/**
 	 * 收款方对付款方结算确认
 	 * @param dctx
@@ -2315,16 +2389,16 @@ public class CloudCardBossServices {
 		String amount = (String) context.get("amount");
 		//paymentId
 		String paymentId = (String) context.get("paymentId");
-		
+
 		//检查payment状态
-		
-		
+
+
 		if (!CloudCardHelper.isManager(delegator, userLogin.getString("partyId"), payeePartyId)) {
             // 若不是 system userLogin，则需要验证是否是本店的manager
             Debug.logError("partyId: " + userLogin.getString("partyId") + " 不是商户：" + payeePartyId + "的管理人员，不能进行账户流水查询操作", module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
         }
-		
+
 		//发送通知的请求
 		GenericValue partyGroup = null;
 		try {
@@ -2333,11 +2407,11 @@ public class CloudCardBossServices {
 			Debug.logError(e1.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		if(UtilValidate.isEmpty(partyGroup)){
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		//查询付款方卖卡限额账户
         GenericValue creditLimitAccount = CloudCardHelper.getCreditLimitAccount(delegator, payerPartyId);
         if (UtilValidate.isEmpty(creditLimitAccount)) {
@@ -2347,7 +2421,7 @@ public class CloudCardBossServices {
         }
 
         String creditLimitAccountId = (String) creditLimitAccount.get("finAccountId");
-        
+
         // 后续可能要用到 system用户操作
         GenericValue systemUserLogin = (GenericValue) context.get("systemUserLogin");
         try {
@@ -2356,7 +2430,7 @@ public class CloudCardBossServices {
             Debug.logError(e1.getMessage(), module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
         }
-        
+
         // 卖卡限额回冲
         Map<String, Object> createFinAccountAuthOutMap;
         try {
@@ -2365,11 +2439,11 @@ public class CloudCardBossServices {
         	if(!"PMNT_P_NOT_SENT_RCV".equals(payment.getString("statusId"))){
                 return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUnableToConfirmSettlement", locale));
         	}
-        	
+
         	if(UtilValidate.isEmpty(payment)){
                 return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
         	}
-        	
+
             createFinAccountAuthOutMap = dispatcher.runSync("createFinAccountAuth",
                     UtilMisc.toMap("userLogin", systemUserLogin, "locale", locale, "currencyUomId", CloudCardConstant.DEFAULT_CURRENCY_UOM_ID,
                             "finAccountId", creditLimitAccountId, "amount", payment.getBigDecimal("amount").negate(),
@@ -2400,7 +2474,7 @@ public class CloudCardBossServices {
         if (ServiceUtil.isError(setPaymentStatusOutMap)) {
             return setPaymentStatusOutMap;
         }
-    
+
 		//发送消息并记录消息
 		try {
 			//消息内容
@@ -2413,7 +2487,7 @@ public class CloudCardBossServices {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		//清除该payment消息
 		try {
 			List<GenericValue> partyNotes = delegator.findByAnd("PartyNote", UtilMisc.toMap("paymentId", paymentId));
@@ -2425,7 +2499,7 @@ public class CloudCardBossServices {
 			Debug.logError(e1.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		//返回待结算的payment
 		Map<String,Object> settlementMap;
 		try {
@@ -2434,7 +2508,7 @@ public class CloudCardBossServices {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		List<Object> retList = FastList.newInstance();
 		int listSize = 0;
 		if(UtilValidate.isNotEmpty(settlementMap.get("retList"))){
@@ -2464,16 +2538,16 @@ public class CloudCardBossServices {
 		String partyIdTo = (String) context.get("partyIdTo");
 		Long week = (Long) context.get("week");
 		Long hour = (Long) context.get("hour");
-		
+
 		if (!CloudCardHelper.isManager(delegator, userLogin.getString("partyId"), partyIdFrom)) {
             // 若不是 system userLogin，则需要验证是否是本店的manager
             Debug.logError("partyId: " + userLogin.getString("partyId") + " 不是商户：" + partyIdFrom + "的管理人员，不能进行账户流水查询操作", module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
         }
-		
+
 		GenericValue partyIdFromSettlementPeriod = null;
 		GenericValue partyIdToSettlementPeriod = null;
-		
+
 		try {
 			partyIdFromSettlementPeriod = delegator.findOne("CloudcardSettlementPeriod", false, UtilMisc.toMap("partyIdFrom", partyIdFrom, "partyIdTo", partyIdTo));
 			partyIdToSettlementPeriod = delegator.findOne("CloudcardSettlementPeriod", false, UtilMisc.toMap("partyIdFrom", partyIdTo, "partyIdTo", partyIdFrom));
@@ -2481,7 +2555,7 @@ public class CloudCardBossServices {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		if (UtilValidate.isEmpty(partyIdFromSettlementPeriod) && UtilValidate.isEmpty(partyIdToSettlementPeriod) ) {
 			try {
 				GenericValue cloudcardSettlementPeriod = delegator.makeValue("CloudcardSettlementPeriod", UtilMisc.toMap("partyIdFrom", partyIdFrom, "partyIdTo", partyIdTo,"status","N","week",week,"hour",hour));
@@ -2501,7 +2575,7 @@ public class CloudCardBossServices {
 					return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 				}
 			}
-			
+
 			if(UtilValidate.isNotEmpty(partyIdToSettlementPeriod)){
 				partyIdToSettlementPeriod.put("Week", week);
 				partyIdToSettlementPeriod.put("Hour", hour);
@@ -2516,7 +2590,7 @@ public class CloudCardBossServices {
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		return result;
 	}
-	
+
 	/**
 	 * 商家与商家之间协议结算时间
 	 * @param dctx
@@ -2531,13 +2605,13 @@ public class CloudCardBossServices {
 
 		String partyIdFrom = (String) context.get("partyIdFrom");
 		String partyIdTo = (String) context.get("partyIdTo");
-		
+
 		if (!CloudCardHelper.isManager(delegator, userLogin.getString("partyId"), partyIdFrom)) {
             // 若不是 system userLogin，则需要验证是否是本店的manager
             Debug.logError("partyId: " + userLogin.getString("partyId") + " 不是商户：" + partyIdFrom + "的管理人员，不能进行账户流水查询操作", module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
         }
-		
+
 		GenericValue partyIdFromSettlementPeriod = null;
 		GenericValue partyIdToSettlementPeriod = null;
 		try {
@@ -2547,7 +2621,7 @@ public class CloudCardBossServices {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-		
+
 		long week = 0;
 		long hour = 0;
 		String status = "N";
@@ -2560,14 +2634,14 @@ public class CloudCardBossServices {
 			hour = partyIdToSettlementPeriod.getLong("hour");
 			status = "Y";
 		}
-		
+
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("week", week);
 		result.put("hour", hour);
 		result.put("status", status);
 		return result;
 	}
-	
+
 	/**
 	 * 我的信用
 	 * @param dctx
@@ -2579,15 +2653,15 @@ public class CloudCardBossServices {
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
 		String storeId = (String) context.get("storeId");
-		
+
 		GenericValue userLogin = (GenericValue) context.get("userLogin");
-        
+
         // 数据权限检查: 登录用户是否是本店的管理员
         if (!CloudCardHelper.isManager(delegator, userLogin.getString("partyId"), storeId)) {
             Debug.logError("partyId: " + userLogin.getString("partyId") + " 不是商户：" + storeId + "的管理人员，不能操作", module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserLoginIsNotManager", locale));
         }
-        
+
         String storeLevel = null;
         try {
 			GenericValue level = CloudCardLevelScoreUtil.getBizLevel(delegator, storeId);
@@ -2598,7 +2672,7 @@ public class CloudCardBossServices {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
-        
+
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 			result.put("storeLevel", storeLevel);
 		return result;

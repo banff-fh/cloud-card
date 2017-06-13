@@ -622,6 +622,20 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 
+	<!-- 获取无卡开卡验证码 -->
+	<request-map uri="getPurchaseCardCaptchaOfUser">
+		<event type="service" invoke="getPurchaseCardCaptchaOfUser" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+
+	<!-- 获取无卡充值验证码 -->
+	<request-map uri="getRechargeCaptchaOfUser">
+		<event type="service" invoke="getRechargeCaptchaOfUser" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+
 	<!-- 后台页面部分 Request Mappings -->
 
 	<request-map uri="main">

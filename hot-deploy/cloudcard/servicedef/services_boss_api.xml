@@ -115,7 +115,7 @@
 		<description>邀请商家加入圈子,单个邀请</description>
 		<attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家Id（自己的商家id）</description></attribute>
 		<attribute name="teleNumber" type="String" mode="IN" optional="false"><description>要邀请加入圈子的店主teleNumber</description></attribute>
-	
+
 		<attribute name="groupId" type="String" mode="OUT" optional="false"><description>圈子id</description></attribute>
 		<attribute name="partyInvitationId" type="String" mode="OUT" optional="true"><description>邀请id</description></attribute>
 	</service>
@@ -128,7 +128,7 @@
 		<attribute name="isAccept" type="String" mode="INOUT" optional="true" default-value="Y"><description>是否接收 Y/N  Y 接受邀请，N 拒绝邀请</description></attribute>
 
 	</service>
-	
+
 	<service name="bizMyGroup" engine="java"
 		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizMyGroup" auth="true">
 		<description>我的圈子</description>
@@ -154,7 +154,7 @@
 		<attribute name="listSize" type="Integer" mode="OUT" optional="true" default-value="0"><description>圈友列表大小</description></attribute>
 
 	</service>
-	
+
 	<service name="bizExitGroup" engine="java"
 		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizExitGroup" auth="true">
 		<description>圈友退出圈子、圈主踢出圈友</description>
@@ -214,24 +214,40 @@
 		<attribute name="settlementAmount" type="BigDecimal" mode="OUT" optional="true" default-value="0"><description>待结算金额</description></attribute>
 		<attribute name="actualSettlementAmount" type="BigDecimal" mode="OUT" optional="true" default-value="0"><description>实际结算金额，本次结算店家线下实际支付的结算金额</description></attribute>
 	</service>
-	
+
 	<service name="bizGetUnconfirmedSettlementInfo" engine="java"
 		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizGetUnconfirmedSettlementInfo" auth="true">
 		<description>B端 获取待确认结算信息</description>
 		<attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家Id（自己的商家id）</description></attribute>
 		<attribute name="storeId" type="String" mode="IN" optional="true"><description>结算的圈友partyId，圈主发起查询时，需要传入</description></attribute>
-		
+
 		<attribute name="settlementId" type="String" mode="OUT" optional="true"><description>还未确认的结算id</description></attribute>
 		<attribute name="settlementAmount" type="BigDecimal" mode="OUT" optional="true" default-value="0"><description>待结算金额</description></attribute>
 		<attribute name="actualSettlementAmount" type="BigDecimal" mode="OUT" optional="true" default-value="0"><description>实际结算金额，本次结算店家线下实际支付的结算金额</description></attribute>
 	</service>
-	
+
 	<service name="bizSettlementRequest" engine="java"
 		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizSettlementRequest" auth="true">
 		<description>B端 催款，提醒圈主进行结算</description>
 		<attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家Id（自己的商家id）</description></attribute>
 	</service>
-	
+
+	<service name="getPurchaseCardCaptchaOfUser" engine="java"
+		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="getPurchaseCardCaptchaOfUser" auth="true">
+		<description>无卡开卡短信通知C端</description>
+		<attribute name="teleNumber" type="String" mode="INOUT" optional="false"><description>顾客电话号码</description></attribute>
+		<attribute name="amount" type="String" mode="INOUT" optional="false"><description>消费金额</description></attribute>
+		<attribute name="status" type="String" mode="OUT" optional="false"><description>短信发送状态</description></attribute>
+	</service>
+
+	<service name="getRechargeCaptchaOfUser" engine="java"
+		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="getRechargeCaptchaOfUser" auth="true">
+		<description>无卡充值短信通知C端</description>
+		<attribute name="teleNumber" type="String" mode="INOUT" optional="false"><description>顾客电话号码</description></attribute>
+		<attribute name="amount" type="String" mode="INOUT" optional="false"><description>消费金额</description></attribute>
+		<attribute name="status" type="String" mode="OUT" optional="false"><description>短信发送状态</description></attribute>
+	</service>
+
 	<service name="getPayCaptchaOfUser" engine="java"
 		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="getPayCaptchaOfUser" auth="true">
 		<description>无卡消费短信通知C端</description>
@@ -239,7 +255,7 @@
 		<attribute name="amount" type="String" mode="INOUT" optional="false"><description>消费金额</description></attribute>
 		<attribute name="status" type="String" mode="OUT" optional="false"><description>短信发送状态</description></attribute>
 	</service>
-	
+
 	<service name="getCloudcardsOfUser" engine="java"
 		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="getCloudcardsOfUser" auth="true">
 		<description>根据电话号码获取用户卡包</description>
@@ -251,7 +267,7 @@
 		<attribute name="listSize" type="Integer" mode="OUT" optional="false"/>
 		<attribute name="cloudCardList" type="List" mode="OUT" optional="false"/>
 	</service>
-	
+
 	<service name="bizByTeleNumberWithdraw" engine="java"
 		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizByTeleNumberWithdraw" auth="true">
 		<description>无卡消费收款</description>
@@ -261,13 +277,13 @@
 		<attribute name="cardCode" type="String" mode="INOUT" optional="false"/>
 		<attribute name="teleNumber" type="String" mode="INOUT" optional="false"/>
 		<attribute name="amount" type="BigDecimal" mode="INOUT" optional="false"/>
-		
+
 		<attribute name="storeName" type="String" mode="OUT" optional="true"><description>店名</description></attribute>
 		<attribute name="cardId" type="String" mode="OUT" optional="true"><description>卡Id</description></attribute>
 		<attribute name="cardBalance" type="BigDecimal" mode="OUT" optional="false"><description>可用余额</description></attribute>
-		<attribute name="customerPartyId" type="String" mode="OUT" optional="false"><description>客户partyId</description></attribute>	
+		<attribute name="customerPartyId" type="String" mode="OUT" optional="false"><description>客户partyId</description></attribute>
 	</service>
-	
+
 	<service name="bizByTeleNumberRecharge" engine="java"
             location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizByTeleNumberRecharge" auth="true">
         <description>无卡消费充值</description>
@@ -279,21 +295,21 @@
         <attribute name="customerPartyId" type="String" mode="OUT" optional="false"><description>客户partyId</description></attribute>
         <attribute name="cardBalance" type="BigDecimal" mode="OUT" optional="false"><description>可用余额</description></attribute>
 	</service>
-	
+
 	<service name="listMyNote" engine="java"
             location="com.banfftech.cloudcard.CloudCardBossServices" invoke="listMyNote" auth="true">
         <description>我的消息</description>
         <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家partyId</description></attribute>
         <attribute name="partyNotes" type="List" mode="OUT" optional="false"><description>消息列表</description></attribute>
 	</service>
-	
+
 	<service name="listMyHistoryNote" engine="java"
             location="com.banfftech.cloudcard.CloudCardBossServices" invoke="listMyHistoryNote" auth="true">
         <description>我的历史消息</description>
         <attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家partyId</description></attribute>
         <attribute name="partyNotes" type="List" mode="OUT" optional="false"><description>消息列表</description></attribute>
 	</service>
-	
+
 	<service name="readMyNote" engine="java"
             location="com.banfftech.cloudcard.CloudCardBossServices" invoke="readMyNote" auth="true">
         <description>已读消息标记</description>
@@ -302,7 +318,7 @@
         <attribute name="isViewed" type="String" mode="INOUT" optional="false"><description>是否已读</description></attribute>
         <attribute name="partyNotes" type="List" mode="OUT" optional="false"><description>消费列表</description></attribute>
 	</service>
-	
+
 	<service name="deleteMyNote" engine="java"
             location="com.banfftech.cloudcard.CloudCardBossServices" invoke="deleteMyNote" auth="true">
         <description>删除消息标记</description>
@@ -311,7 +327,7 @@
         <attribute name="removed" type="String" mode="INOUT" optional="false"><description>是否删除</description></attribute>
         <attribute name="partyNotes" type="List" mode="OUT" optional="false"><description>消费列表</description></attribute>
 	</service>
-	
+
 	<service name="bizUploadStoreInfoImg" engine="java"
             location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizUploadStoreInfoImg" auth="true">
         <description>商家上传图片</description>
@@ -320,7 +336,7 @@
 		<attribute mode="IN" name="_uploadedFile_fileName" type="String" optional="false"><description>文件名</description></attribute>
 		<attribute mode="IN" name="_uploadedFile_contentType" type="String" optional="false"><description>文件mime类型</description></attribute>
 	</service>
-	
+
 	<service name="bizDeleteStoreInfoImg" engine="java"
             location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizDeleteStoreInfoImg" auth="true">
         <description>商家删除图片</description>
@@ -329,14 +345,14 @@
         <attribute name="ossUrl" type="String" mode="OUT" optional="false"><description>oss路径</description></attribute>
         <attribute name="storeInfoImgList" type="List" mode="OUT" optional="false"><description>图片信息</description></attribute>
  	</service>
- 	
+
  	<service name="getCloudCardByBiz" engine="java"
             location="com.banfftech.cloudcard.CloudCardBossServices" invoke="getCloudCardByBiz" auth="true">
         <description>商家获取已开的卡</description>
         <attribute mode="IN" name="organizationPartyId" type="String" optional="false"><description>店家partyI</description></attribute>
  	    <attribute name="finAccountList" type="List" mode="OUT" optional="false"><description>卡信息列表</description></attribute>
  	</service>
- 	
+
  	<service name="getUserPaymentBybiz" engine="java"
             location="com.banfftech.cloudcard.CloudCardBossServices" invoke="getUserPaymentBybiz" auth="true">
         <description>商家获取用户消费列表</description>
@@ -352,7 +368,7 @@
 		<attribute name="paymentsList" type="List" mode="OUT" optional="false"/>
 		<attribute name="totalPage" type="Integer" mode="OUT" optional="false"/>
  	</service>
- 	
+
  	<service name="initiateSettlement" engine="java"
             location="com.banfftech.cloudcard.CloudCardBossServices" invoke="initiateSettlement" auth="true">
         <description>收款方向付款方发起结算请求</description>
@@ -362,7 +378,7 @@
 		<attribute name="amount" type="String" mode="IN" optional="false"/>
 		<attribute name="reqCount" type="Integer" mode="OUT" optional="false"/>
  	</service>
- 	
+
  	<service name="settlementRequest" engine="java"
             location="com.banfftech.cloudcard.CloudCardBossServices" invoke="settlementRequest" auth="true">
         <description>付款方向收款方发起结算确认请求</description>
@@ -371,7 +387,7 @@
 		<attribute name="payeePartyId" type="String" mode="IN" optional="false"/>
 		<attribute name="amount" type="String" mode="IN" optional="false"/>
  	</service>
- 	
+
  	<service name="settlementConfirmation" engine="java"
             location="com.banfftech.cloudcard.CloudCardBossServices" invoke="settlementConfirmation" auth="true">
         <description>收款方对付款方结算确认</description>
@@ -381,8 +397,8 @@
 		<attribute name="amount" type="String" mode="IN" optional="false"/>
 		<attribute name="list" type="List" mode="OUT" optional="false"><description>待结算的payment列表</description></attribute>
         <attribute name="listSize" type="Integer" mode="OUT" optional="true" default-value="0"><description>列表明细条数</description></attribute>
- 	</service> 
- 	
+ 	</service>
+
  	<service name="bizListNeedSettlement" engine="java"
             location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="bizListNeedSettlement" auth="true">
         <description>列出待结算的payment（收款方列需要收款的部分， 付款方列需要付款的部分）</description>
@@ -397,19 +413,19 @@
         <attribute  mode="IN" name="viewIndex" type="Integer" optional="true" default-value="0"><description>页码，0开始</description></attribute>
 		<attribute  mode="IN" name="viewSize" type="Integer" optional="true" default-value="20"><description>页大小 </description></attribute>
 
-        <!-- 
-        [ 
+        <!--
+        [
         	{
-        	 	paymentId: xxx, cardId: xxx, transDate: 1480494333000, cardSellerId: xxx, cardSellerName: xxx, 
+        	 	paymentId: xxx, cardId: xxx, transDate: 1480494333000, cardSellerId: xxx, cardSellerName: xxx,
         			amount: xxx, reqCount: xx, tradePartyId:xxx, tradePartyName:xxx, statusId:1-待发起结算 2-对方已付款，待确认
         	},
         	 ...
          ] -->
         <attribute name="list" type="List" mode="OUT" optional="false"><description>待结算的payment列表</description></attribute>
         <attribute name="listSize" type="Integer" mode="OUT" optional="true" default-value="0"><description>列表明细条数</description></attribute>
-        
+
  	</service>
- 	
+
  	<service name="bizSetCloudcardSettlementPeriod" engine="java"
             location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizSetCloudcardSettlementPeriod" auth="true">
         <description>商家设定结算时间</description>
@@ -417,8 +433,8 @@
 		<attribute name="partyIdTo" type="String" mode="IN" optional="false"/>
 		<attribute name="week" type="Long" mode="IN" optional="false"/>
 		<attribute name="hour" type="Long" mode="IN" optional="false"/>
- 	</service> 	
- 	
+ 	</service>
+
  	<service name="bizGetCloudcardSettlementPeriod" engine="java"
             location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizGetCloudcardSettlementPeriod" auth="true">
         <description>商家查询结算时间</description>
@@ -428,7 +444,7 @@
 		<attribute name="hour" type="Long" mode="OUT" optional="false"/>
 		<attribute name="status" type="String" mode="OUT" optional="false"/>
  	</service>
- 	
+
  	<service name="bizGetMyStorelevel" engine="java"
             location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizGetMyStorelevel" auth="true">
         <description>我的信用</description>

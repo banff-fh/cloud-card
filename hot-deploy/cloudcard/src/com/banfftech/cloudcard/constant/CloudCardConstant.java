@@ -116,6 +116,16 @@ public class CloudCardConstant {
     public static final String LOGIN_SMS_TYPE = "Login";
 
     /**
+     * 发送用户无卡买卡短信验证码{@value}
+     */
+    public static final String USER_PURCHASE_CARD_CAPTCHA_SMS_TYPE = "userPurchaseCard";
+
+    /**
+     * 发送用户无卡充值短信验证码{@value}
+     */
+    public static final String USER_RECHARGE_CAPTCHA_SMS_TYPE = "userRecharge";
+
+    /**
      * 发送用户消费短信验证码{@value}
      */
     public static final String USER_PAY_CAPTCHA_SMS_TYPE = "userPayCaptcha";
