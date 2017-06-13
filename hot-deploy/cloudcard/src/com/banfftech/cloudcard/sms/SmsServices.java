@@ -84,12 +84,12 @@ public class SmsServices {
 			smsParamString = "{money:'"+amount+"',verfiyCode:'"+captcha+"',time:'"+validTime+"'}";
 			smsType = "sms.smsUserPayVCTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_PURCHASE_CARD_CAPTCHA_SMS_TYPE)){
-			String amount = (String) context.get("amount");
+			BigDecimal amount = (BigDecimal) context.get("amount");
 			Integer validTime = (Integer) context.get("validTime");
 			smsParamString = "{money:'"+amount+"',verfiyCode:'"+captcha+"',time:'"+validTime+"'}";
 			smsType = "sms.smsUserPurchaseCardVCTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_RECHARGE_CAPTCHA_SMS_TYPE)){
-			String amount = (String) context.get("amount");
+			BigDecimal amount = (BigDecimal) context.get("amount");
 			Integer validTime = (Integer) context.get("validTime");
 			smsParamString = "{money:'"+amount+"',verfiyCode:'"+captcha+"',time:'"+validTime+"'}";
 			smsType = "sms.smsUserRechargeVCTemplateCode";
