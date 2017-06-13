@@ -1432,7 +1432,7 @@ public class CloudCardBossServices {
 		Locale locale = (Locale) context.get("locale");
 
 		String teleNumber = (String) context.get("teleNumber");
-		String amount = (String) context.get("amount");
+		BigDecimal amount = (BigDecimal) context.get("amount");
 		String smsType = CloudCardConstant.USER_PURCHASE_CARD_CAPTCHA_SMS_TYPE;
 		context.put("smsType", smsType);
 		context.put("amount", amount);
@@ -1662,11 +1662,11 @@ public class CloudCardBossServices {
 					);
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardGetCAPTCHAFailedError", locale));
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
 
 		if(UtilValidate.isEmpty(sms)){
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardGetCAPTCHAFailedError", locale));
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardCaptchaNotExistError", locale));
 		}
 
 		if(!captcha.equalsIgnoreCase(sms.getString("captcha"))){
@@ -1740,6 +1740,31 @@ public class CloudCardBossServices {
 		String teleNumber = (String) context.get("teleNumber");
 		String organizationPartyId = (String) context.get("organizationPartyId");
 		BigDecimal amount = (BigDecimal) context.get("amount");
+		String captcha = (String) context.get("");
+
+		//判断验证码是否正确
+		EntityCondition captchaCondition = EntityCondition.makeCondition(
+				EntityCondition.makeCondition("teleNumber", EntityOperator.EQUALS, teleNumber),
+				EntityUtil.getFilterByDateExpr(),
+				EntityCondition.makeCondition("isValid", EntityOperator.EQUALS,"N"),EntityCondition.makeCondition("smsType", EntityOperator.EQUALS,CloudCardConstant.USER_PURCHASE_CARD_CAPTCHA_SMS_TYPE));
+
+		GenericValue sms = null;
+		try {
+			sms = EntityUtil.getFirst(
+					delegator.findList("SmsValidateCode", captchaCondition, null,UtilMisc.toList("-" + ModelEntity.CREATE_STAMP_FIELD), null, false)
+					);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
+
+		if(UtilValidate.isEmpty(sms)){
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardCaptchaNotExistError", locale));
+		}
+
+		if(!captcha.equalsIgnoreCase(sms.getString("captcha"))){
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardCaptchaCheckFailedError", locale));
+		}
 
 		GenericValue customerMap;
 		try {
@@ -1801,6 +1826,15 @@ public class CloudCardBossServices {
 		}
 		//卡号
 		String cardCode = (String) cloudCardMap.get("cardCode");
+
+		//修改验证码状态
+		sms.set("isValid", "Y");
+		try {
+			sms.store();
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
 
 		//发送充值短信
 		context.put("smsType", CloudCardConstant.USER_RECHARGE_SMS_TYPE);
