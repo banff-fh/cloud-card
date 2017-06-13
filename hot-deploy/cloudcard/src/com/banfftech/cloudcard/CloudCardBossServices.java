@@ -1612,8 +1612,10 @@ public class CloudCardBossServices {
 		}
 
 		//暂时写死
-		if(UtilValidate.isNotEmpty(activateCloudCardAndRechargeOut.get("errorMessage").toString()) && "Users have cards in our store".equalsIgnoreCase(activateCloudCardAndRechargeOut.get("errorMessage").toString())){
-			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUsersHaveCardsInOurStore", locale));
+		if(activateCloudCardAndRechargeOut.containsKey("errorMessage")){
+			if("Users have cards in our store".equalsIgnoreCase(activateCloudCardAndRechargeOut.get("errorMessage").toString())){
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUsersHaveCardsInOurStore", locale));
+			}
 		}
 
 		//修改验证码状态
