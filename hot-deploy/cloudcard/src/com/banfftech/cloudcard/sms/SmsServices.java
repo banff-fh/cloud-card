@@ -83,6 +83,16 @@ public class SmsServices {
 			Integer validTime = (Integer) context.get("validTime");
 			smsParamString = "{money:'"+amount+"',verfiyCode:'"+captcha+"',time:'"+validTime+"'}";
 			smsType = "sms.smsUserPayVCTemplateCode";
+		}else if(smsType.equals(CloudCardConstant.USER_PURCHASE_CARD_CAPTCHA_SMS_TYPE)){
+			String amount = (String) context.get("amount");
+			Integer validTime = (Integer) context.get("validTime");
+			smsParamString = "{money:'"+amount+"',verfiyCode:'"+captcha+"',time:'"+validTime+"'}";
+			smsType = "sms.smsUserPurchaseCardVCTemplateCode";
+		}else if(smsType.equals(CloudCardConstant.USER_RECHARGE_CAPTCHA_SMS_TYPE)){
+			String amount = (String) context.get("amount");
+			Integer validTime = (Integer) context.get("validTime");
+			smsParamString = "{money:'"+amount+"',verfiyCode:'"+captcha+"',time:'"+validTime+"'}";
+			smsType = "sms.smsUserRechargeVCTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_RECHARGE_SMS_TYPE)){
 			BigDecimal amount = (BigDecimal) context.get("amount");
 			String storeName = (String) context.get("storeName");
