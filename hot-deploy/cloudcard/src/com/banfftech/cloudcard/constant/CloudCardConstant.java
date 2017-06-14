@@ -163,11 +163,11 @@ public class CloudCardConstant {
     /**
      * 用户APP端唯一标示{@value}
      */
-    public static final String USER_APP_UUID_TYPE = "userAppUUID";
+    public static final String USER_APP_UUID_TYPE = "USER_APP_UUID";
 
     /**
      * 商家APP端唯一标示{@value}
      */
-    public static final String BIZ_APP_UUID_TYPE = "bizAppUUID";
+    public static final String BIZ_APP_UUID_TYPE = "BIZ_APP_UUID";
 
 }

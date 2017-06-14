@@ -86,6 +86,9 @@
 	<PartyIdentificationType partyIdentificationTypeId="JPUSH_ANDROID_USER" description="极光推送安卓用户" />
 	<PartyIdentificationType partyIdentificationTypeId="JPUSH_IOS_BIZ" description="极光推送苹果商家" />
 	<PartyIdentificationType partyIdentificationTypeId="JPUSH_IOS_USER" description="极光推送苹果用户" />
+	<PartyIdentificationType partyIdentificationTypeId="USER_APP_UUID" description="用户设备唯一标示" />
+	<PartyIdentificationType partyIdentificationTypeId="BIZ_APP_UUID" description="商家设备唯一标示" />
+
 
 	<PartyIdentificationType partyIdentificationTypeId="STORE_QR_CODE" description="商家的二维码" /><!-- 主要用于客户扫码付款 -->
 
