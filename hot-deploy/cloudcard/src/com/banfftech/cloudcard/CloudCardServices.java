@@ -2011,14 +2011,17 @@ public class CloudCardServices {
 			}else{
 				for(GenericValue partyIdentification : partyIdentifications){
 					oldRegId = partyIdentification.getString("idValue");
-					Timestamp timestamp = UtilDateTime.nowTimestamp();
-					int hours = timestamp.getHours();
-					int minutes = timestamp.getMinutes();
-					time = hours +":"+ minutes;
-					//删除partyIdentification
-					partyIdentification.remove();
-					//新增partyIdentification
-					delegator.makeValue("PartyIdentification", UtilMisc.toMap("partyId",partyId,"partyIdentificationTypeId",partyIdentificationTypeId,"idValue", regId)).create();
+					//只要partyIdentificationTypeId和regId不一样，对PartyIdentification进行实体操作
+					if(!partyIdentificationTypeId.equalsIgnoreCase(partyIdentification.getString("partyIdentificationTypeId")) || !oldRegId.equals(regId)){
+						Timestamp timestamp = UtilDateTime.nowTimestamp();
+						int hours = timestamp.getHours();
+						int minutes = timestamp.getMinutes();
+						time = hours +":"+ minutes;
+						//删除partyIdentification
+						partyIdentification.remove();
+						//新增partyIdentification
+						delegator.makeValue("PartyIdentification", UtilMisc.toMap("partyId",partyId,"partyIdentificationTypeId",partyIdentificationTypeId,"idValue", regId)).create();
+					}
 				}
 			}
 		} catch (GenericEntityException e) {
