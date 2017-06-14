@@ -2015,9 +2015,10 @@ public class CloudCardServices {
 					int hours = timestamp.getHours();
 					int minutes = timestamp.getMinutes();
 					time = hours +":"+ minutes;
-					partyIdentification.set("partyIdentificationTypeId", partyIdentificationTypeId);
-					partyIdentification.set("idValue", regId);
-					partyIdentification.store();
+					GenericValue pi = delegator.findByPrimaryKey("PartyIdentification", UtilMisc.toMap("partyId", partyIdentification.getString("partyId"), "partyIdentificationTypeId", partyIdentification.getString("partyIdentificationTypeId")));
+					pi.set("partyIdentificationTypeId", partyIdentificationTypeId);
+					pi.set("idValue", regId);
+					pi.store();
 				}
 			}
 		} catch (GenericEntityException e) {
