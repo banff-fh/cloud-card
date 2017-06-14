@@ -10,6 +10,7 @@
 		<description>用户手机登录</description>
 		<attribute name="teleNumber" type="String" mode="IN" optional="false"/>
 		<attribute name="captcha" type="String" mode="IN" optional="false"/>
+		<attribute name="deviceId" type="String" mode="IN" optional="true"/>
 		<attribute name="token" type="String" mode="OUT" optional="true"/>
 		<attribute name="organizationPartyId" type="String" mode="OUT" optional="true"/>
 	</service>

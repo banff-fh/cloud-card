@@ -236,6 +236,8 @@ public class SmsServices {
 		String teleNumber = (String) context.get("teleNumber");
 		String captcha = (String) context.get("captcha");
 		String appType = (String) context.get("appType");
+		String deviceId = (String) context.get("deviceId");
+		String partyIdentificationTypeId = "";
 
 		String token = null;
 		Map<String, Object> result = ServiceUtil.returnSuccess();
@@ -257,10 +259,14 @@ public class SmsServices {
 		}
 		//返回机构Id
 		List<String> organizationList = FastList.newInstance();
+		//用户ID
+		String customerId = "";
 		if(null != customer){
-			organizationList = CloudCardHelper.getOrganizationPartyId(delegator, customer.get("partyId").toString());
+			customerId = customer.getString("partyId");
+			organizationList = CloudCardHelper.getOrganizationPartyId(delegator, customerId);
 		}else{
-			organizationList = CloudCardHelper.getOrganizationPartyId(delegator, customerMap.get("customerPartyId").toString());
+			customerId = customerMap.get("customerPartyId").toString();
+			organizationList = CloudCardHelper.getOrganizationPartyId(delegator, customerId);
 		}
 
 		if(UtilValidate.isNotEmpty(organizationList)){
@@ -322,6 +328,34 @@ public class SmsServices {
 				} catch (GenericEntityException e) {
 					Debug.logError(e.getMessage(), module);
 					return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+				}
+
+				//增加设备ID
+				if(UtilValidate.isNotEmpty(deviceId)){
+					if(appType.equals("biz")){
+						partyIdentificationTypeId = CloudCardConstant.BIZ_APP_UUID_TYPE;
+					}else if(appType.equals("user")){
+						partyIdentificationTypeId = CloudCardConstant.USER_APP_UUID_TYPE;
+					}
+
+					GenericValue partyIdentification = null;
+					Map<String, Object> lookupFields = FastMap.newInstance();
+					lookupFields.put("partyId", customerId);
+					lookupFields.put("partyIdentificationTypeId", partyIdentificationTypeId);
+					try {
+						partyIdentification = delegator.findByPrimaryKey("PartyIdentification", lookupFields);
+						//判断该用户是否存在deviceId,如果不存在，插入一条新数据，否则修改该partyId的deviceId
+						if(UtilValidate.isEmpty(partyIdentification)){
+							lookupFields.put("idValue", deviceId);
+							delegator.makeValue("PartyIdentification", lookupFields).create();
+						}else{
+							partyIdentification.set("idValue", deviceId);
+							partyIdentification.store();
+						}
+					} catch (GenericEntityException e) {
+						Debug.logError(e.getMessage(), module);
+						return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+					}
 				}
 				result.put("token", token);
 			}else{

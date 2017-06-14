@@ -159,4 +159,15 @@ public class CloudCardConstant {
      * 发送用户转卡通知短信{@value}
      */
     public static final String USER_MODIFY_CARD_OWNER_TYPE = "userModifyCardOwner";
+
+    /**
+     * 用户APP端唯一标示{@value}
+     */
+    public static final String USER_APP_UUID_TYPE = "userAppUUID";
+
+    /**
+     * 商家APP端唯一标示{@value}
+     */
+    public static final String BIZ_APP_UUID_TYPE = "bizAppUUID";
+
 }
