@@ -2015,6 +2015,7 @@ public class CloudCardServices {
 					int hours = timestamp.getHours();
 					int minutes = timestamp.getMinutes();
 					time = hours +":"+ minutes;
+					partyIdentification.set("partyIdentificationTypeId", partyIdentificationTypeId);
 					partyIdentification.set("idValue", regId);
 					partyIdentification.store();
 				}
@@ -2026,8 +2027,9 @@ public class CloudCardServices {
 
 		Map<String, Object> retMap = ServiceUtil.returnSuccess();
 		retMap.put("appType", appType);
+		retMap.put("deviceType", deviceType);
 		retMap.put("regId", oldRegId);
-		retMap.put("time", time );
+		retMap.put("time", time);
 		return retMap;
 	}
 

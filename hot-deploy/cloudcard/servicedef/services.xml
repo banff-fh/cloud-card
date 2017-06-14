@@ -131,8 +131,8 @@
 	<service name="regJpushRegId" engine="java"
 		location="com.banfftech.cloudcard.CloudCardServices" invoke="regJpushRegId" auth="true">
 		<description>注册设备regId</description>
-		<attribute name="regId" type="String" mode="INOUT" optional="true"><description>设备Id</description></attribute>
-		<attribute name="deviceType" type="String" mode="IN" optional="true"><description>设备类型</description></attribute>
+		<attribute name="regId" type="String" mode="INOUT" optional="true"><description>推送Id</description></attribute>
+		<attribute name="deviceType" type="String" mode="INOUT" optional="true"><description>设备类型</description></attribute>
 		<attribute name="appType" type="String" mode="INOUT" optional="true"><description>用户app类型</description></attribute>
 		<attribute name="time" type="String" mode="OUT" optional="true"><description>时间</description></attribute>
 	</service>
@@ -153,6 +153,8 @@
 		<attribute name="title" type="String" mode="IN" optional="true"><description>通知title</description></attribute>
 		<attribute name="message" type="String" mode="IN" optional="true"><description>透传消息</description></attribute>
 		<attribute name="partyId" type="String" mode="IN" optional="true"><description>发送到哪个用户</description></attribute>
+		<attribute name="time" type="String" mode="IN" optional="true"><description>时间</description></attribute>
+		<attribute name="deviceType" type="String" mode="IN" optional="true"><description>设备类型</description></attribute>
 		<attribute name="regId" type="String" mode="IN" optional="true"><description>regId</description></attribute>
 		<attribute name="tag" type="String" mode="IN" optional="true"><description>发送到那个标签</description></attribute>
 		<attribute name="extras" type="Map" mode="IN" optional="true"><description>推送的extrasMap</description></attribute>
