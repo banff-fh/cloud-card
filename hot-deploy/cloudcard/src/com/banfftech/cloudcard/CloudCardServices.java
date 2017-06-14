@@ -45,6 +45,23 @@ public class CloudCardServices {
 
 	public static final String module = CloudCardServices.class.getName();
 
+	/**
+	 * android用户端 和 商户端 用来存储 极光推送的id 的  partyIdentificationTypeId 映射
+	 */
+	public static final Map<String, String> ANDROID_APPTYPE_PIFT_MAP = FastMap.newInstance();
+	static{
+		ANDROID_APPTYPE_PIFT_MAP.put("biz", "JPUSH_ANDROID_BIZ");
+		ANDROID_APPTYPE_PIFT_MAP.put("user", "JPUSH_ANDROID_USER");
+	}
+
+	/**
+	 * ios 用户端 和 商户端 用来存储 极光推送的id 的  partyIdentificationTypeId 映射
+	 */
+	public static final Map<String, String> IOS_APPTYPE_PIFT_MAP = FastMap.newInstance();
+	static{
+		IOS_APPTYPE_PIFT_MAP.put("biz", "JPUSH_IOS_BIZ");
+		IOS_APPTYPE_PIFT_MAP.put("user", "JPUSH_IOS_USER");
+	}
 
 	/**
 	 * 卡授权
@@ -1968,28 +1985,39 @@ public class CloudCardServices {
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardDeviceTypeOrAppTypeInvalid", locale));
 		}
 
-		//查询该用户是否存在regId
-		GenericValue partyIdentification = null;
 		//原app regId
 		String oldRegId = "";
 		String time = "";
-		Map<String, Object> lookupFields = FastMap.newInstance();
-		lookupFields.put("partyId", partyId);
-		lookupFields.put("partyIdentificationTypeId", partyIdentificationTypeId);
+		// 查询registrationID
+		EntityCondition pConditions = EntityCondition.makeCondition("partyId", partyId);
+		List<EntityCondition> devTypeExprs = FastList.newInstance();
+		devTypeExprs.add(EntityCondition.makeCondition("partyIdentificationTypeId", ANDROID_APPTYPE_PIFT_MAP.get(appType)));
+		devTypeExprs.add(EntityCondition.makeCondition("partyIdentificationTypeId", IOS_APPTYPE_PIFT_MAP.get(appType)));
+		EntityCondition devCondition = EntityCondition.makeCondition(devTypeExprs, EntityOperator.OR);
+		pConditions = EntityCondition.makeCondition(pConditions, devCondition);
+
 		try {
-			partyIdentification = delegator.findByPrimaryKey("PartyIdentification", lookupFields);
+			//查找regId
+			List<GenericValue> partyIdentifications = FastList.newInstance();
+			try {
+				partyIdentifications = delegator.findList("PartyIdentification", pConditions, null, null, null, false);
+			} catch (GenericEntityException e) {
+				Debug.logError(e.getMessage(), module);
+			}
+
 			//判断该用户是否存在regId,如果不存在，插入一条新数据，否则修改该partyId的regId
-			if(UtilValidate.isEmpty(partyIdentification)){
-				lookupFields.put("idValue", regId);
-				delegator.makeValue("PartyIdentification", lookupFields).create();
+			if(UtilValidate.isEmpty(partyIdentifications)){
+				delegator.makeValue("PartyIdentification", UtilMisc.toMap("partyId",partyId,"partyIdentificationTypeId",partyIdentificationTypeId,"idValue", regId)).create();
 			}else{
-				oldRegId = partyIdentification.getString("idValue");
-				Timestamp timestamp = UtilDateTime.nowTimestamp();
-				int hours = timestamp.getHours();
-				int minutes = timestamp.getMinutes();
-				time = hours +":"+ minutes;
-				partyIdentification.set("idValue", regId);
-				partyIdentification.store();
+				for(GenericValue partyIdentification : partyIdentifications){
+					oldRegId = partyIdentification.getString("idValue");
+					Timestamp timestamp = UtilDateTime.nowTimestamp();
+					int hours = timestamp.getHours();
+					int minutes = timestamp.getMinutes();
+					time = hours +":"+ minutes;
+					partyIdentification.set("idValue", regId);
+					partyIdentification.store();
+				}
 			}
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
