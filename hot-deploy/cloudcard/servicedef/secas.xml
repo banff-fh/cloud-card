@@ -88,7 +88,7 @@ under the License.
         <set field-name="deviceType" env-name="deviceType"/>
         <set field-name="sendType" value="one"/>
         <set field-name="content" value="你的账号在其他地方登录，本地已下线" />
-        <set field-name="message" value='{"type":"loginNotification","time":"${time}"}' />
+        <set field-name="message" value='{"type":"loginNotification","time":"${time}","deviceType":"${deviceType}"}' />
         <action service="pushNotifOrMessage"  mode="async"/>
     </eca>
 </service-eca>
