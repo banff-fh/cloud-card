@@ -86,6 +86,7 @@ under the License.
     <eca service="regJpushRegId" event="return">
         <set field-name="appType" env-name="appType"/>
         <set field-name="deviceType" env-name="deviceType"/>
+        <set field-name="regId" env-name="regId"/>
         <set field-name="sendType" value="one"/>
         <set field-name="content" value="你的账号在其他地方登录，本地已下线" />
         <set field-name="message" value='{"type":"loginNotification","time":"${time}","deviceType":"${deviceType}"}' />
