@@ -4,7 +4,7 @@
     <description>cloudcard Services</description>
     <vendor></vendor>
     <version>1.0</version>
-    
+
 
     <service name="activateCloudCard" engine="java"
             location="com.banfftech.cloudcard.CloudCardServices" invoke="activateCloudCard" auth="true">
@@ -38,7 +38,7 @@
         <attribute name="cardId" type="String" mode="INOUT" optional="true"><description>卡Id</description></attribute>
         <attribute name="cardCode" type="String" mode="IN" optional="true"><description>卡二维码数据</description></attribute>
         <attribute name="cloudCard" type="GenericValue" mode="IN" optional="true"><description>云卡实体</description></attribute>
-        
+
         <attribute name="amount" type="BigDecimal" mode="INOUT" optional="false"><description>充值金额</description></attribute>
 
         <attribute name="customerPartyId" type="String" mode="OUT" optional="false"><description>客户partyId</description></attribute>
@@ -53,7 +53,7 @@
         <attribute name="cardId" type="String" mode="INOUT" optional="true"><description>卡Id</description></attribute>
         <attribute name="cardCode" type="String" mode="IN" optional="true"><description>卡二维码数据</description></attribute>
         <attribute name="cloudCard" type="GenericValue" mode="IN" optional="true"><description>云卡实体</description></attribute>
-        
+
         <attribute name="receiptPaymentId" type="String" mode="IN" optional="false"><description>收款产生的paymentId</description></attribute>
         <attribute name="amount" type="BigDecimal" mode="OUT" optional="false"><description>充值金额</description></attribute>
 
@@ -69,7 +69,7 @@
         <attribute name="cardCode" type="String" mode="IN" optional="true"><description>卡二维码数据</description></attribute>
         <attribute name="cloudCard" type="GenericValue" mode="IN" optional="true"><description>云卡实体</description></attribute>
         <attribute name="amount" type="BigDecimal" mode="INOUT" optional="false"><description>支付金额</description></attribute>
-        
+
         <attribute name="cardId" type="String" mode="OUT" optional="true"><description>卡Id</description></attribute>
         <attribute name="storeName" type="String" mode="OUT" optional="true"><description>店名</description></attribute>
         <attribute name="cardBalance" type="BigDecimal" mode="OUT" optional="false"><description>可用余额</description></attribute>
@@ -79,7 +79,7 @@
 	<service name="createPaymentAndFinAccountTransForCloudCard" engine="simple"
             location="component://cloudcard/script/com/banfftech/cloudcard/CloudCardServices.xml" invoke="createPaymentAndFinAccountTransForCloudCard" auth="true">
         <description> create new payment and associate with respective financial account in FinAccountTrans Entity,
-        Notice: Only CloudCard use, 
+        Notice: Only CloudCard use,
         base on : component://accounting/script/org/ofbiz/accounting/finaccount/FinAccountServices.xml#createPaymentAndFinAccountTrans
         </description>
         <implements service="createPayment"/>
@@ -89,7 +89,7 @@
         <attribute name="paymentMethodId" type="String" mode="IN" optional="true"/>
         <attribute name="paymentId" type="String" mode="OUT" optional="true"/>
     </service>
-    
+
     <service name="getLoginCaptcha" engine="java"
 		location="com.banfftech.cloudcard.sms.SmsServices" invoke="getLoginCaptcha" auth="false">
 		<description>获取登录验证码</description>
@@ -105,7 +105,7 @@
         <attribute name="quantity" type="String" mode="IN" optional="false"/>
         <attribute name="result" type="String" mode="OUT" optional="true"/>
 	</service>
-	
+
 	<service name="checkAppVersion" engine="java"
 		location="com.banfftech.cloudcard.CloudCardQueryServices" invoke="checkAppVersion" auth="false">
 		<description>检查app版本号</description>
@@ -116,9 +116,9 @@
         <attribute name="updateType" type="Integer" mode="OUT" optional="false"><description>是否强制更新</description></attribute>
         <attribute name="url" type="String" mode="OUT" optional="true"><description>app更新地址</description></attribute>
 	</service>
-	
-	
-	
+
+
+
 	<service name="doSettlement" engine="java"
 		location="com.banfftech.cloudcard.CloudCardServices" invoke="doSettlement" auth="true">
 		<description>商家结算</description>
@@ -127,22 +127,23 @@
 		<attribute name="apAmount" type="BigDecimal" mode="OUT" optional="true"><description>平台应付给商家金额</description></attribute>
 		<attribute name="settlementAmount" type="BigDecimal" mode="OUT" optional="true"><description>结算余额</description></attribute>
 	</service>
-	
+
 	<service name="regJpushRegId" engine="java"
 		location="com.banfftech.cloudcard.CloudCardServices" invoke="regJpushRegId" auth="true">
 		<description>注册设备regId</description>
-		<attribute name="regId" type="String" mode="IN" optional="true"><description>设备Id</description></attribute>
+		<attribute name="regId" type="String" mode="INOUT" optional="true"><description>设备Id</description></attribute>
 		<attribute name="deviceType" type="String" mode="IN" optional="true"><description>设备类型</description></attribute>
-		<attribute name="appType" type="String" mode="IN" optional="true"><description>用户app类型</description></attribute>
+		<attribute name="appType" type="String" mode="INOUT" optional="true"><description>用户app类型</description></attribute>
+		<attribute name="time" type="String" mode="OUT" optional="true"><description>时间</description></attribute>
 	</service>
-	
+
 	<service name="removeJpushRegId" engine="java"
 		location="com.banfftech.cloudcard.CloudCardServices" invoke="removeJpushRegId" auth="true">
 		<description>退出登录删除regId</description>
 		<attribute name="regId" type="String" mode="IN" optional="true"><description>设备Id</description></attribute>
 	</service>
-	
-	
+
+
 	<service name="pushNotifOrMessage" engine="java"
 		location="com.banfftech.cloudcard.jpush.JPushServices" invoke="pushNotifOrMessage" auth="true">
 		<description>极光推送通知或（和）消息</description>
@@ -152,9 +153,10 @@
 		<attribute name="title" type="String" mode="IN" optional="true"><description>通知title</description></attribute>
 		<attribute name="message" type="String" mode="IN" optional="true"><description>透传消息</description></attribute>
 		<attribute name="partyId" type="String" mode="IN" optional="true"><description>发送到哪个用户</description></attribute>
+		<attribute name="regId" type="String" mode="IN" optional="true"><description>regId</description></attribute>
 		<attribute name="tag" type="String" mode="IN" optional="true"><description>发送到那个标签</description></attribute>
 		<attribute name="extras" type="Map" mode="IN" optional="true"><description>推送的extrasMap</description></attribute>
-	
+
 		<attribute name="storeName" type="String" mode="IN" optional="true"><description>店名</description></attribute>
 		<attribute name="cardId" type="String" mode="IN" optional="true"><description>卡Id</description></attribute>
 		<attribute name="amount" type="BigDecimal" mode="IN" optional="true"><description>金额</description></attribute>
@@ -170,7 +172,7 @@
 		<attribute name="body" type="String" mode="IN" optional="false"><description>商品描述</description></attribute>
 		<attribute name="totalFee" type="String" mode="IN" optional="false"><description>交易金额</description></attribute>
 		<attribute name="paymentService" type="String" mode="IN" optional="false"><description>付款业务</description></attribute>
-		
+
 		<!-- 支付宝参数 -->
 		<attribute name="subject" type="String" mode="IN" optional="true"><description>主题</description></attribute>
 		<!--微信参数-->
@@ -186,7 +188,7 @@
 		<attribute name="sign" type="String" mode="OUT" optional="true"><description>签名</description></attribute>
 		<!-- 支付宝返回结果 -->
 		<attribute name="payInfo" type="String" mode="OUT" optional="true"><description>签名</description></attribute>
-		
+
 	</service>
 
     <service name="orderPayQuery" engine="java"
@@ -196,7 +198,7 @@
 		<attribute name="paymentType" type="String" mode="IN" optional="false"><description>支付类型</description></attribute>
 		<attribute name="transactionId" type="String" mode="IN" optional="true"><description>第三方交易流水ID</description></attribute>
 		<attribute name="outTradeNo" type="String" mode="IN" optional="false"><description>商家交易流水ID</description></attribute>
-	
+
 		<attribute name="cashFee" type="Double" mode="OUT" optional="true"><description>支付金额</description></attribute>
 		<attribute name="returnCode" type="String" mode="OUT" optional="true"><description>返回状态码</description></attribute>
 		<attribute name="returnMsg" type="String" mode="OUT" optional="true"><description>返回信息</description></attribute>
@@ -206,7 +208,7 @@
 		<attribute name="timeEnd" type="String" mode="OUT" optional="true"><description>支付完成时间</description></attribute>
 		<attribute name="tradeState" type="String" mode="OUT" optional="true"><description>交易状态</description></attribute>
 	</service>
-	
+
 	<service name="editGeoLocation" engine="simple"
 		location="component://party/script/org/ofbiz/party/party/PartySimpleEvents.xml" invoke="editGeoLocation" auth="true">
 		<description>支付宝或微信查询服务</description>
@@ -222,7 +224,7 @@
 		<attribute name="amount" type="BigDecimal" mode="IN" optional="false"><description>要增加的积分数</description></attribute>
 		<attribute name="partyId" type="String" mode="IN" optional="false"><description>给哪个用户增加</description></attribute>
 	</service>
-	
+
 	<service name="getProvinceOrCityOrArea" engine="java"
         invoke="getProvinceOrCityOrArea" location="com.banfftech.cloudcard.CloudCardServices" auth="false">
         <description>获取省市县</description>
@@ -234,7 +236,7 @@
         <attribute name="cityList" mode="OUT" type="List" optional="true"/>
         <attribute name="countyList" mode="OUT" type="List" optional="true"/>
     </service>
-    
+
     <service name="upload" engine="java"
         invoke="uploadOSS" location="com.banfftech.cloudcard.util.UtilFileUpload" auth="false">
         <description>获取用户上传的文件，并传到阿里云OSS存储</description>
@@ -243,7 +245,7 @@
 		<attribute mode="IN" name="_uploadedFile_contentType" type="String" optional="false"><description>文件mime类型</description></attribute>
 		<attribute mode="OUT" name="key" type="String" optional="false"><description>文件key</description></attribute>
     </service>
-    
+
     <service name="saveMyNote" engine="java"
         invoke="saveMyNote" location="com.banfftech.cloudcard.CloudCardHelper" auth="false">
         <description>记录app推送消息</description>
@@ -252,7 +254,7 @@
 		<attribute mode="IN" name="noteName" type="String" optional="false"><description>信息名称</description></attribute>
 		<attribute mode="IN" name="noteInfo" type="String" optional="false"><description>信息</description></attribute>
     </service>
-    
+
     <service name="delFile" engine="java"
         invoke="delFile" location="com.banfftech.cloudcard.util.UtilFileUpload" auth="false">
         <description>在阿里云OSS存储中删除上传的文件</description>
@@ -268,15 +270,15 @@
 		<attribute mode="IN" name="listOrderBy" type="String" optional="true"><description>排序字段</description></attribute>
 		<attribute mode="OUT" name="geoList" type="List" optional="true"><description>返回的下级Geo列表</description></attribute>
     </service>
-    
+
     <service name="bizSettlementReqJob" engine="java"
             location="com.banfftech.cloudcard.CloudCardServices" invoke="bizSettlementReqJob" auth="false">
             <description>结算定时任务请求</description>
     </service>
-    
+
     <service name="userLogout" engine="java"
             location="com.banfftech.cloudcard.CloudCardServices" invoke="userLogout" auth="false">
             <description>退出登录</description>
     </service>
-    
+
 </services>

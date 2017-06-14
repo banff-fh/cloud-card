@@ -1970,6 +1970,9 @@ public class CloudCardServices {
 
 		//查询该用户是否存在regId
 		GenericValue partyIdentification = null;
+		//原app regId
+		String oldRegId = "";
+		String time = "";
 		Map<String, Object> lookupFields = FastMap.newInstance();
 		lookupFields.put("partyId", partyId);
 		lookupFields.put("partyIdentificationTypeId", partyIdentificationTypeId);
@@ -1980,6 +1983,11 @@ public class CloudCardServices {
 				lookupFields.put("idValue", regId);
 				delegator.makeValue("PartyIdentification", lookupFields).create();
 			}else{
+				oldRegId = partyIdentification.getString("idValue");
+				Timestamp timestamp = UtilDateTime.nowTimestamp();
+				int hours = timestamp.getHours();
+				int minutes = timestamp.getMinutes();
+				time = hours +":"+ minutes;
 				partyIdentification.set("idValue", regId);
 				partyIdentification.store();
 			}
@@ -1989,6 +1997,9 @@ public class CloudCardServices {
 		}
 
 		Map<String, Object> retMap = ServiceUtil.returnSuccess();
+		retMap.put("appType", appType);
+		retMap.put("regId", oldRegId);
+		retMap.put("time", time );
 		return retMap;
 	}
 

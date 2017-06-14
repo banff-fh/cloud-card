@@ -20,7 +20,7 @@ under the License.
 
 <service-eca xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/service-eca.xsd">
-        
+
 	<!-- 授权成功后通知用户 -->
     <eca service="createCardAuth" event="return">
         <set field-name="appType" value="user"/>
@@ -48,7 +48,7 @@ under the License.
         <set field-name="tag" env-name="storeId" />
         <set field-name="message" value='{"type":"payment","cardId":"${cardId}","amount":"${amount}"}' />
         <action service="pushNotifOrMessage"  mode="async"/>
-    </eca> 
+    </eca>
 
 
     <!-- 商家扫码充值成功后通知用户 -->
@@ -75,11 +75,20 @@ under the License.
         <set field-name="partyId" env-name="customerPartyId" />
         <action service="pushNotifOrMessage"  mode="async"/>
     </eca>
-    
+
     <!-- 云卡支付后增加相应积分 -->
     <eca service="cloudCardWithdraw" event="return">
         <set field-name="partyId" env-name="customerPartyId" />
         <action service="addUserScore"  mode="async"/>
     </eca>
-    
+
+    <!-- 更新设备ID后的消息通知 -->
+    <eca service="regJpushRegId" event="return">
+        <set field-name="appType" env-name="appType"/>
+        <set field-name="deviceType" env-name="deviceType"/>
+        <set field-name="sendType" value="one"/>
+        <set field-name="content" value="你的账号在其他地方登录，本地已下线" />
+        <set field-name="message" value='{"type":"loginNotification","time":"${time}"}' />
+        <action service="pushNotifOrMessage"  mode="async"/>
+    </eca>
 </service-eca>

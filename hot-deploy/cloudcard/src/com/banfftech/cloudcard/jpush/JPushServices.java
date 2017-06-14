@@ -48,7 +48,7 @@ public class JPushServices {
 		ANDROID_APPTYPE_PIFT_MAP.put("biz", "JPUSH_ANDROID_BIZ");
 		ANDROID_APPTYPE_PIFT_MAP.put("user", "JPUSH_ANDROID_USER");
 	}
-	
+
 	/**
 	 * ios 用户端 和 商户端 用来存储 极光推送的id 的  partyIdentificationTypeId 映射
 	 */
@@ -57,8 +57,8 @@ public class JPushServices {
 		IOS_APPTYPE_PIFT_MAP.put("biz", "JPUSH_IOS_BIZ");
 		IOS_APPTYPE_PIFT_MAP.put("user", "JPUSH_IOS_USER");
 	}
-	
-	
+
+
 	//注册jPushClient
 	private static JPushClient getJPushClient(Delegator delegator,String appType) {
 		JPushClient jPushClient = null;
@@ -75,15 +75,15 @@ public class JPushServices {
 		return jPushClient;
 	}
 
-	
+
 	// 推送消息
 	public static Map<String,Object> pushNotifOrMessage(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
-		
+
 		// biz 、user
 		String appType = (String) context.get("appType");
-		
+
 		// all 所有人
 		String sendType = (String) context.get("sendType");
 		String title = (String) context.get("title");
@@ -101,14 +101,14 @@ public class JPushServices {
 		}
 
 		String partyId = (String) context.get("partyId");
-		
+
 		Map<String, String> extras = UtilGenerics.checkMap(context.get("extras"));
 		if(null==extras){
 			extras = FastMap.newInstance();
 		}
 
 		PushResult pushResult = null;
-		
+
 		if("all".equals(sendType)){
 			// 推送到全平台所有人
 			JPushClient jPushClient = getJPushClient(delegator, appType);
@@ -150,21 +150,27 @@ public class JPushServices {
 			devTypeExprs.add(EntityCondition.makeCondition("partyIdentificationTypeId", IOS_APPTYPE_PIFT_MAP.get(appType)));
 			EntityCondition devCondition = EntityCondition.makeCondition(devTypeExprs, EntityOperator.OR);
 			pConditions = EntityCondition.makeCondition(pConditions, devCondition);
-			
-			//查找regId
-			List<GenericValue> partyIdentifications = FastList.newInstance();
-			try {
-				partyIdentifications = delegator.findList("PartyIdentification", pConditions, UtilMisc.toSet("idValue"), null, null, false);
-			} catch (GenericEntityException e) {
-				Debug.logError(e.getMessage(), module);
+
+			List<String> idValues = FastList.newInstance();
+
+			String regId = (String) context.get("regId");
+			if(UtilValidate.isEmpty(regId)){
+				//查找regId
+				List<GenericValue> partyIdentifications = FastList.newInstance();
+				try {
+					partyIdentifications = delegator.findList("PartyIdentification", pConditions, UtilMisc.toSet("idValue"), null, null, false);
+				} catch (GenericEntityException e) {
+					Debug.logError(e.getMessage(), module);
+				}
+
+				if(UtilValidate.isEmpty(partyIdentifications)){
+					Debug.logWarning("没有推送目标", module);
+					return ServiceUtil.returnSuccess();
+				}
+				idValues = EntityUtil.getFieldListFromEntityList(partyIdentifications, "idValue", true);
+			}else if(UtilValidate.isNotEmpty(regId)){
+				idValues.add(regId);
 			}
-			
-			if(UtilValidate.isEmpty(partyIdentifications)){
-				Debug.logWarning("没有推送目标", module);
-				return ServiceUtil.returnSuccess();
-			}
-			List<String> idValues = EntityUtil.getFieldListFromEntityList(partyIdentifications, "idValue", true);
-			
 			payloadBuilder.setAudience(Audience.registrationId(idValues)); // FIXME 多个regId的情况下，一个id出错全错？
 		}
 
