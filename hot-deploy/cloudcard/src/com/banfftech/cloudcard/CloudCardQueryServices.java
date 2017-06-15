@@ -192,7 +192,11 @@ public class CloudCardQueryServices {
         int listSize = 0;
         EntityListIterator eli  = null;
 		try {
-			eli = delegator.find("CloudCardPaymentView", paymentConditions, null, UtilMisc.toSet("amount","partyFromGroupName","partyToGroupName","paymentTypeId","effectiveDate"), UtilMisc.toList("-effectiveDate"), null);
+			Set<String> filedSet = UtilMisc.toSet("amount", "partyToFirstName", "partyToGroupName", "partyFromFirstName", "partyFromGroupName", "paymentTypeId");
+		    filedSet.add("effectiveDate");
+		    filedSet.add("distributorPartyName");
+		    filedSet.add("cardCode");
+			eli = delegator.find("CloudCardPaymentView", paymentConditions, null, filedSet, UtilMisc.toList("-effectiveDate"), null);
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
