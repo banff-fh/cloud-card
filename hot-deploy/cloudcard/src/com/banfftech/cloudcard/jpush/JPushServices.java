@@ -19,6 +19,7 @@ import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
+import cn.jiguang.common.ClientConfig;
 import cn.jiguang.common.resp.APIConnectionException;
 import cn.jiguang.common.resp.APIRequestException;
 import cn.jpush.api.JPushClient;
@@ -62,16 +63,20 @@ public class JPushServices {
 	//注册jPushClient
 	private static JPushClient getJPushClient(Delegator delegator,String appType) {
 		JPushClient jPushClient = null;
+		String appkey = null;
+		String secret = null;
 		if(appType.equals("biz")){
-			String appkey = EntityUtilProperties.getPropertyValue("cloudcard", "jpush.bizAppKey", delegator);
-			String secret = EntityUtilProperties.getPropertyValue("cloudcard", "jpush.bizSecret", delegator);
-			jPushClient = new JPushClient(secret, appkey);
-			return jPushClient;
+			appkey = EntityUtilProperties.getPropertyValue("cloudcard", "jpush.bizAppKey", delegator);
+			secret = EntityUtilProperties.getPropertyValue("cloudcard", "jpush.bizSecret", delegator);
 		}else if(appType.equals("user")){
-			String appkey = EntityUtilProperties.getPropertyValue("cloudcard", "jpush.userAppKey", delegator);
-			String secret = EntityUtilProperties.getPropertyValue("cloudcard", "jpush.userSecret", delegator);
-			jPushClient = new JPushClient(secret, appkey);
+			appkey = EntityUtilProperties.getPropertyValue("cloudcard", "jpush.userAppKey", delegator);
+			secret = EntityUtilProperties.getPropertyValue("cloudcard", "jpush.userSecret", delegator);
 		}
+		//设置消息保留时间
+		ClientConfig clientConfig = ClientConfig.getInstance();
+		clientConfig.setTimeToLive(12960000);
+
+		jPushClient = new JPushClient(secret, appkey, null, clientConfig);
 		return jPushClient;
 	}
 

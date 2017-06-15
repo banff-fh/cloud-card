@@ -216,8 +216,6 @@
 	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/fastjson-1.2.21.jar"/>
 	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/gson-2.2.4.jar"/>
 	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/java-jwt-2.2.1.jar"/>
-	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/jiguang-common-0.1.6.jar"/>
-	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/jpush-client-3.2.11.jar"/>
 	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/log4j-1.2.17.jar"/>
 	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/slf4j-api-1.7.7.jar"/>
 	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/slf4j-log4j12-1.7.7.jar"/>
@@ -227,5 +225,7 @@
 	<classpathentry kind="lib" path="framework/base/lib/httpcore-4.4.1.jar"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_DSL_SUPPORT"/>
 	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/alipay-sdk-java20170607114101.jar"/>
+	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/jiguang-common-1.0.6.jar"/>
+	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/jpush-client-3.2.19.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
