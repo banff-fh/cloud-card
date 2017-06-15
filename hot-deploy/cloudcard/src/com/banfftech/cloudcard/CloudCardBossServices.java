@@ -2778,10 +2778,9 @@ public class CloudCardBossServices {
 		String noteDateTime = "";
 		String noteInfo = "";
 		try {
-			GenericValue noteData = delegator.findByPrimaryKey("", UtilMisc.toMap("noteId", noteId));
+			GenericValue noteData = delegator.findByPrimaryKey("NoteData", UtilMisc.toMap("noteId", noteId));
 			noteInfo = noteData.getString("noteInfo");
 			noteDateTime = noteData.getString("noteDateTime");
-
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
