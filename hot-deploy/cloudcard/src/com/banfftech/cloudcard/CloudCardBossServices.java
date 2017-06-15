@@ -2762,4 +2762,34 @@ public class CloudCardBossServices {
 			result.put("storeLevel", storeLevel);
 		return result;
 	}
+
+	/**
+	 * 查看note明细
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> bizGetNodeDetailed(DispatchContext dctx, Map<String, Object> context){
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+		String noteId = (String) context.get("noteId");
+
+		String noteDateTime = "";
+		String noteInfo = "";
+		try {
+			GenericValue noteData = delegator.findByPrimaryKey("", UtilMisc.toMap("noteId", noteId));
+			noteInfo = noteData.getString("noteInfo");
+			noteDateTime = noteData.getString("noteDateTime");
+
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("tiem", noteDateTime);
+		result.put("noteInfo", noteInfo);
+		return result;
+	}
 }

@@ -643,7 +643,12 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 
-
+	<!-- note信息明细 -->
+	<request-map uri="bizGetNodeDetailed">
+		<event type="service" invoke="bizGetNodeDetailed" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
 
 	<!-- 后台页面部分 Request Mappings -->
 

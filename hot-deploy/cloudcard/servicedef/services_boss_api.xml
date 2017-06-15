@@ -466,4 +466,12 @@
 		<attribute name="storeId" type="String" mode="IN" optional="false"/>
 		<attribute name="storeLevel" type="String" mode="OUT" optional="false"/>
  	</service>
+
+ 	<service name="bizGetNodeDetailed" engine="java"
+            location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizGetNodeDetailed" auth="true">
+        <description>查看账单明细</description>
+		<attribute name="noteId" type="String" mode="IN" optional="false"/>
+		<attribute name="noteInfo" type="String" mode="OUT" optional="false"/>
+		<attribute name="noteDateTime" type="String" mode="OUT" optional="false"/>
+ 	</service>
 </services>
