@@ -74,7 +74,7 @@ public class JPushServices {
 		}
 		//设置消息保留时间
 		ClientConfig clientConfig = ClientConfig.getInstance();
-		clientConfig.setTimeToLive(12960000);
+		clientConfig.setTimeToLive(864000);
 
 		jPushClient = new JPushClient(secret, appkey, null, clientConfig);
 		return jPushClient;
