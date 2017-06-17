@@ -2013,12 +2013,12 @@ public class CloudCardServices {
 					//只要partyIdentificationTypeId和regId不一样，对PartyIdentification进行实体操作
 					if(!partyIdentificationTypeId.equalsIgnoreCase(partyIdentification.getString("partyIdentificationTypeId")) && !partyIdentification.getString("idValue").equals(regId)){
 						oldRegId = partyIdentification.getString("idValue");
-						Timestamp timestamp = UtilDateTime.nowTimestamp();
-						int year = timestamp.getYear() + 1900;
-						int month = timestamp.getMonth() + 1;
-						int day = timestamp.getDate();
-						int hours = timestamp.getHours();
-						int minutes = timestamp.getMinutes();
+						Calendar cal = Calendar.getInstance();
+						String year = String.valueOf(cal.get(Calendar.YEAR));
+						String month = String.valueOf(cal.get(Calendar.MONTH) + 1);
+						String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
+						String hours = String.valueOf(cal.get(Calendar.HOUR_OF_DAY));
+						String minutes = String.valueOf(cal.get(Calendar.MINUTE));
 						time = year + "年" + month + "月" + day + "日 " + hours + ":" + minutes;
 						//删除partyIdentification
 						partyIdentification.remove();
