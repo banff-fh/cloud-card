@@ -2014,9 +2014,12 @@ public class CloudCardServices {
 					if(!partyIdentificationTypeId.equalsIgnoreCase(partyIdentification.getString("partyIdentificationTypeId")) && !partyIdentification.getString("idValue").equals(regId)){
 						oldRegId = partyIdentification.getString("idValue");
 						Timestamp timestamp = UtilDateTime.nowTimestamp();
+						int year = timestamp.getYear() + 1900;
+						int month = timestamp.getMonth() + 1;
+						int day = timestamp.getDate();
 						int hours = timestamp.getHours();
 						int minutes = timestamp.getMinutes();
-						time = hours +":"+ minutes;
+						time = year + "年" + month + "月" + day + "日 " + hours + ":" + minutes;
 						//删除partyIdentification
 						partyIdentification.remove();
 						//新增partyIdentification
