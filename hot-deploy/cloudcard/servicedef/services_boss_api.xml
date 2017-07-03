@@ -95,10 +95,10 @@
 		<attribute name="teleNumber" type="String" mode="IN" optional="false"><description>店主电话</description></attribute>
 		<attribute name="personName" type="String" mode="IN" optional="true"><description>店主姓名</description></attribute>
 		<attribute name="description" type="String" mode="IN" optional="true"><description>店铺描述</description></attribute>
-		<attribute name="longitude" type="String" mode="IN" optional="true"><description>经度</description></attribute>
-		<attribute name="latitude" type="String" mode="IN" optional="true"><description>纬度</description></attribute>
-		<attribute name="aliPayAccount" type="String" mode="IN" optional="true"><description>店家支付宝账号</description></attribute>
-		<attribute name="aliPayName" type="String" mode="IN" optional="true"><description>店家支付宝姓名</description></attribute>
+		<attribute name="longitude" type="String" mode="IN" optional="false"><description>经度</description></attribute>
+		<attribute name="latitude" type="String" mode="IN" optional="false"><description>纬度</description></attribute>
+		<attribute name="aliPayAccount" type="String" mode="IN" optional="false"><description>店家支付宝账号</description></attribute>
+		<attribute name="aliPayName" type="String" mode="IN" optional="false"><description>店家支付宝姓名</description></attribute>
 		<attribute name="wxPayAccount" type="String" mode="IN" optional="true"><description>店家微信账号</description></attribute>
 		<attribute name="wxPayName" type="String" mode="IN" optional="true"><description>店家微信姓名</description></attribute>
 

@@ -241,7 +241,7 @@ public class CloudCardBossServices {
 			storeInfoMap.put("level", level);// 信用等级
 			storeInfoMap.put("creditLimit", creditLimit);// 卖卡限额
 
-			createCloudCardStoreMap = dispatcher.runSync("createCloudCardStore", context);
+			createCloudCardStoreMap = dispatcher.runSync("createCloudCardStore", storeInfoMap);
 		} catch (GenericServiceException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
