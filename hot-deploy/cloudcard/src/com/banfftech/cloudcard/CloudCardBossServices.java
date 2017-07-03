@@ -251,7 +251,7 @@ public class CloudCardBossServices {
 			storeInfoMap.put("wxPayName", wxPayName);// 店家微信姓名
 			storeInfoMap.put("allowCrossStorePay", allowCrossStorePay);// 是否允许本店卡跨店付款 Y/N
 			storeInfoMap.put("level", level);// 信用等级
-			storeInfoMap.put("creditLimit", creditLimit);// 卖卡限额
+			storeInfoMap.put("creditLimit", new BigDecimal(creditLimit));// 卖卡限额
 
 			createCloudCardStoreMap = dispatcher.runSync("createCloudCardStore", storeInfoMap);
 		} catch (GenericServiceException e) {
