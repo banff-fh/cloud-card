@@ -199,9 +199,9 @@ public class CloudCardStoreAdminServices {
             }
 
             //创建支付宝姓名
-            if(UtilValidate.isNotEmpty(aliPayAccount)){
+            if(UtilValidate.isNotEmpty(aliPayName)){
             	Map<String, Object> createAliPayAccountOutMap = dispatcher.runSync("createPartyAttribute",
-                        UtilMisc.toMap("userLogin", userLogin, "partyId", cloudCardStroreId, "attrName", "aliPayAccount", "attrValue", aliPayAccount));
+                        UtilMisc.toMap("userLogin", userLogin, "partyId", cloudCardStroreId, "attrName", "aliPayName", "attrValue", aliPayName));
                 if (!ServiceUtil.isSuccess(createAliPayAccountOutMap)) {
                     return createAliPayAccountOutMap;
                 }
@@ -210,14 +210,14 @@ public class CloudCardStoreAdminServices {
 			// 创建微信账号
 			if (UtilValidate.isNotEmpty(wxPayAccount)) {
 				Map<String, Object> createwxPayAccountOutMap = dispatcher.runSync("createPartyAttribute",
-						UtilMisc.toMap("userLogin", userLogin, "partyId", cloudCardStroreId, "attrName","aliPayName", "attrValue", aliPayName));
+						UtilMisc.toMap("userLogin", userLogin, "partyId", cloudCardStroreId, "attrName","wxPayAccount", "attrValue", wxPayAccount));
 				if (!ServiceUtil.isSuccess(createwxPayAccountOutMap)) {
 					return createwxPayAccountOutMap;
 				}
 			}
 
 			// 创建微信姓名
-			if (UtilValidate.isNotEmpty(wxPayAccount)) {
+			if (UtilValidate.isNotEmpty(wxPayName)) {
 				Map<String, Object> createwxPayAccountOutMap = dispatcher.runSync("createPartyAttribute",
 						UtilMisc.toMap("userLogin", userLogin, "partyId", cloudCardStroreId, "attrName","wxPayName", "attrValue", wxPayName));
 				if (!ServiceUtil.isSuccess(createwxPayAccountOutMap)) {
