@@ -3,6 +3,7 @@ package com.banfftech.cloudcard;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -28,9 +29,11 @@ import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
+import com.alibaba.fastjson.JSONObject;
 import com.auth0.jwt.JWTExpiredException;
 import com.auth0.jwt.JWTVerifier;
 import com.banfftech.cloudcard.constant.CloudCardConstant;
+import com.banfftech.cloudcard.lbs.BaiduLBSUtil;
 import com.banfftech.cloudcard.sms.SmsServices;
 import com.banfftech.cloudcard.util.CloudCardLevelScoreUtil;
 
@@ -76,6 +79,27 @@ public class CloudCardBossServices {
             teleNumber = teleNumber.trim();
         }
 
+        //店家支付宝账号
+        String aliPayAccount = (String) context.get("aliPayAccount");
+        if (null != aliPayAccount) {
+        	aliPayAccount = aliPayAccount.trim();
+        }
+        //店家支付宝姓名
+        String aliPayName = (String) context.get("aliPayName");
+        if (null != aliPayName) {
+        	aliPayName = aliPayName.trim();
+        }
+        //店家微信账号
+        String wxPayAccount = (String) context.get("wxPayAccount");
+        if (null != wxPayAccount) {
+        	wxPayAccount = wxPayAccount.trim();
+        }
+        //店家微信姓名
+        String wxPayName = (String) context.get("wxPayName");
+        if (null != wxPayName) {
+        	wxPayName = wxPayName.trim();
+        }
+
         String personName = (String) context.get("personName"); // 店主姓名
         String description = (String) context.get("description"); // 店铺描述
         String longitude = (String) context.get("longitude"); // 经度
@@ -101,7 +125,8 @@ public class CloudCardBossServices {
                 }
             }
 
-            List<GenericValue> oldAnswers = delegator.findList("SurveyResponseAndAnswer",
+
+            /*List<GenericValue> oldAnswers = delegator.findList("SurveyResponseAndAnswer",
                     EntityCondition.makeCondition(EntityOperator.OR,
                             EntityCondition.makeCondition(UtilMisc.toMap("surveyQuestionId", "SQ_CC_S_OWNER_TEL", "textResponse", teleNumber)),
                             EntityCondition.makeCondition(UtilMisc.toMap("surveyQuestionId", "SQ_CC_STORE_NAME", "textResponse", storeName))),
@@ -114,13 +139,116 @@ public class CloudCardBossServices {
             if (UtilValidate.isNotEmpty(oldAnswers)) {
                 Debug.logError("teleNumber[" + teleNumber + "] or storeName[" + storeName + "] has been used to apply for a shop", module);
                 return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardRepeatedApplyForCreateStore", locale));
-            }
+            }*/
         } catch (GenericEntityException e) {
             Debug.logError(e.getMessage(), module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
         }
 
-        // 创建“调查回答”，用于记录开店申请者提交的信息
+		Map<String, Object> createCloudCardStoreMap = null;
+		try {
+			// 根据经纬度获取、省、市、区
+			String ak = EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.ak", delegator);
+			Map<String, String> params = new HashMap<String, String>();
+			params.put("ak", ak);
+			params.put("location", "\"" + latitude + "," + longitude + "\"");
+			params.put("output", "json");
+			params.put("callback", "showLocation");
+
+			String geocoder = BaiduLBSUtil.geocoder(params);
+			geocoder = geocoder.replace("showLocation&&showLocation(", "");
+			geocoder = geocoder.replace(")", "");
+			JSONObject addressJSONObject = JSONObject.parseObject(JSONObject
+					.parseObject(JSONObject.parseObject(geocoder).getString("result")).getString("addressComponent"));
+			String country = addressJSONObject.get("country").toString();// 国家
+			String province = addressJSONObject.get("province").toString();// 省份
+			String city = addressJSONObject.get("city").toString();// 市、县
+			String county = addressJSONObject.get("district").toString();// 区
+			String postalCode = addressJSONObject.get("adcode").toString();// 邮政编码
+			String geoProvince = null;
+			String geoCity = null;
+			String geoCounty = null;
+			try {
+				String provinceTemp = province;
+				if(UtilValidate.isNotEmpty(province)){
+					if("省".equals(province.indexOf("省"))){
+						provinceTemp = province.replace("省", "").trim();
+					}else if("市".equals(province.indexOf("市"))){
+						provinceTemp = province.replace("市", "").trim();
+					}
+				}
+
+				String cityTemp = city;
+				if(UtilValidate.isNotEmpty(province)){
+					if("市".equals(city.indexOf("市"))){
+						cityTemp = city.replace("市", "").trim();
+					}
+				}
+
+				String countyTemp = county;
+				if(UtilValidate.isNotEmpty(province)){
+					if("区".equals(county.indexOf("区"))){
+						countyTemp = county.replace("区", "").trim();
+					}else if("县".equals(county.indexOf("县"))){
+						countyTemp = county.replace("县", "").trim();
+					}
+				}
+				EntityCondition provinceCond = EntityCondition.makeCondition("geoName",EntityOperator.LIKE, provinceTemp + "%");
+				EntityCondition cityCond = EntityCondition.makeCondition("geoName",EntityOperator.LIKE, cityTemp + "%");
+				EntityCondition countyCond = EntityCondition.makeCondition("geoName",EntityOperator.LIKE, countyTemp + "%");
+
+				EntityCondition addrCond =  EntityCondition.makeCondition(EntityOperator.OR,provinceCond,cityCond,countyCond);
+				List<GenericValue> geoList = delegator.findList("Geo", addrCond, UtilMisc.toSet("geoId","geoTypeId"), null, null, true);
+				for(GenericValue geo : geoList){
+					if("PROVINCE".equals(geo.getString("geoTypeId"))){
+						geoProvince = geo.getString("geoId");
+					}else if("CITY".equals(geo.getString("geoTypeId"))){
+						geoCity = geo.getString("geoId");
+					}else if("COUNTY".equals(geo.getString("geoTypeId"))){
+						geoCounty = geo.getString("geoId");
+					}
+				}
+
+				} catch (GenericEntityException e) {
+					Debug.logError(e.getMessage(), module);
+					return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+			}
+
+			//获取店家开卡是否可以跨店、等级、买卡额度
+			String allowCrossStorePay = EntityUtilProperties.getPropertyValue("cloudcard", "store.allowCrossStorePay", delegator);
+			String level = EntityUtilProperties.getPropertyValue("cloudcard", "store.level", delegator);
+			String creditLimit = EntityUtilProperties.getPropertyValue("cloudcard", "store.creditLimit", delegator);
+
+			Map<String, Object> storeInfoMap = FastMap.newInstance();
+			storeInfoMap.put("storeName", storeName);// 店名
+			storeInfoMap.put("description", description);// 描述
+			storeInfoMap.put("storeTeleNumber", teleNumber);
+			storeInfoMap.put("storeOwnerName", personName);// 店主名
+			storeInfoMap.put("storeOwnerTeleNumber", teleNumber);// 店主手机号
+			storeInfoMap.put("geoCountry", "CHN");// 国家GeoId
+			storeInfoMap.put("geoProvince", geoProvince);// 省、直辖市GeoId
+			storeInfoMap.put("geoCity", geoCity);// 市GeoId
+			storeInfoMap.put("geoCounty", geoCounty);// 县GeoId
+			storeInfoMap.put("address1", storeAddress);// 详细地址1
+			storeInfoMap.put("address2", "");// 详细地址2
+			storeInfoMap.put("postalCode", postalCode);// 邮政编码
+			storeInfoMap.put("latitude", latitude);// 纬度
+			storeInfoMap.put("longitude", longitude);// 纬度
+			storeInfoMap.put("aliPayAccount", aliPayAccount);// 店家支付宝账号
+			storeInfoMap.put("aliPayName", aliPayName);// 店家支付宝姓名
+			storeInfoMap.put("wxPayAccount", wxPayAccount);// 店家微信账号
+			storeInfoMap.put("wxPayName", wxPayName);// 店家微信姓名
+			storeInfoMap.put("allowCrossStorePay", allowCrossStorePay);// 是否允许本店卡跨店付款 Y/N
+			storeInfoMap.put("level", level);// 信用等级
+			storeInfoMap.put("creditLimit", creditLimit);// 卖卡限额
+
+			createCloudCardStoreMap = dispatcher.runSync("createCloudCardStore", context);
+		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+
+        /*// 创建“调查回答”，用于记录开店申请者提交的信息
         Map<String, Object> createSurveyResponseOutMap;
         try {
             createSurveyResponseOutMap = dispatcher.runSync("createSurveyResponse",
@@ -134,12 +262,15 @@ public class CloudCardBossServices {
         }
         if (!ServiceUtil.isSuccess(createSurveyResponseOutMap)) {
             return createSurveyResponseOutMap;
-        }
+        }*/
 
-        // 返回结果
-        Map<String, Object> result = ServiceUtil.returnSuccess();
-        result.put("responseId", createSurveyResponseOutMap.get("surveyResponseId"));
-        return result;
+		// 返回结果
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+
+		result.put("storeId", createCloudCardStoreMap.get("storeId"));
+		//result.put("responseId", createSurveyResponseOutMap.get("surveyResponseId"));
+
+		return result;
     }
 
     /**

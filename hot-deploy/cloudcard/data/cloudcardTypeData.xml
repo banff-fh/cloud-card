@@ -187,8 +187,14 @@
   	<!-- PartyContentType库胖商家图片类型 -->
   	<PartyContentType partyContentTypeId="STORE_IMG" description="商家图片PartyContentType"/>
   	<PartyContentType partyContentTypeId="AVATAR_IMG" description="头像图片PartyContentType"/>
+
   	<!-- 结算请求定时任务 -->
   	<TemporalExpression tempExprId="EVERY_HOURS" tempExprTypeId="FREQUENCY" description="每小时" date1="2000-01-03 17:00:00.000" integer1="10" integer2="1"/>
 	<JobSandbox jobId="bizSettlementReqJob" jobName="bizSettlementReqJob" runTime="2015-03-01 00:00:00.000" serviceName="bizSettlementReqJob" poolId="pool" runAsUser="system" tempExprId="EVERY_HOURS" maxRecurrenceCount="-1"/>
+
+	<!-- 创建店家参数 -->
+	<SystemProperty systemResourceId="cloudcard" systemPropertyId="store.allowCrossStorePay" systemPropertyValue="N" description="店家是否允许开店交易"/>
+	<SystemProperty systemResourceId="cloudcard" systemPropertyId="store.level" systemPropertyValue="STORE_LEVEL_5" description="店家信用等级"/>
+	<SystemProperty systemResourceId="cloudcard" systemPropertyId="store.creditLimit" systemPropertyValue="50000" description="店家卖卡额度"/>
 
 </entity-engine-xml>
