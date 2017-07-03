@@ -151,15 +151,14 @@ public class CloudCardBossServices {
 			String ak = EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.ak", delegator);
 			Map<String, String> params = new HashMap<String, String>();
 			params.put("ak", ak);
-			params.put("location", "\"" + latitude + "," + longitude + "\"");
+			params.put("location", latitude + "," + longitude);
 			params.put("output", "json");
 			params.put("callback", "showLocation");
 
 			String geocoder = BaiduLBSUtil.geocoder(params);
 			geocoder = geocoder.replace("showLocation&&showLocation(", "");
 			geocoder = geocoder.replace(")", "");
-			JSONObject addressJSONObject = JSONObject.parseObject(JSONObject
-					.parseObject(JSONObject.parseObject(geocoder).getString("result")).getString("addressComponent"));
+			JSONObject addressJSONObject = JSONObject.parseObject(JSONObject.parseObject(JSONObject.parseObject(geocoder).getString("result")).getString("addressComponent"));
 			String country = addressJSONObject.get("country").toString();// 国家
 			String province = addressJSONObject.get("province").toString();// 省份
 			String city = addressJSONObject.get("city").toString();// 市、县
