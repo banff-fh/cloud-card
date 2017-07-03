@@ -218,7 +218,19 @@ public class CloudCardBossServices {
 			String level = EntityUtilProperties.getPropertyValue("cloudcard", "store.level", delegator);
 			String creditLimit = EntityUtilProperties.getPropertyValue("cloudcard", "store.creditLimit", delegator);
 
+			// 后续可能要用到 system用户操作
+	        GenericValue systemUserLogin = (GenericValue) context.get("systemUserLogin");
+	        if (null == systemUserLogin) {
+	            try {
+	                systemUserLogin = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+	            } catch (GenericEntityException e1) {
+	                Debug.logError(e1.getMessage(), module);
+	                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+	            }
+	        }
+
 			Map<String, Object> storeInfoMap = FastMap.newInstance();
+			storeInfoMap.put("userLogin", systemUserLogin);
 			storeInfoMap.put("storeName", storeName);// 店名
 			storeInfoMap.put("description", description);// 描述
 			storeInfoMap.put("storeTeleNumber", teleNumber);
