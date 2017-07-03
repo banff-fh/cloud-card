@@ -170,25 +170,25 @@ public class CloudCardBossServices {
 			try {
 				String provinceTemp = province;
 				if(UtilValidate.isNotEmpty(province)){
-					if("省".equals(province.indexOf("省"))){
+					if(province.contains("省")){
 						provinceTemp = province.replace("省", "").trim();
-					}else if("市".equals(province.indexOf("市"))){
+					}else if(province.contains("市")){
 						provinceTemp = province.replace("市", "").trim();
 					}
 				}
 
 				String cityTemp = city;
-				if(UtilValidate.isNotEmpty(province)){
-					if("市".equals(city.indexOf("市"))){
+				if(UtilValidate.isNotEmpty(city)){
+					if(city.contains("市")){
 						cityTemp = city.replace("市", "").trim();
 					}
 				}
 
 				String countyTemp = county;
-				if(UtilValidate.isNotEmpty(province)){
-					if("区".equals(county.indexOf("区"))){
+				if(UtilValidate.isNotEmpty(county)){
+					if(county.contains("区")){
 						countyTemp = county.replace("区", "").trim();
-					}else if("县".equals(county.indexOf("县"))){
+					}else if(county.contains("县")){
 						countyTemp = county.replace("县", "").trim();
 					}
 				}
