@@ -93,7 +93,7 @@
 		<attribute name="storeName" type="String" mode="IN" optional="false"><description>店名</description></attribute>
 		<attribute name="storeAddress" type="String" mode="IN" optional="true"><description>商铺详细地址</description></attribute>
 		<attribute name="teleNumber" type="String" mode="IN" optional="false"><description>店主电话</description></attribute>
-		<attribute name="personName" type="String" mode="IN" optional="true"><description>店主姓名</description></attribute>
+		<attribute name="personName" type="String" mode="IN" optional="false"><description>店主姓名</description></attribute>
 		<attribute name="description" type="String" mode="IN" optional="true"><description>店铺描述</description></attribute>
 		<attribute name="longitude" type="String" mode="IN" optional="false"><description>经度</description></attribute>
 		<attribute name="latitude" type="String" mode="IN" optional="false"><description>纬度</description></attribute>
