@@ -2973,7 +2973,7 @@ public class CloudCardBossServices {
 	 * @param context
 	 * @return
 	 */
-	public static Map<String, Object> getCreateStoreCode(DispatchContext dctx, Map<String, Object> context){
+	public static Map<String, Object> getCreateStoreCaptcha(DispatchContext dctx, Map<String, Object> context){
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");

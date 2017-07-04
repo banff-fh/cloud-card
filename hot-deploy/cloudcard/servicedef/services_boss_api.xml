@@ -480,8 +480,8 @@
 		<attribute name="noteDateTime" type="String" mode="OUT" optional="false"/>
  	</service>
 
- 	<service name="getCreateStoreCode" engine="java"
-            location="com.banfftech.cloudcard.CloudCardBossServices" invoke="getCreateStoreCode" auth="false">
+ 	<service name="getCreateStoreCaptcha" engine="java"
+            location="com.banfftech.cloudcard.CloudCardBossServices" invoke="getCreateStoreCaptcha" auth="false">
         <description>创建店铺获取验证码</description>
         <attribute mode="INOUT" name="teleNumber" type="String" optional="false"><description>contentId</description></attribute>
  	</service>
