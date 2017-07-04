@@ -170,4 +170,9 @@ public class CloudCardConstant {
      */
     public static final String BIZ_APP_UUID_TYPE = "BIZ_APP_UUID";
 
+    /**
+     * 商家创建店铺获取验证码通知短信{@value}
+     */
+    public static final String BIZ_CREATE_STORE_CAPTCHA = "bizCreateStoreCaptcha";
+
 }

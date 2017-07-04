@@ -32,6 +32,7 @@
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.appkey" systemPropertyValue="xxxx" description="短信平台appkey"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.intervalTime" systemPropertyValue="60" description="第二次与第一次短信发送间隔时间"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.secret" systemPropertyValue="xxxxxxxxxxxxxxxxxxxxxxxxx" description="短信平台secret"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsBizCreateStoreVCTemplateCode" systemPropertyValue="SMS_75835129" description="商家开店获取验证码短信平台模版号"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsFreeSignName" systemPropertyValue="登录验证" description="短信平台配置签名"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsLoginTemplateCode" systemPropertyValue="SMS_25720222" description="登录短信平台模版号"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsUserPayVCTemplateCode" systemPropertyValue="SMS_70445258" description="消费验证短信平台模版号"/>

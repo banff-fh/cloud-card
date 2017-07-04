@@ -104,9 +104,33 @@ public class CloudCardBossServices {
         String description = (String) context.get("description"); // 店铺描述
         String longitude = (String) context.get("longitude"); // 经度
         String latitude = (String) context.get("latitude"); // 纬度
+        String captcha = (String) context.get("captcha"); // 验证码
+        //判断验证码是否正确
+		EntityCondition captchaCondition = EntityCondition.makeCondition(
+				EntityCondition.makeCondition("teleNumber", EntityOperator.EQUALS, teleNumber),
+				EntityUtil.getFilterByDateExpr(),
+				EntityCondition.makeCondition("isValid", EntityOperator.EQUALS,"N"),EntityCondition.makeCondition("smsType", EntityOperator.EQUALS,CloudCardConstant.BIZ_CREATE_STORE_CAPTCHA));
 
-        String surveyId = "SURV_CC_STORE_INFO"; // 用于 收集库胖卡商家的 “调查（Survey）实体”
-        String statusId = "SRS_CREATED";
+		GenericValue sms = null;
+		try {
+			sms = EntityUtil.getFirst(
+					delegator.findList("SmsValidateCode", captchaCondition, null,UtilMisc.toList("-" + ModelEntity.CREATE_STAMP_FIELD), null, false)
+					);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardGetCAPTCHAFailedError", locale));
+		}
+
+		if(UtilValidate.isEmpty(sms)){
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardGetCAPTCHAFailedError", locale));
+		}
+
+		if(!captcha.equalsIgnoreCase(sms.getString("captcha"))){
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardCaptchaCheckFailedError", locale));
+		}
+
+        /*String surveyId = "SURV_CC_STORE_INFO"; // 用于 收集库胖卡商家的 “调查（Survey）实体”
+        String statusId = "SRS_CREATED";*/
 
         // 必要的参数检验逻辑
         // 比如：
@@ -240,7 +264,7 @@ public class CloudCardBossServices {
 			storeInfoMap.put("geoProvince", geoProvince);// 省、直辖市GeoId
 			storeInfoMap.put("geoCity", geoCity);// 市GeoId
 			storeInfoMap.put("geoCounty", geoCounty);// 县GeoId
-			storeInfoMap.put("address1", storeAddress);// 详细地址1
+			storeInfoMap.put("address1", county);// 详细地址1
 			storeInfoMap.put("address2", "");// 详细地址2
 			storeInfoMap.put("postalCode", postalCode);// 邮政编码
 			storeInfoMap.put("latitude", latitude);// 纬度
@@ -275,6 +299,15 @@ public class CloudCardBossServices {
             return createSurveyResponseOutMap;
         }*/
 
+
+		//修改验证码状态
+		sms.set("isValid", "Y");
+		try {
+			sms.store();
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 
@@ -2931,6 +2964,43 @@ public class CloudCardBossServices {
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("noteDateTime", noteDateTime);
 		result.put("noteInfo", noteInfo);
+		return result;
+	}
+
+	/**
+	 * 查看note明细
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> getCreateStoreCode(DispatchContext dctx, Map<String, Object> context){
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+
+		String teleNumber = (String) context.get("teleNumber");
+		String smsType = CloudCardConstant.BIZ_CREATE_STORE_CAPTCHA;
+		context.put("smsType", smsType);
+		context.put("isValid", "N");
+
+		String storeOwnerPartyId = null;
+		GenericValue userByTeleNumber;
+		try {
+			userByTeleNumber = CloudCardHelper.getUserByTeleNumber(delegator, teleNumber);
+			if (UtilValidate.isNotEmpty(userByTeleNumber)) {
+	            storeOwnerPartyId = userByTeleNumber.getString("partyId");
+	            List<String> storeIds = CloudCardHelper.getOrganizationPartyId(delegator, storeOwnerPartyId);
+	            if (UtilValidate.isNotEmpty(storeIds)) {
+	                return ServiceUtil.returnError("输入的店主手机号已经开过店了！");
+	            }
+	        }
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+
+		Map<String, Object> result = SmsServices.getSMSCaptcha(dctx, context);
+		result.put("teleNumber", teleNumber);
 		return result;
 	}
 }

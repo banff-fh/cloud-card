@@ -143,6 +143,12 @@ public class SmsServices {
 
 			smsParamString = "{money:'"+money+"',verfiyCode:'"+ verfiyCode+"',time:'"+time+"'}";
 			smsType = "sms.smsUserPurchaseCardVCTemplateCode";
+		}else if(smsType.equals(CloudCardConstant.BIZ_CREATE_STORE_CAPTCHA)){
+			String verfiyCode = (String) context.get("captcha");
+			Integer time = (Integer) context.get("validTime");
+
+			smsParamString = "{verfiyCode:'" + verfiyCode + "',time:'" + time + "'}";
+			smsType = "sms.smsBizCreateStoreVCTemplateCode";
 		}
 		//初始化短信发送配置文件
 		getSmsProperty(delegator,smsType);
