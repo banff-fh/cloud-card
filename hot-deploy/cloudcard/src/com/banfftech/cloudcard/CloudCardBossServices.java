@@ -122,7 +122,7 @@ public class CloudCardBossServices {
 		}
 
 		if(UtilValidate.isEmpty(sms)){
-			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardGetCAPTCHAFailedError", locale));
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardCaptchaNotExistError", locale));
 		}
 
 		if(!captcha.equalsIgnoreCase(sms.getString("captcha"))){
