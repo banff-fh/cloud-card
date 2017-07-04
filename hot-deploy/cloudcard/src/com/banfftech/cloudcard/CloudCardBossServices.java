@@ -216,9 +216,18 @@ public class CloudCardBossServices {
 						countyTemp = county.replace("县", "").trim();
 					}
 				}
-				EntityCondition provinceCond = EntityCondition.makeCondition("geoName",EntityOperator.LIKE, provinceTemp + "%");
-				EntityCondition cityCond = EntityCondition.makeCondition("geoName",EntityOperator.LIKE, cityTemp + "%");
-				EntityCondition countyCond = EntityCondition.makeCondition("geoName",EntityOperator.LIKE, countyTemp + "%");
+
+				EntityCondition provinceNameCond = EntityCondition.makeCondition("geoName",EntityOperator.LIKE, provinceTemp + "%");
+				EntityCondition provinceTypeCond = EntityCondition.makeCondition("geoTypeId",EntityOperator.EQUALS, "PROVINCE");
+				EntityCondition provinceCond = EntityCondition.makeCondition(EntityOperator.AND, provinceNameCond, provinceTypeCond);
+
+				EntityCondition cityNameCond = EntityCondition.makeCondition("geoName",EntityOperator.LIKE, cityTemp + "%");
+				EntityCondition cityTypeCond = EntityCondition.makeCondition("geoTypeId",EntityOperator.EQUALS, "CITY");
+				EntityCondition cityCond = EntityCondition.makeCondition(EntityOperator.AND, cityNameCond, cityTypeCond);
+
+				EntityCondition countyNameCond = EntityCondition.makeCondition("geoName",EntityOperator.LIKE, countyTemp + "%");
+				EntityCondition countyTypeCond = EntityCondition.makeCondition("geoTypeId",EntityOperator.EQUALS, "COUNTY");
+				EntityCondition countyCond = EntityCondition.makeCondition(EntityOperator.AND, countyNameCond, countyTypeCond);
 
 				EntityCondition addrCond =  EntityCondition.makeCondition(EntityOperator.OR,provinceCond,cityCond,countyCond);
 				List<GenericValue> geoList = delegator.findList("Geo", addrCond, UtilMisc.toSet("geoId","geoTypeId"), null, null, true);
