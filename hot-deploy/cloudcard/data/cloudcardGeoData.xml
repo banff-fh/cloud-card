@@ -4,10 +4,10 @@
 	<GeoAssocType geoAssocTypeId="CITY_COUNTY" description="County in a city"/>
 
 
-	<!--<Geo geoId="CN-86" geoName="北京" geoTypeId="PROVINCE" />
+	<Geo geoId="CN-86" geoName="北京" geoTypeId="PROVINCE" />
 	<Geo geoId="CN-87" geoName="天津" geoTypeId="PROVINCE" />
 	<Geo geoId="CN-88" geoName="上海" geoTypeId="PROVINCE" />
-	<Geo geoId="CN-89" geoName="重庆" geoTypeId="PROVINCE" />-->
+	<Geo geoId="CN-89" geoName="重庆" geoTypeId="PROVINCE" />
 	<Geo geoId="110100" geoName="北京市" geoTypeId="CITY" />
 	<Geo geoId="120100" geoName="天津市" geoTypeId="CITY" />
 	<Geo geoId="310100" geoName="上海市" geoTypeId="CITY" />
@@ -605,9 +605,9 @@
 	<Geo geoId="130826" geoName="丰宁满族自治县" geoTypeId="COUNTY" />
 	<Geo geoId="130827" geoName="宽城满族自治县" geoTypeId="COUNTY" />
 	<Geo geoId="130828" geoName="围场满族蒙古族自治县" geoTypeId="COUNTY" />
-	
-	
-	
+
+
+
 	<Geo geoId="130902" geoName="新华区" geoTypeId="COUNTY" />
 	<Geo geoId="130903" geoName="运河区" geoTypeId="COUNTY" />
 	<Geo geoId="130921" geoName="沧县" geoTypeId="COUNTY" />
@@ -3360,10 +3360,10 @@
 	<Geo geoId="422906" geoName="天门市" geoTypeId="COUNTY" />
 	<Geo geoId="422921" geoName="神农架林区" geoTypeId="COUNTY" />
 
-	<GeoAssoc geoIdTo="110100" geoId="CN-11" geoAssocTypeId="PROVINCE_CITY" />
-	<GeoAssoc geoIdTo="120100" geoId="CN-12" geoAssocTypeId="PROVINCE_CITY" />
-	<GeoAssoc geoIdTo="310100" geoId="CN-31" geoAssocTypeId="PROVINCE_CITY" />
-	<GeoAssoc geoIdTo="500100" geoId="CN-50" geoAssocTypeId="PROVINCE_CITY" />
+	<GeoAssoc geoIdTo="110100" geoId="CN-86" geoAssocTypeId="PROVINCE_CITY" />
+	<GeoAssoc geoIdTo="120100" geoId="CN-87" geoAssocTypeId="PROVINCE_CITY" />
+	<GeoAssoc geoIdTo="310100" geoId="CN-88" geoAssocTypeId="PROVINCE_CITY" />
+	<GeoAssoc geoIdTo="500100" geoId="CN-89" geoAssocTypeId="PROVINCE_CITY" />
 	<GeoAssoc geoIdTo="130100" geoId="CN-13" geoAssocTypeId="PROVINCE_CITY" />
 	<GeoAssoc geoIdTo="130200" geoId="CN-13" geoAssocTypeId="PROVINCE_CITY" />
 	<GeoAssoc geoIdTo="130300" geoId="CN-13" geoAssocTypeId="PROVINCE_CITY" />
@@ -6701,7 +6701,7 @@
 	<GeoAssoc geoIdTo="820101" geoId="820100" geoAssocTypeId="CITY_COUNTY" />
 	<GeoAssoc geoIdTo="820102" geoId="820100" geoAssocTypeId="CITY_COUNTY" />
 	<GeoAssoc geoIdTo="820103" geoId="820100" geoAssocTypeId="CITY_COUNTY" />
-	
+
 	<GeoAssoc geoIdTo="820104" geoId="820100" geoAssocTypeId="CITY_COUNTY" />
 	<GeoAssoc geoIdTo="820105" geoId="820100" geoAssocTypeId="CITY_COUNTY" />
 	<GeoAssoc geoIdTo="820106" geoId="820100" geoAssocTypeId="CITY_COUNTY" />
@@ -6711,5 +6711,5 @@
 	<GeoAssoc geoIdTo="422905" geoId="422900" geoAssocTypeId="CITY_COUNTY" />
 	<GeoAssoc geoIdTo="422906" geoId="422900" geoAssocTypeId="CITY_COUNTY" />
 	<GeoAssoc geoIdTo="422921" geoId="422900" geoAssocTypeId="CITY_COUNTY" />
-    
+
 </entity-engine-xml>
