@@ -36,7 +36,7 @@
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsFreeSignName" systemPropertyValue="登录验证" description="短信平台配置签名"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsLoginTemplateCode" systemPropertyValue="SMS_25720222" description="登录短信平台模版号"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsUserPayVCTemplateCode" systemPropertyValue="SMS_70445258" description="消费验证短信平台模版号"/>
-    <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsUserPurchaseCardVCTemplateCode" systemPropertyValue="SMS_71025052" description="无卡开卡验证短信平台模版号"/>
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsUserPurchaseCardVCTemplateCode" systemPropertyValue="SMS_75925176" description="无卡开卡验证短信平台模版号"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsUserRechargeVCTemplateCode" systemPropertyValue="SMS_70915054" description="无卡充值验证短信平台模版号"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsUserPayTemplateCode" systemPropertyValue="SMS_60870114" description="消费通知短信平台模版号"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="sms.smsUserRechargeTemplateCode" systemPropertyValue="SMS_60790512" description="充值通知短信平台模版号"/>
