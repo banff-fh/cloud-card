@@ -167,13 +167,18 @@
     <PartyClassificationGroup partyClassificationGroupId="LEVEL_3" description="铂金会员" parentGroupId="LEVEL_2"  partyClassificationTypeId="LEVEL_CLASSIFICATION" />
     <PartyClassificationGroup partyClassificationGroupId="LEVEL_4" description="钻石会员" parentGroupId="LEVEL_3"  partyClassificationTypeId="LEVEL_CLASSIFICATION" />
 
-
-     <PartyClassificationType description="商家信用等级" hasTable="N" parentTypeId="" partyClassificationTypeId="STORE_LEVEL_CLASSIFI"/>
+	<!-- 商家信用等级 -->
+    <PartyClassificationType description="商家信用等级" hasTable="N" parentTypeId="" partyClassificationTypeId="STORE_LEVEL_CLASSIFI"/>
     <PartyClassificationGroup partyClassificationGroupId="STORE_LEVEL_1" description="一星" parentGroupId=""  partyClassificationTypeId="STORE_LEVEL_CLASSIFI" />
     <PartyClassificationGroup partyClassificationGroupId="STORE_LEVEL_2" description="二星" parentGroupId="STORE_LEVEL_1"  partyClassificationTypeId="STORE_LEVEL_CLASSIFI" />
     <PartyClassificationGroup partyClassificationGroupId="STORE_LEVEL_3" description="三星" parentGroupId="STORE_LEVEL_2"  partyClassificationTypeId="STORE_LEVEL_CLASSIFI" />
     <PartyClassificationGroup partyClassificationGroupId="STORE_LEVEL_4" description="四星" parentGroupId="STORE_LEVEL_3"  partyClassificationTypeId="STORE_LEVEL_CLASSIFI" />
     <PartyClassificationGroup partyClassificationGroupId="STORE_LEVEL_5" description="五星" parentGroupId="STORE_LEVEL_4"  partyClassificationTypeId="STORE_LEVEL_CLASSIFI" />
+
+	<!-- 商家等级 -->
+    <PartyClassificationType description="商家类型（一级商家、二级商家）" hasTable="N" parentTypeId="" partyClassificationTypeId="STORE_SERVICE_LEVEL_CLASSIFI"/>
+    <PartyClassificationGroup partyClassificationGroupId="STORE_SERVICE_LEVEL_1" description="一级商户" parentGroupId=""  partyClassificationTypeId="STORE_SERVICE_LEVEL_CLASSIFI" />
+    <PartyClassificationGroup partyClassificationGroupId="STORE_SERVICE_LEVEL_2" description="二级商户" parentGroupId="STORE_SERVICE_LEVEL_1"  partyClassificationTypeId="STORE_SERVICE_LEVEL_CLASSIFI" />
 
     <!-- oss文件服务 -->
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="oss.endpoint" systemPropertyValue="xx" description="oss的endpoint"/>

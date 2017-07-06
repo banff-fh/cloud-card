@@ -63,6 +63,7 @@ public class CloudCardStoreAdminServices {
         String address1 = (String) context.get("address1"); // 详细地址1
         String address2 = (String) context.get("address2"); // 详细地址2
         String postalCode = (String) context.get("postalCode"); // 邮编
+        String storeServiceLevel = (String) context.get("storeServiceLevel");
         if (UtilValidate.isEmpty(postalCode)) {
             postalCode = "99999"; // 邮编没传的情况先默认一个值
         }
@@ -230,6 +231,13 @@ public class CloudCardStoreAdminServices {
                     UtilMisc.toMap("userLogin", userLogin, "partyId", cloudCardStroreId, "partyClassificationGroupId", level));
             if (!ServiceUtil.isSuccess(createPartyClassificationOutMap)) {
                 return createPartyClassificationOutMap;
+            }
+
+            // 店铺分类（一级经销商、二级经销商）
+            Map<String, Object> creatStoreServiceLevelClassificationOutMap = dispatcher.runSync("createPartyClassification",
+                    UtilMisc.toMap("userLogin", userLogin, "partyId", cloudCardStroreId, "partyClassificationGroupId", storeServiceLevel));
+            if (!ServiceUtil.isSuccess(creatStoreServiceLevelClassificationOutMap)) {
+                return creatStoreServiceLevelClassificationOutMap;
             }
 
             // geo相关
