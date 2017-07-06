@@ -297,4 +297,8 @@
         <value xml:lang="en">Users have cards in our store</value>
         <value xml:lang="zh">用户在本店已有卡，不能重复购买</value>
     </property>
+    <property key="CloudCardShopLevelIsTooLow">
+        <value xml:lang="en">Shop level is too low to recharge</value>
+        <value xml:lang="zh">店铺等级过低，用户不能充值</value>
+    </property>
 </resource>
