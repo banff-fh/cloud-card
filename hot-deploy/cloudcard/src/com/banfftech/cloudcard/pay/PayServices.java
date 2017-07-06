@@ -73,7 +73,7 @@ public class PayServices {
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 
-        if(UtilValidate.isNotEmpty(storeSaleLevel) || storeSaleLevel.equalsIgnoreCase("STORE_SALE_LEVEL_1") ){
+        if(UtilValidate.isEmpty(storeSaleLevel) || storeSaleLevel.equalsIgnoreCase("STORE_SALE_LEVEL_1") ){
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardShopLevelIsTooLow", locale));
         }
 
