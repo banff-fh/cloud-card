@@ -479,6 +479,20 @@ public class CloudCardCustServices {
 		String totalFee = (String) context.get("totalFee");
 		String paymentService = (String) context.get("paymentService");
 
+		//判断店家是否拥有用户充值的权限
+        EntityCondition dateCond = EntityUtil.getFilterByDateExpr();
+        EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toMap("partyId", storeId,"partyClassificationTypeId","STORE_SALE_CLASSIFI"));
+        String storeSaleLevel = null;
+        try {
+			GenericValue partyClassification = EntityUtil.getFirst(
+			        delegator.findList("PartyClassificationAndPartyClassificationGroup", EntityCondition.makeCondition(cond, dateCond), null, UtilMisc.toList("-fromDate"), null, true));
+			if(UtilValidate.isNotEmpty(partyClassification)){
+				storeSaleLevel = partyClassification.getString("partyClassificationGroupId");
+			}
+        } catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
 
 		// 传入的organizationPartyId必须是一个存在的partyGroup
 		GenericValue partyGroup;
