@@ -494,6 +494,10 @@ public class CloudCardCustServices {
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 
+        if(UtilValidate.isEmpty(storeSaleLevel) || storeSaleLevel.equalsIgnoreCase("STORE_SALE_LEVEL_1") ){
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardShopLevelIsTooLow", locale));
+        }
+
 		// 传入的organizationPartyId必须是一个存在的partyGroup
 		GenericValue partyGroup;
 		try {
