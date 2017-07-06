@@ -176,9 +176,9 @@
     <PartyClassificationGroup partyClassificationGroupId="STORE_LEVEL_5" description="五星" parentGroupId="STORE_LEVEL_4"  partyClassificationTypeId="STORE_LEVEL_CLASSIFI" />
 
 	<!-- 商家等级 -->
-    <PartyClassificationType description="商家类型（一级商家、二级商家）" hasTable="N" parentTypeId="" partyClassificationTypeId="STORE_SERVICE_LEVEL_CLASSIFI"/>
-    <PartyClassificationGroup partyClassificationGroupId="STORE_SERVICE_LEVEL_1" description="一级商户" parentGroupId=""  partyClassificationTypeId="STORE_SERVICE_LEVEL_CLASSIFI" />
-    <PartyClassificationGroup partyClassificationGroupId="STORE_SERVICE_LEVEL_2" description="二级商户" parentGroupId="STORE_SERVICE_LEVEL_1"  partyClassificationTypeId="STORE_SERVICE_LEVEL_CLASSIFI" />
+    <PartyClassificationType description="商家类型（一级商家、二级商家）" hasTable="N" parentTypeId="" partyClassificationTypeId="STORE_SALE_CLASSIFI"/>
+    <PartyClassificationGroup partyClassificationGroupId="STORE_SALE_LEVEL_1" description="一级商户" parentGroupId=""  partyClassificationTypeId="STORE_SALE_CLASSIFI" />
+    <PartyClassificationGroup partyClassificationGroupId="STORE_SALE_LEVEL_2" description="二级商户" parentGroupId="STORE_SALE_LEVEL_1"  partyClassificationTypeId="STORE_SALE_CLASSIFI" />
 
     <!-- oss文件服务 -->
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="oss.endpoint" systemPropertyValue="xx" description="oss的endpoint"/>

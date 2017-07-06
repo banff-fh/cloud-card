@@ -317,7 +317,7 @@ public class CloudCardBossServices {
 																		// Y/N
 			storeInfoMap.put("level", level);// 信用等级
 			storeInfoMap.put("creditLimit", new BigDecimal(creditLimit));// 卖卡限额
-			storeInfoMap.put("storeServiceLevel", "STORE_SERVICE_LEVEL_1");// 店铺默认等级
+			storeInfoMap.put("storeSaleLevel", "STORE_SALE_LEVEL_1");// 店铺默认等级
 
 			createCloudCardStoreMap = dispatcher.runSync("createCloudCardStore", storeInfoMap);
 		} catch (GenericServiceException e) {

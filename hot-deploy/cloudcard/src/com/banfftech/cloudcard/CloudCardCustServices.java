@@ -21,6 +21,7 @@ import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
 import org.ofbiz.entity.condition.EntityCondition;
 import org.ofbiz.entity.condition.EntityOperator;
+import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
@@ -240,6 +241,22 @@ public class CloudCardCustServices {
 			Debug.logError(e.getMessage(), module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
+
+        //获取店铺服务等级
+        EntityCondition dateCond = EntityUtil.getFilterByDateExpr();
+        EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toMap("partyId", storeId,"partyClassificationTypeId","STORE_SALE_CLASSIFI"));
+        String storeSaleLevel = null;
+        try {
+			GenericValue partyClassification = EntityUtil.getFirst(
+			        delegator.findList("PartyClassificationAndPartyClassificationGroup", EntityCondition.makeCondition(cond, dateCond), null, UtilMisc.toList("-fromDate"), null, true));
+			if(UtilValidate.isNotEmpty(partyClassification)){
+				storeSaleLevel = partyClassification.getString("partyClassificationGroupId");
+			}
+        } catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("storeId", storeId);
@@ -254,6 +271,7 @@ public class CloudCardCustServices {
 		result.put("storeInfoImgList", storeInfoImgList);
 		result.put("storeCode", storeCode);
 		result.put("ossUrl", ossUrl);
+		result.put("storeSaleLevel", storeSaleLevel);
 
 		return result;
 	}

@@ -217,7 +217,7 @@ public class BaiduLBSUtilTest {
 	public void geocoder(){
 		Map<String ,String > params = new HashMap<String, String>();
 		params.put("ak", ak);
-    	params.put("location", "39.983424,116.322987");
+    	params.put("location", "30.32422881426311,120.16462465982332");
     	params.put("output", "json");
     	params.put("callback", "showLocation");
 

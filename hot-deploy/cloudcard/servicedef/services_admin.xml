@@ -28,7 +28,7 @@
 		<attribute mode="IN" name="wxPayName" type="String" optional="true"><description>店家微信姓名</description></attribute>
 		<attribute mode="IN" name="allowCrossStorePay" type="String" optional="false"><description>是否允许本店卡跨店付款 Y/N</description></attribute>
 		<attribute mode="IN" name="level" type="String" optional="false"><description>信用等级</description></attribute>
-		<attribute mode="IN" name="storeServiceLevel" type="String" optional="false"><description>店铺服务等级</description></attribute>
+		<attribute mode="IN" name="storeSaleLevel" type="String" optional="false"><description>店铺销售等级</description></attribute>
 		<attribute mode="IN" name="creditLimit" type="BigDecimal" optional="false"><description>卖卡限额</description></attribute>
 
 		<attribute mode="OUT" name="storeId" type="String" optional="true"><description>返回的storeId</description></attribute>
