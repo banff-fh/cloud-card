@@ -2168,7 +2168,7 @@ public class CloudCardBossServices {
 					cardName = (String) createInfoOutMap.get("cardName");
 					cardCode = (String) createInfoOutMap.get("cardCode");
 					customerPartyId = (String) createInfoOutMap.get("customerPartyId");
-					cardBalance = new BigDecimal(createInfoOutMap.get("actualBalance").toString()) ;
+					cardBalance = new BigDecimal(createInfoOutMap.get("cardBalance").toString()) ;
 				}
 
 			} catch (GenericServiceException e) {
