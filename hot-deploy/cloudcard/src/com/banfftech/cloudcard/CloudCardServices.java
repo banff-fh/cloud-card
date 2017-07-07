@@ -635,6 +635,9 @@ public class CloudCardServices {
 		result.put("cardBalance", rechargeCloudCardOutMap.get("actualBalance"));
 		result.put("customerPartyId", customerPartyId);
 		result.put("cardId", cardId);
+		result.put("cardCode", cardCode);
+		result.put("cardName", cloudCard.getString("finAccountName"));
+
 		return result;
 	}
 
