@@ -2123,6 +2123,11 @@ public class CloudCardBossServices {
 		// 判断验证码是否正确
 		GenericValue sms = null;
 		try {
+			EntityCondition captchaCondition = EntityCondition.makeCondition(
+					EntityCondition.makeCondition("teleNumber", EntityOperator.EQUALS, teleNumber),
+					EntityUtil.getFilterByDateExpr(), EntityCondition.makeCondition("isValid", EntityOperator.EQUALS, "N"),
+					EntityCondition.makeCondition("smsType", EntityOperator.EQUALS,
+							CloudCardConstant.USER_RECHARGE_CAPTCHA_SMS_TYPE));
 			sms = EntityUtil.getFirst(delegator.findList("SmsValidateCode", captchaCondition, null,
 					UtilMisc.toList("-" + ModelEntity.CREATE_STAMP_FIELD), null, false));
 		} catch (GenericEntityException e) {
@@ -2142,12 +2147,6 @@ public class CloudCardBossServices {
 		}
 
 		//判断用户是否存在
-		EntityCondition captchaCondition = EntityCondition.makeCondition(
-				EntityCondition.makeCondition("teleNumber", EntityOperator.EQUALS, teleNumber),
-				EntityUtil.getFilterByDateExpr(), EntityCondition.makeCondition("isValid", EntityOperator.EQUALS, "N"),
-				EntityCondition.makeCondition("smsType", EntityOperator.EQUALS,
-						CloudCardConstant.USER_RECHARGE_CAPTCHA_SMS_TYPE));
-
 		GenericValue customer;
 		try {
 			customer = CloudCardHelper.getUserByTeleNumber(delegator, teleNumber);
