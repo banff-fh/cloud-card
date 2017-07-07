@@ -2247,16 +2247,6 @@ public class CloudCardBossServices {
 			cardBalance = (BigDecimal) cloudCardMap.get("cardBalance");
 			customerPartyId = (String) rechargeCloudCardOutMap.get("customerPartyId");
 
-			// 修改验证码状态
-			sms.set("isValid", "Y");
-			try {
-				sms.store();
-			} catch (GenericEntityException e) {
-				Debug.logError(e.getMessage(), module);
-				return ServiceUtil
-						.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
-			}
-
 			// 发送充值短信
 			context.put("smsType", CloudCardConstant.USER_RECHARGE_SMS_TYPE);
 			context.put("phone", teleNumber);
@@ -2265,6 +2255,16 @@ public class CloudCardBossServices {
 			context.put("cardCode", cardCode.substring(cardCode.length() - 4, cardCode.length()));
 			context.put("cardBalance", rechargeCloudCardOutMap.get("actualBalance"));
 			SmsServices.sendMessage(dctx, context);
+		}
+
+		// 修改验证码状态
+		sms.set("isValid", "Y");
+		try {
+			sms.store();
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil
+					.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 		}
 
 		// 3、返回结果
