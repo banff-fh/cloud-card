@@ -2121,6 +2121,27 @@ public class CloudCardBossServices {
 		BigDecimal cardBalance = new BigDecimal(0);
 
 		// 判断验证码是否正确
+		GenericValue sms = null;
+		try {
+			sms = EntityUtil.getFirst(delegator.findList("SmsValidateCode", captchaCondition, null,
+					UtilMisc.toList("-" + ModelEntity.CREATE_STAMP_FIELD), null, false));
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil
+					.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
+
+		if (UtilValidate.isEmpty(sms)) {
+			return ServiceUtil
+					.returnError(UtilProperties.getMessage(resourceError, "CloudCardCaptchaNotExistError", locale));
+		}
+
+		if (!captcha.equalsIgnoreCase(sms.getString("captcha"))) {
+			return ServiceUtil
+					.returnError(UtilProperties.getMessage(resourceError, "CloudCardCaptchaCheckFailedError", locale));
+		}
+
+		//判断用户是否存在
 		EntityCondition captchaCondition = EntityCondition.makeCondition(
 				EntityCondition.makeCondition("teleNumber", EntityOperator.EQUALS, teleNumber),
 				EntityUtil.getFilterByDateExpr(), EntityCondition.makeCondition("isValid", EntityOperator.EQUALS, "N"),
@@ -2144,7 +2165,7 @@ public class CloudCardBossServices {
 				cardInfoMap.put("captcha", captcha);
 				cardInfoMap.put("amount", amount);
 				cardInfoMap.put("userLogin", userLogin);
-				Map<String,Object> createInfoOutMap = dispatcher.runSync("activateCloudCardAndRechargeByTelNumber", cardInfoMap);
+				Map<String,Object> createInfoOutMap = dispatcher.runSync("activateCloudCardAndRecharge", cardInfoMap);
 				if(UtilValidate.isNotEmpty(createInfoOutMap)){
 					cardName = (String) createInfoOutMap.get("cardName");
 					cardCode = (String) createInfoOutMap.get("cardCode");
@@ -2158,26 +2179,6 @@ public class CloudCardBossServices {
 						.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
 			}
 		}else{
-			GenericValue sms = null;
-			try {
-				sms = EntityUtil.getFirst(delegator.findList("SmsValidateCode", captchaCondition, null,
-						UtilMisc.toList("-" + ModelEntity.CREATE_STAMP_FIELD), null, false));
-			} catch (GenericEntityException e) {
-				Debug.logError(e.getMessage(), module);
-				return ServiceUtil
-						.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
-			}
-
-			if (UtilValidate.isEmpty(sms)) {
-				return ServiceUtil
-						.returnError(UtilProperties.getMessage(resourceError, "CloudCardCaptchaNotExistError", locale));
-			}
-
-			if (!captcha.equalsIgnoreCase(sms.getString("captcha"))) {
-				return ServiceUtil
-						.returnError(UtilProperties.getMessage(resourceError, "CloudCardCaptchaCheckFailedError", locale));
-			}
-
 			GenericValue customerMap;
 			try {
 				customerMap = CloudCardHelper.getUserByTeleNumber(delegator, teleNumber);
