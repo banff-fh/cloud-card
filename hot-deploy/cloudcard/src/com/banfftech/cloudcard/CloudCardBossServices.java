@@ -2161,7 +2161,6 @@ public class CloudCardBossServices {
 				Map<String,Object> cardInfoMap = FastMap.newInstance();
 				cardInfoMap.put("organizationPartyId", organizationPartyId);
 				cardInfoMap.put("teleNumber", teleNumber);
-				cardInfoMap.put("captcha", captcha);
 				cardInfoMap.put("amount", amount);
 				cardInfoMap.put("userLogin", userLogin);
 				Map<String,Object> createInfoOutMap = dispatcher.runSync("activateCloudCardAndRecharge", cardInfoMap);
