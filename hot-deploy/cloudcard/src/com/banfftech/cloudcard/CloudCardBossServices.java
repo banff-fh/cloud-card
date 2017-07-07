@@ -2143,6 +2143,7 @@ public class CloudCardBossServices {
 				cardInfoMap.put("teleNumber", teleNumber);
 				cardInfoMap.put("captcha", captcha);
 				cardInfoMap.put("amount", amount);
+				cardInfoMap.put("userLogin", userLogin);
 				Map<String,Object> createInfoOutMap = dispatcher.runSync("activateCloudCardAndRechargeByTelNumber", cardInfoMap);
 				if(UtilValidate.isNotEmpty(createInfoOutMap)){
 					cardName = (String) createInfoOutMap.get("cardName");
@@ -2245,7 +2246,7 @@ public class CloudCardBossServices {
 			cardCode = (String) cloudCardMap.get("cardCode");
 			cardName = (String) cloudCardMap.get("cardName");
 			cardBalance = (BigDecimal) cloudCardMap.get("cardBalance");
-			customerPartyId = (String) cloudCardMap.get("customerPartyId");
+			customerPartyId = (String) rechargeCloudCardOutMap.get("customerPartyId");
 
 			// 修改验证码状态
 			sms.set("isValid", "Y");
