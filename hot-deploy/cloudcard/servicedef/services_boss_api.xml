@@ -41,6 +41,8 @@
 		<attribute name="cardId" type="String" mode="OUT" optional="false"><description>卡Id</description></attribute>
 		<attribute name="customerPartyId" type="String" mode="OUT" optional="false"><description>客户partyId</description></attribute>
 		<attribute name="cardBalance" type="BigDecimal" mode="OUT" optional="false"><description>可用余额</description></attribute>
+		<attribute name="cardCode" type="String" mode="OUT" optional="false"><description>卡号</description></attribute>
+		<attribute name="cardName" type="String" mode="OUT" optional="false"><description>卡名</description></attribute>
 	</service>
 
 	<service name="receiptByCardCode" engine="java"
