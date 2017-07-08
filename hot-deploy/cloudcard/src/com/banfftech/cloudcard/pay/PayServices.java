@@ -64,7 +64,7 @@ public class PayServices {
         String storeSaleLevel = null;
         try {
 			GenericValue partyClassification = EntityUtil.getFirst(
-			        delegator.findList("PartyClassificationAndPartyClassificationGroup", EntityCondition.makeCondition(cond, dateCond), null, UtilMisc.toList("-fromDate"), null, true));
+			        delegator.findList("PartyClassificationAndPartyClassificationGroup", EntityCondition.makeCondition(cond, dateCond), null, UtilMisc.toList("-fromDate"), null, false));
 			if(UtilValidate.isNotEmpty(partyClassification)){
 				storeSaleLevel = partyClassification.getString("partyClassificationGroupId");
 			}
