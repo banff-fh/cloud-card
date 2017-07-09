@@ -2158,7 +2158,7 @@ public class CloudCardBossServices {
 		}
 
         List<GenericValue> cloudCards = null;
-		if (UtilValidate.isNotEmpty(userLogin)) {
+		if (UtilValidate.isNotEmpty(customer)) {
 			try {
 				EntityCondition cond = CloudCardInfoUtil.createLookupMyStoreCardCondition(delegator,customer.getString("partyId"), organizationPartyId);
 				cloudCards = delegator.findList("CloudCardInfo", cond, null, UtilMisc.toList("-fromDate"), null, false);
