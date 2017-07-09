@@ -35,6 +35,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.banfftech.cloudcard.constant.CloudCardConstant;
 import com.banfftech.cloudcard.lbs.BaiduLBSUtil;
 import com.banfftech.cloudcard.sms.SmsServices;
+import com.banfftech.cloudcard.util.CloudCardInfoUtil;
 import com.banfftech.cloudcard.util.CloudCardLevelScoreUtil;
 
 import javolution.util.FastList;
@@ -2155,8 +2156,20 @@ public class CloudCardBossServices {
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,
 					"CloudCardInternalServiceError", locale));
 		}
+
+        List<GenericValue> cloudCards = null;
+		if (UtilValidate.isNotEmpty(userLogin)) {
+			try {
+				EntityCondition cond = CloudCardInfoUtil.createLookupMyStoreCardCondition(delegator,customer.getString("partyId"), organizationPartyId);
+				cloudCards = delegator.findList("CloudCardInfo", cond, null, UtilMisc.toList("-fromDate"), null, false);
+			} catch (GenericEntityException e) {
+				Debug.logError(e.getMessage(), module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,"CloudCardInternalServiceError", locale));
+			}
+		}
+
 		//如果用户不存在，就购买一张新卡,否则就充值
-		if (UtilValidate.isEmpty(customer)) {
+		if (UtilValidate.isEmpty(customer) || UtilValidate.isEmpty(cloudCards)) {
 			try {
 				Map<String,Object> cardInfoMap = FastMap.newInstance();
 				cardInfoMap.put("organizationPartyId", organizationPartyId);
