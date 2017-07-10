@@ -65,10 +65,14 @@ public class UtilFileUpload {
         ByteBuffer imageDataBytes = (ByteBuffer) context.get("uploadedFile");// 文件流，必输
         String fileName = (String) context.get("_uploadedFile_fileName");// 文件名，必输
         String contentType = (String) context.get("_uploadedFile_contentType");// 文件mime类型，必输
+        String fileDir = (String) context.get("fileDir");
+        if(UtilValidate.isEmpty(fileDir)){
+        	fileDir = "";
+        }
 
         Map<String, Object> result = ServiceUtil.returnSuccess();
         String fileSuffix = fileName.substring(fileName.lastIndexOf(".") + 1);
-        
+
         if (UtilValidate.isEmpty(contentType) && UtilValidate.isNotEmpty(fileSuffix)) {
             GenericValue gv;
             try {
@@ -80,7 +84,7 @@ public class UtilFileUpload {
             if (gv != null)
                 contentType = gv.getString("mimeTypeId");
         }
-        
+
         if (UtilValidate.isNotEmpty(imageDataBytes)) {
             InputStream input = new ByteArrayInputStream(imageDataBytes.array());
             // 创建OSSClient实例
@@ -91,7 +95,7 @@ public class UtilFileUpload {
             // 可以在metadata中标记文件类型
             objectMeta.setContentType(contentType);
             String key = UUID.randomUUID().toString() + System.currentTimeMillis() + "." + fileSuffix;;
-            PutObjectResult pr = client.putObject(BUCKET_NAME, key, input, objectMeta);
+            PutObjectResult pr = client.putObject(BUCKET_NAME, fileDir + key, input, objectMeta);
             // pr 的结果需要判断下吧
             client.shutdown();
             result.put("key", key);
@@ -100,7 +104,7 @@ public class UtilFileUpload {
         return result;
 
     }
-    
+
     /**
      * 上传文件，并返回图片路径及图片名称
      *
@@ -114,9 +118,9 @@ public class UtilFileUpload {
 		Delegator delegator = (Delegator) request.getAttribute("delegator");
 		//LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
 		//HttpSession session = request.getSession();
-		//GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");		
+		//GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
 		String mimeType = "image/jpeg";
-		
+
 		try {
 			ServletFileUpload dfu = new ServletFileUpload(new DiskFileItemFactory(10240, null));
 			List<FileItem> items = dfu.parseRequest(request);
@@ -124,11 +128,11 @@ public class UtilFileUpload {
 //			if(null!=items){
 //				itemSize = items.size();
 //			}
-			
+
 			for (FileItem item : items) {
 				InputStream in = item.getInputStream();
 				String fileName = item.getName();
-				
+
 				String fileSuffix = fileName.substring(fileName.lastIndexOf(".") + 1);
 				if (UtilValidate.isNotEmpty(fileSuffix)) {
 					GenericValue gv;
@@ -140,9 +144,9 @@ public class UtilFileUpload {
 					} catch (GenericEntityException e) {
 						Debug.logError(e.getMessage(), module);
 					}
-					
+
 				}
-				
+
 				if (fileName != null && (!fileName.trim().equals(""))) {
 		            // 创建OSSClient实例
 		            OSSClient client = getNewOssClient(delegator);
@@ -160,17 +164,17 @@ public class UtilFileUpload {
 		} catch (Exception e) {
 			Debug.logError(e.getMessage(), module);
 		}
-		
+
 		return "success";
 	}
 
     /**
      * 删除oss上的文件
-     * 
+     *
      * @param key
      */
     public static Map<String, Object> delFile(DispatchContext dctx, Map<String, ? extends Object> context) {
-    	Delegator delegator = dctx.getDelegator(); 
+    	Delegator delegator = dctx.getDelegator();
     	String key = (String) context.get("key");
         if (UtilValidate.isNotEmpty(key)) {
             OSSClient client = getNewOssClient(delegator);

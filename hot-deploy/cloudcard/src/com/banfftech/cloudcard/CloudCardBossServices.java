@@ -2465,7 +2465,7 @@ public class CloudCardBossServices {
 			// 上传oss
 			Map<String, Object> uploadMap = dispatcher.runSync("upload",
 					UtilMisc.toMap("userLogin", userLogin, "uploadedFile", imageDataBytes, "_uploadedFile_fileName",
-							fileName, "_uploadedFile_contentType", contentType));
+							fileName, "_uploadedFile_contentType", contentType, "fileDir",CloudCardConstant.BIZ__STORE_DETAILS_DIR));
 			if (!ServiceUtil.isSuccess(uploadMap)) {
 				return uploadMap;
 			}

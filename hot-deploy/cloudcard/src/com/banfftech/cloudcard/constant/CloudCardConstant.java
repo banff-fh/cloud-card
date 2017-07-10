@@ -175,4 +175,20 @@ public class CloudCardConstant {
      */
     public static final String BIZ_CREATE_STORE_CAPTCHA = "bizCreateStoreCaptcha";
 
+    /**
+     * 营业执照路径{@value}
+     */
+    public static final String BIZ__STORE_LICENSE_DIR = "bizLic/";
+
+    /**
+     * 店铺头像和卡路径{@value}
+     */
+    public static final String BIZ__STORE_AVATAR_DIR = "bizAvatar/";
+
+    /**
+     * 店铺详情路径{@value}
+     */
+    public static final String BIZ__STORE_DETAILS_DIR = "bizDetails/";
+
+
 }
