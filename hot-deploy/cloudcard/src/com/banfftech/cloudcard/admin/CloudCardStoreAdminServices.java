@@ -165,11 +165,19 @@ public class CloudCardStoreAdminServices {
                 }
 
                 // 保证 店长 partyId 具有 MANAGER 角色
-                Map<String, Object> ensurePartyRoleOut = dispatcher.runSync("ensurePartyRole",
+                Map<String, Object> managerEnsurePartyRoleOut = dispatcher.runSync("ensurePartyRole",
                         UtilMisc.toMap("partyId", storeOwnerPartyId, "roleTypeId", "MANAGER"));
-                if (ServiceUtil.isError(ensurePartyRoleOut)) {
-                    return ensurePartyRoleOut;
+                if (ServiceUtil.isError(managerEnsurePartyRoleOut)) {
+                    return managerEnsurePartyRoleOut;
                 }
+
+                //第一次开店给当前用户授予法人角色
+                Map<String, Object> legalEnsurePartyRoleOut = dispatcher.runSync("ensurePartyRole",
+                        UtilMisc.toMap("partyId", storeOwnerPartyId, "roleTypeId", "LEGAL_REP"));
+                if (ServiceUtil.isError(legalEnsurePartyRoleOut)) {
+                    return legalEnsurePartyRoleOut;
+                }
+
                 // 关联店主与店(管理员)
                 Map<String, Object> managerRelationOutMap = dispatcher.runSync("createPartyRelationship",
                         UtilMisc.toMap("userLogin", userLogin, "partyIdFrom", cloudCardStroreId, "partyIdTo", storeOwnerPartyId, "roleTypeIdFrom",
