@@ -293,8 +293,8 @@ public class CloudCardCustServices {
         String wxPayName = null;
         Map<String,Object> accountMap = CloudCardHelper.getStoreAliPayAndWxPayInfo(delegator, storeId);
         if(UtilValidate.isNotEmpty(accountMap)){
-        	aliPayAccount = (String) accountMap.get("payAccount");
-        	aliPayName = (String) accountMap.get("payName");
+        	aliPayAccount = (String) accountMap.get("aliPayAccount");
+        	aliPayName = (String) accountMap.get("aliPayName");
         	wxPayAccount = (String) accountMap.get("wxPayAccount");
         	wxPayName = (String) accountMap.get("wxPayName");
         }

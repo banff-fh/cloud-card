@@ -3493,8 +3493,20 @@ public class CloudCardBossServices {
 				}
 			}
 
+			//获取店铺支付宝和微信账号
+	        Map<String,Object> accountMap = CloudCardHelper.getStoreAliPayAndWxPayInfo(delegator, storeId);
+
 			//创建支付宝账号
-			if (UtilValidate.isNotEmpty(aliPayAccount)) {
+			if (UtilValidate.isNotEmpty(aliPayAccount) && UtilValidate.isNotEmpty(accountMap.get("aliPayAccount"))) {
+				if(!aliPayAccount.equalsIgnoreCase(accountMap.get("aliPayAccount").toString())){
+					Map<String, Object> updateAliPayAccountOutMap = dispatcher.runSync("updatePartyAttribute",
+							UtilMisc.toMap("userLogin", systemUserLogin, "partyId", storeId, "attrName", "aliPayAccount", "attrValue",
+									aliPayAccount));
+					if (!ServiceUtil.isSuccess(updateAliPayAccountOutMap)) {
+						return updateAliPayAccountOutMap;
+					}
+				}
+			}else{
 				Map<String, Object> createAliPayAccountOutMap = dispatcher.runSync("createPartyAttribute",
 						UtilMisc.toMap("userLogin", systemUserLogin, "partyId", storeId, "attrName", "aliPayAccount", "attrValue",
 								aliPayAccount));
@@ -3504,16 +3516,36 @@ public class CloudCardBossServices {
 			}
 
 			//创建支付宝姓名
-	        if(UtilValidate.isNotEmpty(aliPayName)){
-	        	Map<String, Object> createAliPayAccountOutMap = dispatcher.runSync("createPartyAttribute",
+	        if(UtilValidate.isNotEmpty(aliPayName) && UtilValidate.isNotEmpty(accountMap.get("aliPayName"))){
+	        	if(!aliPayName.equalsIgnoreCase(accountMap.get("aliPayName").toString())){
+	        		if(!aliPayName.equalsIgnoreCase(accountMap.get("aliPayName").toString())){
+						Map<String, Object> updateAliPayNameOutMap = dispatcher.runSync("updatePartyAttribute",
+								UtilMisc.toMap("userLogin", systemUserLogin, "partyId", storeId, "attrName", "aliPayName", "attrValue", aliPayName));
+						if (!ServiceUtil.isSuccess(updateAliPayNameOutMap)) {
+							return updateAliPayNameOutMap;
+						}
+					}
+				}
+	        }else{
+	        	Map<String, Object> createAliPayNameOutMap = dispatcher.runSync("createPartyAttribute",
 	                    UtilMisc.toMap("userLogin", systemUserLogin, "partyId", storeId, "attrName", "aliPayName", "attrValue", aliPayName));
-	            if (!ServiceUtil.isSuccess(createAliPayAccountOutMap)) {
-	                return createAliPayAccountOutMap;
+	            if (!ServiceUtil.isSuccess(createAliPayNameOutMap)) {
+	                return createAliPayNameOutMap;
 	            }
 	        }
 
 			// 创建微信账号
-			if (UtilValidate.isNotEmpty(wxPayAccount)) {
+			if (UtilValidate.isNotEmpty(wxPayAccount) && UtilValidate.isNotEmpty(accountMap.get("wxPayAccount"))) {
+				if(!wxPayAccount.equalsIgnoreCase(accountMap.get("wxPayAccount").toString())){
+	        		if(!wxPayAccount.equalsIgnoreCase(accountMap.get("wxPayAccount").toString())){
+						Map<String, Object> updateWxPayAccountOutMap = dispatcher.runSync("updatePartyAttribute",
+								UtilMisc.toMap("userLogin", systemUserLogin, "partyId", storeId, "attrName","wxPayAccount", "attrValue", wxPayAccount));
+						if (!ServiceUtil.isSuccess(updateWxPayAccountOutMap)) {
+							return updateWxPayAccountOutMap;
+						}
+					}
+				}
+			}else{
 				Map<String, Object> createwxPayAccountOutMap = dispatcher.runSync("createPartyAttribute",
 						UtilMisc.toMap("userLogin", systemUserLogin, "partyId", storeId, "attrName","wxPayAccount", "attrValue", wxPayAccount));
 				if (!ServiceUtil.isSuccess(createwxPayAccountOutMap)) {
@@ -3522,11 +3554,21 @@ public class CloudCardBossServices {
 			}
 
 			// 创建微信姓名
-			if (UtilValidate.isNotEmpty(wxPayName)) {
-				Map<String, Object> createwxPayAccountOutMap = dispatcher.runSync("createPartyAttribute",
+			if (UtilValidate.isNotEmpty(wxPayName) && UtilValidate.isNotEmpty(accountMap.get("wxPayName"))) {
+				if(!wxPayName.equalsIgnoreCase(accountMap.get("wxPayName").toString())){
+	        		if(!wxPayName.equalsIgnoreCase(accountMap.get("wxPayName").toString())){
+						Map<String, Object> updateWxPayNameOutMap = dispatcher.runSync("updatePartyAttribute",
+								UtilMisc.toMap("userLogin", systemUserLogin, "partyId", storeId, "attrName","wxPayName", "attrValue", wxPayName));
+						if (!ServiceUtil.isSuccess(updateWxPayNameOutMap)) {
+							return updateWxPayNameOutMap;
+						}
+					}
+				}
+			}else{
+				Map<String, Object> createWxPayNameOutMap = dispatcher.runSync("createPartyAttribute",
 						UtilMisc.toMap("userLogin", systemUserLogin, "partyId", storeId, "attrName","wxPayName", "attrValue", wxPayName));
-				if (!ServiceUtil.isSuccess(createwxPayAccountOutMap)) {
-					return createwxPayAccountOutMap;
+				if (!ServiceUtil.isSuccess(createWxPayNameOutMap)) {
+					return createWxPayNameOutMap;
 				}
 			}
 
