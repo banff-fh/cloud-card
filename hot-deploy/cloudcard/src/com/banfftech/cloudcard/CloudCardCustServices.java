@@ -285,6 +285,19 @@ public class CloudCardCustServices {
         	legalTeleNumber = (String) legalRepInfoMap.get("legalTeleNumber");
         }
 
+        //获取店铺支付宝和微信账号
+        String payAccount = "";
+        String payName = "";
+        String wxPayAccount = "";
+        String wxPayName = "";
+        Map<String,Object> accountMap = CloudCardHelper.getStoreAliPayAndWxPayInfo(delegator, storeId);
+        if(UtilValidate.isNotEmpty(accountMap)){
+        	payAccount = (String) accountMap.get("payAccount");
+        	payName = (String) accountMap.get("payName");
+        	wxPayAccount = (String) accountMap.get("wxPayAccount");
+        	wxPayName = (String) accountMap.get("wxPayName");
+        }
+
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("storeId", storeId);
@@ -304,6 +317,10 @@ public class CloudCardCustServices {
 		result.put("storeSaleLevel", storeSaleLevel);
 		result.put("legalName", legalName);
 		result.put("legalTeleNumber", legalTeleNumber);
+		result.put("payAccount", payAccount);
+		result.put("payName", payName);
+		result.put("wxPayAccount", wxPayAccount);
+		result.put("wxPayName", wxPayName);
 
 		return result;
 	}

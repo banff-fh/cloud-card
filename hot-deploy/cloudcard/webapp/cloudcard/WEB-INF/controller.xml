@@ -513,8 +513,12 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 
-
-
+	<!-- 商家申请二级商家 -->
+	<request-map uri="bizCreateApplyVIP">
+		<event type="service" invoke="bizCreateApplyVIP" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
 
 	<!-- 获取下级geo列表 -->
 	<request-map uri="getAssociatedGeoList">

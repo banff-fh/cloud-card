@@ -1343,6 +1343,61 @@ public class CloudCardHelper {
     }
 
     /**
+     * 获取店家支付宝和微信账号信息
+     *
+     * @param delegator
+     *            实体引擎
+     * @param storeId
+     *            storeId
+     * @throws GenericEntityException
+     */
+    public static Map<String, Object> getStoreAliPayAndWxPayInfo(Delegator delegator, String storeId){
+        String payAccount = null;
+        String payName = null;
+        String wxPayAccount = null;
+        String wxPayName = null;
+        EntityCondition partyIdCond = EntityCondition.makeCondition("partyId", storeId);
+        //支付宝Cond
+		EntityCondition aliAccountCond = EntityCondition.makeCondition("attrName", "aliPayAccount");
+		EntityCondition aliNameCond = EntityCondition.makeCondition("attrName", "aliPayName");
+		EntityCondition aliAttCond = EntityCondition.makeCondition(aliAccountCond, EntityOperator.OR, aliNameCond);
+
+		//微信Cond
+		EntityCondition wxAccountCond = EntityCondition.makeCondition("attrName", "wxPayAccount");
+		EntityCondition wxNameCond = EntityCondition.makeCondition("attrName", "wxPayName");
+		EntityCondition wxAttCond = EntityCondition.makeCondition(wxAccountCond, EntityOperator.OR, wxNameCond);
+
+		EntityCondition aliAndwxCond = EntityCondition.makeCondition(aliAttCond, EntityOperator.OR, wxAttCond);
+		EntityCondition partyAttributeCond = EntityCondition.makeCondition(partyIdCond, EntityOperator.AND, aliAndwxCond);
+
+		List<GenericValue> partyAttributes;
+		try {
+			partyAttributes = delegator.findList("PartyAttribute", partyAttributeCond, null, null, null, false);
+			for(GenericValue partyAttribute : partyAttributes){
+				if("aliPayAccount".equals(partyAttribute.getString("attrName"))){
+					payAccount = partyAttribute.getString("attrValue");
+				}else if("aliPayName".equals(partyAttribute.getString("attrName"))){
+					payName = partyAttribute.getString("attrValue");
+				}else if("wxPayAccount".equals(partyAttribute.getString("attrName"))){
+					wxPayAccount = partyAttribute.getString("attrValue");
+				}else if("wxPayName".equals(partyAttribute.getString("attrName"))){
+					wxPayName = partyAttribute.getString("attrValue");
+				}
+			}
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+		}
+
+		Map<String, Object> aliPayMap = FastMap.newInstance();
+		aliPayMap.put("payAccount", payAccount);
+		aliPayMap.put("payName", payName);
+		aliPayMap.put("wxPayAccount", wxPayAccount);
+		aliPayMap.put("wxPayName", wxPayName);
+
+		return aliPayMap;
+    }
+
+    /**
      * 根据店铺获取法人信息
      *
      * @param
@@ -1381,7 +1436,7 @@ public class CloudCardHelper {
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 		if(UtilValidate.isNotEmpty(person)){
-			legalName = person.getString("lastName");
+			legalName = person.getString("firstName");
 		}
 
         //查找法人电话号码
