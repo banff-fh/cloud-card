@@ -178,17 +178,17 @@ public class CloudCardConstant {
     /**
      * 营业执照路径{@value}
      */
-    public static final String BIZ__STORE_LICENSE_DIR = "bizLic/";
+    public static final String BIZ__STORE_LICENSE_DIR = "bizLic";
 
     /**
      * 店铺头像和卡路径{@value}
      */
-    public static final String BIZ__STORE_AVATAR_DIR = "bizAvatar/";
+    public static final String BIZ__STORE_AVATAR_DIR = "bizAvatar";
 
     /**
      * 店铺详情路径{@value}
      */
-    public static final String BIZ__STORE_DETAILS_DIR = "bizDetails/";
+    public static final String BIZ__STORE_DETAILS_DIR = "bizDetails";
 
 
 }

@@ -357,6 +357,8 @@
         <attribute mode="IN" name="uploadedFile" type="java.nio.ByteBuffer" optional="false"><description>文件流</description></attribute>
 		<attribute mode="IN" name="_uploadedFile_fileName" type="String" optional="false"><description>文件名</description></attribute>
 		<attribute mode="IN" name="_uploadedFile_contentType" type="String" optional="false"><description>文件mime类型</description></attribute>
+		<attribute mode="IN" name="storeImgType" type="String" optional="false"><description>图片类型</description></attribute>
+
 	</service>
 
 	<service name="bizDeleteStoreInfoImg" engine="java"

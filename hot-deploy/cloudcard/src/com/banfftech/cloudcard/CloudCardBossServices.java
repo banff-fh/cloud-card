@@ -2460,12 +2460,21 @@ public class CloudCardBossServices {
 		ByteBuffer imageDataBytes = (ByteBuffer) context.get("uploadedFile");// 文件流，必输
 		String fileName = (String) context.get("_uploadedFile_fileName");// 文件名，必输
 		String contentType = (String) context.get("_uploadedFile_contentType");// 文件mime类型，必输
+		String storeImgType = (String) context.get("storeImgType");
+		String fileDir = "";
+		if(CloudCardConstant.BIZ__STORE_LICENSE_DIR.equals(storeImgType)){
+			fileDir = CloudCardConstant.BIZ__STORE_DETAILS_DIR;
+		}else if(CloudCardConstant.BIZ__STORE_AVATAR_DIR.equals(storeImgType)){
+			fileDir = CloudCardConstant.BIZ__STORE_AVATAR_DIR;
+		}else if(CloudCardConstant.BIZ__STORE_DETAILS_DIR.equals(storeImgType)){
+			fileDir = CloudCardConstant.BIZ__STORE_DETAILS_DIR;
+		}
 
 		try {
 			// 上传oss
 			Map<String, Object> uploadMap = dispatcher.runSync("upload",
 					UtilMisc.toMap("userLogin", userLogin, "uploadedFile", imageDataBytes, "_uploadedFile_fileName",
-							fileName, "_uploadedFile_contentType", contentType, "fileDir",CloudCardConstant.BIZ__STORE_DETAILS_DIR));
+							fileName, "_uploadedFile_contentType", contentType, "fileDir", fileDir));
 			if (!ServiceUtil.isSuccess(uploadMap)) {
 				return uploadMap;
 			}
@@ -2474,8 +2483,8 @@ public class CloudCardBossServices {
 			// 1.CREATE DATA RESOURCE
 			Map<String, Object> createDataResourceMap = UtilMisc.toMap("userLogin", userLogin, "partyId",
 					organizationPartyId, "dataResourceTypeId", "URL_RESOURCE", "dataCategoryId", "PERSONAL",
-					"dataResourceName", key, "mimeTypeId", contentType, "isPublic", "Y", "dataTemplateTypeId", "NONE",
-					"statusId", "CTNT_PUBLISHED", "objectInfo", key);
+					"dataResourceName", fileDir, "mimeTypeId", contentType, "isPublic", "Y", "dataTemplateTypeId", "NONE",
+					"statusId", "CTNT_PUBLISHED", "objectInfo", fileDir+ "/" + key);
 			Map<String, Object> serviceResultByDataResource = dispatcher.runSync("createDataResource",
 					createDataResourceMap);
 			if (!ServiceUtil.isSuccess(serviceResultByDataResource)) {
