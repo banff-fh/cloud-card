@@ -3469,6 +3469,17 @@ public class CloudCardBossServices {
 				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 			}
 
+			//修改店铺地址
+			Map<String, Object> partyPostalAddressMap = dispatcher.runSync("getPartyPostalAddress", UtilMisc.toMap("partyId", storeId));
+			if(UtilValidate.isNotEmpty(partyPostalAddressMap)){
+				String contactMechId = (String) partyPostalAddressMap.get("contactMechId");
+				GenericValue postalAddress = delegator.findByPrimaryKey("PostalAddress", UtilMisc.toMap("contactMechId", contactMechId));
+				if(UtilValidate.isNotEmpty(postalAddress)){
+					postalAddress.put("address1", storeAddress);
+					postalAddress.store();
+				}
+			}
+
 			//创建支付宝账号
 			if (UtilValidate.isNotEmpty(aliPayAccount)) {
 				Map<String, Object> createAliPayAccountOutMap = dispatcher.runSync("createPartyAttribute",
