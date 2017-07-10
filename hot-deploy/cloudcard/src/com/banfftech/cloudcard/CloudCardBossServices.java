@@ -3419,6 +3419,92 @@ public class CloudCardBossServices {
 	 * @return
 	 */
 	public static Map<String, Object> bizCreateApplyVIP(DispatchContext dctx, Map<String, Object> context) {
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+
+		String organizationPartyId = (String) context.get("organizationPartyId");
+		String legalId = (String) context.get("legalId");
+		String storeName = (String) context.get("storeName");
+		String storeAddress = (String) context.get("storeAddress");
+		String legalName = (String) context.get("legalName");
+		String aliPayAccount = (String) context.get("aliPayAccount");
+		String aliPayName = (String) context.get("aliPayName");
+		String wxPayAccount = (String) context.get("wxPayAccount");
+		String wxPayName = (String) context.get("wxPayName");
+
+
+		try {
+			//修改店铺名称
+			GenericValue partyGroup = null;
+			try {
+				partyGroup = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", organizationPartyId));
+			} catch (GenericEntityException e1) {
+				Debug.logError(e1.getMessage(), module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,
+						"CloudCardInternalServiceError", locale));
+			}
+
+			if (UtilValidate.isNotEmpty(partyGroup)) {
+				partyGroup.set("groupName", storeName);
+				partyGroup.store();
+			}
+
+			//修改法人代表姓名
+			GenericValue person;
+			try {
+				person = delegator.findByPrimaryKey("Person", UtilMisc.toMap("partyId", legalId));
+				person.set("lastName", legalName);
+		        person.store();
+			} catch (GenericEntityException e) {
+				Debug.logError(e.getMessage(), module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+			}
+
+			//创建支付宝账号
+			if (UtilValidate.isNotEmpty(aliPayAccount)) {
+				Map<String, Object> createAliPayAccountOutMap = dispatcher.runSync("createPartyAttribute",
+						UtilMisc.toMap("partyId", organizationPartyId, "attrName", "aliPayAccount", "attrValue",
+								aliPayAccount));
+				if (!ServiceUtil.isSuccess(createAliPayAccountOutMap)) {
+					return createAliPayAccountOutMap;
+				}
+			}
+
+			//创建支付宝姓名
+	        if(UtilValidate.isNotEmpty(aliPayName)){
+	        	Map<String, Object> createAliPayAccountOutMap = dispatcher.runSync("createPartyAttribute",
+	                    UtilMisc.toMap("partyId", organizationPartyId, "attrName", "aliPayName", "attrValue", aliPayName));
+	            if (!ServiceUtil.isSuccess(createAliPayAccountOutMap)) {
+	                return createAliPayAccountOutMap;
+	            }
+	        }
+
+			// 创建微信账号
+			if (UtilValidate.isNotEmpty(wxPayAccount)) {
+				Map<String, Object> createwxPayAccountOutMap = dispatcher.runSync("createPartyAttribute",
+						UtilMisc.toMap("partyId", organizationPartyId, "attrName","wxPayAccount", "attrValue", wxPayAccount));
+				if (!ServiceUtil.isSuccess(createwxPayAccountOutMap)) {
+					return createwxPayAccountOutMap;
+				}
+			}
+
+			// 创建微信姓名
+			if (UtilValidate.isNotEmpty(wxPayName)) {
+				Map<String, Object> createwxPayAccountOutMap = dispatcher.runSync("createPartyAttribute",
+						UtilMisc.toMap("partyId", organizationPartyId, "attrName","wxPayName", "attrValue", wxPayName));
+				if (!ServiceUtil.isSuccess(createwxPayAccountOutMap)) {
+					return createwxPayAccountOutMap;
+				}
+			}
+
+		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
 
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 

@@ -278,11 +278,12 @@ public class CloudCardCustServices {
         //获取店铺法人信息
         String legalName = "";
         String legalTeleNumber = "";
-
+        String legalId = "";
         Map<String,Object> legalRepInfoMap = CloudCardHelper.getLegalRepInfoByStoreId(delegator, locale, storeId);
         if(UtilValidate.isNotEmpty(legalRepInfoMap)){
         	legalName = (String) legalRepInfoMap.get("legalName");
         	legalTeleNumber = (String) legalRepInfoMap.get("legalTeleNumber");
+        	legalId = (String) legalRepInfoMap.get("legalId");
         }
 
         //获取店铺支付宝和微信账号
@@ -317,6 +318,7 @@ public class CloudCardCustServices {
 		result.put("storeSaleLevel", storeSaleLevel);
 		result.put("legalName", legalName);
 		result.put("legalTeleNumber", legalTeleNumber);
+		result.put("legalId", legalId);
 		result.put("aliPayAccount", aliPayAccount);
 		result.put("aliPayName", aliPayName);
 		result.put("wxPayAccount", wxPayAccount);

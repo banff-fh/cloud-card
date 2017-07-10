@@ -112,6 +112,8 @@
 	<service name="bizCreateApplyVIP" engine="java"
 		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizCreateApplyVIP" auth="false">
 		<description>商家申请二级商家VIP</description>
+		<attribute name="organizationPartyId" type="String" mode="IN" optional="false"><description>店家partyId</description></attribute>
+		<attribute name="legalId" type="String" mode="IN" optional="false"><description>法人ID</description></attribute>
 		<attribute name="storeName" type="String" mode="IN" optional="false"><description>店名</description></attribute>
 		<attribute name="storeAddress" type="String" mode="IN" optional="false"><description>商铺详细地址</description></attribute>
 		<attribute name="legalName" type="String" mode="IN" optional="false"><description>法人姓名</description></attribute>

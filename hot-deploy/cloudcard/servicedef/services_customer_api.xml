@@ -131,6 +131,7 @@
 		<attribute name="bizDetailsList" type="List" mode="OUT" optional="true"><description>店铺图片信息</description></attribute>
 		<attribute name="storeCode" type="String" mode="OUT" optional="true"><description>店铺二维码信息</description></attribute>
 		<attribute name="storeSaleLevel" type="String" mode="OUT" optional="true"><description>店铺等级信息</description></attribute>
+		<attribute name="legalId" type="String" mode="OUT" optional="true"><description>店铺法人ID</description></attribute>
 		<attribute name="legalName" type="String" mode="OUT" optional="true"><description>店铺法人姓名</description></attribute>
 		<attribute name="legalTeleNumber" type="String" mode="OUT" optional="true"><description>店铺法人电话</description></attribute>
 		<attribute name="aliPayAccount" type="String" mode="OUT" optional="true"><description>支付宝账号</description></attribute>

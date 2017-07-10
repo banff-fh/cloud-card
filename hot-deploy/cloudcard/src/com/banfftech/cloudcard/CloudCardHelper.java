@@ -1458,8 +1458,10 @@ public class CloudCardHelper {
 
         // 返回结果
         Map<String, Object> result = ServiceUtil.returnSuccess();
+        result.put("legalId", partyId);
         result.put("legalName", legalName);
         result.put("legalTeleNumber", legalTeleNumber);
+
         return result;
     }
 
