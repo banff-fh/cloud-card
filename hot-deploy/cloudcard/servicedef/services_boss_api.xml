@@ -384,8 +384,10 @@
         <attribute mode="IN" name="organizationPartyId" type="String" optional="false"><description>店家partyI</description></attribute>
         <attribute mode="IN" name="contentId" type="String" optional="false"><description>contentId</description></attribute>
         <attribute name="ossUrl" type="String" mode="OUT" optional="false"><description>oss路径</description></attribute>
-        <attribute name="storeInfoImgList" type="List" mode="OUT" optional="false"><description>图片信息</description></attribute>
- 	</service>
+		<attribute name="bizLicImgList" type="List" mode="OUT" optional="true"><description>店铺营业执照信息</description></attribute>
+		<attribute name="bizAvatarImgList" type="List" mode="OUT" optional="true"><description>店铺头像卡片信息</description></attribute>
+		<attribute name="bizDetailsList" type="List" mode="OUT" optional="true"><description>店铺图片信息</description></attribute>
+	</service>
 
  	<service name="getCloudCardByBiz" engine="java"
             location="com.banfftech.cloudcard.CloudCardBossServices" invoke="getCloudCardByBiz" auth="true">

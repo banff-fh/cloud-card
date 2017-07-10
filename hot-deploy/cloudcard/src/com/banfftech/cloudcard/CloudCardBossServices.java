@@ -2608,24 +2608,42 @@ public class CloudCardBossServices {
 					"CloudCardInternalServiceError", locale));
 		}
 
-		// 获取店家商铺详细信息
-		List<GenericValue> storeInfoImgList = FastList.newInstance();
-		try {
-			storeInfoImgList = delegator.findByAnd("PartyContentAndDataResourceDetail",
-					UtilMisc.toMap("partyId", organizationPartyId, "partyContentTypeId", "STORE_IMG", "contentTypeId",
-							"ACTIVITY_PICTURE", "statusId", "CTNT_IN_PROGRESS"));
+		//获取商家营业执照
+        List<GenericValue> bizLicImgList = FastList.newInstance();
+        try {
+        	bizLicImgList = delegator.findByAnd("PartyContentAndDataResourceDetail", UtilMisc.toMap("partyId", organizationPartyId,"partyContentTypeId", "STORE_IMG","contentTypeId","ACTIVITY_PICTURE","statusId","CTNT_IN_PROGRESS", "dataResourceName","bizLic"));
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,
-					"CloudCardInternalServiceError", locale));
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+
+        //获取商家招牌照片
+        List<GenericValue> bizAvatarImgList = FastList.newInstance();
+        try {
+        	bizAvatarImgList = delegator.findByAnd("PartyContentAndDataResourceDetail", UtilMisc.toMap("partyId", organizationPartyId,"partyContentTypeId", "STORE_IMG","contentTypeId","ACTIVITY_PICTURE","statusId","CTNT_IN_PROGRESS", "dataResourceName","bizAvatar"));
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+
+        //获取店家商铺详细信息
+        List<GenericValue> bizDetailsList = FastList.newInstance();
+        try {
+        	bizDetailsList = delegator.findByAnd("PartyContentAndDataResourceDetail", UtilMisc.toMap("partyId", organizationPartyId,"partyContentTypeId", "STORE_IMG","contentTypeId","ACTIVITY_PICTURE","statusId","CTNT_IN_PROGRESS", "dataResourceName","bizDetails"));
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 
 		// 获取oss访问地址
 		String ossUrl = EntityUtilProperties.getPropertyValue("cloudcard", "oss.url",
 				"http://kupang.oss-cn-shanghai.aliyuncs.com/", delegator);
 		Map<String, Object> result = ServiceUtil.returnSuccess();
-		result.put("storeInfoImgList", storeInfoImgList);
+		result.put("bizLicImgList", bizLicImgList);
+		result.put("bizAvatarImgList", bizAvatarImgList);
+		result.put("bizDetailsList", bizDetailsList);
 		result.put("ossUrl", ossUrl);
+
 		return result;
 	}
 
