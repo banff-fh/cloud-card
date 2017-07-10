@@ -2463,11 +2463,11 @@ public class CloudCardBossServices {
 		String storeImgType = (String) context.get("storeImgType");
 		String fileDir = "";
 		if(CloudCardConstant.BIZ__STORE_LICENSE_DIR.equals(storeImgType)){
-			fileDir = CloudCardConstant.BIZ__STORE_DETAILS_DIR;
+			fileDir = CloudCardConstant.BIZ__STORE_LICENSE_DIR + "/";
 		}else if(CloudCardConstant.BIZ__STORE_AVATAR_DIR.equals(storeImgType)){
-			fileDir = CloudCardConstant.BIZ__STORE_AVATAR_DIR;
+			fileDir = CloudCardConstant.BIZ__STORE_AVATAR_DIR + "/";
 		}else if(CloudCardConstant.BIZ__STORE_DETAILS_DIR.equals(storeImgType)){
-			fileDir = CloudCardConstant.BIZ__STORE_DETAILS_DIR;
+			fileDir = CloudCardConstant.BIZ__STORE_DETAILS_DIR + "/";
 		}
 
 		try {
@@ -2483,8 +2483,8 @@ public class CloudCardBossServices {
 			// 1.CREATE DATA RESOURCE
 			Map<String, Object> createDataResourceMap = UtilMisc.toMap("userLogin", userLogin, "partyId",
 					organizationPartyId, "dataResourceTypeId", "URL_RESOURCE", "dataCategoryId", "PERSONAL",
-					"dataResourceName", fileDir, "mimeTypeId", contentType, "isPublic", "Y", "dataTemplateTypeId", "NONE",
-					"statusId", "CTNT_PUBLISHED", "objectInfo", fileDir+ "/" + key);
+					"dataResourceName", storeImgType, "mimeTypeId", contentType, "isPublic", "Y", "dataTemplateTypeId", "NONE",
+					"statusId", "CTNT_PUBLISHED", "objectInfo", fileDir + key);
 			Map<String, Object> serviceResultByDataResource = dispatcher.runSync("createDataResource",
 					createDataResourceMap);
 			if (!ServiceUtil.isSuccess(serviceResultByDataResource)) {
