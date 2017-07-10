@@ -2471,15 +2471,6 @@ public class CloudCardBossServices {
 		}
 
 		try {
-			// 上传oss
-			Map<String, Object> uploadMap = dispatcher.runSync("upload",
-					UtilMisc.toMap("userLogin", userLogin, "uploadedFile", imageDataBytes, "_uploadedFile_fileName",
-							fileName, "_uploadedFile_contentType", contentType, "fileDir", fileDir));
-			if (!ServiceUtil.isSuccess(uploadMap)) {
-				return uploadMap;
-			}
-			String key = (String) uploadMap.get("key");
-
 			//如果是店铺招牌头像，系统只允许一张图片,如果系统存在招牌图片则删除
 			if(CloudCardConstant.BIZ__STORE_AVATAR_DIR.equals(storeImgType)){
 				// 获取店家商铺招牌图片路径
@@ -2512,6 +2503,15 @@ public class CloudCardBossServices {
 				}
 
 			}
+
+			// 上传oss
+			Map<String, Object> uploadMap = dispatcher.runSync("upload",
+					UtilMisc.toMap("userLogin", userLogin, "uploadedFile", imageDataBytes, "_uploadedFile_fileName",
+							fileName, "_uploadedFile_contentType", contentType, "fileDir", fileDir));
+			if (!ServiceUtil.isSuccess(uploadMap)) {
+				return uploadMap;
+			}
+			String key = (String) uploadMap.get("key");
 
 			// 1.CREATE DATA RESOURCE
 			Map<String, Object> createDataResourceMap = UtilMisc.toMap("userLogin", userLogin, "partyId",
