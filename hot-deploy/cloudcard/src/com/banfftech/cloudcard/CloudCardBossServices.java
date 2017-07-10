@@ -3422,8 +3422,10 @@ public class CloudCardBossServices {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
+		GenericValue userLogin = (GenericValue) context.get("userLogin");
 
-		String organizationPartyId = (String) context.get("organizationPartyId");
+
+		String storeId = (String) context.get("organizationPartyId");
 		String legalId = (String) context.get("legalId");
 		String storeName = (String) context.get("storeName");
 		String storeAddress = (String) context.get("storeAddress");
@@ -3433,12 +3435,18 @@ public class CloudCardBossServices {
 		String wxPayAccount = (String) context.get("wxPayAccount");
 		String wxPayName = (String) context.get("wxPayName");
 
+		// 数据权限检查: 登录用户是否是本店的管理员
+		if (!CloudCardHelper.isManager(delegator, userLogin.getString("partyId"), storeId)) {
+			Debug.logError("partyId: " + userLogin.getString("partyId") + " 不是商户：" + storeId + "的管理人员，不能操作", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,
+					"CloudCardUserLoginIsNotManager", locale));
+		}
 
 		try {
 			//修改店铺名称
 			GenericValue partyGroup = null;
 			try {
-				partyGroup = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", organizationPartyId));
+				partyGroup = delegator.findByPrimaryKey("PartyGroup", UtilMisc.toMap("partyId", storeId));
 			} catch (GenericEntityException e1) {
 				Debug.logError(e1.getMessage(), module);
 				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,
@@ -3464,7 +3472,7 @@ public class CloudCardBossServices {
 			//创建支付宝账号
 			if (UtilValidate.isNotEmpty(aliPayAccount)) {
 				Map<String, Object> createAliPayAccountOutMap = dispatcher.runSync("createPartyAttribute",
-						UtilMisc.toMap("partyId", organizationPartyId, "attrName", "aliPayAccount", "attrValue",
+						UtilMisc.toMap("userLogin", userLogin, "partyId", storeId, "attrName", "aliPayAccount", "attrValue",
 								aliPayAccount));
 				if (!ServiceUtil.isSuccess(createAliPayAccountOutMap)) {
 					return createAliPayAccountOutMap;
@@ -3474,7 +3482,7 @@ public class CloudCardBossServices {
 			//创建支付宝姓名
 	        if(UtilValidate.isNotEmpty(aliPayName)){
 	        	Map<String, Object> createAliPayAccountOutMap = dispatcher.runSync("createPartyAttribute",
-	                    UtilMisc.toMap("partyId", organizationPartyId, "attrName", "aliPayName", "attrValue", aliPayName));
+	                    UtilMisc.toMap("userLogin", userLogin, "partyId", storeId, "attrName", "aliPayName", "attrValue", aliPayName));
 	            if (!ServiceUtil.isSuccess(createAliPayAccountOutMap)) {
 	                return createAliPayAccountOutMap;
 	            }
@@ -3483,7 +3491,7 @@ public class CloudCardBossServices {
 			// 创建微信账号
 			if (UtilValidate.isNotEmpty(wxPayAccount)) {
 				Map<String, Object> createwxPayAccountOutMap = dispatcher.runSync("createPartyAttribute",
-						UtilMisc.toMap("partyId", organizationPartyId, "attrName","wxPayAccount", "attrValue", wxPayAccount));
+						UtilMisc.toMap("userLogin", userLogin, "partyId", storeId, "attrName","wxPayAccount", "attrValue", wxPayAccount));
 				if (!ServiceUtil.isSuccess(createwxPayAccountOutMap)) {
 					return createwxPayAccountOutMap;
 				}
@@ -3492,7 +3500,7 @@ public class CloudCardBossServices {
 			// 创建微信姓名
 			if (UtilValidate.isNotEmpty(wxPayName)) {
 				Map<String, Object> createwxPayAccountOutMap = dispatcher.runSync("createPartyAttribute",
-						UtilMisc.toMap("partyId", organizationPartyId, "attrName","wxPayName", "attrValue", wxPayName));
+						UtilMisc.toMap("userLogin", userLogin, "partyId", storeId, "attrName","wxPayName", "attrValue", wxPayName));
 				if (!ServiceUtil.isSuccess(createwxPayAccountOutMap)) {
 					return createwxPayAccountOutMap;
 				}
