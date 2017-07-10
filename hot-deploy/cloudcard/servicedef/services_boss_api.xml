@@ -114,8 +114,8 @@
 		<description>商家申请二级商家VIP</description>
 		<attribute name="storeName" type="String" mode="IN" optional="false"><description>店名</description></attribute>
 		<attribute name="storeAddress" type="String" mode="IN" optional="false"><description>商铺详细地址</description></attribute>
-		<attribute name="personName" type="String" mode="IN" optional="false"><description>店主姓名</description></attribute>
-		<attribute name="legalName" type="String" mode="IN" optional="false"><description>店家支付宝账号</description></attribute>
+		<attribute name="legalName" type="String" mode="IN" optional="false"><description>法人姓名</description></attribute>
+		<attribute name="aliPayAccount" type="String" mode="IN" optional="false"><description>店家支付宝账号</description></attribute>
 		<attribute name="aliPayName" type="String" mode="IN" optional="false"><description>店家支付宝姓名</description></attribute>
 		<attribute name="wxPayAccount" type="String" mode="IN" optional="false"><description>店家微信账号</description></attribute>
 		<attribute name="wxPayName" type="String" mode="IN" optional="false"><description>店家微信姓名</description></attribute>

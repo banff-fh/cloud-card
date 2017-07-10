@@ -1352,8 +1352,8 @@ public class CloudCardHelper {
      * @throws GenericEntityException
      */
     public static Map<String, Object> getStoreAliPayAndWxPayInfo(Delegator delegator, String storeId){
-        String payAccount = null;
-        String payName = null;
+        String aliPayAccount = null;
+        String aliPayName = null;
         String wxPayAccount = null;
         String wxPayName = null;
         EntityCondition partyIdCond = EntityCondition.makeCondition("partyId", storeId);
@@ -1375,9 +1375,9 @@ public class CloudCardHelper {
 			partyAttributes = delegator.findList("PartyAttribute", partyAttributeCond, null, null, null, false);
 			for(GenericValue partyAttribute : partyAttributes){
 				if("aliPayAccount".equals(partyAttribute.getString("attrName"))){
-					payAccount = partyAttribute.getString("attrValue");
+					aliPayAccount = partyAttribute.getString("attrValue");
 				}else if("aliPayName".equals(partyAttribute.getString("attrName"))){
-					payName = partyAttribute.getString("attrValue");
+					aliPayName = partyAttribute.getString("attrValue");
 				}else if("wxPayAccount".equals(partyAttribute.getString("attrName"))){
 					wxPayAccount = partyAttribute.getString("attrValue");
 				}else if("wxPayName".equals(partyAttribute.getString("attrName"))){
@@ -1389,8 +1389,8 @@ public class CloudCardHelper {
 		}
 
 		Map<String, Object> aliPayMap = FastMap.newInstance();
-		aliPayMap.put("payAccount", payAccount);
-		aliPayMap.put("payName", payName);
+		aliPayMap.put("aliPayAccount", aliPayAccount);
+		aliPayMap.put("aliPayName", aliPayName);
 		aliPayMap.put("wxPayAccount", wxPayAccount);
 		aliPayMap.put("wxPayName", wxPayName);
 

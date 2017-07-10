@@ -133,8 +133,8 @@
 		<attribute name="storeSaleLevel" type="String" mode="OUT" optional="true"><description>店铺等级信息</description></attribute>
 		<attribute name="legalName" type="String" mode="OUT" optional="true"><description>店铺法人姓名</description></attribute>
 		<attribute name="legalTeleNumber" type="String" mode="OUT" optional="true"><description>店铺法人电话</description></attribute>
-		<attribute name="payAccount" type="String" mode="OUT" optional="true"><description>支付宝账号</description></attribute>
-		<attribute name="payName" type="String" mode="OUT" optional="true"><description>支付宝姓名</description></attribute>
+		<attribute name="aliPayAccount" type="String" mode="OUT" optional="true"><description>支付宝账号</description></attribute>
+		<attribute name="aliPayName" type="String" mode="OUT" optional="true"><description>支付宝姓名</description></attribute>
 		<attribute name="wxPayAccount" type="String" mode="OUT" optional="true"><description>微信账号</description></attribute>
 		<attribute name="wxPayName" type="String" mode="OUT" optional="true"><description>微信姓名</description></attribute>
 
