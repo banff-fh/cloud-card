@@ -3410,4 +3410,19 @@ public class CloudCardBossServices {
 		result.put("teleNumber", teleNumber);
 		return result;
 	}
+
+	/**
+	 * 申请二级店铺
+	 *
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> bizCreateApplyVIP(DispatchContext dctx, Map<String, Object> context) {
+
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+
+		return result;
+	}
+
 }
