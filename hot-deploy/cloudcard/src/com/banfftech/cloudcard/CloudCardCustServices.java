@@ -286,14 +286,14 @@ public class CloudCardCustServices {
         }
 
         //获取店铺支付宝和微信账号
-        String payAccount = "";
-        String payName = "";
-        String wxPayAccount = "";
-        String wxPayName = "";
+        String aliPayAccount = null;
+        String aliPayName = null;
+        String wxPayAccount = null;
+        String wxPayName = null;
         Map<String,Object> accountMap = CloudCardHelper.getStoreAliPayAndWxPayInfo(delegator, storeId);
         if(UtilValidate.isNotEmpty(accountMap)){
-        	payAccount = (String) accountMap.get("payAccount");
-        	payName = (String) accountMap.get("payName");
+        	aliPayAccount = (String) accountMap.get("payAccount");
+        	aliPayName = (String) accountMap.get("payName");
         	wxPayAccount = (String) accountMap.get("wxPayAccount");
         	wxPayName = (String) accountMap.get("wxPayName");
         }
@@ -317,8 +317,8 @@ public class CloudCardCustServices {
 		result.put("storeSaleLevel", storeSaleLevel);
 		result.put("legalName", legalName);
 		result.put("legalTeleNumber", legalTeleNumber);
-		result.put("payAccount", payAccount);
-		result.put("payName", payName);
+		result.put("payAccount", aliPayAccount);
+		result.put("payName", aliPayName);
 		result.put("wxPayAccount", wxPayAccount);
 		result.put("wxPayName", wxPayName);
 
