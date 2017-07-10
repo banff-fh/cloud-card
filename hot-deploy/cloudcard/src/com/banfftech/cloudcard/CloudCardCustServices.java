@@ -317,8 +317,8 @@ public class CloudCardCustServices {
 		result.put("storeSaleLevel", storeSaleLevel);
 		result.put("legalName", legalName);
 		result.put("legalTeleNumber", legalTeleNumber);
-		result.put("payAccount", aliPayAccount);
-		result.put("payName", aliPayName);
+		result.put("aliPayAccount", aliPayAccount);
+		result.put("aliPayName", aliPayName);
 		result.put("wxPayAccount", wxPayAccount);
 		result.put("wxPayName", wxPayName);
 
