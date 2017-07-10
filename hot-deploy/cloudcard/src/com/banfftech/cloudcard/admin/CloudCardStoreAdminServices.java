@@ -173,7 +173,7 @@ public class CloudCardStoreAdminServices {
                 // 关联店主与店
                 Map<String, Object> relationOutMap = dispatcher.runSync("createPartyRelationship",
                         UtilMisc.toMap("userLogin", userLogin, "partyIdFrom", cloudCardStroreId, "partyIdTo", storeOwnerPartyId, "roleTypeIdFrom",
-                                "INTERNAL_ORGANIZATIO", "roleTypeIdTo", "MANAGER", "partyRelationshipTypeId", "EMPLOYMENT"));
+                                "INTERNAL_ORGANIZATIO", "roleTypeIdTo", "MANAGER", "partyRelationshipTypeId", "LEGAL_PERSON"));
                 if (ServiceUtil.isError(relationOutMap)) {
                     return relationOutMap;
                 }

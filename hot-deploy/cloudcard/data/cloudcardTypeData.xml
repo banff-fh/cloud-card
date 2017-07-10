@@ -203,4 +203,7 @@
 	<SystemProperty systemResourceId="cloudcard" systemPropertyId="store.level" systemPropertyValue="STORE_LEVEL_5" description="店家信用等级"/>
 	<SystemProperty systemResourceId="cloudcard" systemPropertyId="store.creditLimit" systemPropertyValue="50000" description="店家卖卡额度"/>
 
+	<!-- 法人 -->
+    <PartyRelationshipType description="" hasTable="N" parentTypeId="" partyRelationshipName="legal person" partyRelationshipTypeId="LEGAL_PERSON" roleTypeIdValidFrom="" roleTypeIdValidTo=""/>
+
 </entity-engine-xml>
