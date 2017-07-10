@@ -1356,7 +1356,7 @@ public class CloudCardHelper {
         GenericValue  partyRelationship = null;
         try {
         	List<EntityCondition> condList = FastList.newInstance();
-            condList.add(EntityCondition.makeCondition("partyIdTo", storeId));
+            condList.add(EntityCondition.makeCondition("partyIdFrom", storeId));
             condList.add(EntityCondition.makeCondition("roleTypeIdTo", "LEGAL_REP"));
             condList.add(EntityCondition.makeCondition("roleTypeIdFrom", "INTERNAL_ORGANIZATIO"));
             condList.add(EntityCondition.makeCondition("partyRelationshipTypeId", "EMPLOYMENT"));
