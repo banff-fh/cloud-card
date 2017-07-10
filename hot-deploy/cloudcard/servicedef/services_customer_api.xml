@@ -126,7 +126,9 @@
 		<attribute name="latitude" type="String" mode="OUT" optional="true"><description>纬度</description></attribute>
 		<attribute name="isHasCard" type="String" mode="OUT" optional="true"><description>是否有卡</description></attribute>
 		<attribute name="ossUrl" type="String" mode="OUT" optional="true"><description>oss外网访问地址</description></attribute>
-		<attribute name="storeInfoImgList" type="List" mode="OUT" optional="true"><description>店铺图片信息</description></attribute>
+		<attribute name="bizLicImgList" type="List" mode="OUT" optional="true"><description>店铺营业执照信息</description></attribute>
+		<attribute name="bizAvatarImgList" type="List" mode="OUT" optional="true"><description>店铺头像卡片信息</description></attribute>
+		<attribute name="bizDetailsList" type="List" mode="OUT" optional="true"><description>店铺图片信息</description></attribute>
 		<attribute name="storeCode" type="String" mode="OUT" optional="true"><description>店铺二维码信息</description></attribute>
 		<attribute name="storeSaleLevel" type="String" mode="OUT" optional="true"><description>店铺等级信息</description></attribute>
 	</service>

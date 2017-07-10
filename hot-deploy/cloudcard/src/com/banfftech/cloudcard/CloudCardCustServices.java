@@ -131,23 +131,23 @@ public class CloudCardCustServices {
 					boolean isGroupOwner = CloudCardHelper.isStoreGroupOwner(delegator,jsonArray.getJSONObject(i).getObject("storeId", String.class), true);
 					context.put("storeId", jsonArray.getJSONObject(i).getObject("storeId",String.class));
 					//获取店铺信息
-					Map<String,Object> stroeInfo = userGetStoreInfo(dctx, context);
+					Map<String,Object> storeInfo = userGetStoreInfo(dctx, context);
 
 					//如果店铺状态为PARTY_DISABLED则跳出循环
-					if("PARTY_DISABLED".equals(stroeInfo.get("statusId"))){
+					if("PARTY_DISABLED".equals(storeInfo.get("statusId"))){
 						continue;
 			        }
 
 					Map<String, Object> storeMap = FastMap.newInstance();
-					storeMap.put("storeName",stroeInfo.get("storeName"));
-					storeMap.put("address",stroeInfo.get("storeAddress"));
-					storeMap.put("telNum",stroeInfo.get("storeTeleNumber"));
-					storeMap.put("storeId",stroeInfo.get("storeId"));
+					storeMap.put("storeName",storeInfo.get("storeName"));
+					storeMap.put("address",storeInfo.get("storeAddress"));
+					storeMap.put("telNum",storeInfo.get("storeTeleNumber"));
+					storeMap.put("storeId",storeInfo.get("storeId"));
 					storeMap.put("isGroupOwner",CloudCardHelper.bool2YN(isGroupOwner));
-					storeMap.put("isHasCard",stroeInfo.get("isHasCard"));
+					storeMap.put("isHasCard",storeInfo.get("isHasCard"));
 					storeMap.put("distance",jsonArray.getJSONObject(i).getObject("distance",String.class) );
-					if (UtilValidate.isNotEmpty(stroeInfo.get("longitude")) && UtilValidate.isNotEmpty(stroeInfo.get("latitude"))) {
-						storeMap.put("location", "["+stroeInfo.get("longitude")+","+stroeInfo.get("latitude")+"]");
+					if (UtilValidate.isNotEmpty(storeInfo.get("longitude")) && UtilValidate.isNotEmpty(storeInfo.get("latitude"))) {
+						storeMap.put("location", "["+storeInfo.get("longitude")+","+storeInfo.get("latitude")+"]");
 					} else {
 						storeMap.put("location", jsonArray.getJSONObject(i).getObject("location", String.class));
 					}
@@ -217,11 +217,28 @@ public class CloudCardCustServices {
         	longitude = (String) geoAndContactMechInfoMap.get("longitude");
         	latitude = (String) geoAndContactMechInfoMap.get("latitude");
         }
+        //获取商家营业执照
+        List<GenericValue> bizLicImgList = FastList.newInstance();
+        try {
+        	bizLicImgList = delegator.findByAnd("PartyContentAndDataResourceDetail", UtilMisc.toMap("partyId", storeId,"partyContentTypeId", "STORE_IMG","contentTypeId","ACTIVITY_PICTURE","statusId","CTNT_IN_PROGRESS", "dataResourceName","bizLic"));
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+
+        //获取商家招牌照片
+        List<GenericValue> bizAvatarImgList = FastList.newInstance();
+        try {
+        	bizAvatarImgList = delegator.findByAnd("PartyContentAndDataResourceDetail", UtilMisc.toMap("partyId", storeId,"partyContentTypeId", "STORE_IMG","contentTypeId","ACTIVITY_PICTURE","statusId","CTNT_IN_PROGRESS", "dataResourceName","bizAvatar"));
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
 
         //获取店家商铺详细信息
-        List<GenericValue> storeInfoImgList = FastList.newInstance();
+        List<GenericValue> bizDetailsList = FastList.newInstance();
         try {
-        	storeInfoImgList = delegator.findByAnd("PartyContentAndDataResourceDetail", UtilMisc.toMap("partyId", storeId,"partyContentTypeId", "STORE_IMG","contentTypeId","ACTIVITY_PICTURE","statusId","CTNT_IN_PROGRESS"));
+        	bizDetailsList = delegator.findByAnd("PartyContentAndDataResourceDetail", UtilMisc.toMap("partyId", storeId,"partyContentTypeId", "STORE_IMG","contentTypeId","ACTIVITY_PICTURE","statusId","CTNT_IN_PROGRESS", "dataResourceName","bizDetails"));
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
@@ -268,7 +285,9 @@ public class CloudCardCustServices {
 		result.put("longitude", longitude);
 		result.put("latitude", latitude);
 		result.put("isHasCard", isHasCard);
-		result.put("storeInfoImgList", storeInfoImgList);
+		result.put("bizLicImgList", bizLicImgList);
+		result.put("bizAvatarImgList", bizAvatarImgList);
+		result.put("bizDetailsList", bizDetailsList);
 		result.put("storeCode", storeCode);
 		result.put("ossUrl", ossUrl);
 		result.put("storeSaleLevel", storeSaleLevel);
@@ -984,16 +1003,16 @@ public class CloudCardCustServices {
     	//获取店铺信息
     	for(GenericValue cloudcardGeo : cloudcardGeoList){
     		context.put("storeId", cloudcardGeo.getString("partyId"));
-			Map<String,Object> stroeInfo = userGetStoreInfo(dctx, context);
+			Map<String,Object> storeInfo = userGetStoreInfo(dctx, context);
 			Map<String, Object> storeMap = FastMap.newInstance();
-			storeMap.put("storeName",stroeInfo.get("storeName"));
-			storeMap.put("address",stroeInfo.get("storeAddress"));
-			storeMap.put("telNum",stroeInfo.get("storeTeleNumber"));
-			storeMap.put("storeId",stroeInfo.get("storeId"));
+			storeMap.put("storeName",storeInfo.get("storeName"));
+			storeMap.put("address", storeInfo.get("storeAddress"));
+			storeMap.put("telNum", storeInfo.get("storeTeleNumber"));
+			storeMap.put("storeId", storeInfo.get("storeId"));
 			//storeMap.put("isGroupOwner",CloudCardHelper.bool2YN(isGroupOwner));
-			storeMap.put("isHasCard",stroeInfo.get("isHasCard"));
-			if (UtilValidate.isNotEmpty(stroeInfo.get("longitude")) && UtilValidate.isNotEmpty(stroeInfo.get("latitude"))) {
-				storeMap.put("location", "["+stroeInfo.get("longitude")+","+stroeInfo.get("latitude")+"]");
+			storeMap.put("isHasCard", storeInfo.get("isHasCard"));
+			if (UtilValidate.isNotEmpty(storeInfo.get("longitude")) && UtilValidate.isNotEmpty(storeInfo.get("latitude"))) {
+				storeMap.put("location", "["+storeInfo.get("longitude")+","+storeInfo.get("latitude")+"]");
 			}
 			String storeImg = EntityUtilProperties.getPropertyValue("cloudcard","cardImg." + cloudcardGeo.getString("partyId"),delegator);
 			storeMap.put("storeImg",storeImg);
