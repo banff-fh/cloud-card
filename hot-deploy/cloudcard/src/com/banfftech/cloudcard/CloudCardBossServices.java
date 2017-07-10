@@ -3470,7 +3470,7 @@ public class CloudCardBossServices {
 			}
 
 			//修改店铺地址
-			Map<String, Object> partyPostalAddressMap = dispatcher.runSync("getPartyPostalAddress", UtilMisc.toMap("partyId", storeId));
+			Map<String, Object> partyPostalAddressMap = dispatcher.runSync("getPartyPostalAddress", UtilMisc.toMap("userLogin", userLogin, "partyId", storeId));
 			if(UtilValidate.isNotEmpty(partyPostalAddressMap)){
 				String contactMechId = (String) partyPostalAddressMap.get("contactMechId");
 				GenericValue postalAddress = delegator.findByPrimaryKey("PostalAddress", UtilMisc.toMap("contactMechId", contactMechId));
