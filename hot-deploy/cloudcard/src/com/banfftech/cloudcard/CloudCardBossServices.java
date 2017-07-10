@@ -2450,7 +2450,7 @@ public class CloudCardBossServices {
 	 */
 	public static Map<String, Object> bizUploadStoreInfoImg(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
-		// Delegator delegator = dctx.getDelegator();
+		Delegator delegator = dctx.getDelegator();
 		Locale locale = (Locale) context.get("locale");
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 
@@ -2479,6 +2479,39 @@ public class CloudCardBossServices {
 				return uploadMap;
 			}
 			String key = (String) uploadMap.get("key");
+
+			//如果是店铺招牌头像，系统只允许一张图片,如果系统存在招牌图片则删除
+			if(CloudCardConstant.BIZ__STORE_AVATAR_DIR.equals(storeImgType)){
+				// 获取店家商铺招牌图片路径
+				List<GenericValue> bizAvatarImgList = FastList.newInstance();
+				try {
+					bizAvatarImgList = delegator.findByAnd("PartyContentAndDataResourceDetail",
+							UtilMisc.toMap("partyId", organizationPartyId, "partyContentTypeId", "STORE_IMG", "contentTypeId",
+									"ACTIVITY_PICTURE", "statusId", "CTNT_IN_PROGRESS","dataResourceName","bizAvatar"));
+				} catch (GenericEntityException e) {
+					Debug.logError(e.getMessage(), module);
+					return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,
+							"CloudCardInternalServiceError", locale));
+				}
+				//删除原有店铺招牌图片
+				if(UtilValidate.isNotEmpty(bizAvatarImgList)){
+					for(GenericValue bizAvatar : bizAvatarImgList){
+						GenericValue content = delegator.findByPrimaryKey("Content", UtilMisc.toMap("contentId", bizAvatar.getString("contentId")));
+						String dataResourceId = content.getString("dataResourceId");
+						GenericValue dataResource = delegator.findByPrimaryKey("DataResource",
+								UtilMisc.toMap("dataResourceId", dataResourceId));
+
+						// 修改content状态
+						content.put("statusId", "CTNT_DEACTIVATED");
+						content.store();
+
+						// 修改dataResource状态
+						dataResource.put("statusId", "CTNT_DEACTIVATED");
+						dataResource.store();
+					}
+				}
+
+			}
 
 			// 1.CREATE DATA RESOURCE
 			Map<String, Object> createDataResourceMap = UtilMisc.toMap("userLogin", userLogin, "partyId",
@@ -2512,6 +2545,10 @@ public class CloudCardBossServices {
 			}
 
 		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,
+					"CloudCardInternalServiceError", locale));
+		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,
 					"CloudCardInternalServiceError", locale));
@@ -2555,7 +2592,7 @@ public class CloudCardBossServices {
 			}
 
 			// 删除oss文件
-			dispatcher.runSync("delFile", UtilMisc.toMap("userLogin", userLogin, "key", key));
+			//dispatcher.runSync("delFile", UtilMisc.toMap("userLogin", userLogin, "key", key));
 
 			// 修改content状态
 			content.put("statusId", "CTNT_DEACTIVATED");
