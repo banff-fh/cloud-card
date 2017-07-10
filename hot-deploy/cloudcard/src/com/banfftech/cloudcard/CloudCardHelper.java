@@ -1342,4 +1342,70 @@ public class CloudCardHelper {
 		return aliPayMap;
     }
 
+    /**
+     * 根据店铺获取法人信息
+     *
+     * @param
+     *
+     * @return
+     */
+    public static Map<String, Object> getLegalRepInfoByStoreId(Delegator delegator, Locale locale, String storeId) {
+        String legalName = "";
+        String legalTeleNumber = "";
+
+        GenericValue  partyRelationship = null;
+        try {
+        	List<EntityCondition> condList = FastList.newInstance();
+            condList.add(EntityCondition.makeCondition("partyIdTo", storeId));
+            condList.add(EntityCondition.makeCondition("roleTypeIdTo", "LEGAL_REP"));
+            condList.add(EntityCondition.makeCondition("roleTypeIdFrom", "INTERNAL_ORGANIZATIO"));
+            condList.add(EntityCondition.makeCondition("partyRelationshipTypeId", "EMPLOYMENT"));
+            condList.add(EntityUtil.getFilterByDateExpr());
+            EntityCondition condition = EntityCondition.makeCondition(condList);
+            partyRelationship = EntityUtil.getFirst( delegator.findList("PartyRelationship", condition, null, null, null, false));
+
+        } catch (GenericEntityException e) {
+            Debug.logError(e, "Problem finding PartyRelationships. ", module);
+            return null;
+        }
+        if (UtilValidate.isEmpty(partyRelationship)) {
+            return null;
+        }
+        String partyId = partyRelationship.getString("partyIdTo");
+        //查找法人姓名
+        GenericValue person;
+		try {
+			person = delegator.findByPrimaryKey("Person", UtilMisc.toMap("partyId", partyId));
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+		if(UtilValidate.isNotEmpty(person)){
+			legalName = person.getString("lastName");
+		}
+
+        //查找法人电话号码
+        GenericValue partyAndContactMech;
+        try {
+        	List<EntityCondition> pcmCondList = FastList.newInstance();
+        	pcmCondList.add(EntityCondition.makeCondition("partyId", partyId ));
+        	pcmCondList.add(EntityCondition.makeCondition("contactMechTypeId", "TELECOM_NUMBER"));
+            EntityCondition condition = EntityCondition.makeCondition(pcmCondList);
+            partyAndContactMech = EntityUtil.getFirst(delegator.findList("PartyAndContactMech", condition, null, null, null, true));
+        } catch (GenericEntityException e) {
+            Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+        }
+
+        if (UtilValidate.isNotEmpty(partyAndContactMech)) {
+        	legalTeleNumber = (String) partyAndContactMech.get("tnContactNumber");
+        }
+
+        // 返回结果
+        Map<String, Object> result = ServiceUtil.returnSuccess();
+        result.put("legalName", legalName);
+        result.put("legalTeleNumber", legalTeleNumber);
+        return result;
+    }
+
 }

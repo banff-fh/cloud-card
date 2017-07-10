@@ -217,6 +217,7 @@ public class CloudCardCustServices {
         	longitude = (String) geoAndContactMechInfoMap.get("longitude");
         	latitude = (String) geoAndContactMechInfoMap.get("latitude");
         }
+
         //获取商家营业执照
         List<GenericValue> bizLicImgList = FastList.newInstance();
         try {
@@ -274,6 +275,16 @@ public class CloudCardCustServices {
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 
+        //获取店铺法人信息
+        String legalName = "";
+        String legalTeleNumber = "";
+
+        Map<String,Object> legalRepInfoMap = CloudCardHelper.getLegalRepInfoByStoreId(delegator, locale, storeId);
+        if(UtilValidate.isNotEmpty(legalRepInfoMap)){
+        	legalName = (String) legalRepInfoMap.get("legalName");
+        	legalTeleNumber = (String) legalRepInfoMap.get("legalTeleNumber");
+        }
+
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("storeId", storeId);
@@ -291,6 +302,8 @@ public class CloudCardCustServices {
 		result.put("storeCode", storeCode);
 		result.put("ossUrl", ossUrl);
 		result.put("storeSaleLevel", storeSaleLevel);
+		result.put("legalName", legalName);
+		result.put("legalTeleNumber", legalTeleNumber);
 
 		return result;
 	}
