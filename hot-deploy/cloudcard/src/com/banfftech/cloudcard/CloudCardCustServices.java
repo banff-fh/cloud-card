@@ -796,7 +796,7 @@ public class CloudCardCustServices {
         try {
         	GenericValue person = delegator.findByPrimaryKeyCache("Person", UtilMisc.toMap("partyId", partyId));
         	if(UtilValidate.isNotEmpty(person)){
-        		userName = (String) person.get("lastName");
+        		userName = (String) person.get("firstName");
         	}
 
         	List<GenericValue> partyAndTelecomNumbers = delegator.findByAnd("PartyAndTelecomNumber", UtilMisc.toMap("partyId",partyId,"statusId","PARTY_ENABLED","statusId", "LEAD_ASSIGNED"));
@@ -855,7 +855,8 @@ public class CloudCardCustServices {
         GenericValue person;
 		try {
 			person = delegator.findByPrimaryKey("Person", UtilMisc.toMap("partyId", partyId));
-			person.set("lastName", userName);
+			person.set("lastName", "86");
+			person.set("firstName", userName);
 	        person.store();
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);

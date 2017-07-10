@@ -2629,7 +2629,7 @@ public class CloudCardBossServices {
 			cloudCardInfoSet.add("ownerPartyId");
 			cloudCardInfoSet.add("paymentMethodId");
 			cloudCardInfoSet.add("description");
-			cloudCardInfoSet.add("lastName");
+			cloudCardInfoSet.add("firstName");
 			List<GenericValue> finAccountList = delegator.findList("CloudCardInfo", cloudCardInfoEntityCondition,
 					cloudCardInfoSet, UtilMisc.toList("-actualBalance"), null, false);
 
@@ -2646,7 +2646,7 @@ public class CloudCardBossServices {
 				finAccountMap.put("ownerPartyId", finAccount.getString("ownerPartyId"));
 				finAccountMap.put("paymentMethodId", finAccount.getString("paymentMethodId"));
 				finAccountMap.put("description", finAccount.getString("description"));
-				finAccountMap.put("lastName", finAccount.getString("lastName"));
+				finAccountMap.put("firstName", finAccount.getString("firstName"));
 				if (UtilValidate.isNotEmpty(partyAndTelecomNumbers)) {
 					GenericValue partyAndTelecomNumber = partyAndTelecomNumbers.get(0);
 					String contactNumber = partyAndTelecomNumber.getString("contactNumber");
@@ -3462,7 +3462,7 @@ public class CloudCardBossServices {
 			GenericValue person;
 			try {
 				person = delegator.findByPrimaryKey("Person", UtilMisc.toMap("partyId", legalId));
-				person.set("lastName", legalName);
+				person.set("firstName", legalName);
 		        person.store();
 			} catch (GenericEntityException e) {
 				Debug.logError(e.getMessage(), module);
