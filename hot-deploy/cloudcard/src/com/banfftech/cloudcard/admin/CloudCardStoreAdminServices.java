@@ -170,12 +170,19 @@ public class CloudCardStoreAdminServices {
                 if (ServiceUtil.isError(ensurePartyRoleOut)) {
                     return ensurePartyRoleOut;
                 }
-                // 关联店主与店
-                Map<String, Object> relationOutMap = dispatcher.runSync("createPartyRelationship",
+                // 关联店主与店(管理员)
+                Map<String, Object> managerRelationOutMap = dispatcher.runSync("createPartyRelationship",
                         UtilMisc.toMap("userLogin", userLogin, "partyIdFrom", cloudCardStroreId, "partyIdTo", storeOwnerPartyId, "roleTypeIdFrom",
-                                "INTERNAL_ORGANIZATIO", "roleTypeIdTo", "MANAGER", "partyRelationshipTypeId", "LEGAL_PERSON"));
-                if (ServiceUtil.isError(relationOutMap)) {
-                    return relationOutMap;
+                                "INTERNAL_ORGANIZATIO", "roleTypeIdTo", "MANAGER", "partyRelationshipTypeId", "EMPLOYMENT"));
+                if (ServiceUtil.isError(managerRelationOutMap)) {
+                    return managerRelationOutMap;
+                }
+                //关联店主与店(法人)
+                Map<String, Object> legalRepRelationOutMap = dispatcher.runSync("createPartyRelationship",
+                        UtilMisc.toMap("userLogin", userLogin, "partyIdFrom", cloudCardStroreId, "partyIdTo", storeOwnerPartyId, "roleTypeIdFrom",
+                                "INTERNAL_ORGANIZATIO", "roleTypeIdTo", "LEGAL_REP", "partyRelationshipTypeId", "EMPLOYMENT"));
+                if (ServiceUtil.isError(legalRepRelationOutMap)) {
+                    return legalRepRelationOutMap;
                 }
 
             }

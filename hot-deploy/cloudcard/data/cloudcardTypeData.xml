@@ -205,5 +205,6 @@
 
 	<!-- 法人 -->
     <PartyRelationshipType description="" hasTable="N" parentTypeId="" partyRelationshipName="legal person" partyRelationshipTypeId="LEGAL_PERSON" roleTypeIdValidFrom="" roleTypeIdValidTo=""/>
+    <RoleType description="legal representative" hasTable="N" parentTypeId="EMPLOYEE" roleTypeId="LEGAL_REP"/>
 
 </entity-engine-xml>
