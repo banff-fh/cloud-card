@@ -227,5 +227,6 @@
 	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/alipay-sdk-java20170607114101.jar"/>
 	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/jiguang-common-1.0.6.jar"/>
 	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/jpush-client-3.2.19.jar"/>
+	<classpathentry kind="lib" path="hot-deploy/cloudcard/lib/thumbnailator-0.4.8.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

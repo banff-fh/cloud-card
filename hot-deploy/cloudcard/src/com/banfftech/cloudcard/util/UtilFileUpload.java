@@ -1,6 +1,9 @@
 package com.banfftech.cloudcard.util;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -30,6 +33,8 @@ import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.model.ObjectMetadata;
 import com.aliyun.oss.model.PutObjectResult;
 import com.banfftech.cloudcard.constant.CloudCardConstant;
+
+import net.coobird.thumbnailator.Thumbnails;
 
 public class UtilFileUpload {
     public static String module = UtilFileUpload.class.getName();
@@ -85,8 +90,19 @@ public class UtilFileUpload {
                 contentType = gv.getString("mimeTypeId");
         }
 
-        if (UtilValidate.isNotEmpty(imageDataBytes)) {
-            InputStream input = new ByteArrayInputStream(imageDataBytes.array());
+		if (UtilValidate.isNotEmpty(imageDataBytes)) {
+			InputStream input = new ByteArrayInputStream(imageDataBytes.array());
+	        //压缩图片，试试效果
+			String newFileDir = "../cloud-card/hot-deploy/cloudcard/webapp/cloudcard/tmp/";
+			try {
+				Thumbnails.of(input).scale(1f).outputQuality(0.25f).toFile(new File(newFileDir + fileName + ".fileSuffix"));
+				File file = new File(newFileDir + fileName + ".fileSuffix");
+				input = new FileInputStream(file);
+				file.delete();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
             // 创建OSSClient实例
             OSSClient client = getNewOssClient(delegator);
             ObjectMetadata objectMeta = new ObjectMetadata();
