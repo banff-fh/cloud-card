@@ -1081,6 +1081,7 @@ public class CloudCardCustServices {
         String fileName = (String) context.get("_uploadedFile_fileName");// 文件名，必输
         String contentType = (String) context.get("_uploadedFile_contentType");// 文件mime类型，必输
 
+        String fileDir = CloudCardConstant.USER__STORE_AVATAR_DIR + "/";
         // system账户
         GenericValue systemUserLogin = (GenericValue) context.get("systemUserLogin");
         if (null == systemUserLogin) {
@@ -1094,7 +1095,7 @@ public class CloudCardCustServices {
 
 		try {
 			//上传oss
-			Map<String, Object> uploadMap = dispatcher.runSync("upload", UtilMisc.toMap("userLogin",userLogin,"uploadedFile", imageDataBytes, "_uploadedFile_fileName", fileName, "_uploadedFile_contentType", contentType));
+			Map<String, Object> uploadMap = dispatcher.runSync("upload", UtilMisc.toMap("userLogin",userLogin,"uploadedFile", imageDataBytes, "_uploadedFile_fileName", fileName, "_uploadedFile_contentType", contentType, "fileDir", fileDir));
             if (!ServiceUtil.isSuccess(uploadMap)) {
                 return uploadMap;
             }
@@ -1102,9 +1103,9 @@ public class CloudCardCustServices {
 
 			 // 1.CREATE DATA RESOURCE
 			Map<String, Object> createDataResourceMap = UtilMisc.toMap("userLogin", systemUserLogin, "partyId", partyId,
-					"dataResourceTypeId", "URL_RESOURCE", "dataCategoryId", "PERSONAL", "dataResourceName", key,
+					"dataResourceTypeId", "URL_RESOURCE", "dataCategoryId", "PERSONAL", "dataResourceName", CloudCardConstant.USER__STORE_AVATAR_DIR,
 					"mimeTypeId", contentType, "isPublic", "Y", "dataTemplateTypeId", "NONE", "statusId", "CTNT_PUBLISHED",
-					"objectInfo", key);
+					"objectInfo", fileDir + key);
 			Map<String, Object> serviceResultByDataResource = dispatcher.runSync("createDataResource",createDataResourceMap);
 			if (!ServiceUtil.isSuccess(serviceResultByDataResource)) {
 	            return serviceResultByDataResource;

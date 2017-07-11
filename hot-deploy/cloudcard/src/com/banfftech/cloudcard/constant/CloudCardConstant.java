@@ -190,5 +190,10 @@ public class CloudCardConstant {
      */
     public static final String BIZ__STORE_DETAILS_DIR = "bizDetails";
 
+    /**
+     * 用户头像路径{@value}
+     */
+    public static final String USER__STORE_AVATAR_DIR = "userAvatar";
+
 
 }
