@@ -3627,6 +3627,14 @@ public class CloudCardBossServices {
 				}
 			}
 
+			//提交申请
+			Map<String, Object> custReqMap = FastMap.newInstance();
+			custReqMap.put("fromPartyId",storeId);
+			custReqMap.put("custRequestName", "申请二级商家");
+			custReqMap.put("reason", "申请二级商家");
+			custReqMap.put("statusId", "CRQ_ACCEPTED");
+			custReqMap.put("createdByUserLogin", userLogin.getString("partyId"));
+			dispatcher.runSync("createCustRequest", custReqMap);
 		} catch (GenericServiceException e) {
 			Debug.logError(e.getMessage(), module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
