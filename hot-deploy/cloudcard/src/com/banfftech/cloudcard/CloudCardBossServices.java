@@ -2470,6 +2470,17 @@ public class CloudCardBossServices {
 			fileDir = CloudCardConstant.BIZ__STORE_DETAILS_DIR + "/";
 		}
 
+		// system账户
+        GenericValue systemUserLogin = (GenericValue) context.get("systemUserLogin");
+        if (null == systemUserLogin) {
+            try {
+                systemUserLogin = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
+            } catch (GenericEntityException e1) {
+                Debug.logError(e1.getMessage(), module);
+                return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+            }
+        }
+
 		try {
 			//如果是店铺招牌头像，系统只允许一张图片,如果系统存在招牌图片则删除
 			if(CloudCardConstant.BIZ__STORE_AVATAR_DIR.equals(storeImgType)){
@@ -2514,7 +2525,7 @@ public class CloudCardBossServices {
 			String key = (String) uploadMap.get("key");
 
 			// 1.CREATE DATA RESOURCE
-			Map<String, Object> createDataResourceMap = UtilMisc.toMap("userLogin", userLogin, "partyId",
+			Map<String, Object> createDataResourceMap = UtilMisc.toMap("userLogin", systemUserLogin, "partyId",
 					organizationPartyId, "dataResourceTypeId", "URL_RESOURCE", "dataCategoryId", "PERSONAL",
 					"dataResourceName", storeImgType, "mimeTypeId", contentType, "isPublic", "Y", "dataTemplateTypeId", "NONE",
 					"statusId", "CTNT_PUBLISHED", "objectInfo", fileDir + key);
@@ -2526,7 +2537,7 @@ public class CloudCardBossServices {
 			String dataResourceId = (String) serviceResultByDataResource.get("dataResourceId");
 
 			// 2.CREATE CONTENT type=ACTIVITY_PICTURE
-			Map<String, Object> createContentMap = UtilMisc.toMap("userLogin", userLogin, "contentTypeId",
+			Map<String, Object> createContentMap = UtilMisc.toMap("userLogin", systemUserLogin, "contentTypeId",
 					"ACTIVITY_PICTURE", "mimeTypeId", contentType, "dataResourceId", dataResourceId, "partyId",
 					organizationPartyId);
 			Map<String, Object> serviceResultByCreateContentMap = dispatcher.runSync("createContent", createContentMap);
@@ -2536,7 +2547,7 @@ public class CloudCardBossServices {
 			String contentId = (String) serviceResultByCreateContentMap.get("contentId");
 
 			// 3.CREATE PARTY CONTENT type=STORE_IMG
-			Map<String, Object> createPartyContentMap = UtilMisc.toMap("userLogin", userLogin, "partyId",
+			Map<String, Object> createPartyContentMap = UtilMisc.toMap("userLogin", systemUserLogin, "partyId",
 					organizationPartyId, "partyContentTypeId", "STORE_IMG", "contentId", contentId);
 			Map<String, Object> serviceResultByCreatePartyContentMap = dispatcher.runSync("createPartyContent",
 					createPartyContentMap);
