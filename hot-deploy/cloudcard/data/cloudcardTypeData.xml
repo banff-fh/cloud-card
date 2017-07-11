@@ -199,4 +199,7 @@
     <PartyRelationshipType description="" hasTable="N" parentTypeId="" partyRelationshipName="legal person" partyRelationshipTypeId="LEGAL_PERSON" roleTypeIdValidFrom="" roleTypeIdValidTo=""/>
     <RoleType description="legal representative" hasTable="N" parentTypeId="EMPLOYEE" roleTypeId="LEGAL_REP"/>
 
+    <!-- 申请二级店铺CustRequestType -->
+    <CustRequestType custRequestTypeId="RF_STORE_VIP" description="申请二级店铺" hasTable="N" parentTypeId=""/>
+
 </entity-engine-xml>
