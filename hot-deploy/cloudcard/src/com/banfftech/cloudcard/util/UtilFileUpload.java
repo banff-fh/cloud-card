@@ -95,8 +95,8 @@ public class UtilFileUpload {
 	        //压缩图片，试试效果
 			String newFileDir = "../cloud-card/hot-deploy/cloudcard/webapp/cloudcard/tmp/";
 			try {
-				Thumbnails.of(input).scale(1f).outputQuality(0.25f).toFile(new File(newFileDir + fileName + ".fileSuffix"));
-				File file = new File(newFileDir + fileName + ".fileSuffix");
+				Thumbnails.of(input).scale(1f).outputQuality(0.25f).toFile(new File(newFileDir + fileName));
+				File file = new File(newFileDir + fileName);
 				input = new FileInputStream(file);
 				file.delete();
 			} catch (IOException e) {
