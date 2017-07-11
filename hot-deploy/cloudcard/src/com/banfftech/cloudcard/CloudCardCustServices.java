@@ -1053,8 +1053,23 @@ public class CloudCardCustServices {
 			if (UtilValidate.isNotEmpty(storeInfo.get("longitude")) && UtilValidate.isNotEmpty(storeInfo.get("latitude"))) {
 				storeMap.put("location", "["+storeInfo.get("longitude")+","+storeInfo.get("latitude")+"]");
 			}
-			String storeImg = EntityUtilProperties.getPropertyValue("cloudcard","cardImg." + cloudcardGeo.getString("partyId"),delegator);
-			storeMap.put("storeImg",storeImg);
+
+
+			//String storeImg = EntityUtilProperties.getPropertyValue("cloudcard","cardImg." + cloudcardGeo.getString("partyId"),delegator);
+			//获取商家招牌照片
+	        GenericValue bizAvatarImg;
+	        try {
+	        	bizAvatarImg = EntityUtil.getFirst(delegator.findByAnd("PartyContentAndDataResourceDetail", UtilMisc.toMap("partyId", storeInfo.get("storeId"),"partyContentTypeId", "STORE_IMG","contentTypeId","ACTIVITY_PICTURE","statusId","CTNT_IN_PROGRESS", "dataResourceName","bizAvatar")));
+			} catch (GenericEntityException e) {
+				Debug.logError(e.getMessage(), module);
+	            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+			}
+	        String storeImg = "";
+			String ossUrl = EntityUtilProperties.getPropertyValue("cloudcard","oss.url",delegator);
+	        if(UtilValidate.isNotEmpty(bizAvatarImg)){
+	        	storeImg = ossUrl + bizAvatarImg.getString("objectInfo");
+	        }
+			storeMap.put("storeImg", storeImg);
 			storeList.add(storeMap);
     	}
 
