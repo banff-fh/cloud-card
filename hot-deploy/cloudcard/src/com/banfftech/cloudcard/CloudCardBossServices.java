@@ -3629,6 +3629,7 @@ public class CloudCardBossServices {
 
 			//提交申请
 			Map<String, Object> custReqMap = FastMap.newInstance();
+			custReqMap.put("userLogin", systemUserLogin);
 			custReqMap.put("fromPartyId",storeId);
 			custReqMap.put("custRequestName", "申请二级商家");
 			custReqMap.put("reason", "申请二级商家");
