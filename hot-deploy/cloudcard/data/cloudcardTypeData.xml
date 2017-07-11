@@ -56,14 +56,6 @@
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="jpush.userAppKey" systemPropertyValue="xxxxxx" description="极光推送用户appkey"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="jpush.userSecret" systemPropertyValue="xxxxxx" description="极光推送用户secret"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="jpush.setApnsProduction" systemPropertyValue="0" description="极光推送ios端是否上线，1为上线，其余未上线"/>
-	<SystemProperty systemResourceId="cloudcard" systemPropertyId="app.android.biz.update" systemPropertyValue="0" description="商户app安卓版是否强制更新"/>
-    <SystemProperty systemResourceId="cloudcard" systemPropertyId="app.android.biz.version" systemPropertyValue="1.0" description="商户app安卓版本号"/>
-    <SystemProperty systemResourceId="cloudcard" systemPropertyId="app.android.user.update" systemPropertyValue="0" description="用户app安卓版是否强制更新"/>
-    <SystemProperty systemResourceId="cloudcard" systemPropertyId="app.android.user.version" systemPropertyValue="1.0" description="商户app安卓版本号"/>
-    <SystemProperty systemResourceId="cloudcard" systemPropertyId="app.ios.biz.update" systemPropertyValue="0" description="商户app苹果版是否强制更新"/>
-    <SystemProperty systemResourceId="cloudcard" systemPropertyId="app.ios.biz.version" systemPropertyValue="1.0" description="商户app苹果版本号"/>
-    <SystemProperty systemResourceId="cloudcard" systemPropertyId="app.ios.user.update" systemPropertyValue="0" description="用户app苹果版是否强制更新"/>
-    <SystemProperty systemResourceId="cloudcard" systemPropertyId="app.ios.user.version" systemPropertyValue="1.0" description="用户app苹果版本号"/>
 
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="weixin.key" systemPropertyValue="xxxxxx" description="商户平台和开发平台约定的API密钥，在商户平台设置"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="weixin.notifyUrl" systemPropertyValue="xxxxx" description="微信回调地址"/>

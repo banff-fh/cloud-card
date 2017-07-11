@@ -207,7 +207,7 @@ public class CloudCardCustServices {
 			}
 		}
 
-		storeImg = EntityUtilProperties.getPropertyValue("cloudcard","cardImg." + storeId,delegator);
+		//storeImg = EntityUtilProperties.getPropertyValue("cloudcard","cardImg." + storeId,delegator);
 
 
 		Map<String, Object> geoAndContactMechInfoMap = CloudCardHelper.getGeoAndContactMechInfoByStoreId(delegator,locale,storeId);
@@ -235,6 +235,12 @@ public class CloudCardCustServices {
 			Debug.logError(e.getMessage(), module);
             return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
+
+        //店铺头像
+        if(UtilValidate.isNotEmpty(bizAvatarImgList)){
+            GenericValue bizAvatarImg = EntityUtil.getFirst(bizAvatarImgList);
+            storeImg = bizAvatarImg.getString("objectInfo");
+        }
 
         //获取店家商铺详细信息
         List<GenericValue> bizDetailsList = FastList.newInstance();
