@@ -3646,6 +3646,7 @@ public class CloudCardBossServices {
 				GenericValue custRequest = EntityUtil.getFirst(custRequests);
 				Map<String, Object> custReqMap = FastMap.newInstance();
 				custReqMap.put("userLogin", systemUserLogin);
+				custReqMap.put("custRequestId",custRequestId);
 				custReqMap.put("fromPartyId",storeId);
 				custReqMap.put("custRequestName", custRequest.getString("custRequestName"));
 				custReqMap.put("reason", custRequest.getString("reason"));
