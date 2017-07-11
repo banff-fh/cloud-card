@@ -3644,7 +3644,15 @@ public class CloudCardBossServices {
 				custRequestId = (String) createCRMap.get("custRequestId");
 			}else{
 				GenericValue custRequest = EntityUtil.getFirst(custRequests);
-				createCRMap = dispatcher.runSync("updateCustRequest", custRequest);
+				Map<String, Object> custReqMap = FastMap.newInstance();
+				custReqMap.put("userLogin", systemUserLogin);
+				custReqMap.put("fromPartyId",storeId);
+				custReqMap.put("custRequestName", custRequest.getString("custRequestName"));
+				custReqMap.put("reason", custRequest.getString("reason"));
+				custReqMap.put("statusId", custRequest.getString("statusId"));
+				custReqMap.put("custRequestTypeId", custRequest.getString("custRequestTypeId"));
+				custReqMap.put("createdByUserLogin", userLogin.getString("partyId"));
+				createCRMap = dispatcher.runSync("updateCustRequest", custReqMap);
 			}
 
 		} catch (GenericServiceException e) {
