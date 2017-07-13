@@ -475,7 +475,7 @@ public class CloudCardStoreAdminServices {
 		//确认申请
 		Map<String, Object> updateCRMapOut = FastMap.newInstance();
 		try {
-			GenericValue custRequest = EntityUtil.getFirst(delegator.findByAnd("CustRequest", UtilMisc.toMap("fromPartyId", storeId, "custRequestTypeId", "RF_STORE_VIP")));
+			GenericValue custRequest = EntityUtil.getFirst(delegator.findByAnd("CustRequest", UtilMisc.toMap("fromPartyId", storeId, "custRequestTypeId", "RF_STORE_VIP", "statusId", "CRQ_ACCEPTED")));
 			Map<String, Object> custReqMap = FastMap.newInstance();
 			custReqMap.put("custRequestId",custRequest.get("custRequestId"));
 			custReqMap.put("userLogin", systemUserLogin);
@@ -539,7 +539,7 @@ public class CloudCardStoreAdminServices {
 		//拒绝申请
 		Map<String, Object> updateCRMapOut = FastMap.newInstance();
 		try {
-			GenericValue custRequest = EntityUtil.getFirst(delegator.findByAnd("CustRequest", UtilMisc.toMap("fromPartyId", storeId, "custRequestTypeId", "RF_STORE_VIP")));
+			GenericValue custRequest = EntityUtil.getFirst(delegator.findByAnd("CustRequest", UtilMisc.toMap("fromPartyId", storeId, "custRequestTypeId", "RF_STORE_VIP","statusId", "CRQ_ACCEPTED")));
 			Map<String, Object> custReqMap = FastMap.newInstance();
 			custReqMap.put("custRequestId",custRequest.get("custRequestId"));
 			custReqMap.put("userLogin", systemUserLogin);

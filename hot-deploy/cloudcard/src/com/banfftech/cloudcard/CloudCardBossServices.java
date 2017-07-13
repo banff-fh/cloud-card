@@ -3640,7 +3640,7 @@ public class CloudCardBossServices {
 			}
 
 			//提交申请
-			List<GenericValue> custRequests = delegator.findByAnd("CustRequest", UtilMisc.toMap("fromPartyId", storeId, "custRequestTypeId", "RF_STORE_VIP"));
+			List<GenericValue> custRequests = delegator.findByAnd("CustRequest", UtilMisc.toMap("fromPartyId", storeId, "custRequestTypeId", "RF_STORE_VIP","statusId", "CRQ_ACCEPTED"));
 			Map<String, Object> createCRMap;
 			if(UtilValidate.isEmpty(custRequests)){
 				Map<String, Object> custReqMap = FastMap.newInstance();
