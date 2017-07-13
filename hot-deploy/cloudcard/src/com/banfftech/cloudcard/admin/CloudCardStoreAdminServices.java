@@ -351,6 +351,14 @@ public class CloudCardStoreAdminServices {
         return result;
     }
 
+    /**
+     * 后台页面确认店铺的二级申请
+     *
+     * @param dctx
+     * @param context
+     * @return
+     */
+
     public static Map<String, Object> createCloudCardVIPStore(DispatchContext dctx, Map<String, Object> context){
     	LocalDispatcher dispatcher = dctx.getDispatcher();
         Delegator delegator = dispatcher.getDelegator();
@@ -391,11 +399,12 @@ public class CloudCardStoreAdminServices {
 			}
 
 			String finAccountId  = finAccount.getString("finAccountId");
+			BigDecimal replenishLevel  = finAccount.getBigDecimal("replenishLevel");
 
 	        Map<String, Object> updateCreditLimitAccountOutMap;
 			try {
 				updateCreditLimitAccountOutMap = dispatcher.runSync("updateFinAccount",
-				        UtilMisc.toMap("userLogin", systemUserLogin,"finAccountId", finAccountId, "replenishLevel", creditLimit));
+				        UtilMisc.toMap("userLogin", systemUserLogin,"finAccountId", finAccountId, "replenishLevel",creditLimit.divide(replenishLevel)));
 			} catch (GenericServiceException e2) {
 				Debug.logError(e2.getMessage(), module);
 				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,"CloudCardInternalServiceError", locale));
@@ -442,9 +451,19 @@ public class CloudCardStoreAdminServices {
         Map<String, Object> updateStoreServiceLevelClassificationOutMap = FastMap.newInstance();
 		try {
 			GenericValue partyClassification = EntityUtil.getFirst(delegator.findByAnd("PartyClassification", UtilMisc.toMap("partyId", storeId, "partyClassificationGroupId", "STORE_SALE_LEVEL_1")));
-			partyClassification.set("partyClassificationGroupId", "STORE_SALE_LEVEL_2");
+			partyClassification.set("thruDate", UtilDateTime.nowTimestamp());
 			partyClassification.store();
+
+			//重新创建
+			Map<String, Object> creatStoreServiceLevelClassificationOutMap = dispatcher.runSync("createPartyClassification",
+                    UtilMisc.toMap("userLogin", systemUserLogin, "partyId", storeId, "partyClassificationGroupId", "STORE_SALE_LEVEL_2"));
+            if (!ServiceUtil.isSuccess(creatStoreServiceLevelClassificationOutMap)) {
+                return creatStoreServiceLevelClassificationOutMap;
+            }
 		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,"CloudCardInternalServiceError", locale));
+		} catch (GenericServiceException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,"CloudCardInternalServiceError", locale));
 		}
@@ -453,8 +472,94 @@ public class CloudCardStoreAdminServices {
             return updateStoreServiceLevelClassificationOutMap;
         }
 
+		//确认申请
+		Map<String, Object> updateCRMapOut = FastMap.newInstance();
+		try {
+			GenericValue custRequest = EntityUtil.getFirst(delegator.findByAnd("CustRequest", UtilMisc.toMap("fromPartyId", storeId, "custRequestTypeId", "RF_STORE_VIP")));
+			Map<String, Object> custReqMap = FastMap.newInstance();
+			custReqMap.put("custRequestId",custRequest.get("custRequestId"));
+			custReqMap.put("userLogin", systemUserLogin);
+			custReqMap.put("statusId", "CRQ_COMPLETED");
+			updateCRMapOut = dispatcher.runSync("updateCustRequest", custReqMap);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,"CloudCardInternalServiceError", locale));
+		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,"CloudCardInternalServiceError", locale));
+		}
+
+		if (!ServiceUtil.isSuccess(updateCRMapOut)) {
+            return updateCRMapOut;
+        }
+
         Map<String, Object> result = ServiceUtil.returnSuccess();
         result.put("storeId", storeId);
         return result;
     }
+
+    /**
+     * 后台页面拒绝店铺的二级申请
+     *
+     * @param dctx
+     * @param context
+     * @return
+     */
+    public static Map<String, Object> refuseCreateCloudCardVIPStore(DispatchContext dctx, Map<String, Object> context){
+    	LocalDispatcher dispatcher = dctx.getDispatcher();
+        Delegator delegator = dispatcher.getDelegator();
+        Locale locale = (Locale) context.get("locale");
+
+    	String custRequestId = (String) context.get("custRequestId");
+
+    	// 后续可能要用到 system用户操作
+		GenericValue systemUserLogin = (GenericValue) context.get("systemUserLogin");
+		if (null == systemUserLogin) {
+			try {
+				systemUserLogin = delegator.findByPrimaryKeyCache("UserLogin",
+						UtilMisc.toMap("userLoginId", "system"));
+			} catch (GenericEntityException e1) {
+				Debug.logError(e1.getMessage(), module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,
+						"CloudCardInternalServiceError", locale));
+			}
+		}
+
+    	String storeId = null;
+		try {
+			GenericValue custRequest = delegator.findByPrimaryKey("CustRequest", UtilMisc.toMap("custRequestId", custRequestId));
+			if(UtilValidate.isNotEmpty(custRequest)){
+				storeId = custRequest.getString("fromPartyId");
+			}
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,"CloudCardInternalServiceError", locale));
+		}
+
+		//拒绝申请
+		Map<String, Object> updateCRMapOut = FastMap.newInstance();
+		try {
+			GenericValue custRequest = EntityUtil.getFirst(delegator.findByAnd("CustRequest", UtilMisc.toMap("fromPartyId", storeId, "custRequestTypeId", "RF_STORE_VIP")));
+			Map<String, Object> custReqMap = FastMap.newInstance();
+			custReqMap.put("custRequestId",custRequest.get("custRequestId"));
+			custReqMap.put("userLogin", systemUserLogin);
+			custReqMap.put("statusId", "CRQ_REVIEWED");
+			updateCRMapOut = dispatcher.runSync("updateCustRequest", custReqMap);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,"CloudCardInternalServiceError", locale));
+		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,"CloudCardInternalServiceError", locale));
+		}
+
+		if (!ServiceUtil.isSuccess(updateCRMapOut)) {
+            return updateCRMapOut;
+        }
+
+    	Map<String, Object> result = ServiceUtil.returnSuccess();
+        result.put("storeId", storeId);
+        return result;
+    }
+
 }

@@ -43,4 +43,13 @@
 
 		<attribute mode="OUT" name="storeId" type="String" optional="true"><description>返回的storeId</description></attribute>
     </service>
+
+    <service name="refuseCreateCloudCardVIPStore" engine="java"
+        invoke="refuseCreateCloudCardVIPStore" location="com.banfftech.cloudcard.admin.CloudCardStoreAdminServices" auth="true">
+        <description>创建云卡商家</description>
+		<attribute mode="IN" name="custRequestId" type="String" optional="false"><description>请求ID</description></attribute>
+
+		<attribute mode="OUT" name="storeId" type="String" optional="true"><description>返回的storeId</description></attribute>
+    </service>
+
 </services>
