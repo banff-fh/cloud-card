@@ -15,6 +15,7 @@ import org.ofbiz.base.util.UtilValidate;
 import org.ofbiz.entity.Delegator;
 import org.ofbiz.entity.GenericEntityException;
 import org.ofbiz.entity.GenericValue;
+import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
 import org.ofbiz.service.GenericServiceException;
@@ -347,6 +348,112 @@ public class CloudCardStoreAdminServices {
 
         Map<String, Object> result = ServiceUtil.returnSuccess();
         result.put("storeId", cloudCardStroreId);
+        return result;
+    }
+
+    public static Map<String, Object> createCloudCardVIPStore(DispatchContext dctx, Map<String, Object> context){
+    	LocalDispatcher dispatcher = dctx.getDispatcher();
+        Delegator delegator = dispatcher.getDelegator();
+        Locale locale = (Locale) context.get("locale");
+    	String custRequestId = (String) context.get("custRequestId");
+        BigDecimal creditLimit = (BigDecimal) context.get("creditLimit");
+		String allowCrossStorePay = (String) context.get("allowCrossStorePay"); // 是否允许本店的卡去跨店消费
+
+        // 后续可能要用到 system用户操作
+		GenericValue systemUserLogin = (GenericValue) context.get("systemUserLogin");
+		if (null == systemUserLogin) {
+			try {
+				systemUserLogin = delegator.findByPrimaryKeyCache("UserLogin",
+						UtilMisc.toMap("userLoginId", "system"));
+			} catch (GenericEntityException e1) {
+				Debug.logError(e1.getMessage(), module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,
+						"CloudCardInternalServiceError", locale));
+			}
+		}
+    	String storeId = null;
+		try {
+			GenericValue custRequest = delegator.findByPrimaryKey("CustRequest", UtilMisc.toMap("custRequestId", custRequestId));
+			if(UtilValidate.isNotEmpty(custRequest)){
+				storeId = custRequest.getString("fromPartyId");
+			}
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,"CloudCardInternalServiceError", locale));
+		}
+
+		//修改店家卖卡额度
+		try {
+			GenericValue finAccount = EntityUtil.getFirst(delegator.findByAnd("FinAccount", UtilMisc.toMap("ownerPartyId", storeId, "finAccountTypeId", "SVCCRED_ACCOUNT", "statusId", "FNACT_ACTIVE")));
+
+			if(UtilValidate.isEmpty(finAccount)){
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,"CloudCardInternalServiceError", locale));
+			}
+
+			String finAccountId  = finAccount.getString("finAccountId");
+
+	        Map<String, Object> updateCreditLimitAccountOutMap;
+			try {
+				updateCreditLimitAccountOutMap = dispatcher.runSync("updateFinAccount",
+				        UtilMisc.toMap("userLogin", systemUserLogin,"finAccountId", finAccountId, "replenishLevel", creditLimit));
+			} catch (GenericServiceException e2) {
+				Debug.logError(e2.getMessage(), module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,"CloudCardInternalServiceError", locale));
+			}
+
+	        if (!ServiceUtil.isSuccess(updateCreditLimitAccountOutMap)) {
+	            return updateCreditLimitAccountOutMap;
+	        }
+
+	        if (creditLimit.compareTo(CloudCardHelper.ZERO) > 0) {
+	            // 添加卖卡限额
+	            Map<String, Object> createFinAccountAuthOutMap = dispatcher.runSync("createFinAccountAuth",
+	                    UtilMisc.toMap("userLogin", systemUserLogin, "locale", locale, "currencyUomId", CloudCardConstant.DEFAULT_CURRENCY_UOM_ID, "finAccountId",
+	                    		finAccountId, "amount", creditLimit.negate(), "fromDate",
+	                            UtilDateTime.adjustTimestamp(UtilDateTime.nowTimestamp(), Calendar.SECOND, -2)));
+	            if (ServiceUtil.isError(createFinAccountAuthOutMap)) {
+	                return createFinAccountAuthOutMap;
+	            }
+	        }
+
+		} catch (GenericEntityException e3) {
+			Debug.logError(e3.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,"CloudCardInternalServiceError", locale));
+		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,"CloudCardInternalServiceError", locale));
+		}
+
+		//店家的卡是否可以跨店消费
+        allowCrossStorePay = allowCrossStorePay.toUpperCase();
+        Map<String, Object> updatePartyAttributeOutMap = FastMap.newInstance();
+		try {
+			updatePartyAttributeOutMap = dispatcher.runSync("updatePartyAttribute",
+			        UtilMisc.toMap("userLogin", systemUserLogin, "partyId", storeId, "attrName", "allowCrossStorePay", "attrValue", allowCrossStorePay));
+		} catch (GenericServiceException e1) {
+			Debug.logError(e1.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,"CloudCardInternalServiceError", locale));
+		}
+        if (!ServiceUtil.isSuccess(updatePartyAttributeOutMap)) {
+            return updatePartyAttributeOutMap;
+        }
+
+		// 店铺分类（一级经销商、二级经销商）
+        Map<String, Object> updateStoreServiceLevelClassificationOutMap = FastMap.newInstance();
+		try {
+			updateStoreServiceLevelClassificationOutMap = dispatcher.runSync("updatePartyClassification",
+			        UtilMisc.toMap("userLogin",systemUserLogin,"partyId", storeId, "partyClassificationGroupId", "STORE_SALE_LEVEL_2", "fromDate", UtilDateTime.nowTimestamp()));
+		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,"CloudCardInternalServiceError", locale));
+		}
+
+		if (!ServiceUtil.isSuccess(updateStoreServiceLevelClassificationOutMap)) {
+            return updateStoreServiceLevelClassificationOutMap;
+        }
+
+        Map<String, Object> result = ServiceUtil.returnSuccess();
+        result.put("storeId", storeId);
         return result;
     }
 }
