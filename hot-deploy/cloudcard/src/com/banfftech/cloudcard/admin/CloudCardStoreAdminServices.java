@@ -441,9 +441,10 @@ public class CloudCardStoreAdminServices {
 		// 店铺分类（一级经销商、二级经销商）
         Map<String, Object> updateStoreServiceLevelClassificationOutMap = FastMap.newInstance();
 		try {
-			updateStoreServiceLevelClassificationOutMap = dispatcher.runSync("updatePartyClassification",
-			        UtilMisc.toMap("userLogin",systemUserLogin,"partyId", storeId, "partyClassificationGroupId", "STORE_SALE_LEVEL_2", "fromDate", UtilDateTime.nowTimestamp()));
-		} catch (GenericServiceException e) {
+			GenericValue partyClassification = EntityUtil.getFirst(delegator.findByAnd("PartyClassification", UtilMisc.toMap("partyId", storeId, "partyClassificationGroupId", "STORE_SALE_LEVEL_1")));
+			partyClassification.set("partyClassificationGroupId", "STORE_SALE_LEVEL_2");
+			partyClassification.store();
+		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,"CloudCardInternalServiceError", locale));
 		}
