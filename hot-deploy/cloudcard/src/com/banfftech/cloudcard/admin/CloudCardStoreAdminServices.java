@@ -451,8 +451,10 @@ public class CloudCardStoreAdminServices {
         Map<String, Object> updateStoreServiceLevelClassificationOutMap = FastMap.newInstance();
 		try {
 			GenericValue partyClassification = EntityUtil.getFirst(delegator.findByAnd("PartyClassification", UtilMisc.toMap("partyId", storeId, "partyClassificationGroupId", "STORE_SALE_LEVEL_1")));
-			partyClassification.set("thruDate", UtilDateTime.nowTimestamp());
-			partyClassification.store();
+			if(UtilValidate.isNotEmpty(partyClassification)){
+				partyClassification.set("thruDate", UtilDateTime.nowTimestamp());
+				partyClassification.store();
+			}
 
 			//重新创建
 			Map<String, Object> creatStoreServiceLevelClassificationOutMap = dispatcher.runSync("createPartyClassification",
