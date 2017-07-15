@@ -2323,9 +2323,7 @@ public class CloudCardServices {
 		context.put("cardBalance", cardBalance);
 		Map<String, Object> sendMessageMap;
 		try {
-
-			sendMessageMap = dispatcher.runSync("sendMessage",smsMap);
-
+			sendMessageMap = dispatcher.runSync("sendMessage",context);
 		} catch (GenericServiceException e) {
 			Debug.logError(e.getMessage(), module);
   			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
