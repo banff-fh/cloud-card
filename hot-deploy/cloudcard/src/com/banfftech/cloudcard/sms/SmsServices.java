@@ -52,7 +52,7 @@ public class SmsServices {
 		smsTemplateCode = EntityUtilProperties.getPropertyValue("cloudcard",smsType,delegator);
 	}
 
-	public static Map<String, Object> sendMessage1(DispatchContext dctx, Map<String, Object> context) {
+	public static Map<String, Object> sendMessage(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
