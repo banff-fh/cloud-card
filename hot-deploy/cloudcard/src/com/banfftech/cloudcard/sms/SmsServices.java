@@ -82,20 +82,23 @@ public class SmsServices {
 			String amount = (String) context.get("amount");
 			String validTime = (String) context.get("validTime");
 			String code = (String) context.get("code");
+			String storeName = (String) context.get("storeName");
 
 			smsMap.put("money", amount);
 			smsMap.put("verfiyCode", code);
 			smsMap.put("time", validTime);
+			smsMap.put("storeName", storeName);
 			smsType = "sms.smsUserPayVCTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_RECHARGE_CAPTCHA_SMS_TYPE)){
 			String amount = (String) context.get("amount");
 			String validTime = (String) context.get("validTime");
 			String code = (String) context.get("code");
+			String storeName = (String) context.get("storeName");
 
 			smsMap.put("money", amount);
 			smsMap.put("verfiyCode", code);
 			smsMap.put("time", validTime);
-
+			smsMap.put("storeName", storeName);
 			smsType = "sms.smsUserRechargeVCTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_RECHARGE_SMS_TYPE)){
 			String amount = (String) context.get("amount");
@@ -185,7 +188,7 @@ public class SmsServices {
 		//初始化短信发送配置文件
 		getSmsProperty(delegator,smsType);
 		//发送短信
-		SMSClient client = new SMSClient("9b6b8fdb3aaf0da360a7b043", "0e48e52d81afa8142b7f4db3");
+		SMSClient client = new SMSClient(secret, appkey);
     	SMSPayload payload = SMSPayload.newBuilder()
                 .setMobildNumber(phone)
                 .setTempId(Integer.parseInt(smsTemplateCode))

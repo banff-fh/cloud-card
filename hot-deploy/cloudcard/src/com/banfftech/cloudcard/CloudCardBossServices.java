@@ -1772,11 +1772,13 @@ public class CloudCardBossServices {
 		Delegator delegator = dctx.getDelegator();
 		Locale locale = (Locale) context.get("locale");
 
+		String organizationPartyId = (String) context.get("organizationPartyId");
 		String teleNumber = (String) context.get("teleNumber");
 		BigDecimal amount = (BigDecimal) context.get("amount");
 		String smsType = CloudCardConstant.USER_RECHARGE_CAPTCHA_SMS_TYPE;
+
 		context.put("smsType", smsType);
-		context.put("amount", amount);
+		context.put("amount", amount.toString());
 		context.put("isValid", "N");
 
 		/*
@@ -1795,6 +1797,21 @@ public class CloudCardBossServices {
 		}
 		 */
 
+		//获取店铺名称
+		GenericValue partyGroup = null;
+		try {
+			partyGroup = CloudCardHelper.getPartyGroupByStoreId(organizationPartyId, delegator);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,
+					"CloudCardInternalServiceError", locale));
+		}
+
+		String storeName = "";
+		if (UtilValidate.isNotEmpty(partyGroup)) {
+			storeName = partyGroup.getString("groupName");
+		}
+		context.put("storeName", storeName);
 		Map<String, Object> result = SmsServices.getSMSCaptcha(dctx, context);
 		result.put("teleNumber", teleNumber);
 		result.put("amount", amount);
