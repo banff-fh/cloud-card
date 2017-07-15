@@ -285,4 +285,21 @@
             <description>退出登录</description>
     </service>
 
+	<service name="sendMessage" engine="java"
+			location="com.banfftech.cloudcard.CloudCardServices" invoke="sendMessage" auth="false">
+		<description>发送短信</description>
+		<attribute mode="IN" name="phone" type="String" optional="false"><description>短信接收人</description></attribute>
+		<attribute mode="IN" name="smsType" type="String" optional="false"><description>短信模版</description></attribute>
+		<attribute mode="IN" name="telNum" type="String" optional="true"><description>电话号码</description></attribute>
+		<attribute mode="IN" name="storeName" type="String" optional="true"><description>店名</description></attribute>
+		<attribute mode="IN" name="cardCode" type="String" optional="true"><description>卡号后四位</description></attribute>
+		<attribute mode="IN" name="amount" type="String" optional="true"><description>金额</description></attribute>
+		<attribute mode="IN" name="cardBalance" type="String" optional="true"><description>卡余额</description></attribute>
+		<attribute mode="IN" name="code" type="String" optional="true"><description>验证码</description></attribute>
+		<attribute mode="IN" name="authType" type="String" optional="true"><description>授权类型</description></attribute>
+		<attribute mode="IN" name="validTime" type="String" optional="true"><description>有效时间</description></attribute>
+		<attribute mode="IN" name="startTime" type="String" optional="true"><description>开始时间</description></attribute>
+		<attribute mode="IN" name="endTime" type="String" optional="true"><description>结束时间</description></attribute>
+	</service>
+
 </services>

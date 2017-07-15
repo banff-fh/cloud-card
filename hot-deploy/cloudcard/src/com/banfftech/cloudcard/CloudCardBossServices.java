@@ -2074,13 +2074,27 @@ public class CloudCardBossServices {
 					"CloudCardInternalServiceError", locale));
 		}
 
-		context.put("smsType", CloudCardConstant.USER_PAY_SMS_TYPE);
-		context.put("phone", teleNumber);
-		context.put("storeName", partyGroup.getString("groupName"));
-		context.put("amount", amount);
-		context.put("cardCode", cardCode.substring(cardCode.length() - 4, cardCode.length()));
-		context.put("cardBalance", cloudCardWithdrawOut.get("cardBalance"));
-		SmsServices.sendMessage(dctx, context);
+		//发送短信
+		Map<String, String> smsMap = FastMap.newInstance();
+		smsMap.put("smsType", CloudCardConstant.USER_PAY_SMS_TYPE);
+		smsMap.put("phone", teleNumber);
+		smsMap.put("storeName", partyGroup.getString("groupName"));
+		smsMap.put("amount", String.valueOf(amount));
+		smsMap.put("cardCode", cardCode.substring(cardCode.length() - 4, cardCode.length()));
+		smsMap.put("cardBalance", String.valueOf(cloudCardWithdrawOut.get("cardBalance")));
+
+		Map<String, Object> sendMap;
+		try {
+			sendMap = dispatcher.runSync("sendMessage", smsMap);
+		} catch (GenericServiceException e1) {
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,
+					"CloudCardInternalServiceError", locale));
+		}
+
+		if(!ServiceUtil.isSuccess(sendMap)){
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,
+					"CloudCardInternalServiceError", locale));
+		}
 
 		// 修改验证码状态
 		sms.set("isValid", "Y");
@@ -2261,13 +2275,25 @@ public class CloudCardBossServices {
 			customerPartyId = (String) rechargeCloudCardOutMap.get("customerPartyId");
 
 			// 发送充值短信
-			context.put("smsType", CloudCardConstant.USER_RECHARGE_SMS_TYPE);
-			context.put("phone", teleNumber);
-			context.put("storeName", partyGroup.getString("groupName"));
-			context.put("amount", amount);
-			context.put("cardCode", cardCode.substring(cardCode.length() - 4, cardCode.length()));
-			context.put("cardBalance", rechargeCloudCardOutMap.get("actualBalance"));
-			SmsServices.sendMessage(dctx, context);
+			Map<String, String> smsMap = FastMap.newInstance();
+			smsMap.put("smsType", CloudCardConstant.USER_RECHARGE_SMS_TYPE);
+			smsMap.put("phone", teleNumber);
+			smsMap.put("storeName", partyGroup.getString("groupName"));
+			smsMap.put("amount", String.valueOf(amount));
+			smsMap.put("cardCode", cardCode.substring(cardCode.length() - 4, cardCode.length()));
+			smsMap.put("cardBalance", String.valueOf(rechargeCloudCardOutMap.get("actualBalance")));
+			Map<String, Object> sendMap;
+			try {
+				sendMap = dispatcher.runSync("sendMessage", smsMap);
+			} catch (GenericServiceException e) {
+				Debug.logError(e.getMessage(), module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,
+						"CloudCardInternalServiceError", locale));
+			}
+			if(!ServiceUtil.isSuccess(sendMap)){
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,
+						"CloudCardInternalServiceError", locale));
+			}
 		}
 
 		// 修改验证码状态

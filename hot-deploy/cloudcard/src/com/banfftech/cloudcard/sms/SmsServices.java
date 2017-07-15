@@ -1,6 +1,5 @@
 package com.banfftech.cloudcard.sms;
 
-import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +24,7 @@ import org.ofbiz.entity.model.ModelEntity;
 import org.ofbiz.entity.util.EntityUtil;
 import org.ofbiz.entity.util.EntityUtilProperties;
 import org.ofbiz.service.DispatchContext;
+import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
@@ -32,94 +32,118 @@ import com.auth0.jwt.JWTSigner;
 import com.banfftech.cloudcard.CloudCardHelper;
 import com.banfftech.cloudcard.CloudCardQueryServices;
 import com.banfftech.cloudcard.constant.CloudCardConstant;
-import com.taobao.api.ApiException;
-import com.taobao.api.DefaultTaobaoClient;
-import com.taobao.api.TaobaoClient;
-import com.taobao.api.request.AlibabaAliqinFcSmsNumSendRequest;
-import com.taobao.api.response.AlibabaAliqinFcSmsNumSendResponse;
 
+import cn.jsms.api.SendSMSResult;
+import cn.jsms.api.common.SMSClient;
+import cn.jsms.api.common.model.SMSPayload;
 import javolution.util.FastList;
 import javolution.util.FastMap;
 
 public class SmsServices {
 	public static final String module = CloudCardQueryServices.class.getName();
 	public static final String resourceError = "cloudcardErrorUiLabels";
-	private static String url = null;
 	private static String appkey = null;
 	private static String secret = null;
-	private static String smsFreeSignName = null;
 	private static String smsTemplateCode = null;
 
 	public static void getSmsProperty(Delegator delegator,String smsType){
-		url = EntityUtilProperties.getPropertyValue("cloudcard","sms.url",delegator);
 		appkey = EntityUtilProperties.getPropertyValue("cloudcard","sms.appkey",delegator);
 		secret = EntityUtilProperties.getPropertyValue("cloudcard","sms.secret",delegator);
-		smsFreeSignName = EntityUtilProperties.getPropertyValue("cloudcard","sms.smsFreeSignName",delegator);
 		smsTemplateCode = EntityUtilProperties.getPropertyValue("cloudcard",smsType,delegator);
 	}
 
-	public static Map<String, Object> sendMessage(DispatchContext dctx, Map<String, Object> context) {
+	public static Map<String, Object> sendMessage1(DispatchContext dctx, Map<String, Object> context) {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
 		String phone = (String) context.get("phone");
 		String smsType = (String) context.get("smsType");
-		String smsParamString = "";
-		String captcha = (String) context.get("captcha");
 
+		//短信内容
+		Map<String, String> smsMap = FastMap.newInstance();
 		if(smsType.equals(CloudCardConstant.LOGIN_SMS_TYPE)){
-			smsParamString = "{code:'"+captcha+"',product:'"+"库胖"+"'}";
+			String code = (String) context.get("");
+
+			smsMap.put("code", code);
+			smsMap.put("product", "库胖");
 			smsType = "sms.smsLoginTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_PAY_SMS_TYPE)){
-			BigDecimal amount = (BigDecimal) context.get("amount");
+			String amount = (String) context.get("amount");
 			String storeName = (String) context.get("storeName");
-			BigDecimal cardBalance = (BigDecimal) context.get("cardBalance");
+			String cardBalance = (String) context.get("cardBalance");
 			String cardCode = (String) context.get("cardCode");
 
-			smsParamString = "{storeName:'"+storeName+"',amount:'"+amount+"',cardCode:'"+cardCode+"',cardBalance:'"+cardBalance+"'}";
+			smsMap.put("storeName", storeName);
+			smsMap.put("amount", amount);
+			smsMap.put("cardCode", cardCode);
+			smsMap.put("cardBalance", cardBalance);
 			smsType = "sms.smsUserPayTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_PAY_CAPTCHA_SMS_TYPE)){
 			String amount = (String) context.get("amount");
-			Integer validTime = (Integer) context.get("validTime");
-			smsParamString = "{money:'"+amount+"',verfiyCode:'"+captcha+"',time:'"+validTime+"'}";
+			String validTime = (String) context.get("validTime");
+			String code = (String) context.get("code");
+
+			smsMap.put("money", amount);
+			smsMap.put("verfiyCode", code);
+			smsMap.put("time", validTime);
 			smsType = "sms.smsUserPayVCTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_RECHARGE_CAPTCHA_SMS_TYPE)){
-			BigDecimal amount = (BigDecimal) context.get("amount");
-			Integer validTime = (Integer) context.get("validTime");
-			smsParamString = "{money:'"+amount+"',verfiyCode:'"+captcha+"',time:'"+validTime+"'}";
+			String amount = (String) context.get("amount");
+			String validTime = (String) context.get("validTime");
+			String code = (String) context.get("code");
+
+			smsMap.put("money", amount);
+			smsMap.put("verfiyCode", code);
+			smsMap.put("time", validTime);
+
 			smsType = "sms.smsUserRechargeVCTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_RECHARGE_SMS_TYPE)){
-			BigDecimal amount = (BigDecimal) context.get("amount");
+			String amount = (String) context.get("amount");
 			String storeName = (String) context.get("storeName");
 			String cardCode = (String) context.get("cardCode");
-			BigDecimal cardBalance = (BigDecimal) context.get("cardBalance");
+			String cardBalance = (String) context.get("cardBalance");
 
-			smsParamString = "{storeName:'"+storeName+"',cardCode:'"+ cardCode+"',cardBalance:'"+cardBalance+"',amount:'"+amount+"'}";
+			smsMap.put("storeName", storeName);
+			smsMap.put("cardCode", cardCode);
+			smsMap.put("cardBalance", cardBalance);
+			smsMap.put("amount", amount);
 			smsType = "sms.smsUserRechargeTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_PURCHASE_CARD_SMS_TYPE)){
 			String storeName = (String) context.get("storeName");
 			String cardCode = (String) context.get("cardCode");
-			BigDecimal cardBalance = (BigDecimal) context.get("cardBalance");
+			String cardBalance = (String) context.get("cardBalance");
 
-			smsParamString = "{storeName:'"+storeName+"',cardCode:'"+ cardCode+"',cardBalance:'"+cardBalance+"'}";
+			smsMap.put("storeName", storeName);
+			smsMap.put("cardCode", cardCode);
+			smsMap.put("cardBalance", cardBalance);
 			smsType = "sms.smsUserPurchaseCardTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_CREATE_CARD_AUTH_TYPE)){
 			String authType = (String) context.get("authType");
 			String storeName = (String) context.get("storeName");
 			String teleNumber = (String) context.get("teleNumber");
-			BigDecimal cardBalance = (BigDecimal) context.get("amount");
+			String cardBalance = (String) context.get("amount");
 
 			if("1".equals(authType)){
 				String date = (String) context.get("date");
-				smsParamString = "{teleNumber:'" + teleNumber + "',storeName:'" + storeName + "',cardBalance:'" + cardBalance + "',date:'" + date + "'}";
+				smsMap.put("teleNumber", teleNumber);
+				smsMap.put("storeName", storeName);
+				smsMap.put("cardBalance", cardBalance);
+				smsMap.put("date", date);
 				smsType = "sms.smsUserCreateCardAuthShortTimeTemplateCode";
 			}else if("2".equals(authType)){
-				smsParamString = "{teleNumber:'"+teleNumber+ "',storeName:'" + storeName + "',cardBalance:'"+ cardBalance + "'}";
+				smsMap.put("teleNumber", teleNumber);
+				smsMap.put("storeName", storeName);
+				smsMap.put("cardBalance", cardBalance);
 				smsType = "sms.smsUserCreateCardAuthLongTimeTemplateCode";
 			}else if("3".equals(authType)){
 				String startTime = (String) context.get("startTime");
 				String endTime = (String) context.get("endTime");
-				smsParamString = "{teleNumber:'"+teleNumber+ "',storeName:'" + storeName + "',cardBalance:'"+ cardBalance + "',startTime:'"+ startTime + "',endTime:'"+ endTime + "'}";
+
+				smsMap.put("teleNumber", teleNumber);
+				smsMap.put("storeName", storeName);
+				smsMap.put("cardBalance", cardBalance);
+				smsMap.put("startTime", startTime);
+				smsMap.put("endTime", endTime);
 				smsType = "sms.smsUserCreateCardAuthTimeIntervalTemplateCode";
 			}
 		}else if(smsType.equals(CloudCardConstant.USER_REVOKE_CARD_AUTH_TYPE)){
@@ -127,50 +151,56 @@ public class SmsServices {
 			String storeName = (String) context.get("storeName");
 			String cardCode = (String) context.get("cardCode");
 
-			smsParamString = "{teleNumber:'"+teleNumber+"',storeName:'"+ storeName+"',cardCode:'"+cardCode+"'}";
+			smsMap.put("teleNumber", teleNumber);
+			smsMap.put("storeName", storeName);
+			smsMap.put("cardCode", cardCode);
+
 			smsType = "sms.smsUserRevokeCardAuthTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_MODIFY_CARD_OWNER_TYPE)){
 			String teleNumber = (String) context.get("teleNumber");
 			String storeName = (String) context.get("storeName");
-			BigDecimal cardBalance = (BigDecimal) context.get("cardBalance");
+			String cardBalance = (String) context.get("cardBalance");
 
-			smsParamString = "{teleNumber:'"+teleNumber+"',storeName:'"+ storeName+"',cardBalance:'"+cardBalance+"'}";
+			smsMap.put("teleNumber", teleNumber);
+			smsMap.put("storeName", storeName);
+			smsMap.put("cardBalance", cardBalance);
 			smsType = "sms.smsModifyCardOwnerTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_PURCHASE_CARD_CAPTCHA_SMS_TYPE)){
 			String verfiyCode = (String) context.get("captcha");
-			Integer time = (Integer) context.get("validTime");
-			BigDecimal money = (BigDecimal) context.get("amount");
+			String time = (String) context.get("validTime");
+			String money = (String) context.get("amount");
 
-			smsParamString = "{money:'"+money+"',verfiyCode:'"+ verfiyCode+"',time:'"+time+"'}";
+			smsMap.put("money", money);
+			smsMap.put("verfiyCode", verfiyCode);
+			smsMap.put("time", time);
 			smsType = "sms.smsUserPurchaseCardVCTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.BIZ_CREATE_STORE_CAPTCHA)){
 			String verfiyCode = (String) context.get("captcha");
-			Integer time = (Integer) context.get("validTime");
+			String time = (String) context.get("validTime");
 
-			smsParamString = "{verfiyCode:'" + verfiyCode + "',time:'" + time + "'}";
+			smsMap.put("verfiyCode", verfiyCode);
+			smsMap.put("time", time);
 			smsType = "sms.smsBizCreateStoreVCTemplateCode";
 		}
 		//初始化短信发送配置文件
 		getSmsProperty(delegator,smsType);
 		//发送短信
-		TaobaoClient client = new DefaultTaobaoClient(url, appkey, secret);
-		AlibabaAliqinFcSmsNumSendRequest req = new AlibabaAliqinFcSmsNumSendRequest();
-		req.setExtend("");
-		req.setSmsType("normal");
-		req.setSmsFreeSignName(smsFreeSignName);
-		req.setSmsParamString(smsParamString);
-		req.setRecNum(phone);
-		req.setSmsTemplateCode(smsTemplateCode);
-		AlibabaAliqinFcSmsNumSendResponse rsp = null;
-		try {
-			rsp = client.execute(req);
-		} catch (ApiException e) {
+		SMSClient client = new SMSClient("9b6b8fdb3aaf0da360a7b043", "0e48e52d81afa8142b7f4db3");
+    	SMSPayload payload = SMSPayload.newBuilder()
+                .setMobildNumber(phone)
+                .setTempId(Integer.parseInt(smsTemplateCode))
+                .setTempPara(smsMap)
+                .build();
+    	try {
+            SendSMSResult res = client.sendTemplateSMS(payload);
+            if(res!=null && !res.isResultOK()){
+    			Debug.logWarning("something wrong when send the short message, response body:" + res.ERROR_MESSAGE_NONE, module);
+    		}
+		} catch (Exception e) {
 			Debug.logError(phone+"短信发送异常" + e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardSendMessageServiceError", UtilMisc.toMap("phone", phone),locale));
-		}
-		if(rsp!=null && !rsp.isSuccess()){
-			Debug.logWarning("something wrong when send the short message, response body:" + rsp.getBody(), module);
-		}
+        }
+
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		return result;
 	}
@@ -445,10 +475,18 @@ public class SmsServices {
 				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardSendFailedError", locale));
 			}
 			//发送短信
-			context.put("captcha", captcha);
-			context.put("phone", teleNumber);
-			context.put("validTime", validTime/60);
-			SmsServices.sendMessage(dctx, context);
+			Map<String, Object> sendMessageMap;
+			try {
+				sendMessageMap = dispatcher.runSync("sendMessage", UtilMisc.toMap("code", captcha, "phone", teleNumber, "validTime", validTime/60));
+
+			} catch (GenericServiceException e) {
+				Debug.logError(e, module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+			}
+
+			if(!ServiceUtil.isSuccess(sendMessageMap)){
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardSendFailedError", locale));
+			}
 		}
 
 		return ServiceUtil.returnSuccess();

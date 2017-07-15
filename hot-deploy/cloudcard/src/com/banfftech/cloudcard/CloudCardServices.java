@@ -265,13 +265,29 @@ public class CloudCardServices {
   			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
   		}
 
-	    context.put("smsType", CloudCardConstant.USER_CREATE_CARD_AUTH_TYPE);
-	    context.put("phone", teleNumber);
-	    context.put("authType", authType);
-	    context.put("teleNumber", ownTeleNumber);
-		context.put("storeName", storeName);
-		context.put("amount", amount);
-		SmsServices.sendMessage(dctx, context);
+
+		//发送短信
+  		Map<String, String> smsMap = FastMap.newInstance();
+  		smsMap.put("smsType", CloudCardConstant.USER_CREATE_CARD_AUTH_TYPE);
+  		smsMap.put("phone", teleNumber);
+  		smsMap.put("authType", authType);
+		smsMap.put("teleNumber", ownTeleNumber);
+		smsMap.put("storeName", storeName);
+		smsMap.put("amount", String.valueOf(amount));
+		Map<String, Object> sendMessageMap;
+		try {
+
+			sendMessageMap = dispatcher.runSync("sendMessage",smsMap);
+
+		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
+  			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+
+		}
+
+		if(!ServiceUtil.isSuccess(sendMessageMap)){
+  			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
 
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
@@ -408,12 +424,25 @@ public class CloudCardServices {
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 
-		context.put("smsType", CloudCardConstant.USER_REVOKE_CARD_AUTH_TYPE);
-		context.put("phone", toTeleNumber);
-	    context.put("teleNumber", ownTeleNumber);
-		context.put("storeName", storeName);
-		context.put("cardCode", cardCode);
-		SmsServices.sendMessage(dctx, context);
+		//发送短信
+		Map<String, String> smsMap = FastMap.newInstance();
+		smsMap.put("smsType", CloudCardConstant.USER_REVOKE_CARD_AUTH_TYPE);
+		smsMap.put("phone", toTeleNumber);
+		smsMap.put("teleNumber", ownTeleNumber);
+		smsMap.put("storeName", storeName);
+		smsMap.put("cardCode", cardCode);
+
+		Map<String, Object> sendMap;
+		try {
+			sendMap = dispatcher.runSync("sendMessage", smsMap);
+		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+
+		if(!ServiceUtil.isSuccess(sendMap)){
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
 
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
@@ -606,14 +635,25 @@ public class CloudCardServices {
 
 		//开卡成功后发送开卡短信通知
 		if(UtilValidate.isNotEmpty(teleNumber)){
-			cardCode = (String) context.get("cardCode");
-			context.put("smsType", CloudCardConstant.USER_PURCHASE_CARD_SMS_TYPE);
-			context.put("phone", teleNumber);
-			context.put("storeName", partyGroup.getString("groupName"));
-			context.put("cardCode", cardCode.substring(cardCode.length()-4,cardCode.length()));
-			context.put("cardBalance", rechargeCloudCardOutMap.get("actualBalance"));
-			SmsServices.sendMessage(dctx, context);
+			Map<String, String> smsMap = FastMap.newInstance();
+			smsMap.put("smsType", CloudCardConstant.USER_PURCHASE_CARD_SMS_TYPE);
+			smsMap.put("phone", teleNumber);
+			smsMap.put("storeName", partyGroup.getString("groupName"));
+			smsMap.put("cardCode", cardCode.substring(cardCode.length()-4,cardCode.length()));
+			smsMap.put("cardBalance", rechargeCloudCardOutMap.get("actualBalance").toString());
+			Map<String, Object> sendMap;
+			try {
+				sendMap = dispatcher.runSync("sendMessage", smsMap);
+			} catch (GenericServiceException e) {
+				Debug.logError(e, module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+			}
+			if(!ServiceUtil.isSuccess(sendMap)){
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+			}
 		}
+
+
 
 		//查找商家名称
 		//查找商家名称
@@ -2275,12 +2315,26 @@ public class CloudCardServices {
 		}
 
 		//转卡短信通知
-		context.put("smsType", CloudCardConstant.USER_MODIFY_CARD_OWNER_TYPE);
+  		Map<String, String> smsMap = FastMap.newInstance();
+  		context.put("smsType", CloudCardConstant.USER_MODIFY_CARD_OWNER_TYPE);
 	    context.put("phone", context.get("teleNumber"));
 	    context.put("teleNumber", teleNumber);
 		context.put("storeName", cloudCard.getString("distributorPartyName"));
 		context.put("cardBalance", cardBalance);
-		SmsServices.sendMessage(dctx, context);
+		Map<String, Object> sendMessageMap;
+		try {
+
+			sendMessageMap = dispatcher.runSync("sendMessage",smsMap);
+
+		} catch (GenericServiceException e) {
+			Debug.logError(e.getMessage(), module);
+  			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+
+		}
+
+		if(!ServiceUtil.isSuccess(sendMessageMap)){
+  			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
 
 		// 服务返回成功
 		Map<String, Object> retMap = ServiceUtil.returnSuccess();
