@@ -411,6 +411,7 @@ public class SmsServices {
 		String isValid = (String) context.get("isValid");
 		String smsType = (String) context.get("smsType");
 		String amount = (String) context.get("amount");
+		String storeName = (String) context.get("storeName");
 
 		//校验电话号码是否非法
 		Pattern p = Pattern.compile("^((13[0-9])|(15[^4,\\D])|(14[57])|(17[0])|(17[3])|(17[5])|(17[6])|(17[7])|(18[0,0-9]))\\d{8}$");
@@ -485,6 +486,10 @@ public class SmsServices {
 			if(UtilValidate.isNotEmpty(amount)){
 				smsMap.put("amount", amount);
 			}
+			if(UtilValidate.isNotEmpty(storeName)){
+				smsMap.put("storeName", storeName);
+			}
+
 			try {
 				sendMessageMap = dispatcher.runSync("sendMessage", smsMap);
 			} catch (GenericServiceException e) {

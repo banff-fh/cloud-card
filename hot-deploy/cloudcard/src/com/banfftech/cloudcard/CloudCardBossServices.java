@@ -1813,6 +1813,7 @@ public class CloudCardBossServices {
 		Delegator delegator = dctx.getDelegator();
 		Locale locale = (Locale) context.get("locale");
 
+		String organizationPartyId = (String) context.get("organizationPartyId");
 		String teleNumber = (String) context.get("teleNumber");
 		BigDecimal amount = (BigDecimal) context.get("amount");
 		String smsType = CloudCardConstant.USER_PAY_CAPTCHA_SMS_TYPE;
@@ -1831,7 +1832,23 @@ public class CloudCardBossServices {
 					UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserNotExistError", locale));
 		}
 
+		//获取店铺名称
+		GenericValue partyGroup = null;
+		try {
+			partyGroup = CloudCardHelper.getPartyGroupByStoreId(organizationPartyId, delegator);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,
+					"CloudCardInternalServiceError", locale));
+		}
+
+		String storeName = "";
+		if (UtilValidate.isNotEmpty(partyGroup)) {
+			storeName = partyGroup.getString("groupName");
+		}
+
 		//发送验证码短信
+		context.put("storeName", storeName);
 		context.put("teleNumber", teleNumber);
 		context.put("amount", amount.toString());
 		context.put("smsType", smsType);
