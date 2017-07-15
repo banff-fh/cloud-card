@@ -476,8 +476,13 @@ public class SmsServices {
 			}
 			//发送短信
 			Map<String, Object> sendMessageMap;
+			Map<String, String> smsMap = FastMap.newInstance();
+			smsMap.put("code", captcha);
+			smsMap.put("smsType", smsType);
+			smsMap.put("phone", teleNumber);
+			smsMap.put("validTime", String.valueOf(validTime/60));
 			try {
-				sendMessageMap = dispatcher.runSync("sendMessage", UtilMisc.toMap("code", captcha, "smsType", smsType, "phone", teleNumber, "validTime", validTime/60));
+				sendMessageMap = dispatcher.runSync("sendMessage", smsMap);
 			} catch (GenericServiceException e) {
 				Debug.logError(e, module);
 				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
