@@ -2318,7 +2318,7 @@ public class CloudCardServices {
   		Map<String, String> smsMap = FastMap.newInstance();
   		context.put("smsType", CloudCardConstant.USER_MODIFY_CARD_OWNER_TYPE);
 	    context.put("phone", context.get("teleNumber"));
-	    context.put("teleNumber", teleNumber);
+	    context.put("telNum", teleNumber);
 		context.put("storeName", cloudCard.getString("distributorPartyName"));
 		context.put("cardBalance", cardBalance);
 		Map<String, Object> sendMessageMap;
