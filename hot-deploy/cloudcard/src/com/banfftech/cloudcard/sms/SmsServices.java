@@ -178,7 +178,7 @@ public class SmsServices {
 			smsMap.put("time", time);
 			smsType = "sms.smsUserPurchaseCardVCTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.BIZ_CREATE_STORE_CAPTCHA)){
-			String verfiyCode = (String) context.get("captcha");
+			String verfiyCode = (String) context.get("code");
 			String time = (String) context.get("validTime");
 
 			smsMap.put("verfiyCode", verfiyCode);
