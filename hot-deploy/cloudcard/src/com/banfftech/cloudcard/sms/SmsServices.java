@@ -160,7 +160,7 @@ public class SmsServices {
 
 			smsType = "sms.smsUserRevokeCardAuthTemplateCode";
 		}else if(smsType.equals(CloudCardConstant.USER_MODIFY_CARD_OWNER_TYPE)){
-			String teleNumber = (String) context.get("teleNumber");
+			String teleNumber = (String) context.get("telNum");
 			String storeName = (String) context.get("storeName");
 			String cardBalance = (String) context.get("cardBalance");
 
