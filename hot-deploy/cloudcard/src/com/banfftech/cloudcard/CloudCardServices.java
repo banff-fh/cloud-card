@@ -527,19 +527,17 @@ public class CloudCardServices {
 			}
 
 			//生成的卡号
-			String newCardCode = null;
 			String description = partyGroup.getString("groupName")+"库胖卡";
-			String cardId = "";
 			Timestamp fromDate = UtilDateTime.adjustTimestamp(UtilDateTime.nowTimestamp(), Calendar.SECOND, -2);
 
 			try {
-				newCardCode = CloudCardHelper.generateCloudCardCode(delegator);
+				cardCode = CloudCardHelper.generateCloudCardCode(delegator);
 				String finAccountId = delegator.getNextSeqId("FinAccount");
 				Map<String, Object> finAccountMap = FastMap.newInstance();
 				finAccountMap.put("finAccountId", finAccountId);
 				finAccountMap.put("finAccountTypeId", "GIFTCERT_ACCOUNT");
 				finAccountMap.put("finAccountName", description);
-				finAccountMap.put("finAccountCode", newCardCode);
+				finAccountMap.put("finAccountCode", cardCode);
 				finAccountMap.put("organizationPartyId", CloudCardConstant.PLATFORM_PARTY_ID);
 				finAccountMap.put("ownerPartyId", customerPartyId);
 				finAccountMap.put("currencyUomId", "CNY");
@@ -560,7 +558,7 @@ public class CloudCardServices {
 	            // 创建PaymentMethod GiftCard
 	            Map<String, Object> giftCardInMap = FastMap.newInstance();
 	            giftCardInMap.putAll(context);
-	            giftCardInMap.put("cardNumber", newCardCode);
+	            giftCardInMap.put("cardNumber", cardCode);
 	            giftCardInMap.put("description", description);
 	            giftCardInMap.put("customerPartyId", customerPartyId);
 	            giftCardInMap.put("finAccountId", finAccountId);
@@ -570,7 +568,7 @@ public class CloudCardServices {
 	                return giftCardOutMap;
 	            }
 
-	    		context.put("cardCode", (String) newCardCode);
+	    		context.put("cardCode", (String) cardCode);
 	    		context.put("cardId", (String) giftCardOutMap.get("paymentMethodId"));
 
 			} catch (GenericEntityException e) {
