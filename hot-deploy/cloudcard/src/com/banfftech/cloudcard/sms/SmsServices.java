@@ -123,18 +123,18 @@ public class SmsServices {
 		}else if(smsType.equals(CloudCardConstant.USER_CREATE_CARD_AUTH_TYPE)){
 			String authType = (String) context.get("authType");
 			String storeName = (String) context.get("storeName");
-			String teleNumber = (String) context.get("teleNumber");
+			String telNum = (String) context.get("telNum");
 			String cardBalance = (String) context.get("amount");
 
 			if("1".equals(authType)){
-				String date = (String) context.get("date");
-				smsMap.put("teleNumber", teleNumber);
+				String validTime = (String) context.get("validTime");
+				smsMap.put("teleNumber", telNum);
 				smsMap.put("storeName", storeName);
 				smsMap.put("cardBalance", cardBalance);
-				smsMap.put("date", date);
+				smsMap.put("date", validTime);
 				smsType = "sms.smsUserCreateCardAuthShortTimeTemplateCode";
 			}else if("2".equals(authType)){
-				smsMap.put("teleNumber", teleNumber);
+				smsMap.put("teleNumber", telNum);
 				smsMap.put("storeName", storeName);
 				smsMap.put("cardBalance", cardBalance);
 				smsType = "sms.smsUserCreateCardAuthLongTimeTemplateCode";
@@ -142,7 +142,7 @@ public class SmsServices {
 				String startTime = (String) context.get("startTime");
 				String endTime = (String) context.get("endTime");
 
-				smsMap.put("teleNumber", teleNumber);
+				smsMap.put("teleNumber", telNum);
 				smsMap.put("storeName", storeName);
 				smsMap.put("cardBalance", cardBalance);
 				smsMap.put("startTime", startTime);

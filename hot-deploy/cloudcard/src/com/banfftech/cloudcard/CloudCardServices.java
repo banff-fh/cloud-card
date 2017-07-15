@@ -223,7 +223,10 @@ public class CloudCardServices {
 	     * 2.代表长时间授权
 	     */
 	    String authType = "1";
-	    String date = "";
+	    String validTime = "";
+	    String startTime = "";
+	    String endTime = "";
+
 	    if(UtilValidate.isEmpty(thruDate)){
 	    	authType = "2";
 	    }else if(UtilValidate.isEmpty(days) && UtilValidate.isNotEmpty(fromDate) && UtilValidate.isNotEmpty(thruDate)){
@@ -234,21 +237,18 @@ public class CloudCardServices {
 	    	int startYear = fromDateTemp.getYear() + 1900;
 			int startMonth = fromDateTemp.getMonth() + 1;
 			int startDay = fromDateTemp.getDate();
-			String startTime = startYear + "年" + startMonth + "月" + startDay + "日";
-	    	context.put("startTime", startTime);
+			startTime = startYear + "年" + startMonth + "月" + startDay + "日";
 	    	//结束时间
 	    	Timestamp thruDateTemp = UtilDateTime.getDayEnd(thruDate, 1L);
 	    	int endYear = thruDate.getYear() + 1900;
 			int endMonth = thruDate.getMonth() + 1;
 			int endDay = thruDate.getDate();
-			String endTime = endYear + "年" + endMonth + "月" + endDay + "日";
-	    	context.put("endTime", endTime);
+			endTime = endYear + "年" + endMonth + "月" + endDay + "日";
 	    }else{
 			int year = thruDate.getYear() + 1900;
 			int month = thruDate.getMonth() + 1;
 			int day = thruDate.getDate();
-			date = year + "年" + month + "月" + day + "日";
-		    context.put("date", date);
+			validTime = year + "年" + month + "月" + day + "日";
 	    }
 
 	    //获取卡主人电话号码
@@ -271,14 +271,16 @@ public class CloudCardServices {
   		smsMap.put("smsType", CloudCardConstant.USER_CREATE_CARD_AUTH_TYPE);
   		smsMap.put("phone", teleNumber);
   		smsMap.put("authType", authType);
-		smsMap.put("teleNumber", ownTeleNumber);
+		smsMap.put("telNum", ownTeleNumber);
 		smsMap.put("storeName", storeName);
 		smsMap.put("amount", String.valueOf(amount));
+		smsMap.put("validTime", validTime);
+		smsMap.put("endTime", endTime);
+    	smsMap.put("startTime", startTime);
+
 		Map<String, Object> sendMessageMap;
 		try {
-
 			sendMessageMap = dispatcher.runSync("sendMessage",smsMap);
-
 		} catch (GenericServiceException e) {
 			Debug.logError(e.getMessage(), module);
   			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
