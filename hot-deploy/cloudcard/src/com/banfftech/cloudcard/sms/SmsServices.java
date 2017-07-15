@@ -62,7 +62,7 @@ public class SmsServices {
 		//短信内容
 		Map<String, String> smsMap = FastMap.newInstance();
 		if(smsType.equals(CloudCardConstant.LOGIN_SMS_TYPE)){
-			String code = (String) context.get("");
+			String code = (String) context.get("code");
 
 			smsMap.put("code", code);
 			smsMap.put("product", "库胖");
