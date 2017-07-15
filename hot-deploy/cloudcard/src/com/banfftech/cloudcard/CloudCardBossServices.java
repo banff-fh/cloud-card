@@ -1814,7 +1814,7 @@ public class CloudCardBossServices {
 		Locale locale = (Locale) context.get("locale");
 
 		String teleNumber = (String) context.get("teleNumber");
-		String amount = (String) context.get("amount");
+		BigDecimal amount = (BigDecimal) context.get("amount");
 		String smsType = CloudCardConstant.USER_PAY_CAPTCHA_SMS_TYPE;
 
 		GenericValue customer;
@@ -1833,7 +1833,7 @@ public class CloudCardBossServices {
 
 		//发送验证码短信
 		context.put("teleNumber", teleNumber);
-		context.put("amount", amount);
+		context.put("amount", amount.toString());
 		context.put("smsType", smsType);
 		context.put("isValid", "N");
 		Map<String, Object> result = SmsServices.getSMSCaptcha(dctx, context);
