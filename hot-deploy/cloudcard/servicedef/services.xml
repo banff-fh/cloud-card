@@ -286,7 +286,7 @@
     </service>
 
 	<service name="sendMessage" engine="java"
-			location="com.banfftech.cloudcard.CloudCardServices" invoke="sendMessage" auth="false">
+			location="com.banfftech.cloudcard.sms.SmsServices" invoke="sendMessage" auth="false">
 		<description>发送短信</description>
 		<attribute mode="IN" name="phone" type="String" optional="false"><description>短信接收人</description></attribute>
 		<attribute mode="IN" name="smsType" type="String" optional="false"><description>短信模版</description></attribute>
