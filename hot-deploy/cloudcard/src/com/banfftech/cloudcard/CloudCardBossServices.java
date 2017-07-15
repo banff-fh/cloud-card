@@ -1751,7 +1751,7 @@ public class CloudCardBossServices {
 		BigDecimal amount = (BigDecimal) context.get("amount");
 		String smsType = CloudCardConstant.USER_PURCHASE_CARD_CAPTCHA_SMS_TYPE;
 		context.put("smsType", smsType);
-		context.put("amount", amount);
+		context.put("amount", String.valueOf(amount));
 		context.put("isValid", "N");
 
 		Map<String, Object> result = SmsServices.getSMSCaptcha(dctx, context);
@@ -1816,9 +1816,6 @@ public class CloudCardBossServices {
 		String teleNumber = (String) context.get("teleNumber");
 		String amount = (String) context.get("amount");
 		String smsType = CloudCardConstant.USER_PAY_CAPTCHA_SMS_TYPE;
-		context.put("smsType", smsType);
-		context.put("amount", amount);
-		context.put("isValid", "N");
 
 		GenericValue customer;
 		try {
@@ -1834,6 +1831,11 @@ public class CloudCardBossServices {
 					UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardUserNotExistError", locale));
 		}
 
+		//发送验证码短信
+		context.put("teleNumber", teleNumber);
+		context.put("amount", amount);
+		context.put("smsType", smsType);
+		context.put("isValid", "N");
 		Map<String, Object> result = SmsServices.getSMSCaptcha(dctx, context);
 		result.put("teleNumber", teleNumber);
 		result.put("amount", amount);

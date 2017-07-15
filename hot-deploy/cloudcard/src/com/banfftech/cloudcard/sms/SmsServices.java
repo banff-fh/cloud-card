@@ -410,6 +410,7 @@ public class SmsServices {
 		String teleNumber = (String) context.get("teleNumber");
 		String isValid = (String) context.get("isValid");
 		String smsType = (String) context.get("smsType");
+		String amount = (String) context.get("amount");
 
 		//校验电话号码是否非法
 		Pattern p = Pattern.compile("^((13[0-9])|(15[^4,\\D])|(14[57])|(17[0])|(17[3])|(17[5])|(17[6])|(17[7])|(18[0,0-9]))\\d{8}$");
@@ -481,6 +482,9 @@ public class SmsServices {
 			smsMap.put("smsType", smsType);
 			smsMap.put("phone", teleNumber);
 			smsMap.put("validTime", String.valueOf(validTime/60));
+			if(UtilValidate.isNotEmpty(amount)){
+				smsMap.put("amount", amount);
+			}
 			try {
 				sendMessageMap = dispatcher.runSync("sendMessage", smsMap);
 			} catch (GenericServiceException e) {
