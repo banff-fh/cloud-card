@@ -477,8 +477,7 @@ public class SmsServices {
 			//发送短信
 			Map<String, Object> sendMessageMap;
 			try {
-				sendMessageMap = dispatcher.runSync("sendMessage", UtilMisc.toMap("code", captcha, "phone", teleNumber, "validTime", validTime/60));
-
+				sendMessageMap = dispatcher.runSync("sendMessage", UtilMisc.toMap("code", captcha, "smsType", smsType, "phone", teleNumber, "validTime", validTime/60));
 			} catch (GenericServiceException e) {
 				Debug.logError(e, module);
 				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
