@@ -2316,14 +2316,14 @@ public class CloudCardServices {
 
 		//转卡短信通知
   		Map<String, String> smsMap = FastMap.newInstance();
-  		context.put("smsType", CloudCardConstant.USER_MODIFY_CARD_OWNER_TYPE);
-	    context.put("phone", context.get("teleNumber"));
-	    context.put("telNum", teleNumber);
-		context.put("storeName", cloudCard.getString("distributorPartyName"));
-		context.put("cardBalance", cardBalance);
+  		smsMap.put("smsType", CloudCardConstant.USER_MODIFY_CARD_OWNER_TYPE);
+  		smsMap.put("phone", context.get("teleNumber").toString());
+  		smsMap.put("telNum", teleNumber);
+  		smsMap.put("storeName", cloudCard.getString("distributorPartyName"));
+  		smsMap.put("cardBalance", cardBalance.toString());
 		Map<String, Object> sendMessageMap;
 		try {
-			sendMessageMap = dispatcher.runSync("sendMessage",context);
+			sendMessageMap = dispatcher.runSync("sendMessage",smsMap);
 		} catch (GenericServiceException e) {
 			Debug.logError(e.getMessage(), module);
   			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
