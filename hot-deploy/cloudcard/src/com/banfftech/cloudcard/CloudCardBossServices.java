@@ -3552,7 +3552,6 @@ public class CloudCardBossServices {
 		Locale locale = (Locale) context.get("locale");
 		GenericValue userLogin = (GenericValue) context.get("userLogin");
 
-
 		String storeId = (String) context.get("organizationPartyId");
 		String legalId = (String) context.get("legalId");
 		String storeName = (String) context.get("storeName");
@@ -3606,6 +3605,32 @@ public class CloudCardBossServices {
 				if(UtilValidate.isNotEmpty(postalAddress)){
 					postalAddress.put("address1", storeAddress);
 					postalAddress.store();
+				}
+			}
+
+			//修改店铺的经纬度
+			String ak = EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.ak", delegator);
+			Map<String ,String > params = new HashMap<String, String>();
+			params.put("ak", ak);
+			params.put("address", storeAddress);
+			params.put("output", "json");
+
+			String geocoder = BaiduLBSUtil.geocoder(params);
+			if(UtilValidate.isNotEmpty(geocoder)){
+				String latitude = null;
+				String longitude = null;
+
+				JSONObject addressJSONObject = JSONObject.parseObject(JSONObject.parseObject(JSONObject.parseObject(geocoder).getString("result")).getString("location"));
+				longitude = addressJSONObject.getString("lng");
+				latitude = addressJSONObject.getString("lat");
+
+				GenericValue partyAndGeoPoint = EntityUtil.getFirst(delegator.findByAnd("PartyAndGeoPoint", UtilMisc.toMap("partyId", storeId)));
+				if(UtilValidate.isNotEmpty(partyAndGeoPoint)){
+					String geoPointId = partyAndGeoPoint.getString("geoPointId");
+					GenericValue geoPoint = delegator.findByPrimaryKey("GeoPoint", UtilMisc.toMap("geoPointId", geoPointId));
+					geoPoint.set("longitude", longitude);
+					geoPoint.set("latitude", latitude);
+					geoPoint.store();
 				}
 			}
 
