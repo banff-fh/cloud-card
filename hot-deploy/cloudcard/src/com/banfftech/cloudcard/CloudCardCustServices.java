@@ -146,6 +146,8 @@ public class CloudCardCustServices {
 					storeMap.put("isGroupOwner",CloudCardHelper.bool2YN(isGroupOwner));
 					storeMap.put("isHasCard",storeInfo.get("isHasCard"));
 					storeMap.put("distance",jsonArray.getJSONObject(i).getObject("distance",String.class) );
+					storeMap.put("storeId",storeInfo.get("storeId"));
+					storeMap.put("storeSaleLevel",storeInfo.get("storeSaleLevel"));
 					if (UtilValidate.isNotEmpty(storeInfo.get("longitude")) && UtilValidate.isNotEmpty(storeInfo.get("latitude"))) {
 						storeMap.put("location", "["+storeInfo.get("longitude")+","+storeInfo.get("latitude")+"]");
 					} else {
