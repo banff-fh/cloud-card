@@ -185,10 +185,24 @@ public class CloudCardBossServices {
 					"CloudCardInternalServiceError", locale));
 		}
 
+		//根据地址获取经纬度
+		String ak = EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.ak", delegator);
+		Map<String ,String > addrParams = new HashMap<String, String>();
+		addrParams.put("ak", ak);
+		addrParams.put("address", storeAddress);
+		addrParams.put("output", "json");
+
+		String addGeocoder = BaiduLBSUtil.geocoder(addrParams);
+		if(UtilValidate.isNotEmpty(addGeocoder)){
+			JSONObject addressJSONObject = JSONObject.parseObject(JSONObject.parseObject(JSONObject.parseObject(addGeocoder).getString("result")).getString("location"));
+			longitude = addressJSONObject.getString("lng");
+			latitude = addressJSONObject.getString("lat");
+		}
+
 		Map<String, Object> createCloudCardStoreMap = null;
 		try {
 			// 根据经纬度获取、省、市、区
-			String ak = EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.ak", delegator);
+			//String ak = EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.ak", delegator);
 			Map<String, String> params = new HashMap<String, String>();
 			params.put("ak", ak);
 			params.put("location", latitude + "," + longitude);
@@ -204,7 +218,11 @@ public class CloudCardBossServices {
 			String province = addressJSONObject.get("province").toString();// 省份
 			String city = addressJSONObject.get("city").toString();// 市、县
 			String county = addressJSONObject.get("district").toString();// 区
+			String street = addressJSONObject.get("street").toString();// 路
+			String street_number = addressJSONObject.get("street_number").toString();// 门牌号
+			String direction = addressJSONObject.get("direction").toString();// 楼
 			String postalCode = addressJSONObject.get("adcode").toString();// 邮政编码
+
 			String geoProvince = null;
 			String geoCity = null;
 			String geoCounty = null;
@@ -269,6 +287,10 @@ public class CloudCardBossServices {
 					}
 				}
 
+				if(UtilValidate.isEmpty("")){
+					storeAddress = province + city + county + street + street_number + direction;
+				}
+
 			} catch (GenericEntityException e) {
 				Debug.logError(e.getMessage(), module);
 				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,
@@ -305,7 +327,7 @@ public class CloudCardBossServices {
 			storeInfoMap.put("geoProvince", geoProvince);// 省、直辖市GeoId
 			storeInfoMap.put("geoCity", geoCity);// 市GeoId
 			storeInfoMap.put("geoCounty", geoCounty);// 县GeoId
-			storeInfoMap.put("address1", county);// 详细地址1
+			storeInfoMap.put("address1", storeAddress);// 详细地址1
 			storeInfoMap.put("address2", "");// 详细地址2
 			storeInfoMap.put("postalCode", postalCode);// 邮政编码
 			storeInfoMap.put("latitude", latitude);// 纬度
