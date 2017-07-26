@@ -76,9 +76,14 @@ public class CloudCardInfoUtil {
             try {
             	//获取商家招牌照片
             	GenericValue bizAvatarImg= EntityUtil.getFirst(delegator.findByAnd("PartyContentAndDataResourceDetail", UtilMisc.toMap("partyId", distributorPartyId,"partyContentTypeId", "STORE_IMG","contentTypeId","ACTIVITY_PICTURE","statusId","CTNT_IN_PROGRESS", "dataResourceName","bizAvatar")));
-            	// 图片地址
-                String ossUrl = EntityUtilProperties.getPropertyValue("cloudcard","oss.url","http://kupang.oss-cn-shanghai.aliyuncs.com/",delegator);
-                cloudCardMap.put("cardImg", ossUrl + bizAvatarImg.getString("objectInfo"));
+            	if(UtilValidate.isNotEmpty(bizAvatarImg)){
+            		// 图片地址
+                    String aImg = bizAvatarImg.getString("objectInfo");
+                    if(UtilValidate.isNotEmpty(aImg)){
+                        String ossUrl = EntityUtilProperties.getPropertyValue("cloudcard","oss.url","http://kupang.oss-cn-shanghai.aliyuncs.com/",delegator);
+                    	cloudCardMap.put("cardImg", ossUrl + aImg);
+                    }
+            	}
             } catch (GenericEntityException e) {
     			Debug.logError(e.getMessage(), module);
     		}
