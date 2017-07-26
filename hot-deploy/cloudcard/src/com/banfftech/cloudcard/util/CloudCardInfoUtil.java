@@ -23,17 +23,17 @@ import javolution.util.FastMap;
 
 /**
  * 库胖卡信息相关帮助类
- * 
+ *
  * @author cy
  *
  */
 public class CloudCardInfoUtil {
 
-    public static final String module = CloudCardInfoUtil.class.getName(); 
+    public static final String module = CloudCardInfoUtil.class.getName();
 
     /**
      * 构造 查询 某人 在 某店 可以使用的 卡的 查询条件
-     * 
+     *
      * @param delegator
      *            实体引擎
      * @param partyId
@@ -52,7 +52,7 @@ public class CloudCardInfoUtil {
                 // 存在圈主，且不是自己的情况，
                 storeCond = EntityCondition.makeCondition(EntityOperator.OR, storeCond, EntityCondition.makeCondition("distributorPartyId", groupOwnerId));
             }
-            
+
             lookupConditions = EntityCondition.makeCondition(lookupConditions, storeCond);
         }
         lookupConditions = EntityCondition.makeCondition(lookupConditions, EntityUtil.getFilterByDateExpr());
@@ -61,7 +61,7 @@ public class CloudCardInfoUtil {
 
     /**
      * 将 CloudCardInfo视图的查询结果封装成 Map， 并处理 卡号、卡名、余额、是否授权、授权起止时间 等信息
-     * 
+     *
      * @param delegator
      * @param partyId
      * @param cloudCard
@@ -71,9 +71,17 @@ public class CloudCardInfoUtil {
         Map<String, Object> cloudCardMap = FastMap.newInstance();
         String distributorPartyId = cloudCard.getString("distributorPartyId");
         String partyId = cloudCard.getString("partyId");
+
         if (distributorPartyId != null) {
-            // 图片地址
-            cloudCardMap.put("cardImg", EntityUtilProperties.getPropertyValue("cloudcard", "cardImg." + distributorPartyId, delegator));
+            try {
+            	//获取商家招牌照片
+            	GenericValue bizAvatarImg= EntityUtil.getFirst(delegator.findByAnd("PartyContentAndDataResourceDetail", UtilMisc.toMap("partyId", distributorPartyId,"partyContentTypeId", "STORE_IMG","contentTypeId","ACTIVITY_PICTURE","statusId","CTNT_IN_PROGRESS", "dataResourceName","bizAvatar")));
+            	// 图片地址
+                String ossUrl = EntityUtilProperties.getPropertyValue("cloudcard","oss.url","http://kupang.oss-cn-shanghai.aliyuncs.com/",delegator);
+                cloudCardMap.put("cardImg", ossUrl + bizAvatarImg.getString("objectInfo"));
+            } catch (GenericEntityException e) {
+    			Debug.logError(e.getMessage(), module);
+    		}
         }
         String cardName = UtilFormatOut.checkEmpty(cloudCard.getString("description"), cloudCard.getString("finAccountName"));
         String authThruDate = "";
@@ -118,7 +126,7 @@ public class CloudCardInfoUtil {
         cloudCardMap.put("distributorPartyId", distributorPartyId); // 发卡商家partyId
         // 卡主
         cloudCardMap.put("ownerPartyId", cloudCard.get("ownerPartyId"));
-        
+
         // 店家信用等级
         EntityCondition dateCond = EntityUtil.getFilterByDateExpr();
         EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toMap("partyId", distributorPartyId,"partyClassificationTypeId","STORE_LEVEL_CLASSIFI"));
@@ -139,7 +147,7 @@ public class CloudCardInfoUtil {
 		} catch (GenericEntityException e) {
 			 Debug.logError(e.getMessage(), module);
 		}
-		
+
 		// 获取店铺联系方式
         Map<String, Object> geoAndContactMechInfoMap = CloudCardHelper.getGeoAndContactMechInfoByStoreId(delegator, null, distributorPartyId);
         if (UtilValidate.isNotEmpty(geoAndContactMechInfoMap)) {
