@@ -1,9 +1,6 @@
 package com.banfftech.cloudcard.util;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -30,11 +27,11 @@ import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.ServiceUtil;
 
 import com.aliyun.oss.OSSClient;
+import com.aliyun.oss.model.CannedAccessControlList;
+import com.aliyun.oss.model.CreateBucketRequest;
 import com.aliyun.oss.model.ObjectMetadata;
 import com.aliyun.oss.model.PutObjectResult;
 import com.banfftech.cloudcard.constant.CloudCardConstant;
-
-import net.coobird.thumbnailator.Thumbnails;
 
 public class UtilFileUpload {
     public static String module = UtilFileUpload.class.getName();
@@ -53,7 +50,16 @@ public class UtilFileUpload {
         ACCESS_ID = EntityUtilProperties.getPropertyValue("cloudcard", "oss.accessKeyId", delegator);
         ACCESS_KEY_SECRET = EntityUtilProperties.getPropertyValue("cloudcard", "oss.accessKeySecret", delegator);
         BUCKET_NAME = EntityUtilProperties.getPropertyValue("cloudcard", "oss.bucketName", delegator);
-        return new OSSClient(ENDPOINT, ACCESS_ID, ACCESS_KEY_SECRET);
+
+        OSSClient ossClient = new OSSClient(ENDPOINT, ACCESS_ID, ACCESS_KEY_SECRET);
+        // 判断文件容器是否存在，不存在则创建
+        if (!ossClient.doesBucketExist(BUCKET_NAME)) {
+            ossClient.createBucket(BUCKET_NAME);
+            CreateBucketRequest createBucketRequest = new CreateBucketRequest(BUCKET_NAME);
+            createBucketRequest.setCannedACL(CannedAccessControlList.PublicRead);
+            ossClient.createBucket(createBucketRequest);
+        }
+        return ossClient;
     }
 
     /**
