@@ -1,24 +1,13 @@
 package com.banfftech.cloudcard.pay.tenpay.api;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.jdom.JDOMException;
-
-import com.banfftech.cloudcard.pay.tenpay.api.WxPayApiConfig.PayModel;
-import com.banfftech.cloudcard.pay.tenpay.util.XMLUtil;
 import com.banfftech.cloudcard.pay.util.HttpKit;
 import com.banfftech.cloudcard.pay.util.HttpUtils;
 import com.banfftech.cloudcard.pay.util.PaymentKit;
-import com.ebay.soap.eBLBaseComponents.GetAccountRequestType;
 /**
  * 
  * @author su_bk
