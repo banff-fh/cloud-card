@@ -238,7 +238,7 @@ public class WxPayApi {
 	 * @param appKey
 	 * @return map
 	 */
-	public static Map<String, String> receiveNotify(HttpServletRequest request, String appKey) {
+	public static Map<String, String> appPayNotify(HttpServletRequest request, String appKey) {
 		// 支付结果通用通知文档: https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_7
 		String xmlMsg = HttpKit.readData(request);
 		System.out.println("支付通知=" + xmlMsg);

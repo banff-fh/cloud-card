@@ -129,8 +129,14 @@ public class WeiXinPayServices {
 		LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
 		Delegator delegator = dispatcher.getDelegator();
 		String wxReturn = null;
+		
+		String appId = EntityUtilProperties.getPropertyValue("cloudcard", "weixin.wxAppID", delegator);
+		String wxPartnerid = EntityUtilProperties.getPropertyValue("cloudcard", "weixin.wxPartnerid", delegator);
 		String appKey = EntityUtilProperties.getPropertyValue("cloudcard", "weixin.key", delegator);
-		Map map = WxPayApi.receiveNotify(request, appKey);
+		getApiConfig(appId, wxPartnerid, appKey);
+		Map<String, String> map = WxPayApi.appPayNotify(request, appKey);
+		WxPayApiConfigKit.removeThreadLocalApiConfig();
+
 		try {
 			if (map.get("return_code").toString().equalsIgnoreCase("SUCCESS")) {
 				// 支付成功
@@ -146,15 +152,12 @@ public class WeiXinPayServices {
 						cardId = arr[1];
 						storeId = arr[2];
 					}
-					GenericValue payment = delegator.findByPrimaryKey("Payment",
-							UtilMisc.toMap("paymentId", paymentId));
+					GenericValue payment = delegator.findByPrimaryKey("Payment", UtilMisc.toMap("paymentId", paymentId));
 					if ("PMNT_RECEIVED".equals(payment.getString("statusId"))) {
 
 						GenericValue systemUserLogin = delegator.findByPrimaryKeyCache("UserLogin",
 								UtilMisc.toMap("userLoginId", "system"));
-						Map<String, Object> rechargeCloudCardDepositOutMap = dispatcher.runSync(
-								"rechargeCloudCardDeposit", UtilMisc.toMap("userLogin", systemUserLogin, "cardId",
-										cardId, "receiptPaymentId", paymentId, "organizationPartyId", storeId));
+						Map<String, Object> rechargeCloudCardDepositOutMap = dispatcher.runSync("rechargeCloudCardDeposit", UtilMisc.toMap("userLogin", systemUserLogin, "cardId",  cardId, "receiptPaymentId", paymentId, "organizationPartyId", storeId));
 
 						if (!ServiceUtil.isSuccess(rechargeCloudCardDepositOutMap)) {
 							// TODO 平台入账 不成功 发起退款
