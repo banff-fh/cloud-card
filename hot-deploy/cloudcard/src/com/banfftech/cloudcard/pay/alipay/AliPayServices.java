@@ -34,6 +34,7 @@ import com.banfftech.cloudcard.CloudCardHelper;
 import com.banfftech.cloudcard.pay.alipay.api.AliPayApi;
 import com.banfftech.cloudcard.pay.alipay.api.AliPayApiConfig;
 import com.banfftech.cloudcard.pay.alipay.api.AliPayApiConfigKit;
+import com.banfftech.cloudcard.pay.tenpay.api.WxPayApiConfigKit;
 import com.banfftech.cloudcard.pay.util.StringUtils;
 
 import javolution.util.FastMap;
@@ -43,7 +44,7 @@ public class AliPayServices {
 
 	public static final String module = AliPayServices.class.getName();
 	
-	public static AliPayApiConfig getApiConfig(String app_id,String alipay_public_key,String charset,String private_key,String service_url,String sign_type) {
+	public static void getApiConfig(String app_id,String alipay_public_key,String charset,String private_key,String service_url,String sign_type) {
 		AliPayApiConfig aliPayApiConfig = AliPayApiConfig.New()
 		.setAppId(app_id)
 		.setAlipayPublicKey(alipay_public_key)
@@ -53,7 +54,6 @@ public class AliPayServices {
 		.setSignType(sign_type)
 		.build();
 		AliPayApiConfigKit.setThreadLocalAliPayApiConfig(aliPayApiConfig);
-		return aliPayApiConfig;
 	}
 
 	/**
@@ -81,7 +81,8 @@ public class AliPayServices {
 		String cardId = (String) context.get("cardId");
 
 		getApiConfig(partner,publicKey,"utf-8",rsaPrivate,service_url,signType);
-		
+		AliPayApiConfigKit.removeThreadLocalApiConfig();
+
 		AlipayTradeAppPayModel model = new AlipayTradeAppPayModel();
 		model.setBody(body);
 		model.setSubject(subject);

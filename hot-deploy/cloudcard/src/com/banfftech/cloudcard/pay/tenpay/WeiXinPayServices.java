@@ -38,13 +38,13 @@ public class WeiXinPayServices {
 	public static final String resourceError = "cloudcardErrorUiLabels";
 	public static final String  module = WeiXinPayServices.class.getName();
 	
-	public static WxPayApiConfig getApiConfig(String appId, String mchId,String partnerKey ) {
+	public static void getApiConfig(String appId, String mchId,String partnerKey ) {
 		WxPayApiConfig apiConfig = WxPayApiConfig.New()
 				.setAppId(appId)
 				.setMchId(mchId)
 				.setPaternerKey(partnerKey)
 				.setPayModel(PayModel.BUSINESSMODEL);
-		return apiConfig;
+		WxPayApiConfigKit.setThreadLocalWxPayApiConfig(apiConfig);
 	}
 	
 	/**
@@ -71,6 +71,7 @@ public class WeiXinPayServices {
 		String storeId= (String) context.get("storeId");
 		
 		getApiConfig(wxAppID, wxPartnerid, partnerKey);
+		WxPayApiConfigKit.removeThreadLocalApiConfig();
 		
 		Map<String, String> params = WxPayApiConfigKit.getWxPayApiConfig()
 				.setAttach(receiptPaymentId + "," + cardId + "," + storeId)
