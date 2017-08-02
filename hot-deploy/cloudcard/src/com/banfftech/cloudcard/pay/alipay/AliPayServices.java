@@ -178,17 +178,14 @@ public class AliPayServices {
 								model.setPayeeRealName(payeeRealName); //账户真实名称
 								model.setPayerShowName("宁波区快微贝网络技术有限公司");
 								model.setRemark("来自库胖卡" + noticeMap.get("body") + "的收益");
+								model.setPayeeType("ALIPAY_LOGONID");
 								
-								AliPayApiConfig aliPayApiConfig = AliPayApiConfig.New();
-								aliPayApiConfig.setServiceUrl(EntityUtilProperties.getPropertyValue("cloudcard","aliPay.url","https://openapi.alipay.com/gateway.do",delegator));
-								aliPayApiConfig.setAppId(EntityUtilProperties.getPropertyValue("cloudcard","aliPay.kupangAppID",delegator));
-								aliPayApiConfig.setCharset("utf-8");
-								aliPayApiConfig.setAlipayPublicKey(EntityUtilProperties.getPropertyValue("cloudcard","aliPay.kupangPublicKey",delegator));
-								aliPayApiConfig.setPrivateKey(EntityUtilProperties.getPropertyValue("cloudcard.properties", "aliPay.rsa_kupang_transfer_private",delegator));
-								aliPayApiConfig.setSignType(EntityUtilProperties.getPropertyValue("cloudcard","aliPay.signType","RSA",delegator));
-								aliPayApiConfig.setFormat("json");
+								String partner = EntityUtilProperties.getPropertyValue("cloudcard","aliPay.kupangAppID",delegator);
+								String service_url = EntityUtilProperties.getPropertyValue("cloudcard","aliPay.url","https://openapi.alipay.com/gateway.do",delegator);
+								String kuPangPublicKey = EntityUtilProperties.getPropertyValue("cloudcard","aliPay.kupangPublicKey",delegator);
+								String rsaPrivate = EntityUtilProperties.getPropertyValue("cloudcard.properties", "aliPay.rsa_kupang_transfer_private",delegator);
 								
-								AliPayApiConfigKit.setThreadLocalAliPayApiConfig(aliPayApiConfig);
+								getApiConfig(partner,kuPangPublicKey,"utf-8",rsaPrivate,service_url,signType);
 								boolean isSuccess = AliPayApi.transfer(model);
 								AliPayApiConfigKit.removeThreadLocalApiConfig();
 								

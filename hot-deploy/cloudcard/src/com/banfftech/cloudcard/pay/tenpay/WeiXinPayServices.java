@@ -76,7 +76,7 @@ public class WeiXinPayServices {
 				.setAttach(receiptPaymentId + "," + cardId + "," + storeId)
 				.setBody(body)
 				.setSpbillCreateIp("127.0.0.1")
-				.setTotalFee(totalFee)
+				.setTotalFee(String.valueOf(Math.round((Double.valueOf(totalFee) * 100))))
 				.setTradeType(WxPayApi.TradeType.APP)
 				.setNotifyUrl(notifyUrl)
 				.build();
@@ -172,8 +172,7 @@ public class WeiXinPayServices {
 							payeeRealName = aliPayMap.get("payName").toString();
 						}
 						// 查找转账折扣率
-						double discount = Double.valueOf(EntityUtilProperties.getPropertyValue("cloudcard",
-								"transfer.discount", "1", delegator));
+						double discount = Double.valueOf(EntityUtilProperties.getPropertyValue("cloudcard", "transfer.discount", "1", delegator));
 						// 计算转账金额
 						double price = Double.parseDouble(map.get("total_fee").toString()) / 100;
 						double amount = price * discount;
@@ -186,6 +185,7 @@ public class WeiXinPayServices {
 						model.setPayeeRealName(payeeRealName); // 账户真实名称
 						model.setPayerShowName("宁波区快微贝网络技术有限公司");
 						model.setRemark("来自库胖卡的收益");
+						model.setPayeeType("ALIPAY_LOGONID");
 						
 						String partner = EntityUtilProperties.getPropertyValue("cloudcard","aliPay.kupangAppID",delegator);
 						String service_url = EntityUtilProperties.getPropertyValue("cloudcard","aliPay.url","https://openapi.alipay.com/gateway.do",delegator);
