@@ -22,13 +22,13 @@ import org.ofbiz.service.ServiceUtil;
 
 import com.alipay.api.domain.AlipayFundTransToaccountTransferModel;
 import com.banfftech.cloudcard.CloudCardHelper;
+import com.banfftech.cloudcard.pay.alipay.AliPayServices;
 import com.banfftech.cloudcard.pay.alipay.api.AliPayApi;
-import com.banfftech.cloudcard.pay.alipay.api.AliPayApiConfig;
 import com.banfftech.cloudcard.pay.alipay.api.AliPayApiConfigKit;
 import com.banfftech.cloudcard.pay.tenpay.api.WxPayApi;
 import com.banfftech.cloudcard.pay.tenpay.api.WxPayApiConfig;
-import com.banfftech.cloudcard.pay.tenpay.api.WxPayApiConfigKit;
 import com.banfftech.cloudcard.pay.tenpay.api.WxPayApiConfig.PayModel;
+import com.banfftech.cloudcard.pay.tenpay.api.WxPayApiConfigKit;
 import com.banfftech.cloudcard.pay.tenpay.util.XMLUtil;
 import com.banfftech.cloudcard.pay.util.PaymentKit;
 
@@ -186,22 +186,14 @@ public class WeiXinPayServices {
 						model.setPayeeRealName(payeeRealName); // 账户真实名称
 						model.setPayerShowName("宁波区快微贝网络技术有限公司");
 						model.setRemark("来自库胖卡的收益");
+						
+						String partner = EntityUtilProperties.getPropertyValue("cloudcard","aliPay.kupangAppID",delegator);
+						String service_url = EntityUtilProperties.getPropertyValue("cloudcard","aliPay.url","https://openapi.alipay.com/gateway.do",delegator);
+						String publicKey = EntityUtilProperties.getPropertyValue("cloudcard","aliPay.kupangPublicKey",delegator);
+						String rsaPrivate = EntityUtilProperties.getPropertyValue("cloudcard.properties", "aliPay.rsa_kupang_transfer_private",delegator);
+						String signType = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.signType", delegator);
 
-						AliPayApiConfig aliPayApiConfig = AliPayApiConfig.New();
-						aliPayApiConfig.setServiceUrl(EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.url",
-								"https://openapi.alipay.com/gateway.do", delegator));
-						aliPayApiConfig.setAppId(
-								EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.kupangAppID", delegator));
-						aliPayApiConfig.setCharset("utf-8");
-						aliPayApiConfig.setAlipayPublicKey(EntityUtilProperties.getPropertyValue("cloudcard",
-								"aliPay.kupangPublicKey", delegator));
-						aliPayApiConfig.setPrivateKey(EntityUtilProperties.getPropertyValue("cloudcard.properties",
-								"aliPay.rsa_kupang_transfer_private", delegator));
-						aliPayApiConfig.setSignType(EntityUtilProperties.getPropertyValue("cloudcard",
-								"aliPay.signType", "RSA", delegator));
-						aliPayApiConfig.setFormat("json");
-
-						AliPayApiConfigKit.setThreadLocalAliPayApiConfig(aliPayApiConfig);
+						AliPayServices.getApiConfig(partner,publicKey,"utf-8",rsaPrivate,service_url,signType);
 						boolean isSuccess = AliPayApi.transfer(model);
 						AliPayApiConfigKit.removeThreadLocalApiConfig();
 
