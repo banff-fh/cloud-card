@@ -28,6 +28,7 @@ import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.domain.AlipayFundTransToaccountTransferModel;
 import com.alipay.api.domain.AlipayTradeAppPayModel;
+import com.alipay.api.domain.AlipayTradeRefundModel;
 import com.alipay.api.request.AlipayTradeQueryRequest;
 import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.banfftech.cloudcard.CloudCardHelper;
@@ -145,6 +146,13 @@ public class AliPayServices {
 							//判断平台是否入账成功
 							if (!ServiceUtil.isSuccess(rechargeCloudCardDepositOutMap)) {
 								// TODO 平台入账 不成功 发起退款
+								AlipayTradeRefundModel model = new AlipayTradeRefundModel();
+								model.setOutTradeNo(noticeMap.get("out_trade_no"));
+								model.setTradeNo(noticeMap.get("trade_no"));
+								model.setRefundAmount(noticeMap.get("total_fee"));
+								model.setRefundReason("交易失败退款");
+								String resultStr = AliPayApi.tradeRefund(model);
+								Debug.logError(resultStr, module);
 							}else {
 								// 查找店家支付宝账号和支付宝姓名
 								String payeeAccount = null;
