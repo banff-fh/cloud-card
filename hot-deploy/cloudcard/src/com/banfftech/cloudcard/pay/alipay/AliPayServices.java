@@ -34,8 +34,8 @@ import com.banfftech.cloudcard.CloudCardHelper;
 import com.banfftech.cloudcard.pay.alipay.api.AliPayApi;
 import com.banfftech.cloudcard.pay.alipay.api.AliPayApiConfig;
 import com.banfftech.cloudcard.pay.alipay.api.AliPayApiConfigKit;
+import com.banfftech.cloudcard.pay.alipay.util.SignUtils;
 import com.banfftech.cloudcard.pay.tenpay.api.WxPayApiConfigKit;
-import com.banfftech.cloudcard.pay.util.StringUtils;
 
 import javolution.util.FastMap;
 import net.sf.json.JSONObject;
@@ -70,11 +70,8 @@ public class AliPayServices {
 		String subject = (String) context.get("subject");
 		String body = (String) context.get("body");
 		String totalFee = (String) context.get("totalFee");
-		
 		String partner = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.partner", delegator);
 		String seller = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.seller", delegator);
-		String service_url = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.url", delegator);
-		String publicKey = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.publicKey", delegator);
 		String rsaPrivate = EntityUtilProperties.getPropertyValue("cloudcard.properties", "aliPay.rsa_private",delegator);
 		String notifyUrl = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.notifyUrl", delegator);
 		String signType = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.signType", delegator);
@@ -82,28 +79,21 @@ public class AliPayServices {
 		String storeId = (String) context.get("storeId");
 		String cardId = (String) context.get("cardId");
 
-		getApiConfig(partner,publicKey,"utf-8",rsaPrivate,service_url,signType);
+		String orderInfo = getOrderInfo(partner, seller, subject, body, totalFee, receiptPaymentId, notifyUrl,receiptPaymentId,cardId, storeId);
+		String sign = SignUtils.sign(orderInfo, rsaPrivate, signType);
 
-		AlipayTradeAppPayModel model = new AlipayTradeAppPayModel();
-		model.setSellerId(seller);
-		model.setBody(body);
-		model.setSubject(subject);
-		model.setOutTradeNo(receiptPaymentId);
-		model.setTimeoutExpress("30m");
-		model.setTotalAmount(totalFee);
-		model.setPassbackParams(receiptPaymentId  + "," + cardId + "," + storeId );
-		
-		String payInfo = null;
 		try {
-			payInfo = AliPayApi.startAppPayStr(model, notifyUrl);
-			AliPayApiConfigKit.removeThreadLocalApiConfig();
-		} catch (AlipayApiException e) {
-			Debug.logError(e, module);
+			// 仅需对sign 做URL编码
+			sign = URLEncoder.encode(sign, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
 		}
+
+		// 完整的符合支付宝参数规范的订单信息
+		final String payInfo = orderInfo + "&sign=\"" + sign + "\"&" + getSignType();
 		Map<String, Object> results = ServiceUtil.returnSuccess();
 		results.put("payInfo", payInfo);
 		return results;
-
 	}
 
 	/**
@@ -292,6 +282,73 @@ public class AliPayServices {
 	public static Map<String, Object> refund(DispatchContext dctx, Map<String, Object> context) {
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		return result;
+	}
+	
+	/**
+	 * get the sign type we use. 获取签名方式
+	 *
+	 */
+	private static String getSignType() {
+		return "sign_type=\"RSA\"";
+	}
+	
+	/**
+	 * create the order info. 创建订单信息 由服务器生成
+	 * @param storeId
+	 */
+	private static String getOrderInfo(String partner, String seller, String subject, String body, String price,
+			String out_trade_no, String notifyUrl,String receiptPaymentId,String cardId, String storeId) {
+
+		// 签约合作者身份ID
+		String orderInfo = "partner=" + "\"" + partner + "\"";
+
+		// 签约卖家支付宝账号
+		orderInfo += "&seller_id=" + "\"" + seller + "\"";
+
+		// 商户网站唯一订单号
+		orderInfo += "&out_trade_no=" + "\"" + out_trade_no + "\"";
+
+		// 商品名称
+		orderInfo += "&subject=" + "\"" + subject + "\"";
+
+		// 商品详情
+		orderInfo += "&body=" + "\"" + body + "\"";
+
+		// 商品金额
+		orderInfo += "&total_fee=" + "\"" + price + "\"";
+
+		// 服务器异步通知页面路径
+		orderInfo += "&notify_url=" + "\"" + notifyUrl + "\"";
+
+		// 服务接口名称， 固定值
+		orderInfo += "&service=\"mobile.securitypay.pay\"";
+
+		// 支付类型， 固定值
+		orderInfo += "&payment_type=\"1\"";
+
+		// 参数编码， 固定值
+		orderInfo += "&_input_charset=\"utf-8\"";
+
+		// 设置未付款交易的超时时间
+		// 默认30分钟，一旦超时，该笔交易就会自动被关闭。
+		// 取值范围：1m～15d。
+		// m-分钟，h-小时，d-天，1c-当天（无论交易何时创建，都在0点关闭）。
+		// 该参数数值不接受小数点，如1.5h，可转换为90m。
+		orderInfo += "&it_b_pay=\"30m\"";
+
+		// extern_token为经过快登授权获取到的alipay_open_id,带上此参数用户将使用授权的账户进行支付
+		// orderInfo += "&extern_token=" + "\"" + extern_token + "\"";
+
+		// 支付宝处理完请求后，当前页面跳转到商户指定页面的路径，可空
+		orderInfo += "&return_url=\"m.alipay.com\"";
+
+		//回调返回
+        orderInfo += "&passback_params=" + "\"" + receiptPaymentId + "," + cardId + "," + storeId + "\"";
+
+		// 调用银行卡支付，需配置此参数，参与签名， 固定值 （需要签约《无线银行卡快捷支付》才能使用）
+		// orderInfo += "&paymethod=\"expressGateway\"";
+
+		return orderInfo;
 	}
 
 }
