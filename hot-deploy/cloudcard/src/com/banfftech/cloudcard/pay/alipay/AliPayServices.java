@@ -52,6 +52,7 @@ public class AliPayServices {
 		.setServiceUrl(service_url)
 		.setSignType(sign_type)
 		.build();
+		AliPayApiConfigKit.setThreadLocalAliPayApiConfig(aliPayApiConfig);
 		return aliPayApiConfig;
 	}
 
