@@ -70,7 +70,9 @@ public class AliPayServices {
 		String subject = (String) context.get("subject");
 		String body = (String) context.get("body");
 		String totalFee = (String) context.get("totalFee");
+		
 		String partner = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.partner", delegator);
+		String seller = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.seller", delegator);
 		String service_url = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.url", delegator);
 		String publicKey = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.publicKey", delegator);
 		String rsaPrivate = EntityUtilProperties.getPropertyValue("cloudcard.properties", "aliPay.rsa_private",delegator);
@@ -84,6 +86,7 @@ public class AliPayServices {
 		AliPayApiConfigKit.removeThreadLocalApiConfig();
 
 		AlipayTradeAppPayModel model = new AlipayTradeAppPayModel();
+		model.setSellerId(seller);
 		model.setBody(body);
 		model.setSubject(subject);
 		model.setOutTradeNo(receiptPaymentId);
