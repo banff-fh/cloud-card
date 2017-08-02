@@ -71,7 +71,6 @@ public class WeiXinPayServices {
 		String storeId= (String) context.get("storeId");
 		
 		getApiConfig(wxAppID, wxPartnerid, partnerKey);
-		WxPayApiConfigKit.removeThreadLocalApiConfig();
 		
 		Map<String, String> params = WxPayApiConfigKit.getWxPayApiConfig()
 				.setAttach(receiptPaymentId + "," + cardId + "," + storeId)
@@ -106,6 +105,7 @@ public class WeiXinPayServices {
 		orderMap.put("noncestr", System.currentTimeMillis() + "");
 		orderMap.put("timestamp", System.currentTimeMillis() / 1000 + "");
 		String packageSign = PaymentKit.createSign(orderMap, WxPayApiConfigKit.getWxPayApiConfig().getPaternerKey());
+		WxPayApiConfigKit.removeThreadLocalApiConfig();
 
 		//返回给app
 		Map<String, Object> results = ServiceUtil.returnSuccess();

@@ -83,7 +83,6 @@ public class AliPayServices {
 		String cardId = (String) context.get("cardId");
 
 		getApiConfig(partner,publicKey,"utf-8",rsaPrivate,service_url,signType);
-		AliPayApiConfigKit.removeThreadLocalApiConfig();
 
 		AlipayTradeAppPayModel model = new AlipayTradeAppPayModel();
 		model.setSellerId(seller);
@@ -97,6 +96,7 @@ public class AliPayServices {
 		String payInfo = null;
 		try {
 			payInfo = AliPayApi.startAppPayStr(model, notifyUrl);
+			AliPayApiConfigKit.removeThreadLocalApiConfig();
 		} catch (AlipayApiException e) {
 			Debug.logError(e, module);
 		}
