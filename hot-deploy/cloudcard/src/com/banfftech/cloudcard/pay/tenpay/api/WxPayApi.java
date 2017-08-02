@@ -241,17 +241,13 @@ public class WxPayApi {
 	public static Map<String, String> appPayNotify(HttpServletRequest request, String appKey) {
 		// 支付结果通用通知文档: https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_7
 		String xmlMsg = HttpKit.readData(request);
-		System.out.println("支付通知=" + xmlMsg);
 		Map<String, String> params = PaymentKit.xmlToMap(xmlMsg);
-
 		String result_code = params.get("result_code");
-		
 		if(PaymentKit.verifyNotify(params, WxPayApiConfigKit.getWxPayApiConfig().getPaternerKey())){
 			if (!("SUCCESS").equals(result_code)) {
 				params = null;
 			}
 		}
-		
 		return params;
 	}
 	

@@ -384,7 +384,6 @@ public class AliPayApi {
 	 */
 	public static Map<String, String> appPayNotify(HttpServletRequest request, String publicKey, String charset, String sign_type) {
 		Map<String, String> params = AliPayApi.toMap(request);
-
 		boolean flag =false;
 		try {
 			flag = AlipaySignature.rsaCheckV1(params, publicKey, charset, sign_type);

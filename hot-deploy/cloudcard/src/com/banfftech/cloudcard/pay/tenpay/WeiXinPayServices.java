@@ -141,7 +141,6 @@ public class WeiXinPayServices {
 			if (map.get("return_code").toString().equalsIgnoreCase("SUCCESS")) {
 				// 支付成功
 				if ("SUCCESS".equalsIgnoreCase((String) map.get("result_code"))) {
-
 					String attach = (String) map.get("attach");
 					String[] arr = attach.split(",");
 					String paymentId = "";
@@ -158,11 +157,13 @@ public class WeiXinPayServices {
 						GenericValue systemUserLogin = delegator.findByPrimaryKeyCache("UserLogin",
 								UtilMisc.toMap("userLoginId", "system"));
 						Map<String, Object> rechargeCloudCardDepositOutMap = dispatcher.runSync("rechargeCloudCardDeposit", UtilMisc.toMap("userLogin", systemUserLogin, "cardId",  cardId, "receiptPaymentId", paymentId, "organizationPartyId", storeId));
-
+						
+						String certPass = EntityUtilProperties.getPropertyValue("cloudcard", "weixin.certPass", delegator);
 						if (!ServiceUtil.isSuccess(rechargeCloudCardDepositOutMap)) {
 							// TODO 平台入账 不成功 发起退款
+							//WxPayApi.orderRefund(params, "../cloud-card/hot-deploy/cloudcard/cert/apiclient_cert.p12", certPass);
 						}
-
+						
 						// 查找店家支付宝账号和支付宝姓名
 						String payeeAccount = null;
 						String payeeRealName = null;
