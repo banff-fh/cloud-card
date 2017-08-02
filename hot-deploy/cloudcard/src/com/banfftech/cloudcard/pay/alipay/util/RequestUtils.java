@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import com.banfftech.cloudcard.pay.util.StringUtils;
 
 public class RequestUtils {
 

@@ -17,7 +17,7 @@ import org.jdom.input.SAXBuilder;
 
 /**
  * xml工具类
- * @author miklchen
+ * @author su_bk
  *
  */
 public class XMLUtil {
@@ -87,21 +87,6 @@ public class XMLUtil {
 		}
 		
 		return sb.toString();
-	}
-	
-	/**
-	 * 获取xml编码字符集
-	 * @param strxml
-	 * @return
-	 * @throws IOException 
-	 * @throws JDOMException 
-	 */
-	public static String getXMLEncoding(String strxml) throws JDOMException, IOException {
-		InputStream in = HttpClientUtil.String2Inputstream(strxml);
-		SAXBuilder builder = new SAXBuilder();
-		Document doc = builder.build(in);
-		in.close();
-		return (String)doc.getProperty("encoding");
 	}
 	
 	/**

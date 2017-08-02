@@ -23,18 +23,18 @@ import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
-import com.alibaba.fastjson.JSON;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
+import com.alipay.api.domain.AlipayFundTransToaccountTransferModel;
+import com.alipay.api.domain.AlipayTradeAppPayModel;
 import com.alipay.api.request.AlipayTradeQueryRequest;
 import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.banfftech.cloudcard.CloudCardHelper;
-import com.banfftech.cloudcard.pay.alipay.bean.AlipayNotification;
-import com.banfftech.cloudcard.pay.alipay.util.AlipayNotify;
-import com.banfftech.cloudcard.pay.alipay.util.RequestUtils;
-import com.banfftech.cloudcard.pay.alipay.util.StringUtils;
-import com.banfftech.cloudcard.pay.util.PayUtil;
+import com.banfftech.cloudcard.pay.alipay.api.AliPayApi;
+import com.banfftech.cloudcard.pay.alipay.api.AliPayApiConfig;
+import com.banfftech.cloudcard.pay.alipay.api.AliPayApiConfigKit;
+import com.banfftech.cloudcard.pay.util.StringUtils;
 
 import javolution.util.FastMap;
 import net.sf.json.JSONObject;
@@ -42,6 +42,18 @@ import net.sf.json.JSONObject;
 public class AliPayServices {
 
 	public static final String module = AliPayServices.class.getName();
+	
+	public static AliPayApiConfig getApiConfig(String app_id,String alipay_public_key,String charset,String private_key,String service_url,String sign_type) {
+		AliPayApiConfig aliPayApiConfig = AliPayApiConfig.New()
+		.setAppId(app_id)
+		.setAlipayPublicKey(alipay_public_key)
+		.setCharset(charset)
+		.setPrivateKey(private_key)
+		.setServiceUrl(service_url)
+		.setSignType(sign_type)
+		.build();
+		return aliPayApiConfig;
+	}
 
 	/**
 	 * 预支付订单
@@ -58,7 +70,8 @@ public class AliPayServices {
 		String body = (String) context.get("body");
 		String totalFee = (String) context.get("totalFee");
 		String partner = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.partner", delegator);
-		String seller = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.seller", delegator);
+		String service_url = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.url", delegator);
+		String publicKey = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.publicKey", delegator);
 		String rsaPrivate = EntityUtilProperties.getPropertyValue("cloudcard.properties", "aliPay.rsa_private",delegator);
 		String notifyUrl = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.notifyUrl", delegator);
 		String signType = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.signType", delegator);
@@ -66,18 +79,22 @@ public class AliPayServices {
 		String storeId = (String) context.get("storeId");
 		String cardId = (String) context.get("cardId");
 
-		String orderInfo = getOrderInfo(partner, seller, subject, body, totalFee, receiptPaymentId, notifyUrl,receiptPaymentId,cardId, storeId);
-		String sign = StringUtils.sign(orderInfo, rsaPrivate, signType);
-
+		getApiConfig(partner,publicKey,"utf-8",rsaPrivate,service_url,signType);
+		
+		AlipayTradeAppPayModel model = new AlipayTradeAppPayModel();
+		model.setBody(body);
+		model.setSubject(subject);
+		model.setOutTradeNo(receiptPaymentId);
+		model.setTimeoutExpress("30m");
+		model.setTotalAmount(totalFee);
+		model.setPassbackParams(receiptPaymentId  + "," + cardId + "," + storeId );
+		
+		String payInfo = null;
 		try {
-			// 仅需对sign 做URL编码
-			sign = URLEncoder.encode(sign, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			payInfo = AliPayApi.startAppPayStr(model, notifyUrl);
+		} catch (AlipayApiException e) {
+			Debug.logError(e, module);
 		}
-
-		// 完整的符合支付宝参数规范的订单信息
-		final String payInfo = orderInfo + "&sign=\"" + sign + "\"&" + getSignType();
 		Map<String, Object> results = ServiceUtil.returnSuccess();
 		results.put("payInfo", payInfo);
 		return results;
@@ -92,93 +109,103 @@ public class AliPayServices {
 	 */
 
 	public static void aliPayNotify(HttpServletRequest request, HttpServletResponse response) {
-
-	    LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
-	    Delegator delegator =  dispatcher.getDelegator();
-
-		Map<String, String> underScoreKeyMap = RequestUtils.getStringParams(request);
-		Map<String, String> camelCaseKeyMap = RequestUtils.convertKeyToCamelCase(underScoreKeyMap);
-		// 首先验证调用是否来自支付宝
-		boolean verifyResult = AlipayNotify.verify(request, underScoreKeyMap);
-
+		LocalDispatcher dispatcher = (LocalDispatcher) request.getAttribute("dispatcher");
+		Delegator delegator = dispatcher.getDelegator();
+		
+		String publicKey = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.publicKey", delegator);
+		String signType = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.signType", delegator);
+	
+		Map<String,String> noticeMap = AliPayApi.appPayNotify(request, publicKey, "utf-8", signType);
 		try {
-			String jsonString = JSON.toJSONString(camelCaseKeyMap);
-			AlipayNotification notice = JSON.parseObject(jsonString, AlipayNotification.class);
-			notice.setVerifyResult(verifyResult);
-
 			String resultResponse = "success";
 			PrintWriter printWriter = null;
 			try {
 				printWriter = response.getWriter();
 				// do business
-                if (verifyResult) {
-                    resultResponse = "success";
-                    String cbstr = notice.getExtraCommonParam();
-                    String[] arr = cbstr.split(",");
-                    String paymentId = "";
-                    String cardId = "";
-                    String storeId = "";
-                    if (arr.length >= 3) {
-                        paymentId = arr[0];
-                        cardId = arr[1];
-                        storeId = arr[2];
-                    }
+				if (UtilValidate.isNotEmpty(noticeMap)) {
+					resultResponse = "success";
+					String cbstr = noticeMap.get("extraCommonParam");
+					String[] arr = cbstr.split(",");
+					String paymentId = "";
+					String cardId = "";
+					String storeId = "";
+					if (arr.length >= 3) {
+						paymentId = arr[0];
+						cardId = arr[1];
+						storeId = arr[2];
+					}
 
-                    GenericValue payment = delegator.findByPrimaryKey("Payment", UtilMisc.toMap("paymentId", paymentId));
-                    if("PMNT_RECEIVED".equals(payment.getString("statusId"))){
-                        resultResponse = "success";
-                        String tradeStatus = notice.getTradeStatus();
-                        if ("TRADE_SUCCESS".equals(tradeStatus) || "TRADE_FINISHED".equals(tradeStatus)) {
-                            GenericValue systemUserLogin = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
-                            Map<String, Object> rechargeCloudCardDepositOutMap = dispatcher.runSync("rechargeCloudCardDeposit", UtilMisc.toMap("userLogin",
-                                    systemUserLogin, "cardId", cardId, "receiptPaymentId", paymentId, "organizationPartyId", storeId));
+					GenericValue payment = delegator.findByPrimaryKey("Payment",
+							UtilMisc.toMap("paymentId", paymentId));
+					if ("PMNT_RECEIVED".equals(payment.getString("statusId"))) {
+						resultResponse = "success";
+						String tradeStatus = noticeMap.get("tradeStatus");
+						if ("TRADE_SUCCESS".equals(tradeStatus) || "TRADE_FINISHED".equals(tradeStatus)) {
+							GenericValue systemUserLogin = delegator.findByPrimaryKeyCache("UserLogin",
+									UtilMisc.toMap("userLoginId", "system"));
+							Map<String, Object> rechargeCloudCardDepositOutMap = dispatcher.runSync(
+									"rechargeCloudCardDeposit", UtilMisc.toMap("userLogin", systemUserLogin, "cardId",
+											cardId, "receiptPaymentId", paymentId, "organizationPartyId", storeId));
 
-                            if (!ServiceUtil.isSuccess(rechargeCloudCardDepositOutMap)) {
-                                // TODO 平台入账 不成功 发起退款
-                            }
+							//判断平台是否入账成功
+							if (!ServiceUtil.isSuccess(rechargeCloudCardDepositOutMap)) {
+								// TODO 平台入账 不成功 发起退款
+							}else {
+								// 查找店家支付宝账号和支付宝姓名
+								String payeeAccount = null;
+								String payeeRealName = null;
+								Map<String, Object> aliPayMap = CloudCardHelper.getStoreAliPayInfo(delegator, storeId);
+								if (UtilValidate.isNotEmpty(aliPayMap)) {
+									payeeAccount = aliPayMap.get("payAccount").toString();
+									payeeRealName = aliPayMap.get("payName").toString();
+								}
+								// 查找转账折扣率
+								double discount = Double.valueOf(EntityUtilProperties.getPropertyValue("cloudcard", "transfer.discount", "1", delegator));
+								// 计算转账金额
+								double price = Double.valueOf(noticeMap.get("price"));
+								double amount = price * discount;
+								
+								// 立即将钱打给商家
+								AlipayFundTransToaccountTransferModel model =  new AlipayFundTransToaccountTransferModel();
+								model.setOutBizNo(paymentId); //生成订单号
+								model.setPayeeAccount(payeeAccount); //转账收款账户
+								model.setAmount(String.format("%.2f", amount)); //账户收款金额
+								model.setPayeeRealName(payeeRealName); //账户真实名称
+								model.setPayerShowName("宁波区快微贝网络技术有限公司");
+								model.setRemark("来自库胖卡" + noticeMap.get("body") + "的收益");
+								
+								AliPayApiConfig aliPayApiConfig = AliPayApiConfig.New();
+								aliPayApiConfig.setServiceUrl(EntityUtilProperties.getPropertyValue("cloudcard","aliPay.url","https://openapi.alipay.com/gateway.do",delegator));
+								aliPayApiConfig.setAppId(EntityUtilProperties.getPropertyValue("cloudcard","aliPay.kupangAppID",delegator));
+								aliPayApiConfig.setCharset("utf-8");
+								aliPayApiConfig.setAlipayPublicKey(EntityUtilProperties.getPropertyValue("cloudcard","aliPay.kupangPublicKey",delegator));
+								aliPayApiConfig.setPrivateKey(EntityUtilProperties.getPropertyValue("cloudcard.properties", "aliPay.rsa_kupang_transfer_private",delegator));
+								aliPayApiConfig.setSignType(EntityUtilProperties.getPropertyValue("cloudcard","aliPay.signType","RSA",delegator));
+								aliPayApiConfig.setFormat("json");
+								
+								AliPayApiConfigKit.setThreadLocalAliPayApiConfig(aliPayApiConfig);
+								boolean isSuccess = AliPayApi.transfer(model);
+								AliPayApiConfigKit.removeThreadLocalApiConfig();
+								
+								// 如果转账成功,设置Payment状态为PMNT_CONFIRMED
+								if (isSuccess) {
+									Map<String, Object> setPaymentStatusOutMap;
+									try {
+										setPaymentStatusOutMap = dispatcher.runSync("setPaymentStatus",
+												UtilMisc.toMap("userLogin", systemUserLogin, "locale", null, "paymentId",
+														paymentId, "statusId", "PMNT_CONFIRMED"));
+									} catch (GenericServiceException e1) {
+										Debug.logError(e1, module);
+									}
+								} else {
 
-                        	//查找店家支付宝账号和支付宝姓名
-                            String payeeAccount = null;
-                            String payeeRealName = null;
-                            Map<String,Object> aliPayMap =  CloudCardHelper.getStoreAliPayInfo(delegator, storeId);
-                            if(UtilValidate.isNotEmpty(aliPayMap)){
-                            	payeeAccount = aliPayMap.get("payAccount").toString();
-                            	payeeRealName = aliPayMap.get("payName").toString();
-                            }
-                            //查找转账折扣率
-                    		double discount = Double.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","transfer.discount","1",delegator));
-                    		//计算转账金额
-                            double price  = notice.getPrice();
-                            double amount = price * discount;
-
-                            //立即将钱打给商家
-                            Map<String,Object> transferMap = FastMap.newInstance();
-                            transferMap.put("orderId", paymentId);
-                            transferMap.put("payeeAccount", payeeAccount);
-                            transferMap.put("totalAmount", String.format("%.2f", amount));
-                            transferMap.put("payerRealName", "宁波区快微贝网络技术有限公司");
-                            transferMap.put("payeeRealName", payeeRealName);
-                            transferMap.put("remark", "来自库胖卡"+ notice.getBody() +"的收益");
-							boolean isSuccess = PayUtil.transfer(delegator, transferMap);
-
-                    		//如果转账成功,设置Payment状态为PMNT_CONFIRMED
-							if(isSuccess){
-								Map<String, Object> setPaymentStatusOutMap;
-					            try {
-					                setPaymentStatusOutMap = dispatcher.runSync("setPaymentStatus",
-					                        UtilMisc.toMap("userLogin", systemUserLogin, "locale", null, "paymentId", paymentId, "statusId", "PMNT_CONFIRMED"));
-					            } catch (GenericServiceException e1) {
-					                Debug.logError(e1, module);
-					            }
-							}else{
-
+								}
 							}
+						} else {
 
-                        } else {
-
-                        }
-                    }
-                }
+						}
+					}
+				}
 				// fail due to verification error
 				else {
 					resultResponse = "fail";
@@ -201,25 +228,30 @@ public class AliPayServices {
 	public static Map<String, Object> orderPayQuery(Delegator delegator, Map<String, Object> context) {
 		String outTradeNo = (String) context.get("outTradeNo");
 		String tradeNo = (String) context.get("transactionId");
-		String qRsa_private = EntityUtilProperties.getPropertyValue("cloudcard.properties", "aliPay.qRsa_private",delegator);
-		String qRsa_public= EntityUtilProperties.getPropertyValue("cloudcard.properties", "aliPay.qRsa_public",delegator);
-		String qRsa_AppId = EntityUtilProperties.getPropertyValue("cloudcard.properties", "aliPay.qRsa_appId",delegator);
+		String qRsa_private = EntityUtilProperties.getPropertyValue("cloudcard.properties", "aliPay.qRsa_private",
+				delegator);
+		String qRsa_public = EntityUtilProperties.getPropertyValue("cloudcard.properties", "aliPay.qRsa_public",
+				delegator);
+		String qRsa_AppId = EntityUtilProperties.getPropertyValue("cloudcard.properties", "aliPay.qRsa_appId",
+				delegator);
 
-		AlipayClient alipayClient = new DefaultAlipayClient("https://openapi.alipay.com/gateway.do", qRsa_AppId, qRsa_private, "json", "GBK", qRsa_public, "RSA");
+		AlipayClient alipayClient = new DefaultAlipayClient("https://openapi.alipay.com/gateway.do", qRsa_AppId,
+				qRsa_private, "json", "GBK", qRsa_public, "RSA");
 		AlipayTradeQueryRequest request = new AlipayTradeQueryRequest();
 
-		//request.setBizContent("{" + "\"out_trade_no\":\""+outTradeNo.trim()+"\"}");
+		// request.setBizContent("{" + "\"out_trade_no\":\""+outTradeNo.trim()+"\"}");
 
 		// 判断商家交易流水是否为空，为空给空空字符串
 		if (UtilValidate.isEmpty(outTradeNo)) {
 			outTradeNo = "";
 		}
-		//判断第三方流水是否为空，为空给空空字符串
-		if(UtilValidate.isEmpty(tradeNo)){
-			tradeNo="";
+		// 判断第三方流水是否为空，为空给空空字符串
+		if (UtilValidate.isEmpty(tradeNo)) {
+			tradeNo = "";
 		}
-		//根据商户订单流水和支付宝流水查询
-		request.setBizContent("{" + "\"out_trade_no\":\""+outTradeNo+"\"," + "\"trade_no\":\""+tradeNo+"\"" + "  }");
+		// 根据商户订单流水和支付宝流水查询
+		request.setBizContent(
+				"{" + "\"out_trade_no\":\"" + outTradeNo + "\"," + "\"trade_no\":\"" + tradeNo + "\"" + "  }");
 		AlipayTradeQueryResponse response = null;
 		try {
 			response = alipayClient.execute(request);
@@ -229,7 +261,8 @@ public class AliPayServices {
 		Map<String, Object> orderPayMap = FastMap.newInstance();
 		if (response.isSuccess()) {
 			orderPayMap = ServiceUtil.returnSuccess();
-			JSONObject jsonObject = JSONObject.fromObject(response.getBody()).getJSONObject("alipay_trade_query_response");
+			JSONObject jsonObject = JSONObject.fromObject(response.getBody())
+					.getJSONObject("alipay_trade_query_response");
 			orderPayMap.put("cashFee", Double.parseDouble(jsonObject.get("total_amount").toString()));
 			orderPayMap.put("returnCode", jsonObject.get("code"));
 			orderPayMap.put("returnMsg", jsonObject.get("msg"));
@@ -239,7 +272,8 @@ public class AliPayServices {
 			orderPayMap.put("tradeState", jsonObject.get("trade_status"));
 		} else {
 			orderPayMap = ServiceUtil.returnSuccess();
-			JSONObject jsonObject = JSONObject.fromObject(response.getBody()).getJSONObject("alipay_trade_query_response");
+			JSONObject jsonObject = JSONObject.fromObject(response.getBody())
+					.getJSONObject("alipay_trade_query_response");
 			orderPayMap.put("tradeState", response.getSubMsg());
 		}
 
@@ -256,88 +290,6 @@ public class AliPayServices {
 	public static Map<String, Object> refund(DispatchContext dctx, Map<String, Object> context) {
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		return result;
-	}
-
-	/**
-	 * get the out_trade_no for an order. 获取外部订单号
-	 *
-	 */
-	public static String getOutTradeNo() {
-		SimpleDateFormat format = new SimpleDateFormat("MMddHHmmss", Locale.getDefault());
-		Date date = new Date();
-		String key = format.format(date);
-
-		Random r = new Random();
-		key = key + r.nextInt();
-		key = key.substring(0, 15);
-		return key;
-	}
-
-	/**
-	 * get the sign type we use. 获取签名方式
-	 *
-	 */
-	private static String getSignType() {
-		return "sign_type=\"RSA\"";
-	}
-
-	/**
-	 * create the order info. 创建订单信息 由服务器生成
-	 * @param storeId
-	 */
-	private static String getOrderInfo(String partner, String seller, String subject, String body, String price,
-			String out_trade_no, String notifyUrl,String receiptPaymentId,String cardId, String storeId) {
-
-		// 签约合作者身份ID
-		String orderInfo = "partner=" + "\"" + partner + "\"";
-
-		// 签约卖家支付宝账号
-		orderInfo += "&seller_id=" + "\"" + seller + "\"";
-
-		// 商户网站唯一订单号
-		orderInfo += "&out_trade_no=" + "\"" + out_trade_no + "\"";
-
-		// 商品名称
-		orderInfo += "&subject=" + "\"" + subject + "\"";
-
-		// 商品详情
-		orderInfo += "&body=" + "\"" + body + "\"";
-
-		// 商品金额
-		orderInfo += "&total_fee=" + "\"" + price + "\"";
-
-		// 服务器异步通知页面路径
-		orderInfo += "&notify_url=" + "\"" + notifyUrl + "\"";
-
-		// 服务接口名称， 固定值
-		orderInfo += "&service=\"mobile.securitypay.pay\"";
-
-		// 支付类型， 固定值
-		orderInfo += "&payment_type=\"1\"";
-
-		// 参数编码， 固定值
-		orderInfo += "&_input_charset=\"utf-8\"";
-
-		// 设置未付款交易的超时时间
-		// 默认30分钟，一旦超时，该笔交易就会自动被关闭。
-		// 取值范围：1m～15d。
-		// m-分钟，h-小时，d-天，1c-当天（无论交易何时创建，都在0点关闭）。
-		// 该参数数值不接受小数点，如1.5h，可转换为90m。
-		orderInfo += "&it_b_pay=\"30m\"";
-
-		// extern_token为经过快登授权获取到的alipay_open_id,带上此参数用户将使用授权的账户进行支付
-		// orderInfo += "&extern_token=" + "\"" + extern_token + "\"";
-
-		// 支付宝处理完请求后，当前页面跳转到商户指定页面的路径，可空
-		orderInfo += "&return_url=\"m.alipay.com\"";
-
-		//回调返回
-        orderInfo += "&passback_params=" + "\"" + receiptPaymentId + "," + cardId + "," + storeId + "\"";
-
-		// 调用银行卡支付，需配置此参数，参与签名， 固定值 （需要签约《无线银行卡快捷支付》才能使用）
-		// orderInfo += "&paymethod=\"expressGateway\"";
-
-		return orderInfo;
 	}
 
 }
