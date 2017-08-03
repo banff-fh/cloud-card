@@ -31,6 +31,7 @@ import com.banfftech.cloudcard.pay.tenpay.api.WxPayApiConfig.PayModel;
 import com.banfftech.cloudcard.pay.tenpay.api.WxPayApiConfigKit;
 import com.banfftech.cloudcard.pay.tenpay.util.XMLUtil;
 import com.banfftech.cloudcard.pay.util.PaymentKit;
+import com.banfftech.cloudcard.pay.util.StringUtils;
 
 import javolution.util.FastMap;
 
@@ -97,13 +98,17 @@ public class WeiXinPayServices {
 		// 以下字段在return_code 和result_code都为SUCCESS的时候有返回
 		String prepay_id = result.get("prepay_id");
 		//封装调起微信支付的参数 https://pay.weixin.qq.com/wiki/doc/api/app/app.php?chapter=9_12
+		
+		String noncestr = StringUtils.getNonceStr(32);
+		String timestamp = String.valueOf(System.currentTimeMillis()/1000);
+		
 		Map<String, String> orderMap = FastMap.newInstance();
 		orderMap.put("appid", wxAppID);
 		orderMap.put("partnerid", wxPartnerid);
 		orderMap.put("package", "Sign=WXPay");
 		orderMap.put("prepayid", prepay_id);
-		orderMap.put("noncestr", System.currentTimeMillis() + "");
-		orderMap.put("timestamp", System.currentTimeMillis() / 1000 + "");
+		orderMap.put("noncestr", noncestr);
+		orderMap.put("timestamp", timestamp);
 		String packageSign = PaymentKit.createSign(orderMap, WxPayApiConfigKit.getWxPayApiConfig().getPaternerKey());
 		WxPayApiConfigKit.removeThreadLocalApiConfig();
 
@@ -113,8 +118,8 @@ public class WeiXinPayServices {
 		results.put("partnerid", wxPartnerid);
 		results.put("package", "Sign=WXPay");
 		results.put("prepayid", prepay_id);
-		results.put("noncestr", System.currentTimeMillis() + "");
-		results.put("timestamp", System.currentTimeMillis() / 1000 + "");
+		results.put("noncestr", noncestr);
+		results.put("timestamp", timestamp);
 		results.put("sign", packageSign);
 
 		return results;

@@ -120,7 +120,7 @@ public class PayServices {
 		String paymentType = (String) context.get("paymentType");
 		Map<String, Object> orderMap = FastMap.newInstance();
 		if ("aliPay".equals(paymentType)) {
-			orderMap = AliPayServices.orderPayQuery(delegator, context);
+			//orderMap = AliPayServices.orderPayQuery(delegator, context);
 		} else if ("wxPay".equals(paymentType)) {
 			orderMap = WeiXinPayServices.orderPayQuery(delegator, context);
 		}
