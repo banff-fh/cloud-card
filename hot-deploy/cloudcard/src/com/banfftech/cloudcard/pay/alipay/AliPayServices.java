@@ -3,11 +3,7 @@ package com.banfftech.cloudcard.pay.alipay;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,23 +19,13 @@ import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
-import com.alipay.api.AlipayApiException;
-import com.alipay.api.AlipayClient;
-import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.domain.AlipayFundTransToaccountTransferModel;
-import com.alipay.api.domain.AlipayTradeAppPayModel;
 import com.alipay.api.domain.AlipayTradeRefundModel;
-import com.alipay.api.request.AlipayTradeQueryRequest;
-import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.banfftech.cloudcard.CloudCardHelper;
 import com.banfftech.cloudcard.pay.alipay.api.AliPayApi;
 import com.banfftech.cloudcard.pay.alipay.api.AliPayApiConfig;
 import com.banfftech.cloudcard.pay.alipay.api.AliPayApiConfigKit;
 import com.banfftech.cloudcard.pay.alipay.util.SignUtils;
-import com.banfftech.cloudcard.pay.tenpay.api.WxPayApiConfigKit;
-
-import javolution.util.FastMap;
-import net.sf.json.JSONObject;
 
 public class AliPayServices {
 
@@ -110,14 +96,14 @@ public class AliPayServices {
 		
 		String publicKey = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.publicKey", delegator);
 		String signType = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.signType", delegator);
-	
+		String service_url = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.url", delegator);
+		
 		Map<String,String> noticeMap = AliPayApi.appPayNotify(request, publicKey, "utf-8", signType);
 		try {
 			String resultResponse = "success";
 			PrintWriter printWriter = null;
 			try {
 				printWriter = response.getWriter();
-				// do business
 				if (UtilValidate.isNotEmpty(noticeMap)) {
 					resultResponse = "success";
 					String cbstr = noticeMap.get("extra_common_param");
@@ -136,18 +122,27 @@ public class AliPayServices {
 						resultResponse = "success";
 						String tradeStatus = noticeMap.get("trade_status");
 						if ("TRADE_SUCCESS".equals(tradeStatus) || "TRADE_FINISHED".equals(tradeStatus)) {
+							
+							String kupangPartner = EntityUtilProperties.getPropertyValue("cloudcard","aliPay.kupangAppID",delegator);
+							String kuPangPublicKey = EntityUtilProperties.getPropertyValue("cloudcard","aliPay.kupangPublicKey",delegator);
+							String kupangRsaPrivate = EntityUtilProperties.getPropertyValue("cloudcard.properties", "aliPay.rsa_kupang_transfer_private",delegator);
+							
 							GenericValue systemUserLogin = delegator.findByPrimaryKeyCache("UserLogin", UtilMisc.toMap("userLoginId", "system"));
 							Map<String, Object> rechargeCloudCardDepositOutMap = dispatcher.runSync("rechargeCloudCardDeposit", UtilMisc.toMap("userLogin", systemUserLogin, "cardId",cardId, "receiptPaymentId", paymentId, "organizationPartyId", storeId));
 							//判断平台是否入账成功
 							if (!ServiceUtil.isSuccess(rechargeCloudCardDepositOutMap)) {
 								// TODO 平台入账 不成功 发起退款
 								AlipayTradeRefundModel model = new AlipayTradeRefundModel();
-								model.setOutTradeNo(noticeMap.get("out_trade_no"));
 								model.setTradeNo(noticeMap.get("trade_no"));
 								model.setRefundAmount(noticeMap.get("total_fee"));
 								model.setRefundReason("交易失败退款");
+								
+								getApiConfig(kupangPartner,kuPangPublicKey,"utf-8",kupangRsaPrivate,service_url,signType);
 								String resultStr = AliPayApi.tradeRefund(model);
+								AliPayApiConfigKit.removeThreadLocalApiConfig();
 								Debug.logError(resultStr, module);
+								
+								resultResponse = "success";
 							}else {
 								// 查找店家支付宝账号和支付宝姓名
 								String payeeAccount = null;
@@ -173,12 +168,7 @@ public class AliPayServices {
 								model.setRemark("来自库胖卡" + noticeMap.get("body") + "的收益");
 								model.setPayeeType("ALIPAY_LOGONID");
 								
-								String partner = EntityUtilProperties.getPropertyValue("cloudcard","aliPay.kupangAppID",delegator);
-								String service_url = EntityUtilProperties.getPropertyValue("cloudcard","aliPay.url","https://openapi.alipay.com/gateway.do",delegator);
-								String kuPangPublicKey = EntityUtilProperties.getPropertyValue("cloudcard","aliPay.kupangPublicKey",delegator);
-								String rsaPrivate = EntityUtilProperties.getPropertyValue("cloudcard.properties", "aliPay.rsa_kupang_transfer_private",delegator);
-								
-								getApiConfig(partner,kuPangPublicKey,"utf-8",rsaPrivate,service_url,signType);
+								getApiConfig(kupangPartner,kuPangPublicKey,"utf-8",kupangRsaPrivate,service_url,signType);
 								boolean isSuccess = AliPayApi.transfer(model);
 								AliPayApiConfigKit.removeThreadLocalApiConfig();
 								
@@ -186,14 +176,12 @@ public class AliPayServices {
 								if (isSuccess) {
 									Map<String, Object> setPaymentStatusOutMap;
 									try {
-										setPaymentStatusOutMap = dispatcher.runSync("setPaymentStatus",
-												UtilMisc.toMap("userLogin", systemUserLogin, "locale", null, "paymentId",
-														paymentId, "statusId", "PMNT_CONFIRMED"));
+										setPaymentStatusOutMap = dispatcher.runSync("setPaymentStatus", UtilMisc.toMap("userLogin", systemUserLogin, "locale", null, "paymentId", paymentId, "statusId", "PMNT_CONFIRMED"));
 									} catch (GenericServiceException e1) {
 										Debug.logError(e1, module);
 									}
 								} else {
-
+									
 								}
 							}
 						} else {

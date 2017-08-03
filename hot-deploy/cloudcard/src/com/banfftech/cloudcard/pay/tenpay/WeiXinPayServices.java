@@ -140,8 +140,7 @@ public class WeiXinPayServices {
 		String appKey = EntityUtilProperties.getPropertyValue("cloudcard", "weixin.key", delegator);
 		getApiConfig(appId, wxPartnerid, appKey);
 		Map<String, String> map = WxPayApi.appPayNotify(request, appKey);
-		WxPayApiConfigKit.removeThreadLocalApiConfig();
-
+		
 		try {
 			if (map.get("return_code").toString().equalsIgnoreCase("SUCCESS")) {
 				// 支付成功
@@ -158,64 +157,84 @@ public class WeiXinPayServices {
 					}
 					GenericValue payment = delegator.findByPrimaryKey("Payment", UtilMisc.toMap("paymentId", paymentId));
 					if ("PMNT_RECEIVED".equals(payment.getString("statusId"))) {
-
 						GenericValue systemUserLogin = delegator.findByPrimaryKeyCache("UserLogin",
 								UtilMisc.toMap("userLoginId", "system"));
 						Map<String, Object> rechargeCloudCardDepositOutMap = dispatcher.runSync("rechargeCloudCardDeposit", UtilMisc.toMap("userLogin", systemUserLogin, "cardId",  cardId, "receiptPaymentId", paymentId, "organizationPartyId", storeId));
 						
-						String certPass = EntityUtilProperties.getPropertyValue("cloudcard", "weixin.certPass", delegator);
+						//如果平台收款成功，钱打给店家，否则退给用户
 						if (!ServiceUtil.isSuccess(rechargeCloudCardDepositOutMap)) {
 							// TODO 平台入账 不成功 发起退款
-							//WxPayApi.orderRefund(params, "../cloud-card/hot-deploy/cloudcard/cert/apiclient_cert.p12", certPass);
-						}
-						
-						// 查找店家支付宝账号和支付宝姓名
-						String payeeAccount = null;
-						String payeeRealName = null;
-						Map<String, Object> aliPayMap = CloudCardHelper.getStoreAliPayInfo(delegator, storeId);
-						if (UtilValidate.isNotEmpty(aliPayMap)) {
-							payeeAccount = aliPayMap.get("payAccount").toString();
-							payeeRealName = aliPayMap.get("payName").toString();
-						}
-						// 查找转账折扣率
-						double discount = Double.valueOf(EntityUtilProperties.getPropertyValue("cloudcard", "transfer.discount", "1", delegator));
-						// 计算转账金额
-						double price = Double.parseDouble(map.get("total_fee").toString()) / 100;
-						double amount = price * discount;
-
-						// 立即将钱打给商家
-						AlipayFundTransToaccountTransferModel model = new AlipayFundTransToaccountTransferModel();
-						model.setOutBizNo(paymentId); // 生成订单号
-						model.setPayeeAccount(payeeAccount); // 转账收款账户
-						model.setAmount(String.format("%.2f", amount)); // 账户收款金额
-						model.setPayeeRealName(payeeRealName); // 账户真实名称
-						model.setPayerShowName("宁波区快微贝网络技术有限公司");
-						model.setRemark("来自库胖卡的收益");
-						model.setPayeeType("ALIPAY_LOGONID");
-						
-						String partner = EntityUtilProperties.getPropertyValue("cloudcard","aliPay.kupangAppID",delegator);
-						String service_url = EntityUtilProperties.getPropertyValue("cloudcard","aliPay.url","https://openapi.alipay.com/gateway.do",delegator);
-						String publicKey = EntityUtilProperties.getPropertyValue("cloudcard","aliPay.kupangPublicKey",delegator);
-						String rsaPrivate = EntityUtilProperties.getPropertyValue("cloudcard.properties", "aliPay.rsa_kupang_transfer_private",delegator);
-						String signType = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.signType", delegator);
-
-						AliPayServices.getApiConfig(partner,publicKey,"utf-8",rsaPrivate,service_url,signType);
-						boolean isSuccess = AliPayApi.transfer(model);
-						AliPayApiConfigKit.removeThreadLocalApiConfig();
-
-						// 如果转账成功,设置Payment状态为PMNT_CONFIRMED
-						if (isSuccess) {
-							Map<String, Object> setPaymentStatusOutMap;
-							try {
-								setPaymentStatusOutMap = dispatcher.runSync("setPaymentStatus",
-										UtilMisc.toMap("userLogin", systemUserLogin, "locale", null, "paymentId",
-												paymentId, "statusId", "PMNT_CONFIRMED"));
-							} catch (GenericServiceException e1) {
-								Debug.logError(e1, module);
+							String certPass = EntityUtilProperties.getPropertyValue("cloudcard", "weixin.certPass", delegator);
+							String amount = String.valueOf(Double.parseDouble(map.get("cash_fee"))/100);
+							SortedMap<String, String> orderMap = new TreeMap<>();
+							orderMap.put("appid", appId);
+							orderMap.put("mch_id", wxPartnerid);
+							orderMap.put("nonce_str", StringUtils.getNonceStr(32));
+							orderMap.put("out_trade_no", map.get("out_trade_no"));
+							orderMap.put("out_refund_no", payment.getString("paymentId"));
+							orderMap.put("total_fee", amount);
+							orderMap.put("refund_fee", amount);
+							orderMap.put("op_user_id", wxPartnerid);
+														
+							String packageSign = PaymentKit.createSign(orderMap, WxPayApiConfigKit.getWxPayApiConfig().getPaternerKey());
+							orderMap.put("sign", packageSign);
+							
+							String msg = WxPayApi.orderRefund(orderMap, "../cloud-card/hot-deploy/cloudcard/cert/apiclient_cert.p12", certPass);
+							Debug.logError(msg, module);
+							
+							//返给微信平台信息
+							SortedMap<String, Object> sort = new TreeMap<String, Object>();
+							sort.put("return_code", "SUCCESS");
+							sort.put("return_msg", "OK");
+							wxReturn = XMLUtil.toXml(sort);
+						}else {
+							// 查找店家支付宝账号和支付宝姓名
+							String payeeAccount = null;
+							String payeeRealName = null;
+							Map<String, Object> aliPayMap = CloudCardHelper.getStoreAliPayInfo(delegator, storeId);
+							if (UtilValidate.isNotEmpty(aliPayMap)) {
+								payeeAccount = aliPayMap.get("payAccount").toString();
+								payeeRealName = aliPayMap.get("payName").toString();
 							}
-						} else {
+							// 查找转账折扣率
+							double discount = Double.valueOf(EntityUtilProperties.getPropertyValue("cloudcard", "transfer.discount", "1", delegator));
+							// 计算转账金额
+							double price = Double.parseDouble(map.get("total_fee").toString()) / 100;
+							double amount = price * discount;
 
+							// 立即将钱打给商家
+							AlipayFundTransToaccountTransferModel model = new AlipayFundTransToaccountTransferModel();
+							model.setOutBizNo(paymentId); // 生成订单号
+							model.setPayeeAccount(payeeAccount); // 转账收款账户
+							model.setAmount(String.format("%.2f", amount)); // 账户收款金额
+							model.setPayeeRealName(payeeRealName); // 账户真实名称
+							model.setPayerShowName("宁波区快微贝网络技术有限公司");
+							model.setRemark("来自库胖卡的收益");
+							model.setPayeeType("ALIPAY_LOGONID");
+							
+							String partner = EntityUtilProperties.getPropertyValue("cloudcard","aliPay.kupangAppID",delegator);
+							String service_url = EntityUtilProperties.getPropertyValue("cloudcard","aliPay.url","https://openapi.alipay.com/gateway.do",delegator);
+							String publicKey = EntityUtilProperties.getPropertyValue("cloudcard","aliPay.kupangPublicKey",delegator);
+							String rsaPrivate = EntityUtilProperties.getPropertyValue("cloudcard.properties", "aliPay.rsa_kupang_transfer_private",delegator);
+							String signType = EntityUtilProperties.getPropertyValue("cloudcard", "aliPay.signType", delegator);
+
+							AliPayServices.getApiConfig(partner,publicKey,"utf-8",rsaPrivate,service_url,signType);
+							boolean isSuccess = AliPayApi.transfer(model);
+							AliPayApiConfigKit.removeThreadLocalApiConfig();
+
+							// 如果转账成功,设置Payment状态为PMNT_CONFIRMED
+							if (isSuccess) {
+								Map<String, Object> setPaymentStatusOutMap;
+								try {
+									setPaymentStatusOutMap = dispatcher.runSync("setPaymentStatus", UtilMisc.toMap("userLogin", systemUserLogin, "locale", null, "paymentId", paymentId, "statusId", "PMNT_CONFIRMED"));
+								} catch (GenericServiceException e1) {
+									Debug.logError(e1, module);
+								}
+							} else {
+								
+							}
 						}
+						
 					} else {
 						// 支付失败
 					}
@@ -225,6 +244,7 @@ public class WeiXinPayServices {
 				sort.put("return_code", "SUCCESS");
 				sort.put("return_msg", "OK");
 				wxReturn = XMLUtil.toXml(sort);
+				
 			} else {
 				// 支付失败
 				SortedMap<String, Object> sort = new TreeMap<String, Object>();
@@ -236,6 +256,9 @@ public class WeiXinPayServices {
 		} catch (Exception e) {
 			Debug.logError(e.getMessage(), module);
 		}
+		
+		//销毁apiClient
+		AliPayApiConfigKit.removeThreadLocalApiConfig();
 
 		//返回给微信
 		try {

@@ -62,7 +62,8 @@
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="weixin.wxAppID" systemPropertyValue="xxxxx" description="应用从官方网站申请到的合法appId"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="weixin.wxPartnerid" systemPropertyValue="xxxxx" description="商户号"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="weixin.wxURL" systemPropertyValue="xxxxx" description="接口链接"/>
-
+    <SystemProperty systemResourceId="cloudcard" systemPropertyId="weixin.certPass" systemPropertyValue="xxxxx" description="证书密码"/>
+    
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="aliPay.partner" systemPropertyValue="xxxxxx" description="商户号"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="aliPay.publicKey" systemPropertyValue="xxxxx" description="支付宝公钥"/>
     <SystemProperty systemResourceId="cloudcard" systemPropertyId="aliPay.signType" systemPropertyValue="xxxxx" description="签名方式"/>
