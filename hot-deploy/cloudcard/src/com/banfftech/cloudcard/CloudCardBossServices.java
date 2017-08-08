@@ -3791,4 +3791,44 @@ public class CloudCardBossServices {
 		return result;
 	}
 
+	/**
+	 * 商家登录获取验证码
+	 *
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> getBizLoginCaptcha(DispatchContext dctx, Map<String, Object> context){
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+		//获取电话号码
+		String teleNumber = (String) context.get("teleNumber");
+		
+		GenericValue customer;
+		try {
+			customer = CloudCardHelper.getUserByTeleNumber(delegator, teleNumber);
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
+		
+		String customerId = null;
+		if(UtilValidate.isNotEmpty(customer)) {
+			customerId = customer.getString("partyId");
+		}
+		
+		List<String> organizationList = null;
+		if(UtilValidate.isNotEmpty(customerId)) {
+			organizationList = CloudCardHelper.getOrganizationPartyId(delegator, customerId);
+		}
+		
+		if(UtilValidate.isEmpty(organizationList)){
+			Debug.logError(teleNumber+"不是商户管理人员，不能登录 商户app", module);
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardBizLoginIsNotManager", locale));
+		}
+		
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		return result;
+	}
 }

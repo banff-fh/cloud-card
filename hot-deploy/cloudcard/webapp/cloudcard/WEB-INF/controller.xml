@@ -660,8 +660,13 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-
-
+	
+	<!-- 商家登录获取验证码 -->
+	<request-map uri="getBizLoginCaptcha">
+		<event type="service" invoke="getBizLoginCaptcha" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
 
 	<!-- 后台页面部分 Request Mappings -->
 

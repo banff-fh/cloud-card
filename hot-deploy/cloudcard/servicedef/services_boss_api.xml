@@ -5,6 +5,13 @@
     <vendor></vendor>
     <version>1.0</version>
 
+
+	<service name="getBizLoginCaptcha" engine="java"
+		location="com.banfftech.cloudcard.CloudCardBossServices" invoke="getBizLoginCaptcha" auth="false">
+		<description>商家获取登录验证码</description>
+		<attribute name="teleNumber" type="String" mode="IN" optional="false"/>
+	</service>
+	
 	<service name="bizAppLogin" engine="java"
 		location="com.banfftech.cloudcard.sms.SmsServices" invoke="bizAppLogin" auth="false">
 		<description>商家手机登录</description>
