@@ -701,7 +701,7 @@ public class CloudCardCustServices {
 
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
-		result.put("refreshTime", expirationTime);
+		result.put("refreshTime", expirationTime/1000);
 		result.put("qrCode", CloudCardConstant.CODE_PREFIX_PAY_ + qrCode);
 		return result;
 	}
