@@ -190,7 +190,7 @@ public class SmsServices {
 		//发送短信
 		SMSClient client = new SMSClient(secret, appkey);
     	SMSPayload payload = SMSPayload.newBuilder()
-                .setMobildNumber(phone)
+    				.setMobileNumber(phone)
                 .setTempId(Integer.parseInt(smsTemplateCode))
                 .setTempPara(smsMap)
                 .build();
