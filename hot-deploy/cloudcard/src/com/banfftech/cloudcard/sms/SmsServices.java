@@ -346,7 +346,7 @@ public class SmsServices {
 				String iss = EntityUtilProperties.getPropertyValue("cloudcard","token.issuer",delegator);
 				String tokenSecret = EntityUtilProperties.getPropertyValue("cloudcard","token.secret",delegator);
 				//开始时间
-				final long iat = System.currentTimeMillis() / 1000L; // issued at claim
+				final long iat = System.currentTimeMillis(); // issued at claim
 				//Token到期时间
 				final long exp = iat + expirationTime;
 				//生成Token

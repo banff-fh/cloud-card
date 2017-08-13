@@ -136,7 +136,7 @@ public class CloudCardLoginWorker {
             //当token离到期时间少于多少秒，更新新的token，默认24小时（24*3600 = 86400L）
             long secondsBeforeUpdatetoken = Long.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","token.secondsBeforeUpdate", "86400", defaultDelegator));
             
-            long now = System.currentTimeMillis() / 1000L;  
+            long now = System.currentTimeMillis();  
             Long oldExp = Long.valueOf(String.valueOf(claims.get("exp")));
 
             if(oldExp - now < secondsBeforeUpdatetoken){

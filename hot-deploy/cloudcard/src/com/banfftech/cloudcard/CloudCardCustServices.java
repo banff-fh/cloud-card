@@ -681,7 +681,7 @@ public class CloudCardCustServices {
 		String iss = EntityUtilProperties.getPropertyValue("cloudcard","qrCode.issuer",delegator);
 		String tokenSecret = EntityUtilProperties.getPropertyValue("cloudcard","qrCode.secret",delegator);
 		//开始时间
-		final long iat = System.currentTimeMillis() / 1000L; // issued at claim
+		final long iat = System.currentTimeMillis(); // issued at claim
 		//Token到期时间
 		final long exp = iat + expirationTime;
 		//生成Token
