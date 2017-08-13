@@ -80,9 +80,10 @@ public class CloudCardLoginWorker {
         String iss = EntityUtilProperties.getPropertyValue("cloudcard","token.issuer",delegator);
         
         Map<String, Claim> claims;
+        DecodedJWT jwt;
         try {
         		JWTVerifier verifier = JWT.require(Algorithm.HMAC256(tokenSecret)).build();//验证token和发布者（云平台
-			DecodedJWT jwt = verifier.verify(token);
+        		jwt = verifier.verify(token);
 			claims =  jwt.getClaims();
         }catch(TokenExpiredException e1){
             Debug.logInfo("token过期：" + e1.getMessage(),module);
@@ -136,8 +137,8 @@ public class CloudCardLoginWorker {
             //当token离到期时间少于多少秒，更新新的token，默认24小时（24*3600 = 86400L）
             long secondsBeforeUpdatetoken = Long.valueOf(EntityUtilProperties.getPropertyValue("cloudcard","token.secondsBeforeUpdate", "86400", defaultDelegator));
             
-            long now = System.currentTimeMillis();  
-            Long oldExp = Long.valueOf(String.valueOf(claims.get("exp")));
+            long now = System.currentTimeMillis();
+			long oldExp = jwt.getExpiresAt().getTime();
 
             if(oldExp - now < secondsBeforeUpdatetoken){
             	// 快要过期了，新生成token
