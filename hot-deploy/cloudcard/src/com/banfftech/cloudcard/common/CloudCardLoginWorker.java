@@ -19,10 +19,8 @@
 package com.banfftech.cloudcard.common;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
-import java.util.HashMap;
+import java.io.UnsupportedEncodingException;
+import java.util.Date;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -48,10 +46,13 @@ import org.ofbiz.webapp.control.ContextFilter;
 import org.ofbiz.webapp.control.LoginWorker;
 import org.ofbiz.webapp.stats.VisitHandler;
 
-import com.auth0.jwt.JWTExpiredException;
-import com.auth0.jwt.JWTSigner;
+import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.JWTVerifyException;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
+import com.auth0.jwt.interfaces.Claim;
+import com.auth0.jwt.interfaces.DecodedJWT;
 
 /**
  * Common Workers
@@ -78,14 +79,15 @@ public class CloudCardLoginWorker {
         String tokenSecret = EntityUtilProperties.getPropertyValue("cloudcard","token.secret", defaultDelegator);
         String iss = EntityUtilProperties.getPropertyValue("cloudcard","token.issuer",delegator);
         
-        Map<String, Object> claims;
+        Map<String, Claim> claims;
         try {
-             JWTVerifier verifier = new JWTVerifier(tokenSecret, null, iss);//验证token和发布者（云平台）
-             claims= verifier.verify(token);
-        }catch(JWTExpiredException e1){
+        		JWTVerifier verifier = JWT.require(Algorithm.HMAC256(tokenSecret)).build();//验证token和发布者（云平台
+			DecodedJWT jwt = verifier.verify(token);
+			claims =  jwt.getClaims();
+        }catch(TokenExpiredException e1){
             Debug.logInfo("token过期：" + e1.getMessage(),module);
             return "success";
-        }catch (JWTVerifyException | InvalidKeyException | NoSuchAlgorithmException | IllegalStateException | SignatureException | IOException e) {
+        }catch(JWTVerificationException | IllegalStateException | IOException e) {
             Debug.logInfo("token没通过验证：" + e.getMessage(),module);
             return "success";
         }
@@ -95,8 +97,8 @@ public class CloudCardLoginWorker {
              return "success";
         }
         
-        String userLoginId = (String) claims.get("user");
-        String tokenDelegatorName = (String) claims.get("delegatorName");
+        String userLoginId = claims.get("user").asString();
+        String tokenDelegatorName = claims.get("delegatorName").asString();
         Delegator tokenDelegator = DelegatorFactory.getDelegator(tokenDelegatorName);
         GenericValue userLogin;
 		try {
@@ -144,16 +146,20 @@ public class CloudCardLoginWorker {
     			//Token到期时间
     			long exp = now + expirationTime; 
     			//生成Token
-    			JWTSigner signer = new JWTSigner(tokenSecret);
-    			claims = new HashMap<String, Object>();
-    			claims.put("iss", iss);
-    			claims.put("user", userLoginId);
-    			claims.put("delegatorName", tokenDelegatorName);
-    			claims.put("exp", exp);
-    			claims.put("iat", now);
-    			request.setAttribute(TOKEN_KEY_ATTR, signer.sign(claims));
-            }
-            
+            Algorithm algorithm;
+			try {
+				algorithm = Algorithm.HMAC256(tokenSecret);
+				token = JWT.create()
+			    		.withIssuer(iss)
+			    		.withIssuedAt(new Date(now))
+			    		.withExpiresAt(new Date(exp))
+			    		.withClaim("delegatorName", tokenDelegatorName)
+			    		.withClaim("user",userLoginId)
+			        .sign(algorithm);
+			} catch (IllegalArgumentException | UnsupportedEncodingException e1) {
+				Debug.logError(e1.getMessage(), module);
+			}
+          }
         } else {
             Debug.logWarning("Could not find userLogin for token: " + token, module);
         }

@@ -30,8 +30,12 @@ import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
 import com.alibaba.fastjson.JSONObject;
-import com.auth0.jwt.JWTExpiredException;
+import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.TokenExpiredException;
+import com.auth0.jwt.interfaces.Claim;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.banfftech.cloudcard.constant.CloudCardConstant;
 import com.banfftech.cloudcard.lbs.BaiduLBSUtil;
 import com.banfftech.cloudcard.sms.SmsServices;
@@ -1918,14 +1922,15 @@ public class CloudCardBossServices {
 		String partyId = null;
 		// 如果扫的码 cardCode字段是 个用户付款码，则根据付款码进行自动找卡
 		if (UtilValidate.isNotEmpty(qrCode) && qrCode.startsWith(CloudCardConstant.CODE_PREFIX_PAY_)) {
-			String iss = EntityUtilProperties.getPropertyValue("cloudcard", "qrCode.issuer", delegator);
+			//String iss = EntityUtilProperties.getPropertyValue("cloudcard", "qrCode.issuer", delegator);
 			String tokenSecret = EntityUtilProperties.getPropertyValue("cloudcard", "qrCode.secret", delegator);
 			try {
-				JWTVerifier verifier = new JWTVerifier(tokenSecret, null, iss);
 				String qrCodeTmp = qrCode.replace(CloudCardConstant.CODE_PREFIX_PAY_, "");
-				Map<String, Object> claims = verifier.verify(qrCodeTmp);
-				partyId = (String) claims.get("user");
-			} catch (JWTExpiredException e1) {
+				JWTVerifier verifier = JWT.require(Algorithm.HMAC256(tokenSecret)).build();//验证token和发布者（云平台
+				DecodedJWT jwt = verifier.verify(qrCodeTmp);
+				Map<String, Claim> claims =  jwt.getClaims();
+				partyId = claims.get("user").asString();
+			} catch (TokenExpiredException e1) {
 				// 用户付款码已过期
 				Debug.logWarning("付款码已经过期", module);
 				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,

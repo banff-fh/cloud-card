@@ -27,11 +27,14 @@ import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
-import com.auth0.jwt.JWTExpiredException;
+import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.TokenExpiredException;
+import com.auth0.jwt.interfaces.Claim;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.banfftech.cloudcard.constant.CloudCardConstant;
 import com.banfftech.cloudcard.jpush.JPushServices;
-import com.banfftech.cloudcard.sms.SmsServices;
 import com.banfftech.cloudcard.util.CloudCardInfoUtil;
 
 import javolution.util.FastList;
@@ -1671,14 +1674,15 @@ public class CloudCardServices {
 
                 cardCode = cardCode.substring(CloudCardConstant.CODE_PREFIX_PAY_.length());
 
-                String iss = EntityUtilProperties.getPropertyValue("cloudcard", "qrCode.issuer", delegator);
+                //String iss = EntityUtilProperties.getPropertyValue("cloudcard", "qrCode.issuer", delegator);
                 String tokenSecret = EntityUtilProperties.getPropertyValue("cloudcard", "qrCode.secret", delegator);
                 String customerPartyId = null;
                 try {
-                    JWTVerifier verifier = new JWTVerifier(tokenSecret, null, iss);
-                    Map<String, Object> claims = verifier.verify(cardCode);
-                    customerPartyId = (String) claims.get("user");
-                } catch (JWTExpiredException e1) {
+					JWTVerifier verifier = JWT.require(Algorithm.HMAC256(tokenSecret)).build();// 验证token和发布者（云平台
+					DecodedJWT jwt = verifier.verify(cardCode);
+					Map<String, Claim> claims = jwt.getClaims();
+					customerPartyId = claims.get("user").asString();
+                } catch (TokenExpiredException e1) {
                     // 用户付款码已过期
                     Debug.logWarning("付款码已经过期", module);
                     return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardPaymentCodeExpired", locale));

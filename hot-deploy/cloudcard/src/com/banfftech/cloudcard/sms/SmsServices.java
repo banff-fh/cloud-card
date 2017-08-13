@@ -1,7 +1,8 @@
 package com.banfftech.cloudcard.sms;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -28,7 +29,8 @@ import org.ofbiz.service.GenericServiceException;
 import org.ofbiz.service.LocalDispatcher;
 import org.ofbiz.service.ServiceUtil;
 
-import com.auth0.jwt.JWTSigner;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.banfftech.cloudcard.CloudCardHelper;
 import com.banfftech.cloudcard.CloudCardQueryServices;
 import com.banfftech.cloudcard.constant.CloudCardConstant;
@@ -189,11 +191,11 @@ public class SmsServices {
 		getSmsProperty(delegator,smsType);
 		//发送短信
 		SMSClient client = new SMSClient(secret, appkey);
-    	SMSPayload payload = SMSPayload.newBuilder()
+    		SMSPayload payload = SMSPayload.newBuilder()
     				.setMobileNumber(phone)
-                .setTempId(Integer.parseInt(smsTemplateCode))
-                .setTempPara(smsMap)
-                .build();
+    				.setTempId(Integer.parseInt(smsTemplateCode))
+    				.setTempPara(smsMap)
+    				.build();
     	try {
             SendSMSResult res = client.sendTemplateSMS(payload);
             if(res!=null && !res.isResultOK()){
@@ -348,18 +350,28 @@ public class SmsServices {
 				//Token到期时间
 				final long exp = iat + expirationTime;
 				//生成Token
-				final JWTSigner signer = new JWTSigner(tokenSecret);
-				final HashMap<String, Object> claims = new HashMap<String, Object>();
-				claims.put("iss", iss);
+				
+				String user = null;
 				if(null != customer){
-					claims.put("user", customer.get("userLoginId"));
+					user = customer.getString("userLoginId");
 				}else{
-					claims.put("user", customerMap.get("userLoginId"));
+					user =  customerMap.get("userLoginId").toString();
 				}
-				claims.put("delegatorName", delegator.getDelegatorName());
-				claims.put("exp", exp);
-				claims.put("iat", iat);
-				token = signer.sign(claims);
+				
+				Algorithm algorithm;
+				try {
+					algorithm = Algorithm.HMAC256(tokenSecret);
+					token = JWT.create()
+				    		.withIssuer(iss)
+				    		.withIssuedAt(new Date(iat))
+				    		.withExpiresAt(new Date(exp))
+				    		.withClaim("delegatorName",  delegator.getDelegatorName())
+				    		.withClaim("user",user)
+				        .sign(algorithm);
+				} catch (IllegalArgumentException | UnsupportedEncodingException e1) {
+					Debug.logError(e1.getMessage(), module);
+				}
+				
 				//修改验证码状态
 				sms.set("isValid", "Y");
 				try {

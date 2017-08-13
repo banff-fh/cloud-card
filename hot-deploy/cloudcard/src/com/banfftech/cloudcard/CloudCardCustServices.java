@@ -1,10 +1,11 @@
 package com.banfftech.cloudcard;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.sql.Timestamp;
 import java.util.Calendar;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -30,7 +31,8 @@ import org.ofbiz.service.ServiceUtil;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.auth0.jwt.JWTSigner;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.banfftech.cloudcard.constant.CloudCardConstant;
 import com.banfftech.cloudcard.lbs.BaiduLBSUtil;
 import com.banfftech.cloudcard.util.CloudCardLevelScoreUtil;
@@ -683,14 +685,19 @@ public class CloudCardCustServices {
 		//Token到期时间
 		final long exp = iat + expirationTime;
 		//生成Token
-		final JWTSigner signer = new JWTSigner(tokenSecret);
-		final HashMap<String, Object> claims = new HashMap<String, Object>();
-		claims.put("iss", iss);
-		claims.put("user", userLogin.get("partyId"));
-		claims.put("delegatorName", delegator.getDelegatorName());
-		claims.put("exp", exp);
-		claims.put("iat", iat);
-		qrCode = signer.sign(claims);
+		Algorithm algorithm;
+		try {
+			algorithm = Algorithm.HMAC256(tokenSecret);
+			qrCode = JWT.create()
+		    		.withIssuer(iss)
+		    		.withIssuedAt(new Date(iat))
+		    		.withExpiresAt(new Date(exp))
+		    		.withClaim("delegatorName",  delegator.getDelegatorName())
+		    		.withClaim("user", userLogin.getString("partyId"))
+		        .sign(algorithm);
+		} catch (IllegalArgumentException | UnsupportedEncodingException e1) {
+			Debug.logError(e1.getMessage(), module);
+		}
 
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
