@@ -29,8 +29,8 @@ import com.banfftech.cloudcard.pay.tenpay.api.WxPayApi;
 import com.banfftech.cloudcard.pay.tenpay.api.WxPayApiConfig;
 import com.banfftech.cloudcard.pay.tenpay.api.WxPayApiConfig.PayModel;
 import com.banfftech.cloudcard.pay.tenpay.api.WxPayApiConfigKit;
+import com.banfftech.cloudcard.pay.tenpay.util.PaymentKit;
 import com.banfftech.cloudcard.pay.tenpay.util.XMLUtil;
-import com.banfftech.cloudcard.pay.util.PaymentKit;
 import com.banfftech.cloudcard.pay.util.StringUtils;
 
 import javolution.util.FastMap;

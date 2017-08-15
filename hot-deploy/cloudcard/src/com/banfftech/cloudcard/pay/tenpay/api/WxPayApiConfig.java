@@ -6,7 +6,7 @@ import java.util.Map;
 
 import com.banfftech.cloudcard.pay.alipay.ext.kit.StrKit;
 import com.banfftech.cloudcard.pay.tenpay.api.WxPayApi.TradeType;
-import com.banfftech.cloudcard.pay.util.PaymentKit;
+import com.banfftech.cloudcard.pay.tenpay.util.PaymentKit;
 
 public class WxPayApiConfig implements Serializable {
 	private static final long serialVersionUID = -6447075676732210047L;

@@ -8,9 +8,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.banfftech.cloudcard.pay.alipay.ext.kit.StrKit;
-import com.banfftech.cloudcard.pay.util.HttpKit;
-import com.banfftech.cloudcard.pay.util.PaymentKit;
-import com.banfftech.cloudcard.pay.vo.AjaxResult;
+import com.banfftech.cloudcard.pay.tenpay.util.HttpKit;
+import com.banfftech.cloudcard.pay.tenpay.util.PaymentKit;
+import com.banfftech.cloudcard.pay.tenpay.vo.AjaxResult;
 
 public class QrCodeScanPayApi {
 	/**

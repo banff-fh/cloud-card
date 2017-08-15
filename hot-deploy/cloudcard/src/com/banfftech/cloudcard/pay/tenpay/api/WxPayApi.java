@@ -5,9 +5,9 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.banfftech.cloudcard.pay.util.HttpKit;
-import com.banfftech.cloudcard.pay.util.HttpUtils;
-import com.banfftech.cloudcard.pay.util.PaymentKit;
+import com.banfftech.cloudcard.pay.tenpay.util.HttpKit;
+import com.banfftech.cloudcard.pay.tenpay.util.HttpUtils;
+import com.banfftech.cloudcard.pay.tenpay.util.PaymentKit;
 /**
  * 
  * @author su_bk

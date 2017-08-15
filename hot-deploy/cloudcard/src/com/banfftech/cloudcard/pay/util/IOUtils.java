@@ -3,6 +3,8 @@ package com.banfftech.cloudcard.pay.util;
 import java.io.*;
 import java.nio.charset.Charset;
 
+import com.banfftech.cloudcard.pay.tenpay.util.Charsets;
+
 /**
  * IOUtils
  * @author L.cm
