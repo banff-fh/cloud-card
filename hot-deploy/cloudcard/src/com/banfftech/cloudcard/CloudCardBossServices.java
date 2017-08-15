@@ -3832,6 +3832,15 @@ public class CloudCardBossServices {
 			Debug.logError(teleNumber+"不是商户管理人员，不能登录 商户app", module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardBizLoginIsNotManager", locale));
 		}
+
+		try {
+			Map<String ,Object> captchaMap = dispatcher.runSync("getLoginCaptcha",UtilMisc.toMap("teleNumber", teleNumber));
+			if(ServiceUtil.isError(captchaMap)) {
+				return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+			}
+		} catch (GenericServiceException e) {
+			return ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "CloudCardInternalServiceError", locale));
+		}
 		
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		return result;
