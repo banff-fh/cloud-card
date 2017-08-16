@@ -101,7 +101,21 @@
 
 	<service name="userStoreListLBS" engine="java"
 		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="userStoreListLBS" auth="false">
-		<description>查找圈子</description>
+		<description>地图显示附近的店铺</description>
+		<attribute name="longitude" type="String" mode="INOUT" optional="false"><description>经度</description></attribute>
+		<attribute name="latitude" type="String" mode="INOUT" optional="false"><description>纬度</description></attribute>
+		<attribute name="storeName" type="String" mode="IN" optional="true"><description>店铺名称</description></attribute>
+		<attribute name="region" type="String" mode="INOUT" optional="true"><description>区域名称</description></attribute>
+		<attribute name="geoId" type="String" mode="OUT" optional="true"><description>geoId</description></attribute>
+		<attribute name="geoTypeId" type="String" mode="OUT" optional="true"><description>geoTypeId</description></attribute>
+		<attribute name="countyList" type="List" mode="OUT" optional="true"><description>当前所属城市下属市区列表</description></attribute>
+		<attribute name="listSize" type="String" mode="OUT" optional="true"><description>店铺列表大小</description></attribute>
+		<attribute name="storeList" type="List" mode="OUT" optional="true"><description>店铺列表</description></attribute>
+	</service>
+	
+	<service name="userGetNearbyStore" engine="java"
+		location="com.banfftech.cloudcard.CloudCardCustServices" invoke="userGetNearbyStore" auth="false">
+		<description>获取附近店铺信息</description>
 		<attribute name="longitude" type="String" mode="INOUT" optional="false"><description>经度</description></attribute>
 		<attribute name="latitude" type="String" mode="INOUT" optional="false"><description>纬度</description></attribute>
 		<attribute name="storeName" type="String" mode="IN" optional="true"><description>店铺名称</description></attribute>

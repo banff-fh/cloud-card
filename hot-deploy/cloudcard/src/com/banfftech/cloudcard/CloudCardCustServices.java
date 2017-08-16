@@ -54,13 +54,9 @@ public class CloudCardCustServices {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
-		//GenericValue userLogin = (GenericValue) context.get("userLogin");
 
         double longitude = Double.parseDouble(UtilFormatOut.checkNull((String) context.get("longitude"), "0.00"));
         double latitude = Double.parseDouble(UtilFormatOut.checkNull((String) context.get("latitude"), "0.00"));
-        String region = (String) context.get("region");
-        String geoId = null;
-        String geoTypeId = null;
 		List<GenericValue> countyList = FastList.newInstance();
 		double exp = 10e-10;
         // 经度最大是180° 最小是-180° 纬度最大是90° 最小是-90°
@@ -88,9 +84,141 @@ public class CloudCardCustServices {
 		params.put("page_size","50");
     		lbsResult = JSONObject.parseObject(BaiduLBSUtil.nearby(params));
 
-    		//String geocoder = BaiduLBSUtil.geocoder(UtilMisc.toMap("ak", ak, "location", latitude + "," + longitude, "output", "json", "callback", "showLocation"));
+    		// 如果地图返回状态非0，全部定义为手机定位异常
+		if (!"0".equals(lbsResult.get("status").toString())) {
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardAbnormalPositioning", locale));
+		}
+		
+		if (!"0".equalsIgnoreCase(lbsResult.get("total").toString())) {
+			JSONArray jsonArray = JSONObject.parseArray(lbsResult.get("contents").toString());
+			for (int i = 0; i < jsonArray.size(); i++) {
+				String storeName = null;
+				String statusId = null;
+				String storeAddress = null;
+				String storeId = jsonArray.getJSONObject(i).getObject("storeId", String.class);
+				String telNum = null;
+				String storeLongitude = null;
+				String storeLatitude = null;
+				// 判断店家是否存在
+				if ("Y".equalsIgnoreCase(jsonArray.getJSONObject(i).getObject("isRemoved", String.class))) {
+					continue;
+				}
+				try {
+					context.put("storeId", storeId);
+					
+					// 获取店铺信息
+					Map<String, Object> cardAndStoreInfoMap = CloudCardHelper.getCardAndStoreInfo(dctx, context);
+					if (UtilValidate.isNotEmpty(cardAndStoreInfoMap)) {
+						storeName = (String) cardAndStoreInfoMap.get("storeName");
+						statusId = (String) cardAndStoreInfoMap.get("statusId");
+					}
+					
+					// 如果店铺状态为PARTY_DISABLED则跳出循环
+					if ("PARTY_DISABLED".equals(statusId)) {
+						continue;
+					}
+					
+					//查找店铺联系地址
+					Map<String, Object> geoAndContactMechInfoMap = CloudCardHelper.getGeoAndContactMechInfoByStoreId(delegator, locale, storeId);
+					if (UtilValidate.isNotEmpty(geoAndContactMechInfoMap)) {
+						storeAddress = (String) geoAndContactMechInfoMap.get("storeAddress");
+						telNum = (String) geoAndContactMechInfoMap.get("storeTeleNumber");
+						storeLongitude = (String) geoAndContactMechInfoMap.get("longitude");
+						storeLatitude = (String) geoAndContactMechInfoMap.get("latitude");
+					}
+					
+					//获取店铺服务等级
+			        EntityCondition dateCond = EntityUtil.getFilterByDateExpr();
+			        EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toMap("partyId", storeId,"partyClassificationTypeId","STORE_SALE_CLASSIFI"));
+			        String storeSaleLevel = null;
+			        try {
+						GenericValue partyClassification = EntityUtil.getFirst(
+						        delegator.findList("PartyClassificationAndPartyClassificationGroup", EntityCondition.makeCondition(cond, dateCond), null, UtilMisc.toList("-fromDate"), null, false));
+						if(UtilValidate.isNotEmpty(partyClassification)){
+							storeSaleLevel = partyClassification.getString("partyClassificationGroupId");
+						}
+			        } catch (GenericEntityException e) {
+						Debug.logError(e.getMessage(), module);
+			            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+					}
+	
+					Map<String, Object> storeMap = FastMap.newInstance();
+					storeMap.put("storeName", storeName);
+					storeMap.put("address", storeAddress);
+					storeMap.put("telNum", telNum);
+					storeMap.put("storeId", storeId);
+					storeMap.put("distance", jsonArray.getJSONObject(i).getObject("distance", String.class));
+					storeMap.put("storeSaleLevel", storeSaleLevel);
+					if (UtilValidate.isNotEmpty(storeLongitude) && UtilValidate.isNotEmpty(storeLatitude)) {
+						storeMap.put("location", "[" + storeLongitude + "," + storeLatitude + "]");
+					} else {
+						storeMap.put("location", jsonArray.getJSONObject(i).getObject("location", String.class));
+					}
+					storeList.add(storeMap);
+				} catch (Exception e) {
+					Debug.logError(e.getMessage(), module);
+					return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+				}
+			}
+		}
+		
+		// 返回结果
+		Map<String, Object> result = ServiceUtil.returnSuccess();
+		result.put("listSize", lbsResult.get("total").toString());
+		result.put("longitude", String.valueOf(longitude));
+		result.put("latitude",String.valueOf(latitude));
+		result.put("countyList",countyList);
+		result.put("storeList", storeList);
+		return result;
+	}
+	
+	/**
+	 * 获取附近的库胖店
+	 *
+	 * @param dctx
+	 * @param context
+	 * @return
+	 */
+	public static Map<String, Object> userGetNearbyStore(DispatchContext dctx, Map<String, Object> context) {
+		LocalDispatcher dispatcher = dctx.getDispatcher();
+		Delegator delegator = dispatcher.getDelegator();
+		Locale locale = (Locale) context.get("locale");
+		GenericValue userLogin = (GenericValue) context.get("userLogin");
 
-	    	/*
+        double longitude = Double.parseDouble(UtilFormatOut.checkNull((String) context.get("longitude"), "0.00"));
+        double latitude = Double.parseDouble(UtilFormatOut.checkNull((String) context.get("latitude"), "0.00"));
+        String region = (String) context.get("region");
+        String geoId = null;
+        String geoTypeId = null;
+		List<GenericValue> countyList = FastList.newInstance();
+		double exp = 10e-10;
+        // 经度最大是180° 最小是-180° 纬度最大是90° 最小是-90°
+        if (Math.abs(longitude) - 180.00 > exp || Math.abs(latitude) - 90.00 > exp) {
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardAbnormalPositioning", locale));
+        }
+
+		String ak = EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.ak", delegator);
+		String getTableId = EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.getTableId", delegator);
+		String radius = EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.radius", delegator);
+		String CoordType = EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.CoordType", delegator);
+		String q = EntityUtilProperties.getPropertyValue("cloudcard", "baiduMap.q", delegator);
+
+		Map<String, Object> params = FastMap.newInstance();
+		params.put("ak", ak);
+		params.put("geotable_id", getTableId);
+		params.put("q", q);
+		params.put("Coord_type", CoordType);
+
+		JSONObject lbsResult = null;
+		params.put("location", longitude + "," + latitude);
+		params.put("radius", radius);
+		params.put("page_index","0");
+		params.put("page_size","50");
+    		lbsResult = JSONObject.parseObject(BaiduLBSUtil.nearby(params));
+
+    		String geocoder = BaiduLBSUtil.geocoder(UtilMisc.toMap("ak", ak, "location", latitude + "," + longitude, "output", "json", "callback", "showLocation"));
+
+    		//获取省市
 	    	if(UtilValidate.isNotEmpty(geocoder)){
 	    		geocoder = geocoder.replace("showLocation&&showLocation(", "");
 	        	geocoder = geocoder.replace(")", "");
@@ -119,55 +247,73 @@ public class CloudCardCustServices {
 					}
 	        	}
 	    	}
-	    	*/
-
-    		// 如果地图返回状态非0，全部定义为手机定位异常
-		if (!"0".equals(lbsResult.get("status").toString())) {
-			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardAbnormalPositioning", locale));
-		}
-		
+	    	
+	    	//获取店铺信息
+	    	List<Map<String,Object>> storeList = FastList.newInstance();
 		if (!"0".equalsIgnoreCase(lbsResult.get("total").toString())) {
 			JSONArray jsonArray = JSONObject.parseArray(lbsResult.get("contents").toString());
 			for (int i = 0; i < jsonArray.size(); i++) {
+				String storeName = null;
+				String statusId = null;
+				String storeAddress = null;
+				String storeId = jsonArray.getJSONObject(i).getObject("storeId", String.class);
+				String storeImg = null;
 				// 判断店家是否存在
 				if ("Y".equalsIgnoreCase(jsonArray.getJSONObject(i).getObject("isRemoved", String.class))) {
 					continue;
 				}
 				try {
-					boolean isGroupOwner = CloudCardHelper.isStoreGroupOwner(delegator,jsonArray.getJSONObject(i).getObject("storeId", String.class), true);
-					context.put("storeId", jsonArray.getJSONObject(i).getObject("storeId", String.class));
+					context.put("storeId", storeId);
 					// 获取店铺信息
-					Map<String, Object> storeInfo = userGetStoreInfo(dctx, context);
-	
+					Map<String, Object> cardAndStoreInfoMap = CloudCardHelper.getCardAndStoreInfo(dctx, context);
+					if (UtilValidate.isNotEmpty(cardAndStoreInfoMap)) {
+						storeName = (String) cardAndStoreInfoMap.get("storeName");
+						statusId = (String) cardAndStoreInfoMap.get("statusId");
+					}
+					
+					//查找店铺联系地址
+					Map<String, Object> geoAndContactMechInfoMap = CloudCardHelper.getGeoAndContactMechInfoByStoreId(delegator, locale, storeId);
+					if (UtilValidate.isNotEmpty(geoAndContactMechInfoMap)) {
+						storeAddress = (String) geoAndContactMechInfoMap.get("storeAddress");
+					}
+					
+					//获取oss访问地址
+			        String ossUrl = EntityUtilProperties.getPropertyValue("cloudcard","oss.url","http://kupang.oss-cn-shanghai.aliyuncs.com/",delegator);
+					
+					//获取商家招牌照片
+			        List<GenericValue> bizAvatarImgList = FastList.newInstance();
+			        try {
+			        	bizAvatarImgList = delegator.findByAnd("PartyContentAndDataResourceDetail", UtilMisc.toMap("partyId", storeId,"partyContentTypeId", "STORE_IMG","contentTypeId","ACTIVITY_PICTURE","statusId","CTNT_IN_PROGRESS", "dataResourceName","bizAvatar"));
+					} catch (GenericEntityException e) {
+						Debug.logError(e.getMessage(), module);
+			            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+					}
+
+			        //店铺头像
+			        if(UtilValidate.isNotEmpty(bizAvatarImgList) && UtilValidate.isNotEmpty(ossUrl)){
+			            GenericValue bizAvatarImg = EntityUtil.getFirst(bizAvatarImgList);
+						storeImg = ossUrl + bizAvatarImg.getString("objectInfo");
+			        }
+			        
 					// 如果店铺状态为PARTY_DISABLED则跳出循环
-					if ("PARTY_DISABLED".equals(storeInfo.get("statusId"))) {
+					if ("PARTY_DISABLED".equals(statusId)) {
 						continue;
 					}
-	
+
 					Map<String, Object> storeMap = FastMap.newInstance();
-					storeMap.put("storeName", storeInfo.get("storeName"));
-					storeMap.put("address", storeInfo.get("storeAddress"));
-					storeMap.put("telNum", storeInfo.get("storeTeleNumber"));
-					storeMap.put("storeId", storeInfo.get("storeId"));
-					storeMap.put("isGroupOwner", CloudCardHelper.bool2YN(isGroupOwner));
-					storeMap.put("isHasCard", storeInfo.get("isHasCard"));
-					storeMap.put("distance", jsonArray.getJSONObject(i).getObject("distance", String.class));
-					storeMap.put("storeId", storeInfo.get("storeId"));
-					storeMap.put("storeSaleLevel", storeInfo.get("storeSaleLevel"));
-					if (UtilValidate.isNotEmpty(storeInfo.get("longitude")) && UtilValidate.isNotEmpty(storeInfo.get("latitude"))) {
-						storeMap.put("location", "[" + storeInfo.get("longitude") + "," + storeInfo.get("latitude") + "]");
-					} else {
-						storeMap.put("location", jsonArray.getJSONObject(i).getObject("location", String.class));
-					}
+					storeMap.put("storeName", storeName);
+					storeMap.put("address", storeAddress);
+					storeMap.put("storeId", storeId);
+					storeMap.put("storeImg", storeImg);
 					storeList.add(storeMap);
-				} catch (GenericEntityException e) {
+				} catch (Exception e) {
 					Debug.logError(e.getMessage(), module);
 					return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 				}
 			}
 		}
-		
-		// 返回结果
+
+	    	// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("listSize", lbsResult.get("total").toString());
 		result.put("longitude", String.valueOf(longitude));
@@ -220,10 +366,10 @@ public class CloudCardCustServices {
 
 		Map<String, Object> geoAndContactMechInfoMap = CloudCardHelper.getGeoAndContactMechInfoByStoreId(delegator,locale,storeId);
         if(UtilValidate.isNotEmpty(geoAndContactMechInfoMap)){
-        	storeAddress = (String) geoAndContactMechInfoMap.get("storeAddress");
-        	storeTeleNumber = (String) geoAndContactMechInfoMap.get("storeTeleNumber");
-        	longitude = (String) geoAndContactMechInfoMap.get("longitude");
-        	latitude = (String) geoAndContactMechInfoMap.get("latitude");
+	        	storeAddress = (String) geoAndContactMechInfoMap.get("storeAddress");
+	        	storeTeleNumber = (String) geoAndContactMechInfoMap.get("storeTeleNumber");
+	        	longitude = (String) geoAndContactMechInfoMap.get("longitude");
+	        	latitude = (String) geoAndContactMechInfoMap.get("latitude");
         }
 
         //获取商家营业执照

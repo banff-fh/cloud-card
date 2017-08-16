@@ -341,14 +341,22 @@
 		<response name="error" type="request" value="json" />
 	</request-map>
 
-	<!-- 查找附件的店 -->
+	<!-- 地图显示附近的店 -->
 	<request-map uri="userStoreListLBS">
 		<!--<security https="true" auth="false" />-->
 		<event type="service" invoke="userStoreListLBS" />
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
 	</request-map>
-
+	
+	<!-- 查找附近的店 -->
+	<request-map uri="userGetNearbyStore">
+		<!--<security https="true" auth="false" />-->
+		<event type="service" invoke="userGetNearbyStore" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
 	<!-- 用户扫码获取商家信息和卡列表 -->
 	<request-map uri="userScanCodeGetCardAndStoreInfo">
 		<!--<security https="true" auth="false" />-->
