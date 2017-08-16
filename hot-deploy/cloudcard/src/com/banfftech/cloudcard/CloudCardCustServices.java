@@ -96,7 +96,7 @@ public class CloudCardCustServices {
 				String statusId = null;
 				String storeAddress = null;
 				String storeId = jsonArray.getJSONObject(i).getObject("storeId", String.class);
-				String telNum = null;
+				String storeTeleNumber = null;
 				String storeLongitude = null;
 				String storeLatitude = null;
 				// 判断店家是否存在
@@ -122,7 +122,7 @@ public class CloudCardCustServices {
 					Map<String, Object> geoAndContactMechInfoMap = CloudCardHelper.getGeoAndContactMechInfoByStoreId(delegator, locale, storeId);
 					if (UtilValidate.isNotEmpty(geoAndContactMechInfoMap)) {
 						storeAddress = (String) geoAndContactMechInfoMap.get("storeAddress");
-						telNum = (String) geoAndContactMechInfoMap.get("storeTeleNumber");
+						storeTeleNumber = (String) geoAndContactMechInfoMap.get("storeTeleNumber");
 						storeLongitude = (String) geoAndContactMechInfoMap.get("longitude");
 						storeLatitude = (String) geoAndContactMechInfoMap.get("latitude");
 					}
@@ -144,8 +144,8 @@ public class CloudCardCustServices {
 	
 					Map<String, Object> storeMap = FastMap.newInstance();
 					storeMap.put("storeName", storeName);
-					storeMap.put("address", storeAddress);
-					storeMap.put("telNum", telNum);
+					storeMap.put("storeAddress", storeAddress);
+					storeMap.put("storeTeleNumber", storeTeleNumber);
 					storeMap.put("storeId", storeId);
 					storeMap.put("distance", jsonArray.getJSONObject(i).getObject("distance", String.class));
 					storeMap.put("storeSaleLevel", storeSaleLevel);
@@ -302,7 +302,7 @@ public class CloudCardCustServices {
 
 					Map<String, Object> storeMap = FastMap.newInstance();
 					storeMap.put("storeName", storeName);
-					storeMap.put("address", storeAddress);
+					storeMap.put("storeAddress", storeAddress);
 					storeMap.put("storeId", storeId);
 					storeMap.put("storeImg", storeImg);
 					storeList.add(storeMap);
