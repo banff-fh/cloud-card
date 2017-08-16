@@ -3657,6 +3657,7 @@ public class CloudCardBossServices {
 		String aliPayName = (String) context.get("aliPayName");
 		String wxPayAccount = (String) context.get("wxPayAccount");
 		String wxPayName = (String) context.get("wxPayName");
+		String reqType = (String) context.get("reqType");
 		//申请ID
 		String custRequestId = "";
 		// 数据权限检查: 登录用户是否是本店的管理员
@@ -3823,32 +3824,35 @@ public class CloudCardBossServices {
 			}
 
 			//提交申请
-			List<GenericValue> custRequests = delegator.findByAnd("CustRequest", UtilMisc.toMap("fromPartyId", storeId, "custRequestTypeId", "RF_STORE_VIP","statusId", "CRQ_ACCEPTED"));
-			Map<String, Object> createCRMap;
-			if(UtilValidate.isEmpty(custRequests)){
-				Map<String, Object> custReqMap = FastMap.newInstance();
-				custReqMap.put("userLogin", systemUserLogin);
-				custReqMap.put("fromPartyId",storeId);
-				custReqMap.put("custRequestName", "申请二级商家");
-				custReqMap.put("reason", "申请二级商家");
-				custReqMap.put("statusId", "CRQ_ACCEPTED");
-				custReqMap.put("custRequestTypeId", "RF_STORE_VIP");
-				custReqMap.put("createdByUserLogin", userLogin.getString("partyId"));
-				createCRMap = dispatcher.runSync("createCustRequest", custReqMap);
-				custRequestId = (String) createCRMap.get("custRequestId");
-			}else{
-				GenericValue custRequest = EntityUtil.getFirst(custRequests);
-				Map<String, Object> custReqMap = FastMap.newInstance();
-				custReqMap.put("userLogin", systemUserLogin);
-				custReqMap.put("custRequestId",custRequest.get("custRequestId"));
-				custReqMap.put("fromPartyId",storeId);
-				custReqMap.put("custRequestName", custRequest.getString("custRequestName"));
-				custReqMap.put("reason", custRequest.getString("reason"));
-				custReqMap.put("statusId", custRequest.getString("statusId"));
-				custReqMap.put("custRequestTypeId", custRequest.getString("custRequestTypeId"));
-				custReqMap.put("createdByUserLogin", userLogin.getString("partyId"));
-				createCRMap = dispatcher.runSync("updateCustRequest", custReqMap);
+			if("apply".equals(reqType)) {
+				List<GenericValue> custRequests = delegator.findByAnd("CustRequest", UtilMisc.toMap("fromPartyId", storeId, "custRequestTypeId", "RF_STORE_VIP","statusId", "CRQ_ACCEPTED"));
+				Map<String, Object> createCRMap;
+				if(UtilValidate.isEmpty(custRequests)){
+					Map<String, Object> custReqMap = FastMap.newInstance();
+					custReqMap.put("userLogin", systemUserLogin);
+					custReqMap.put("fromPartyId",storeId);
+					custReqMap.put("custRequestName", "申请二级商家");
+					custReqMap.put("reason", "申请二级商家");
+					custReqMap.put("statusId", "CRQ_ACCEPTED");
+					custReqMap.put("custRequestTypeId", "RF_STORE_VIP");
+					custReqMap.put("createdByUserLogin", userLogin.getString("partyId"));
+					createCRMap = dispatcher.runSync("createCustRequest", custReqMap);
+					custRequestId = (String) createCRMap.get("custRequestId");
+				}else{
+					GenericValue custRequest = EntityUtil.getFirst(custRequests);
+					Map<String, Object> custReqMap = FastMap.newInstance();
+					custReqMap.put("userLogin", systemUserLogin);
+					custReqMap.put("custRequestId",custRequest.get("custRequestId"));
+					custReqMap.put("fromPartyId",storeId);
+					custReqMap.put("custRequestName", custRequest.getString("custRequestName"));
+					custReqMap.put("reason", custRequest.getString("reason"));
+					custReqMap.put("statusId", custRequest.getString("statusId"));
+					custReqMap.put("custRequestTypeId", custRequest.getString("custRequestTypeId"));
+					custReqMap.put("createdByUserLogin", userLogin.getString("partyId"));
+					createCRMap = dispatcher.runSync("updateCustRequest", custReqMap);
+				}
 			}
+			
 
 		} catch (GenericServiceException e) {
 			Debug.logError(e.getMessage(), module);
@@ -3861,7 +3865,7 @@ public class CloudCardBossServices {
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("custRequestId", custRequestId);
 		result.put("storeId", storeId);
-
+		result.put("reqType", reqType);
 		return result;
 	}
 
