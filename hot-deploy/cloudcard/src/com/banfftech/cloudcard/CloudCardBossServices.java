@@ -1301,9 +1301,16 @@ public class CloudCardBossServices {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
-		// GenericValue userLogin = (GenericValue) context.get("userLogin");
-
+		//GenericValue userLogin = (GenericValue) context.get("userLogin");
+		
 		String storeId = (String) context.get("storeId"); // 要查询的店家partyId
+		String storeName = null;
+        String statusId = "PARTY_DISABLED";
+		String storeImg = null;
+		String storeAddress = null;
+		String storeTeleNumber = null;
+		String longitude = null;
+		String latitude = null;
 
 		Map<String, Object> checkInputParamRet = checkInputParam(dctx, context);
 		if (!ServiceUtil.isSuccess(checkInputParamRet)) {
@@ -1311,66 +1318,128 @@ public class CloudCardBossServices {
 		}
 
 		GenericValue store = (GenericValue) checkInputParamRet.get("store");
+		if(UtilValidate.isNotEmpty(store)) {
+			storeName =  store.getString("groupName");
+		}
+		
+		Map<String, Object> geoAndContactMechInfoMap = CloudCardHelper.getGeoAndContactMechInfoByStoreId(delegator,locale,storeId);
+        if(UtilValidate.isNotEmpty(geoAndContactMechInfoMap)){
+	        	storeAddress = (String) geoAndContactMechInfoMap.get("storeAddress");
+	        	storeTeleNumber = (String) geoAndContactMechInfoMap.get("storeTeleNumber");
+	        	longitude = (String) geoAndContactMechInfoMap.get("longitude");
+	        	latitude = (String) geoAndContactMechInfoMap.get("latitude");
+        }
 
-		// TODO storeImg 暂时使用老的 “从系统配置中获取”的方式，
-		// 以后直接从partyGroup实体中获取 logoImageUrl 字段
-		String storeImg = EntityUtilProperties.getPropertyValue("cloudcard", "cardImg." + storeId, delegator);
-		String storeAddress = "";
-		String storeTeleNumber = "";
-
-		List<GenericValue> PartyAndContactMechs = FastList.newInstance();
-		try {
-			PartyAndContactMechs = delegator.findList("PartyAndContactMech",
-					EntityCondition.makeCondition("partyId", storeId), null, null, null, true);
+        //获取oss访问地址
+        String ossUrl = EntityUtilProperties.getPropertyValue("cloudcard","oss.url","http://kupang.oss-cn-shanghai.aliyuncs.com/",delegator);
+        
+        //获取商家营业执照
+        List<GenericValue> bizLicImgList = FastList.newInstance();
+        try {
+        	bizLicImgList = delegator.findByAnd("PartyContentAndDataResourceDetail", UtilMisc.toMap("partyId", storeId,"partyContentTypeId", "STORE_IMG","contentTypeId","ACTIVITY_PICTURE","statusId","CTNT_IN_PROGRESS", "dataResourceName","bizLic"));
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,
-					"CloudCardInternalServiceError", locale));
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 
-		if (UtilValidate.isNotEmpty(PartyAndContactMechs)) {
-			for (GenericValue partyAndContactMech : PartyAndContactMechs) {
-				String cmType = partyAndContactMech.getString("contactMechTypeId");
-				if ("POSTAL_ADDRESS".equals(cmType)) {
-					storeAddress = partyAndContactMech.getString("paAddress1");
-				} else if (("TELECOM_NUMBER".equals(cmType))) {
-					storeTeleNumber = partyAndContactMech.getString("tnContactNumber");
-				}
-			}
-		}
-
-		// 圈子相关
-		boolean isJoinGroup = false;
-		boolean isGroupOwner = false;
-		boolean isFrozen = false;
-		try {
-			GenericValue partyRelationship = CloudCardHelper.getGroupRelationShipByStoreId(delegator, storeId, false);
-			if (null != partyRelationship) {
-				isJoinGroup = true;
-				isGroupOwner = CloudCardHelper.isStoreGroupOwnerRelationship(partyRelationship);
-				isFrozen = CloudCardHelper.isFrozenGroupRelationship(partyRelationship);
-			}
+        //获取商家招牌照片
+        List<GenericValue> bizAvatarImgList = FastList.newInstance();
+        try {
+        	bizAvatarImgList = delegator.findByAnd("PartyContentAndDataResourceDetail", UtilMisc.toMap("partyId", storeId,"partyContentTypeId", "STORE_IMG","contentTypeId","ACTIVITY_PICTURE","statusId","CTNT_IN_PROGRESS", "dataResourceName","bizAvatar"));
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,
-					"CloudCardInternalServiceError", locale));
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 		}
 
-		;
-		// 待结算金额settlementAmount的计算
-		BigDecimal settlementAmount = CloudCardHelper.getSettlementAmountByStoreId(delegator, storeId);
+        //店铺头像
+        if(UtilValidate.isNotEmpty(bizAvatarImgList) && UtilValidate.isNotEmpty(ossUrl)){
+            GenericValue bizAvatarImg = EntityUtil.getFirst(bizAvatarImgList);
+            storeImg = bizAvatarImg.getString("objectInfo");
+        }
+
+        //获取店家商铺详细信息
+        List<GenericValue> bizDetailsList = FastList.newInstance();
+        try {
+        	bizDetailsList = delegator.findByAnd("PartyContentAndDataResourceDetail", UtilMisc.toMap("partyId", storeId,"partyContentTypeId", "STORE_IMG","contentTypeId","ACTIVITY_PICTURE","statusId","CTNT_IN_PROGRESS", "dataResourceName","bizDetails"));
+		} catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+
+        //获取店铺收款二维码
+        String storeCode = "";
+        try {
+        	GenericValue partyIdentification = delegator.findOne("PartyIdentification", UtilMisc.toMap("partyId", storeId, "partyIdentificationTypeId", "STORE_QR_CODE"),true);
+        	if(UtilValidate.isNotEmpty(partyIdentification)){
+        		storeCode = partyIdentification.getString("idValue");
+        	}
+        } catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+
+        //获取店铺服务等级
+        EntityCondition dateCond = EntityUtil.getFilterByDateExpr();
+        EntityCondition cond = EntityCondition.makeCondition(UtilMisc.toMap("partyId", storeId,"partyClassificationTypeId","STORE_SALE_CLASSIFI"));
+        String storeSaleLevel = null;
+        try {
+			GenericValue partyClassification = EntityUtil.getFirst(
+			        delegator.findList("PartyClassificationAndPartyClassificationGroup", EntityCondition.makeCondition(cond, dateCond), null, UtilMisc.toList("-fromDate"), null, false));
+			if(UtilValidate.isNotEmpty(partyClassification)){
+				storeSaleLevel = partyClassification.getString("partyClassificationGroupId");
+			}
+        } catch (GenericEntityException e) {
+			Debug.logError(e.getMessage(), module);
+            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+		}
+
+        //获取店铺法人信息
+        String legalName = "";
+        String legalTeleNumber = "";
+        String legalId = "";
+        Map<String,Object> legalRepInfoMap = CloudCardHelper.getLegalRepInfoByStoreId(delegator, locale, storeId);
+        if(UtilValidate.isNotEmpty(legalRepInfoMap)){
+	        	legalName = (String) legalRepInfoMap.get("legalName");
+	        	legalTeleNumber = (String) legalRepInfoMap.get("legalTeleNumber");
+	        	legalId = (String) legalRepInfoMap.get("legalId");
+        }
+
+        //获取店铺支付宝和微信账号
+        String aliPayAccount = null;
+        String aliPayName = null;
+        String wxPayAccount = null;
+        String wxPayName = null;
+        Map<String,Object> accountMap = CloudCardHelper.getStoreAliPayAndWxPayInfo(delegator, storeId);
+        if(UtilValidate.isNotEmpty(accountMap)){
+	        	aliPayAccount = (String) accountMap.get("aliPayAccount");
+	        	aliPayName = (String) accountMap.get("aliPayName");
+	        	wxPayAccount = (String) accountMap.get("wxPayAccount");
+	        	wxPayName = (String) accountMap.get("wxPayName");
+        }
 
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("storeId", storeId);
-		result.put("storeName", store.getString("groupName"));
+		result.put("storeName", storeName);
+		result.put("statusId", statusId);
 		result.put("storeImg", storeImg);
 		result.put("storeAddress", storeAddress);
 		result.put("storeTeleNumber", storeTeleNumber);
-		result.put("settlementAmount", settlementAmount);
-		result.put("isJoinGroup", CloudCardHelper.bool2YN(isJoinGroup));
-		result.put("isGroupOwner", CloudCardHelper.bool2YN(isGroupOwner));
-		result.put("isFrozen", CloudCardHelper.bool2YN(isFrozen));
+		result.put("longitude", longitude);
+		result.put("latitude", latitude);
+		result.put("bizLicImgList", bizLicImgList);
+		result.put("bizAvatarImgList", bizAvatarImgList);
+		result.put("bizDetailsList", bizDetailsList);
+		result.put("storeCode", storeCode);
+		result.put("ossUrl", ossUrl);
+		result.put("storeSaleLevel", storeSaleLevel);
+		result.put("legalName", legalName);
+		result.put("legalTeleNumber", legalTeleNumber);
+		result.put("legalId", legalId);
+		result.put("aliPayAccount", aliPayAccount);
+		result.put("aliPayName", aliPayName);
+		result.put("wxPayAccount", wxPayAccount);
+		result.put("wxPayName", wxPayName);
 		return result;
 	}
 

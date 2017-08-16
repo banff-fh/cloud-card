@@ -316,8 +316,16 @@
 		<response name="success" type="request" value="json" />
 		<response name="error" type="request" value="json" />
     </request-map>
-
-	<!-- 店铺信息 -->
+    
+	<!-- 商家获取店铺信息 -->
+	<request-map uri="bizGetStoreInfo">
+		<security https="false" auth="false"/>
+		<event type="service" invoke="bizGetStoreInfo" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
+	<!-- 用户获取店铺信息 -->
 	<request-map uri="userGetStoreInfo">
 		<security https="false" auth="false"/>
 		<event type="service" invoke="userGetStoreInfo" />

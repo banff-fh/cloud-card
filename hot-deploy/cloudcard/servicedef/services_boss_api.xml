@@ -517,4 +517,31 @@
         <description>创建店铺获取验证码</description>
         <attribute mode="INOUT" name="teleNumber" type="String" optional="false"><description>contentId</description></attribute>
  	</service>
+ 	
+ 	<service name="bizGetStoreInfo" engine="java"
+            location="com.banfftech.cloudcard.CloudCardBossServices" invoke="bizGetStoreInfo" auth="false">
+		<description>商家获取店铺信息</description>
+		<attribute name="storeId" type="String" mode="INOUT" optional="false"><description>商家partyId</description></attribute>
+		<attribute name="storeName" type="String" mode="OUT" optional="true"><description>店名</description></attribute>
+		<attribute name="statusId" type="String" mode="OUT" optional="true"><description>店铺状态</description></attribute>
+		<attribute name="storeImg" type="String" mode="OUT" optional="true"><description>店铺图片地址</description></attribute>
+		<attribute name="storeAddress" type="String" mode="OUT" optional="true"><description>店铺地址</description></attribute>
+		<attribute name="storeTeleNumber" type="String" mode="OUT" optional="true"><description>店铺联系电话（店主电话）</description></attribute>
+		<attribute name="longitude" type="String" mode="OUT" optional="true"><description>经度</description></attribute>
+		<attribute name="latitude" type="String" mode="OUT" optional="true"><description>纬度</description></attribute>
+		<attribute name="ossUrl" type="String" mode="OUT" optional="true"><description>oss外网访问地址</description></attribute>
+		<attribute name="bizLicImgList" type="List" mode="OUT" optional="true"><description>店铺营业执照信息</description></attribute>
+		<attribute name="bizAvatarImgList" type="List" mode="OUT" optional="true"><description>店铺头像卡片信息</description></attribute>
+		<attribute name="bizDetailsList" type="List" mode="OUT" optional="true"><description>店铺图片信息</description></attribute>
+		<attribute name="storeCode" type="String" mode="OUT" optional="true"><description>店铺二维码信息</description></attribute>
+		<attribute name="storeSaleLevel" type="String" mode="OUT" optional="true"><description>店铺等级信息</description></attribute>
+		<attribute name="legalId" type="String" mode="OUT" optional="true"><description>店铺法人ID</description></attribute>
+		<attribute name="legalName" type="String" mode="OUT" optional="true"><description>店铺法人姓名</description></attribute>
+		<attribute name="legalTeleNumber" type="String" mode="OUT" optional="true"><description>店铺法人电话</description></attribute>
+		<attribute name="aliPayAccount" type="String" mode="OUT" optional="true"><description>支付宝账号</description></attribute>
+		<attribute name="aliPayName" type="String" mode="OUT" optional="true"><description>支付宝姓名</description></attribute>
+		<attribute name="wxPayAccount" type="String" mode="OUT" optional="true"><description>微信账号</description></attribute>
+		<attribute name="wxPayName" type="String" mode="OUT" optional="true"><description>微信姓名</description></attribute>
+ 	</service>
+ 	
 </services>
