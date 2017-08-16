@@ -500,6 +500,7 @@ public class CloudCardStoreAdminServices {
 
         Map<String, Object> result = ServiceUtil.returnSuccess();
         result.put("storeId", storeId);
+        result.put("reqType", reqType);
         return result;
     }
 

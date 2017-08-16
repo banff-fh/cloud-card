@@ -128,7 +128,7 @@
 		<attribute name="aliPayName" type="String" mode="IN" optional="false"><description>店家支付宝姓名</description></attribute>
 		<attribute name="wxPayAccount" type="String" mode="IN" optional="false"><description>店家微信账号</description></attribute>
 		<attribute name="wxPayName" type="String" mode="IN" optional="false"><description>店家微信姓名</description></attribute>
-		<attribute name="reqType" type="String" mode="IN" optional="false"><description>请求类型</description></attribute>
+		<attribute name="reqType" type="String" mode="INOUT" optional="false"><description>请求类型</description></attribute>
 
 		<attribute name="custRequestId" type="String" mode="OUT" optional="false"><description>请求Id</description></attribute>
 		<attribute name="storeId" type="String" mode="OUT" optional="false"><description>店铺Id</description></attribute>
