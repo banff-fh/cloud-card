@@ -54,7 +54,7 @@ public class CloudCardCustServices {
 		LocalDispatcher dispatcher = dctx.getDispatcher();
 		Delegator delegator = dispatcher.getDelegator();
 		Locale locale = (Locale) context.get("locale");
-		GenericValue userLogin = (GenericValue) context.get("userLogin");
+		//GenericValue userLogin = (GenericValue) context.get("userLogin");
 
         double longitude = Double.parseDouble(UtilFormatOut.checkNull((String) context.get("longitude"), "0.00"));
         double latitude = Double.parseDouble(UtilFormatOut.checkNull((String) context.get("latitude"), "0.00"));
@@ -86,83 +86,87 @@ public class CloudCardCustServices {
 		params.put("radius", radius);
 		params.put("page_index","0");
 		params.put("page_size","50");
-    	lbsResult = JSONObject.parseObject(BaiduLBSUtil.nearby(params));
+    		lbsResult = JSONObject.parseObject(BaiduLBSUtil.nearby(params));
 
-    	String geocoder = BaiduLBSUtil.geocoder(UtilMisc.toMap("ak", ak, "location", latitude + "," + longitude, "output", "json", "callback", "showLocation"));
-    	if(UtilValidate.isNotEmpty(geocoder)){
-    		geocoder = geocoder.replace("showLocation&&showLocation(", "");
-        	geocoder = geocoder.replace(")", "");
-    		JSONObject addressJSONObject = JSONObject.parseObject(JSONObject.parseObject(JSONObject.parseObject(geocoder).getString("result")).getString("addressComponent"));
-        	region = addressJSONObject.getString("city");
-        	if(UtilValidate.isNotEmpty(region)){
-        		try {
-        			List<GenericValue> geoList = delegator.findList("Geo", EntityCondition.makeCondition("geoName",EntityOperator.LIKE, region.replace("市", "") + "%"), UtilMisc.toSet("geoId"), null, null, true);
-        			String cityId = null;
-        			if(UtilValidate.isNotEmpty(geoList)){
-        				cityId = geoList.get(0).getString("geoId");
-        				geoId = cityId;
-        				geoTypeId = "CITY";
-        				Map<String, Object> cityMap = dispatcher.runSync("getProvinceOrCityOrArea", UtilMisc.toMap("userLogin",userLogin,"geoAssocTypeId", "CITY_COUNTY","cityId",cityId));
-        				if(UtilValidate.isNotEmpty(cityMap)){
-        					countyList = UtilGenerics.checkList(cityMap.get("countyList"));
-        				}
+    		//String geocoder = BaiduLBSUtil.geocoder(UtilMisc.toMap("ak", ak, "location", latitude + "," + longitude, "output", "json", "callback", "showLocation"));
 
-        			}
-				} catch (GenericServiceException e) {
-					Debug.logError(e.getMessage(), module);
-		            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-				} catch (GenericEntityException e) {
-					Debug.logError(e.getMessage(), module);
-		            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-				}
-        	}
-    	}
+	    	/*
+	    	if(UtilValidate.isNotEmpty(geocoder)){
+	    		geocoder = geocoder.replace("showLocation&&showLocation(", "");
+	        	geocoder = geocoder.replace(")", "");
+	    		JSONObject addressJSONObject = JSONObject.parseObject(JSONObject.parseObject(JSONObject.parseObject(geocoder).getString("result")).getString("addressComponent"));
+	        	region = addressJSONObject.getString("city");
+	        	if(UtilValidate.isNotEmpty(region)){
+	        		try {
+	        			List<GenericValue> geoList = delegator.findList("Geo", EntityCondition.makeCondition("geoName",EntityOperator.LIKE, region.replace("市", "") + "%"), UtilMisc.toSet("geoId"), null, null, true);
+	        			String cityId = null;
+	        			if(UtilValidate.isNotEmpty(geoList)){
+	        				cityId = geoList.get(0).getString("geoId");
+	        				geoId = cityId;
+	        				geoTypeId = "CITY";
+	        				Map<String, Object> cityMap = dispatcher.runSync("getProvinceOrCityOrArea", UtilMisc.toMap("userLogin",userLogin,"geoAssocTypeId", "CITY_COUNTY","cityId",cityId));
+	        				if(UtilValidate.isNotEmpty(cityMap)){
+	        					countyList = UtilGenerics.checkList(cityMap.get("countyList"));
+	        				}
+	
+	        			}
+					} catch (GenericServiceException e) {
+						Debug.logError(e.getMessage(), module);
+			            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+					} catch (GenericEntityException e) {
+						Debug.logError(e.getMessage(), module);
+			            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+					}
+	        	}
+	    	}
+	    	*/
 
-		//如果地图返回状态非0，全部定义为手机定位异常
-		if(!"0".equals(lbsResult.get("status").toString())){
-            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardAbnormalPositioning", locale));
+    		// 如果地图返回状态非0，全部定义为手机定位异常
+		if (!"0".equals(lbsResult.get("status").toString())) {
+			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardAbnormalPositioning", locale));
 		}
-		if(!"0".equalsIgnoreCase(lbsResult.get("total").toString())){
+		
+		if (!"0".equalsIgnoreCase(lbsResult.get("total").toString())) {
 			JSONArray jsonArray = JSONObject.parseArray(lbsResult.get("contents").toString());
-			for(int i = 0 ;i<jsonArray.size();i++){
-				//判断店家是否存在
-				if("Y".equalsIgnoreCase(jsonArray.getJSONObject(i).getObject("isRemoved",String.class))){
+			for (int i = 0; i < jsonArray.size(); i++) {
+				// 判断店家是否存在
+				if ("Y".equalsIgnoreCase(jsonArray.getJSONObject(i).getObject("isRemoved", String.class))) {
 					continue;
 				}
 				try {
 					boolean isGroupOwner = CloudCardHelper.isStoreGroupOwner(delegator,jsonArray.getJSONObject(i).getObject("storeId", String.class), true);
-					context.put("storeId", jsonArray.getJSONObject(i).getObject("storeId",String.class));
-					//获取店铺信息
-					Map<String,Object> storeInfo = userGetStoreInfo(dctx, context);
-
-					//如果店铺状态为PARTY_DISABLED则跳出循环
-					if("PARTY_DISABLED".equals(storeInfo.get("statusId"))){
+					context.put("storeId", jsonArray.getJSONObject(i).getObject("storeId", String.class));
+					// 获取店铺信息
+					Map<String, Object> storeInfo = userGetStoreInfo(dctx, context);
+	
+					// 如果店铺状态为PARTY_DISABLED则跳出循环
+					if ("PARTY_DISABLED".equals(storeInfo.get("statusId"))) {
 						continue;
-			        }
-
+					}
+	
 					Map<String, Object> storeMap = FastMap.newInstance();
-					storeMap.put("storeName",storeInfo.get("storeName"));
-					storeMap.put("address",storeInfo.get("storeAddress"));
-					storeMap.put("telNum",storeInfo.get("storeTeleNumber"));
-					storeMap.put("storeId",storeInfo.get("storeId"));
-					storeMap.put("isGroupOwner",CloudCardHelper.bool2YN(isGroupOwner));
-					storeMap.put("isHasCard",storeInfo.get("isHasCard"));
-					storeMap.put("distance",jsonArray.getJSONObject(i).getObject("distance",String.class) );
-					storeMap.put("storeId",storeInfo.get("storeId"));
-					storeMap.put("storeSaleLevel",storeInfo.get("storeSaleLevel"));
+					storeMap.put("storeName", storeInfo.get("storeName"));
+					storeMap.put("address", storeInfo.get("storeAddress"));
+					storeMap.put("telNum", storeInfo.get("storeTeleNumber"));
+					storeMap.put("storeId", storeInfo.get("storeId"));
+					storeMap.put("isGroupOwner", CloudCardHelper.bool2YN(isGroupOwner));
+					storeMap.put("isHasCard", storeInfo.get("isHasCard"));
+					storeMap.put("distance", jsonArray.getJSONObject(i).getObject("distance", String.class));
+					storeMap.put("storeId", storeInfo.get("storeId"));
+					storeMap.put("storeSaleLevel", storeInfo.get("storeSaleLevel"));
 					if (UtilValidate.isNotEmpty(storeInfo.get("longitude")) && UtilValidate.isNotEmpty(storeInfo.get("latitude"))) {
-						storeMap.put("location", "["+storeInfo.get("longitude")+","+storeInfo.get("latitude")+"]");
+						storeMap.put("location", "[" + storeInfo.get("longitude") + "," + storeInfo.get("latitude") + "]");
 					} else {
 						storeMap.put("location", jsonArray.getJSONObject(i).getObject("location", String.class));
 					}
 					storeList.add(storeMap);
 				} catch (GenericEntityException e) {
 					Debug.logError(e.getMessage(), module);
-		            return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
+					return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
 				}
 			}
 		}
-
+		
 		// 返回结果
 		Map<String, Object> result = ServiceUtil.returnSuccess();
 		result.put("listSize", lbsResult.get("total").toString());
