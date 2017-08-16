@@ -363,10 +363,10 @@ public class CloudCardStoreAdminServices {
     	LocalDispatcher dispatcher = dctx.getDispatcher();
         Delegator delegator = dispatcher.getDelegator();
         Locale locale = (Locale) context.get("locale");
-    	String custRequestId = (String) context.get("custRequestId");
+        String custRequestId = (String) context.get("custRequestId");
         BigDecimal creditLimit = (BigDecimal) context.get("creditLimit");
 		String allowCrossStorePay = (String) context.get("allowCrossStorePay"); // 是否允许本店的卡去跨店消费
-
+		String reqType = (String) context.get("reqType");
         // 后续可能要用到 system用户操作
 		GenericValue systemUserLogin = (GenericValue) context.get("systemUserLogin");
 		if (null == systemUserLogin) {
@@ -379,7 +379,7 @@ public class CloudCardStoreAdminServices {
 						"CloudCardInternalServiceError", locale));
 			}
 		}
-    	String storeId = null;
+		String storeId = null;
 		try {
 			GenericValue custRequest = delegator.findByPrimaryKey("CustRequest", UtilMisc.toMap("custRequestId", custRequestId));
 			if(UtilValidate.isNotEmpty(custRequest)){
@@ -475,25 +475,28 @@ public class CloudCardStoreAdminServices {
         }
 
 		//确认申请
-		Map<String, Object> updateCRMapOut = FastMap.newInstance();
-		try {
-			GenericValue custRequest = EntityUtil.getFirst(delegator.findByAnd("CustRequest", UtilMisc.toMap("fromPartyId", storeId, "custRequestTypeId", "RF_STORE_VIP", "statusId", "CRQ_ACCEPTED")));
-			Map<String, Object> custReqMap = FastMap.newInstance();
-			custReqMap.put("custRequestId",custRequest.get("custRequestId"));
-			custReqMap.put("userLogin", systemUserLogin);
-			custReqMap.put("statusId", "CRQ_COMPLETED");
-			updateCRMapOut = dispatcher.runSync("updateCustRequest", custReqMap);
-		} catch (GenericEntityException e) {
-			Debug.logError(e.getMessage(), module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,"CloudCardInternalServiceError", locale));
-		} catch (GenericServiceException e) {
-			Debug.logError(e.getMessage(), module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,"CloudCardInternalServiceError", locale));
-		}
+		if(reqType.equals("apply")) {
+			Map<String, Object> updateCRMapOut = FastMap.newInstance();
+			try {
+				GenericValue custRequest = EntityUtil.getFirst(delegator.findByAnd("CustRequest", UtilMisc.toMap("fromPartyId", storeId, "custRequestTypeId", "RF_STORE_VIP", "statusId", "CRQ_ACCEPTED")));
+				Map<String, Object> custReqMap = FastMap.newInstance();
+				custReqMap.put("custRequestId",custRequest.get("custRequestId"));
+				custReqMap.put("userLogin", systemUserLogin);
+				custReqMap.put("statusId", "CRQ_COMPLETED");
+				updateCRMapOut = dispatcher.runSync("updateCustRequest", custReqMap);
+			} catch (GenericEntityException e) {
+				Debug.logError(e.getMessage(), module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,"CloudCardInternalServiceError", locale));
+			} catch (GenericServiceException e) {
+				Debug.logError(e.getMessage(), module);
+				return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError,"CloudCardInternalServiceError", locale));
+			}
 
-		if (!ServiceUtil.isSuccess(updateCRMapOut)) {
-            return updateCRMapOut;
-        }
+			if (!ServiceUtil.isSuccess(updateCRMapOut)) {
+	            return updateCRMapOut;
+	        }
+		}
+		
 
         Map<String, Object> result = ServiceUtil.returnSuccess();
         result.put("storeId", storeId);
