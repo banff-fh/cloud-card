@@ -963,10 +963,14 @@ public class CloudCardCustServices {
         	if(UtilValidate.isNotEmpty(person)){
         		userName = (String) person.get("firstName");
         	}
-
-        	List<GenericValue> partyAndTelecomNumbers = delegator.findByAnd("PartyAndTelecomNumber", UtilMisc.toMap("partyId",partyId,"statusId","PARTY_ENABLED","statusId", "LEAD_ASSIGNED"));
-        	if(UtilValidate.isNotEmpty(partyAndTelecomNumbers)){
-        		GenericValue partyAndTelecomNumber = partyAndTelecomNumbers.get(0);
+        	
+        	EntityCondition 	partyIdCond =  EntityCondition.makeCondition("partyId",EntityOperator.EQUALS, partyId);
+        	EntityCondition partyEnableCond = EntityCondition.makeCondition("statusId",EntityOperator.EQUALS, "PARTY_ENABLED");
+        	EntityCondition leadAssignedCond = EntityCondition.makeCondition("statusId",EntityOperator.EQUALS, "LEAD_ASSIGNED");
+        	EntityCondition statusCond = EntityCondition.makeCondition(partyEnableCond, EntityOperator.OR, leadAssignedCond);
+        	EntityCondition lookupConditions = EntityCondition.makeCondition(partyIdCond, EntityOperator.AND, statusCond);
+        	GenericValue partyAndTelecomNumber = EntityUtil.getFirst(delegator.findList("PartyAndTelecomNumber", lookupConditions, null, UtilMisc.toList("-fromDate"), null, true));
+        	if(UtilValidate.isNotEmpty(partyAndTelecomNumber)){
         		teleNumber = partyAndTelecomNumber.getString("contactNumber");
         	}
 
