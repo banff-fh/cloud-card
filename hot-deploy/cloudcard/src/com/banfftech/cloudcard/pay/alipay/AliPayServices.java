@@ -72,7 +72,7 @@ public class AliPayServices {
 		orderInfo.setBody(body);
 		orderInfo.setTotalFee(totalFee);
 		orderInfo.setNotifyUrl(notifyUrl);
-		String passbackParams = receiptPaymentId + "\",\"" + cardId + "\",\"" + storeId;
+		String passbackParams = receiptPaymentId + "," + cardId + "," + storeId;
 		orderInfo.setPassbackParams(passbackParams);
 		String info = orderInfo.toString();
 		String sign = SignUtils.sign(info, rsaPrivate, signType);
