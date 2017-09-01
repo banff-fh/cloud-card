@@ -258,16 +258,19 @@ public class CloudCardServices {
   		String ownTeleNumber = null;
   		List<GenericValue> partyAndTelecomNumbers;
   		try {
-  			partyAndTelecomNumbers = delegator.findByAnd("PartyAndTelecomNumber", UtilMisc.toMap("partyId",userLogin.getString("partyId"),"statusId","PARTY_ENABLED","statusId", "LEAD_ASSIGNED"));
-  			if(UtilValidate.isNotEmpty(partyAndTelecomNumbers)){
-  	    		GenericValue partyAndTelecomNumber = partyAndTelecomNumbers.get(0);
-  	    		ownTeleNumber = partyAndTelecomNumber.getString("contactNumber");
-  	    	}
+  			  	    		EntityCondition 	partyIdCond =  EntityCondition.makeCondition("partyId",EntityOperator.EQUALS, userLogin.getString("partyId"));
+  	        	EntityCondition partyEnableCond = EntityCondition.makeCondition("statusId",EntityOperator.EQUALS, "PARTY_ENABLED");
+  	        	EntityCondition leadAssignedCond = EntityCondition.makeCondition("statusId",EntityOperator.EQUALS, "LEAD_ASSIGNED");
+  	        	EntityCondition statusCond = EntityCondition.makeCondition(partyEnableCond, EntityOperator.OR, leadAssignedCond);
+  	        	EntityCondition lookupConditions = EntityCondition.makeCondition(partyIdCond, EntityOperator.AND, statusCond);
+  	        	GenericValue partyAndTelecomNumber = EntityUtil.getFirst(delegator.findList("PartyAndTelecomNumber", lookupConditions, null, UtilMisc.toList("-fromDate"), null, true));
+  	        	if(UtilValidate.isNotEmpty(partyAndTelecomNumber)){
+  	        		ownTeleNumber = partyAndTelecomNumber.getString("contactNumber");
+  	        	}
   		} catch (GenericEntityException e) {
   			Debug.logError(e.getMessage(), module);
   			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
   		}
-
 
 		//发送短信
   		Map<String, String> smsMap = FastMap.newInstance();
@@ -279,7 +282,7 @@ public class CloudCardServices {
 		smsMap.put("amount", String.valueOf(amount));
 		smsMap.put("validTime", validTime);
 		smsMap.put("endTime", endTime);
-    	smsMap.put("startTime", startTime);
+    		smsMap.put("startTime", startTime);
 
 		Map<String, Object> sendMessageMap;
 		try {
