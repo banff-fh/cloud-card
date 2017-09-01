@@ -152,7 +152,7 @@ public class SmsServices {
 				smsType = "sms.smsUserCreateCardAuthTimeIntervalTemplateCode";
 			}
 		}else if(smsType.equals(CloudCardConstant.USER_REVOKE_CARD_AUTH_TYPE)){
-			String teleNumber = (String) context.get("teleNumber");
+			String teleNumber = (String) context.get("telNum");
 			String storeName = (String) context.get("storeName");
 			String cardCode = (String) context.get("cardCode");
 
