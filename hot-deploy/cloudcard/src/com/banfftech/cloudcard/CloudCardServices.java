@@ -401,32 +401,29 @@ public class CloudCardServices {
 
 		//获取卡主人电话号码
 		String ownTeleNumber = null;
-		List<GenericValue> partyAndTelecomNumbers;
-		try {
-			partyAndTelecomNumbers = delegator.findByAnd("PartyAndTelecomNumber", UtilMisc.toMap("partyId",userLogin.getString("partyId"),"statusId","PARTY_ENABLED","statusId", "LEAD_ASSIGNED"));
-			if(UtilValidate.isNotEmpty(partyAndTelecomNumbers)){
-	    		GenericValue partyAndTelecomNumber = partyAndTelecomNumbers.get(0);
-	    		ownTeleNumber = partyAndTelecomNumber.getString("contactNumber");
-	    	}
-		} catch (GenericEntityException e) {
-			Debug.logError(e.getMessage(), module);
-			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
-		}
-
+		
 		//获取被授权人电话号码
 		String toTeleNumber = null;
-		List<GenericValue> toPartyAndTelecomNumbers;
 		try {
+			EntityCondition 	ownPartyIdCond =  EntityCondition.makeCondition("partyId",EntityOperator.EQUALS, userLogin.getString("partyId"));
+		    	EntityCondition ownPartyEnableCond = EntityCondition.makeCondition("statusId",EntityOperator.EQUALS, "PARTY_ENABLED");
+		    	EntityCondition ownLeadAssignedCond = EntityCondition.makeCondition("statusId",EntityOperator.EQUALS, "LEAD_ASSIGNED");
+		    	EntityCondition ownStatusCond = EntityCondition.makeCondition(ownPartyEnableCond, EntityOperator.OR, ownLeadAssignedCond);
+		    	EntityCondition ownLookupConditions = EntityCondition.makeCondition(ownPartyIdCond, EntityOperator.AND, ownStatusCond);
+		    	GenericValue ownPartyAndTelecomNumber = EntityUtil.getFirst(delegator.findList("PartyAndTelecomNumber", ownLookupConditions, null, UtilMisc.toList("-fromDate"), null, true));
+		    	if(UtilValidate.isNotEmpty(ownPartyAndTelecomNumber)){
+		    		ownTeleNumber = ownPartyAndTelecomNumber.getString("contactNumber");
+		    	}
+			
 			EntityCondition partyIdCond = EntityCondition.makeCondition("partyId", cardAuthorizeInfo.get("toPartyId"));
 			EntityCondition leadAssignedCond = EntityCondition.makeCondition("statusId", "LEAD_ASSIGNED");
 			EntityCondition partyEnabledCond = EntityCondition.makeCondition("statusId", "PARTY_ENABLED");
 			EntityCondition statusIdCond = EntityCondition.makeCondition(leadAssignedCond, EntityOperator.OR, partyEnabledCond);
-			EntityCondition telNumCond = EntityCondition.makeCondition(partyIdCond, EntityOperator.AND, statusIdCond);
-			toPartyAndTelecomNumbers = delegator.findList("PartyAndTelecomNumber", telNumCond, null, null, null, true);
-			if(UtilValidate.isNotEmpty(toPartyAndTelecomNumbers)){
-	    		GenericValue partyAndTelecomNumber = toPartyAndTelecomNumbers.get(0);
-	    		toTeleNumber = partyAndTelecomNumber.getString("contactNumber");
-	    	}
+			EntityCondition lookupConditions = EntityCondition.makeCondition(partyIdCond, EntityOperator.AND, statusIdCond);
+			GenericValue toPartyAndTelecomNumber = EntityUtil.getFirst(delegator.findList("PartyAndTelecomNumber", lookupConditions, null, null, null, true));
+			if(UtilValidate.isNotEmpty(toPartyAndTelecomNumber)){
+	    			toTeleNumber = toPartyAndTelecomNumber.getString("contactNumber");
+			}
 		} catch (GenericEntityException e) {
 			Debug.logError(e.getMessage(), module);
 			return ServiceUtil.returnError(UtilProperties.getMessage(CloudCardConstant.resourceError, "CloudCardInternalServiceError", locale));
