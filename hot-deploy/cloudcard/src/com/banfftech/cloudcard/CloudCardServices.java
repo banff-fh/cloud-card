@@ -433,7 +433,7 @@ public class CloudCardServices {
 		Map<String, String> smsMap = FastMap.newInstance();
 		smsMap.put("smsType", CloudCardConstant.USER_REVOKE_CARD_AUTH_TYPE);
 		smsMap.put("phone", toTeleNumber);
-		smsMap.put("teleNumber", ownTeleNumber);
+		smsMap.put("telNum", ownTeleNumber);
 		smsMap.put("storeName", storeName);
 		smsMap.put("cardCode", cardCode);
 
